@@ -1,7 +1,7 @@
-\beamer@sectionintoc {1}{Resonance, vibration and filter use (3.7)}{3}{0}{1}
+\beamer@sectionintoc {1}{Resonance, vibration and filter use (3.7)}{4}{0}{1}
 \beamer@sectionintoc {2}{Sensors and measurement principles (4.1)}{16}{0}{2}
-\beamer@sectionintoc {3}{Encoder and resolver (4.2)}{22}{0}{3}
-\beamer@sectionintoc {4}{Sampling and digitisation (4.3)}{32}{0}{4}
-\beamer@sectionintoc {5}{Signal processing and filters (4.4)}{38}{0}{5}
-\beamer@sectionintoc {6}{Communication and system integration (4.5)}{49}{0}{6}
-\beamer@sectionintoc {7}{Day summary and course wrap-up}{59}{0}{7}
+\beamer@sectionintoc {3}{Encoder and resolver (4.2)}{23}{0}{3}
+\beamer@sectionintoc {4}{Sampling and digitisation (4.3)}{33}{0}{4}
+\beamer@sectionintoc {5}{Signal processing and filters (4.4)}{41}{0}{5}
+\beamer@sectionintoc {6}{Communication and system integration (4.5)}{51}{0}{6}
+\beamer@sectionintoc {7}{Course wrap-up}{62}{0}{7}

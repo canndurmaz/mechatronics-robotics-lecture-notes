@@ -2,13 +2,14 @@
 \usetheme{mekatronik}
 \setday{1}{Electrical Machines and Actuators}
 \title[Electrical Machines and Actuators]{Electrical Machines and Actuators}
-\subtitle{Principles, machine structures, motor models, transmissions and sizing\\ + introduction to dynamic system modelling}
+\subtitle{How motors make torque, how we model them, gears and screws, motor sizing\\ + introduction to dynamic system modelling}
 \author{Mechatronics Training Programme}
 \institute{Theoretical Course Series}
 \date{Day 1 of 5}
 
 % small helpers used only in this deck
 \newcommand{\figph}[2]{\includegraphics[#1]{../figures/#2}}
+\newcommand{\gofurther}[1]{{\scriptsize\color{mkGray}\textbf{Going further:} #1\par}}
 \tikzset{
   mkblk/.style={draw=mkBlue,fill=mkPale,rounded corners=1.5pt,minimum height=7mm,minimum width=12mm,font=\scriptsize,align=center,line width=.6pt},
   mksum/.style={draw=mkBlue,circle,fill=white,minimum size=4.5mm,inner sep=0pt,line width=.6pt},
@@ -44,15 +45,15 @@
 {\scriptsize\color{mkGray} Breaks ($\approx$10 min) roughly every hour are additional.}
 \end{column}
 \begin{column}{.45\textwidth}
-\begin{defbox}[After today you can \dots]
-\footnotesize
+\begin{defbox}[By the end of today you can \dots]
+\small
 \begin{itemize}\setlength\itemsep{1pt}
-\item explain how force/torque and voltage arise from $\bm{B}$, $i$ and motion
-\item distinguish DC, BLDC, PMSM, induction and stepper machines
-\item write and use the DC-motor model, block diagram and transfer function
-\item reflect loads through gears and screws; choose a gear ratio
-\item size a servo motor from a move profile (peak, RMS, thermal)
-\item build lumped models of mechanical, electrical and coupled systems
+\item \textbf{explain} how a magnetic field turns current into torque
+\item \textbf{tell apart} DC, brushless, induction and stepper motors
+\item \textbf{write} the two DC-motor equations and \textbf{sketch} its step response
+\item \textbf{calculate} speed, torque and inertia through a gear or screw
+\item \textbf{check} whether a motor is big enough for a move
+\item \textbf{model} mass--spring--damper and RLC systems
 \end{itemize}
 \end{defbox}
 \end{column}
@@ -63,45 +64,82 @@
 \section{1.1 Fundamental principles and classification}
 % =====================================================================
 
-\begin{frame}{Electromechanical energy conversion in a servo axis}
+\begin{frame}{A servo axis is a chain of energy converters}
 \centering
 \begin{tikzpicture}[node distance=5mm and 6mm]
-\node[mkblk,minimum width=15mm] (grid) {Supply\\ AC grid / DC};
-\node[mkblk,right=of grid,minimum width=15mm] (drv) {Power\\ converter\\ (drive)};
+\node[mkblk,minimum width=15mm] (grid) {Supply\\ (mains)};
+\node[mkblk,right=of grid,minimum width=15mm] (drv) {Drive\\ (power\\ electronics)};
 \node[mkblk,right=of drv,fill=mkCream,draw=mkOrange,minimum width=17mm] (mot) {\textbf{Motor}\\ elec.$\to$mech.};
 \node[mkblk,right=of mot,minimum width=17mm] (tr) {Transmission\\ gear / screw};
-\node[mkblk,right=of tr,minimum width=13mm] (ld) {Load\\ $J_L,\,T_L$};
+\node[mkblk,right=of tr,minimum width=13mm] (ld) {Load};
 \draw[mksig,line width=1.4pt,mkOrange] (grid) -- (drv);
 \draw[mksig,line width=1.4pt,mkOrange] (drv) -- node[above,mklab]{$v,\,i$} (mot);
 \draw[mksig,line width=1.4pt,mkOrange] (mot) -- node[above,mklab]{$T,\,\omega$} (tr);
 \draw[mksig,line width=1.4pt,mkOrange] (tr) -- node[above,mklab]{$F,\,v$} (ld);
 \node[mkblk,below=8mm of mot,minimum width=15mm,fill=white] (sens) {Sensor\\ (encoder)};
-\node[mkblk,below=8mm of drv,minimum width=15mm,fill=white] (ctl) {Controller\\ $C(s)$};
+\node[mkblk,below=8mm of drv,minimum width=15mm,fill=white] (ctl) {Controller};
 \draw[mksig] (mot.south) -- (sens.north);
 \draw[mksig] (sens) -- (ctl);
 \draw[mksig] (ctl) -- (drv);
-\node[left=6mm of ctl,mklab,align=center] (ref) {reference\\ $\theta^*,\omega^*$};
+\node[left=6mm of ctl,mklab,align=center] (ref) {desired\\ position};
 \draw[mksig] (ref) -- (ctl);
-% losses
-\foreach \n/\t in {drv/{switching,\\ conduction},mot/{copper $i^2R$,\\ iron, friction},tr/{gear mesh,\\ friction}}{
-  \draw[-{Stealth},mkRed,line width=.6pt] (\n.north) -- ++(0,5mm) node[above,font=\tiny,text=mkRed,align=center]{\t};}
+\foreach \n/\t in {drv/{heat},mot/{heat},tr/{friction}}{
+  \draw[-{Stealth},mkRed,line width=.6pt] (\n.north) -- ++(0,4mm) node[above,font=\scriptsize,text=mkRed,align=center]{\t};}
 \end{tikzpicture}
 
-\vspace{2mm}
+\vspace{1mm}
 \begin{columns}[T]
 \begin{column}{.5\textwidth}
-\begin{eqbox}\small
-$P_\text{el}=v\,i \;\xrightarrow{\text{motor}}\; P_\text{mech}=T\,\omega=P_\text{el}-P_\text{loss}$\\[1mm]
-$\eta=\dfrac{T\omega}{v\,i}$, \quad typical servo motor $\eta\approx 85\text{--}95\,\%$
-\end{eqbox}
+\begin{defbox}[Refresher: power equals torque times speed]
+\small
+Linear: $P=F\,v$ \quad Rotation: $P=T\,\omega$\\
+$T$ in \si{\newton\metre}, $\omega$ in \si{\radian\per\second}, $P$ in \si{\watt};\; $\omega=\dfrac{2\pi n}{60}$ ($n$ in rpm)\\
+\textbf{Example:} \SI{1.27}{\newton\metre} at \SI{3000}{rpm}: $\omega=\SI{314}{\radian\per\second}$ $\Rightarrow$ $P\approx\SI{400}{\watt}$.
+\end{defbox}
 \end{column}
 \begin{column}{.46\textwidth}
-\footnotesize
-\begin{itemize}\setlength\itemsep{0pt}
-\item Conversion is \hl{reversible}: motoring and generating (braking).
-\item Coupling medium: the \term{magnetic field} in the air gap.
-\item Losses become heat $\Rightarrow$ the \hl{thermal limit} sets continuous torque.
+\small
+\begin{itemize}\setlength\itemsep{1pt}
+\item Motor: electrical power $v\,i$ in, mechanical power $T\,\omega$ out.
+\item Efficiency $\eta=T\omega/(v\,i)\approx 85$--$95\,\%$.
+\item Losses become \hl{heat}: heat limits the motor.
+\item Works both ways: braking turns the motor into a \term{generator}.
 \end{itemize}
+\end{column}
+\end{columns}
+\end{frame}
+
+% ---------------------------------------------------------------------
+\begin{frame}{Refresher: magnetic field and the force on a wire}
+\begin{columns}[T]
+\begin{column}{.43\textwidth}
+\centering
+\begin{tikzpicture}[scale=.95]
+\fill[mkRed!70] (0,2.4) rectangle (4,2.9); \node[white,font=\scriptsize\bfseries] at (2,2.65) {N};
+\fill[mkMid] (0,-.4) rectangle (4,-.9); \node[white,font=\scriptsize\bfseries] at (2,-.65) {S};
+\foreach \x in {0.4,1.0,...,3.8} \draw[-{Stealth[length=1.6mm]},mkSky] (\x,2.3) -- (\x,-.3);
+\node[mkSky,font=\scriptsize] at (4.25,1.0) {$\bm{B}$};
+\draw[mkGray,line width=1pt] (0.2,0.3) -- (3.9,0.3); \draw[mkGray,line width=1pt] (0.2,1.7) -- (3.9,1.7);
+\fill[mkOrange] (2.1,0.2) rectangle (2.35,1.8);
+\draw[-{Stealth},mkOrange,line width=1pt] (2.22,0.45) -- (2.22,1.55);
+\node[font=\scriptsize,text=mkOrange,right] at (2.35,1.25) {$i$};
+\draw[-{Stealth},mkNavy,line width=1.4pt] (2.5,1.0) -- (3.5,1.0) node[right,font=\scriptsize]{$F$};
+\draw[|-|,mkNavy] (1.8,0.3) -- node[left,font=\scriptsize]{$l$} (1.8,1.7);
+\node[font=\scriptsize] at (2,-1.2) {\color{mkGray}wire on two rails between magnet poles};
+\end{tikzpicture}
+\end{column}
+\begin{column}{.55\textwidth}
+\small
+\begin{itemize}\setlength\itemsep{2pt}
+\item A magnet fills space with a \term{magnetic field} $\bm{B}$ (unit: tesla, \si{\tesla}). Picture it as arrows from N to S.
+\item A wire carrying current through that field is \hl{pushed sideways} -- perpendicular to both $i$ and $\bm{B}$.
+\item Direction: right-hand rule (fingers along $i$, bend toward $\bm{B}$, thumb $=$ force).
+\end{itemize}
+\begin{eqbox}
+$F = B\,l\,i$ \qquad $F$ [\si{\newton}], $B$ [\si{\tesla}], $l$ [\si{\metre}], $i$ [\si{\ampere}]
+\end{eqbox}
+\textbf{Example:} $B=\SI{0.5}{\tesla}$, $l=\SI{0.1}{\metre}$, $i=\SI{4}{\ampere}$ $\Rightarrow$ $F=\SI{0.2}{\newton}$.\\[1mm]
+\hl{Take-away:} current $+$ magnetic field $=$ force. Every motor uses this.
 \end{column}
 \end{columns}
 \end{frame}
@@ -109,56 +147,43 @@ $\eta=\dfrac{T\omega}{v\,i}$, \quad typical servo motor $\eta\approx 85\text{--}
 % ---------------------------------------------------------------------
 \begin{frame}{Lorentz force and Faraday's law: the two halves of every motor}
 \begin{columns}[T]
-\begin{column}{.43\textwidth}
-\centering
-\begin{tikzpicture}[scale=.95]
-% magnet poles
-\fill[mkRed!70] (0,2.4) rectangle (4,2.9); \node[white,font=\scriptsize\bfseries] at (2,2.65) {N};
-\fill[mkMid] (0,-.4) rectangle (4,-.9); \node[white,font=\scriptsize\bfseries] at (2,-.65) {S};
-\foreach \x in {0.4,1.0,...,3.8} \draw[-{Stealth[length=1.6mm]},mkSky] (\x,2.3) -- (\x,-.3);
-\node[mkSky,font=\scriptsize] at (4.25,1.0) {$\bm{B}$};
-% rails & conductor
-\draw[mkGray,line width=1pt] (0.2,0.3) -- (3.9,0.3); \draw[mkGray,line width=1pt] (0.2,1.7) -- (3.9,1.7);
-\fill[mkOrange] (2.1,0.2) rectangle (2.35,1.8);
-\draw[-{Stealth},mkOrange,line width=1pt] (2.22,0.45) -- (2.22,1.55);
-\node[font=\scriptsize,text=mkOrange,right] at (2.35,1.25) {$i$};
-\draw[-{Stealth},mkNavy,line width=1.4pt] (2.5,1.0) -- (3.5,1.0) node[right,font=\scriptsize]{$F,\,v$};
-\draw[|-|,mkNavy] (1.8,0.3) -- node[left,font=\scriptsize]{$l$} (1.8,1.7);
-\node[font=\scriptsize] at (2,-1.2) {\color{mkGray}($\bm{B}$ into the plane in the real geometry)};
-\end{tikzpicture}
-\end{column}
-\begin{column}{.55\textwidth}
-\begin{eqbox}\small
-\textbf{Lorentz force} (conductor of length $l$):\quad $\bm{F}=i\,\bm{l}\times\bm{B}\;\Rightarrow\;F=B\,l\,i$\\[1mm]
-\textbf{Faraday / motional EMF:}\quad $e=-\dfrac{d\lambda}{dt}\;\Rightarrow\;e=B\,l\,v$
+\begin{column}{.47\textwidth}
+\small
+\textbf{1. Motor action (Lorentz):} current in a field gives force, $F=Bli$.\\[1mm]
+\textbf{2. Generator action (Faraday):} a wire \hl{moving} at speed $v$ through the field gets a voltage $e=Blv$, the \term{back-EMF}.\\[1mm]
+Both happen at the same time in every motor.\\[2mm]
+Bend the wire into a coil ($N$ turns, radius $r$) and both laws use the same constant $k=2NBlr$:
+\begin{eqbox}
+$T=k_t\,i$, \qquad $e=k_e\,\omega$, \qquad $k_t=k_e$ (SI units)
 \end{eqbox}
-\vspace{1mm}
-\footnotesize
-\textbf{Power balance} (ideal, lossless): \quad $e\,i = (B l v)\,i = (B l i)\,v = F\,v$\\[1mm]
-For a coil with $N$ turns at radius $r$ ($2N$ active sides):
-\[
-T = \underbrace{2NBlr}_{k_t}\, i, \qquad e=\underbrace{2NBlr}_{k_e}\,\omega
-\]
-\begin{keybox}[Consequence]
-The same geometry gives \hl{torque per ampere} and \hl{volts per rad/s}: in SI units $k_t=k_e$
-(\si{\newton\metre\per\ampere} $\equiv$ \si{\volt\second\per\radian}).
+\end{column}
+\begin{column}{.5\textwidth}
+\begin{defbox}[Worked example]
+\small
+Coil: $N=50$, $B=\SI{0.5}{\tesla}$, $l=\SI{0.04}{\metre}$, $r=\SI{0.02}{\metre}$
+\begin{enumerate}\setlength\itemsep{1pt}
+\item $k=2\cdot50\cdot0.5\cdot0.04\cdot0.02=\SI{0.04}{\newton\metre\per\ampere}$
+\item At $i=\SI{5}{\ampere}$: $T=0.04\cdot5=\SI{0.2}{\newton\metre}$
+\item At $\omega=\SI{300}{\radian\per\second}$: $e=0.04\cdot300=\SI{12}{\volt}$
+\end{enumerate}
+\end{defbox}
+\begin{keybox}[Take-away]
+\small
+\term{Torque constant} $k_t$ (\si{\newton\metre\per\ampere}) and \term{back-EMF constant} $k_e$ (\si{\volt\second\per\radian}) are the same number: \hl{current makes torque, speed makes voltage}.
 \end{keybox}
 \end{column}
 \end{columns}
 \end{frame}
 
 % ---------------------------------------------------------------------
-\begin{frame}{Reluctance force and the co-energy method}
+\begin{frame}{Reluctance force: iron is pulled into the field}
 \begin{columns}[T]
-\begin{column}{.36\textwidth}
+\begin{column}{.40\textwidth}
 \centering
 \begin{tikzpicture}[scale=.8]
-% C core
 \fill[mkGray!50] (0,0) rectangle (0.6,3); \fill[mkGray!50] (0,0) rectangle (2.4,0.6); \fill[mkGray!50] (0,2.4) rectangle (2.4,3);
-% coil
 \foreach \y in {0.9,1.2,...,2.1} \draw[mkOrange,line width=1.6pt] (-0.15,\y) -- (0.75,\y);
 \node[font=\scriptsize,text=mkOrange] at (-0.5,1.5) {$N,i$};
-% rotor bar rotated
 \begin{scope}[shift={(2.85,1.5)},rotate=30]
 \fill[mkMid] (-0.25,-1.1) rectangle (0.25,1.1);
 \end{scope}
@@ -173,59 +198,19 @@ The same geometry gives \hl{torque per ampere} and \hl{volts per rad/s}: in SI u
 \end{axis}
 \end{tikzpicture}
 \end{column}
-\begin{column}{.62\textwidth}
-\footnotesize
-Iron is attracted towards the position of \term{minimum reluctance} (maximum inductance), even without magnets.
-\begin{eqbox}\small
-Co-energy: $W'(i,\theta)=\displaystyle\int_0^{i}\lambda(i',\theta)\,di'$,\qquad
-$T=\left.\dfrac{\partial W'}{\partial\theta}\right|_{i=\text{const}}$\\[1mm]
-Linear magnetics, $\lambda=L(\theta)\,i$:\qquad $T=\tfrac12\,i^2\,\dfrac{dL}{d\theta}$, \quad $F=\tfrac12\,i^2\,\dfrac{dL}{dx}$
-\end{eqbox}
-\begin{itemize}\setlength\itemsep{0pt}
-\item Torque $\propto i^2$: independent of current sign $\Rightarrow$ solenoids, switched-reluctance and stepper machines.
-\item $L(\theta)=L_0+L_2\cos2\theta$ gives $T=-L_2\,i^2\sin2\theta$ (plot).
-\item In IPM synchronous motors a \hl{reluctance torque} adds to the magnet torque (saliency $L_q>L_d$).
-\item With saturation, use the full co-energy $W'$, not $\tfrac12 Li^2$.
+\begin{column}{.57\textwidth}
+\small
+\textbf{Analogy:} a fridge magnet snaps onto the steel door -- the iron moves to where the magnetic path is \hl{easiest}.
+\begin{itemize}\setlength\itemsep{2pt}
+\item No magnet needed on the rotor: a plain iron bar turns to line up with the coil.
+\item Torque pushes towards the position of \hl{highest inductance} $L$.
+\item Torque grows with $i^2$, so the current direction does not matter.
+\item Used in solenoids, \term{stepper motors} and switched-reluctance motors.
 \end{itemize}
-{\scriptsize\color{mkGray}[Fitzgerald, Kingsley \& Umans, 2003, ch.\,3]}
-\end{column}
-\end{columns}
-\end{frame}
-
-% ---------------------------------------------------------------------
-\begin{frame}{Torque, speed and power}
-\begin{columns}[T]
-\begin{column}{.5\textwidth}
-\begin{tikzpicture}
-\begin{axis}[mkplot,width=7.2cm,height=5cm,xmin=0,xmax=2.6,ymin=0,ymax=1.25,
-  xlabel={speed $\omega/\omega_\text{b}$},ylabel={normalised},legend pos=north east,
-  xtick={0,0.5,1,1.5,2,2.5}]
-\addplot[mkBlue,thick,domain=0:1]{1}; \addlegendentry{torque $T/T_\text{N}$}
-\addplot[mkBlue,thick,domain=1:2.5,samples=40,forget plot]{1/x};
-\addplot[mkOrange,thick,domain=0:1]{x}; \addlegendentry{power $P/P_\text{N}$}
-\addplot[mkOrange,thick,domain=1:2.5,forget plot]{1};
-\draw[dashed,mkGray] (axis cs:1,0) -- (axis cs:1,1.2);
-\node[font=\tiny,text=mkMid] at (axis cs:0.5,1.12) {constant torque};
-\node[font=\tiny,text=mkMid] at (axis cs:1.8,1.12) {constant power};
-\node[font=\tiny,text=mkGray] at (axis cs:1.8,0.3) {(field weakening)};
-\end{axis}
-\end{tikzpicture}
-\end{column}
-\begin{column}{.48\textwidth}
-\begin{eqbox}\small
-$P=T\,\omega$,\qquad $\omega=\dfrac{2\pi n}{60}$ \quad ($n$ in rpm)\\[1mm]
-$P\,[\si{\kilo\watt}]=\dfrac{T\,[\si{\newton\metre}]\cdot n\,[\si{rpm}]}{9549}$
+\begin{eqbox}
+$T=\tfrac12\,i^2\,\dfrac{dL}{d\theta}$ \quad ($L$ in \si{\henry}, $\theta$ in rad)
 \end{eqbox}
-\footnotesize
-\begin{itemize}\setlength\itemsep{1pt}
-\item Torque is limited by \hl{current} (thermal, magnet demagnetisation).
-\item Speed is limited by \hl{voltage} (back-EMF $k_e\omega$ must stay below the supply) and by mechanics.
-\item Above base speed $\omega_\text{b}$, field weakening trades torque for speed at $\approx$ constant power.
-\item Linear motion: $P=F\,v$; screw/belt convert $T,\omega\leftrightarrow F,v$.
-\end{itemize}
-\begin{notebox}
-\textbf{Example:} \SI{1.27}{\newton\metre} at \SI{3000}{rpm} $\Rightarrow$ $\omega=\SI{314}{\radian\per\second}$, $P=\SI{400}{\watt}$.
-\end{notebox}
+\gofurther{the general co-energy method $T=\partial W'/\partial\theta$ also covers saturated iron and the extra ``reluctance torque'' of interior-magnet motors [Fitzgerald et al., 2003, ch.\,3].}
 \end{column}
 \end{columns}
 \end{frame}
@@ -236,63 +221,91 @@ $P\,[\si{\kilo\watt}]=\dfrac{T\,[\si{\newton\metre}]\cdot n\,[\si{rpm}]}{9549}$
 \resizebox{\textwidth}{!}{\begin{tikzpicture}[
   lvl1/.style={mkblk,fill=mkBlue,text=white,minimum width=24mm,font=\scriptsize\bfseries},
   lvl2/.style={mkblk,minimum width=20mm,text width=20mm},
-  lvl3/.style={font=\tiny,text=mkNavy,align=left,text width=22mm},
+  lvl3/.style={font=\scriptsize,text=mkNavy,align=left,text width=22mm},
   edge/.style={mkGray,line width=.5pt}]
 \node[mkblk,fill=mkNavy,text=white,font=\small\bfseries,minimum width=40mm] (root) {Actuators};
 \node[lvl1,below left=6mm and 26mm of root] (em) {Electromagnetic};
 \node[lvl1,below right=6mm and 26mm of root] (oth) {Other principles};
 \draw[edge] (root) -- (em); \draw[edge] (root) -- (oth);
-\node[lvl2,below=7mm of em,xshift=-36mm] (dc) {DC commutator};
+\node[lvl2,below=7mm of em,xshift=-36mm] (dc) {DC (brushed)};
 \node[lvl2,right=2mm of dc] (pm) {PM brushless};
 \node[lvl2,right=2mm of pm] (im) {Induction};
 \node[lvl2,right=2mm of im] (rel) {Reluctance / stepper};
 \node[lvl2,right=2mm of rel] (lin) {Linear direct};
 \foreach \n in {dc,pm,im,rel,lin} \draw[edge] (em.south) -- (\n.north);
-\node[lvl3,below=1mm of dc] {PM-excited (servo)\\ series / shunt\\ coreless (ironless)};
-\node[lvl3,below=1mm of pm] {BLDC (trapezoidal)\\ PMSM: SPM, IPM\\ torque motors};
-\node[lvl3,below=1mm of im] {squirrel cage\\ wound rotor\\ (V/f, vector ctrl.)};
-\node[lvl3,below=1mm of rel] {hybrid stepper\\ switched reluctance\\ synchronous rel.};
-\node[lvl3,below=1mm of lin] {iron-core / ironless\\ linear motors\\ voice coil, solenoid};
+\node[lvl3,below=1mm of dc] {toys, small tools,\\ simple drives};
+\node[lvl3,below=1mm of pm] {BLDC, PMSM\\ (``AC servo'')};
+\node[lvl3,below=1mm of im] {pumps, fans,\\ big spindles};
+\node[lvl3,below=1mm of rel] {3D printers,\\ positioning};
+\node[lvl3,below=1mm of lin] {linear motor,\\ voice coil};
 \node[lvl2,right=8mm of lin,fill=mkCream,draw=mkOrange] (fl) {Fluid power};
 \node[lvl2,right=2mm of fl,fill=mkCream,draw=mkOrange] (sm) {Smart materials};
 \draw[edge] (oth.south) -- (fl.north); \draw[edge] (oth.south) -- (sm.north);
-\node[lvl3,below=1mm of fl] {hydraulic cylinders\\ pneumatic cylinders};
-\node[lvl3,below=1mm of sm] {piezo stacks\\ shape-memory alloy\\ magnetostrictive};
+\node[lvl3,below=1mm of fl] {hydraulic and\\ pneumatic cylinders};
+\node[lvl3,below=1mm of sm] {piezo stacks,\\ shape-memory alloy};
 \end{tikzpicture}}
 
 \vspace{3mm}
-\footnotesize
+\small
 \begin{tabular}{@{}lcccc@{}}
 \toprule
  & \textbf{PM servo motor} & \textbf{Hydraulic} & \textbf{Pneumatic} & \textbf{Piezo}\\
 \midrule
-Force/torque density & high & \hl{very high} & medium & high (tiny stroke)\\
-Bandwidth / precision & \hl{high / high} & medium / medium & low / low & \hl{very high} / nm\\
-Controllability, cleanliness & \hl{excellent} & leakage, pump & compressible air & HV drive\\
+Force per size & high & \hl{very high} & medium & high (tiny stroke)\\
+Speed of response / precision & \hl{high / high} & medium & low & \hl{very high} / nm\\
+Easy to control, clean? & \hl{yes} & oil leaks, pump & air is springy & needs high voltage\\
 \bottomrule
 \end{tabular}
 \end{frame}
 
 % ---------------------------------------------------------------------
-\begin{frame}{Session 1.1 -- Summary / key take-aways}
+\begin{frame}{Session 1.1 -- Check your understanding}
 \begin{columns}[T]
-\begin{column}{.55\textwidth}
+\begin{column}{.6\textwidth}
+\begin{keybox}[Check your understanding]
+\begin{enumerate}\setlength\itemsep{6pt}
+\item A motor has $k_t=\SI{0.1}{\newton\metre\per\ampere}$. You double the current from \SI{2}{\ampere} to \SI{4}{\ampere}. What happens to the torque?
+\item A motor delivers \SI{2}{\newton\metre} at \SI{1500}{rpm}. Roughly how much mechanical power is that?
+\item Why does a motor that should spin faster need a higher supply voltage?
+\end{enumerate}
+\end{keybox}
+\end{column}
+\begin{column}{.36\textwidth}
+\small
+\textbf{How to work:}
 \begin{itemize}
-\item A motor converts $v\,i$ into $T\,\omega$ through the air-gap magnetic field; the process is reversible.
-\item \term{Lorentz}: $F=Bli$ \;$\Leftrightarrow$\; \term{Faraday}: $e=Blv$ $\Rightarrow$ $k_t=k_e$ (SI).
-\item \term{Reluctance} torque $T=\tfrac12 i^2\,dL/d\theta$ needs no magnets (steppers, SRM, IPM saliency).
-\item Current limits torque; voltage limits speed; heat limits the continuous operating point.
+\item 2 minutes alone, then compare with your neighbour.
+\item Write the formula first, then the numbers with units.
+\item Hint: $T=k_t i$, $P=T\omega$, $e=k_e\omega$.
 \end{itemize}
 \end{column}
-\begin{column}{.42\textwidth}
+\end{columns}
+\end{frame}
+
+% ---------------------------------------------------------------------
+\begin{frame}{Session 1.1 -- Summary and key terms}
+\begin{columns}[T]
+\begin{column}{.55\textwidth}
+\small
+\begin{itemize}
+\item A motor turns $v\,i$ into $T\,\omega$ through a magnetic field -- and back again when braking.
+\item Current in a field gives force ($F=Bli$); motion in a field gives voltage ($e=Blv$).
+\item Iron alone is also pulled into a field (reluctance).
+\item \hl{Current limits torque, voltage limits speed, heat limits continuous use.}
+\end{itemize}
 \begin{keybox}[Remember]
-\[
-P=T\omega=Fv,\qquad \omega=\frac{2\pi n}{60}
-\]
-\[
-T=k_t\,i,\qquad e=k_e\,\omega
-\]
+$P=T\omega$, \quad $T=k_t\,i$, \quad $e=k_e\,\omega$, \quad $k_t=k_e$
 \end{keybox}
+\end{column}
+\begin{column}{.42\textwidth}
+\begin{defbox}[Key terms]
+\small
+\term{Magnetic field $B$}: invisible ``push field'' of a magnet, in tesla.\\
+\term{Back-EMF}: voltage a spinning motor generates.\\
+\term{Torque constant $k_t$}: torque per ampere.\\
+\term{Reluctance}: ``difficulty'' of the magnetic path.\\
+\term{Efficiency $\eta$}: power out / power in.
+\end{defbox}
 \end{column}
 \end{columns}
 \end{frame}
@@ -305,152 +318,112 @@ T=k_t\,i,\qquad e=k_e\,\omega
 \begin{columns}[T]
 \begin{column}{.47\textwidth}
 \centering
-\begin{tikzpicture}[scale=.72,lbl/.style={font=\tiny,text=mkNavy},ld/.style={mkGray,line width=.3pt}]
-% housing
+\begin{tikzpicture}[scale=.72,lbl/.style={font=\scriptsize,text=mkNavy},ld/.style={mkGray,line width=.3pt}]
 \draw[mkGray,line width=.8pt,fill=mkLight] (0,0) rectangle (6.4,3.4);
 \foreach \x in {0.6,1.0,...,4.6} {\fill[mkGray!40] (\x,3.4) rectangle (\x+0.15,3.6); \fill[mkGray!40] (\x,-0.2) rectangle (\x+0.15,0);}
-% flange (drive end)
 \fill[mkGray!60] (-0.35,-0.35) rectangle (0,3.75);
-% stator stack
 \fill[mkSky!60] (1.0,2.3) rectangle (4.4,3.2); \fill[mkSky!60] (1.0,0.2) rectangle (4.4,1.1);
-% end windings
 \foreach \y in {2.3,0.2} {\fill[mkOrange!80] (0.6,\y+0.1) rectangle (1.0,\y+0.8); \fill[mkOrange!80] (4.4,\y+0.1) rectangle (4.8,\y+0.8);}
-% rotor with magnets
 \fill[mkGray!50] (1.0,1.25) rectangle (4.4,2.15);
 \fill[mkRed!70] (1.0,2.0) rectangle (4.4,2.15); \fill[mkMid] (1.0,1.25) rectangle (4.4,1.4);
-% shaft
 \fill[mkGray] (-1.3,1.55) rectangle (5.9,1.85);
-% bearings
 \foreach \x in {0.25,5.0} {\draw[mkNavy,fill=white] (\x,1.85) rectangle (\x+0.35,2.2); \draw[mkNavy] (\x,1.85) -- (\x+0.35,2.2) (\x,2.2) -- (\x+0.35,1.85);
   \draw[mkNavy,fill=white] (\x,1.2) rectangle (\x+0.35,1.55); \draw[mkNavy] (\x,1.2) -- (\x+0.35,1.55) (\x,1.55) -- (\x+0.35,1.2);}
-% brake
 \fill[mkAmber!70] (5.45,1.0) rectangle (5.7,2.4);
-% encoder
 \fill[mkNavy] (5.9,1.1) rectangle (5.98,2.3); \fill[mkGreen!70] (6.05,2.0) rectangle (6.3,2.3);
-% connector
 \fill[mkGray!70] (2.6,3.6) rectangle (3.4,4.1);
-% labels
-\draw[ld] (2.7,2.75) -- (2.7,4.5) node[above,lbl]{stator stack + winding};
-\draw[ld] (0.8,2.8) -- (0.2,4.5) node[above,lbl]{end winding};
-\draw[ld] (3.4,3.85) -- (4.5,4.5) node[above,lbl]{connector};
-\draw[ld] (2.0,2.07) -- (1.6,-0.9) node[below,lbl]{PM rotor};
-\draw[ld] (0.42,1.3) -- (0.2,-0.9) node[below,lbl]{bearing};
-\draw[ld] (-0.9,1.7) -- (-1.1,-0.9) node[below,lbl]{shaft (DE)};
+\draw[ld] (2.7,2.75) -- (2.7,4.5) node[above,lbl]{stator + winding};
+\draw[ld] (3.4,3.85) -- (5.0,4.5) node[above,lbl]{connector};
+\draw[ld] (2.0,2.07) -- (1.6,-0.9) node[below,lbl]{magnet rotor};
+\draw[ld] (0.42,1.3) -- (0.1,-0.9) node[below,lbl]{bearing};
+\draw[ld] (-0.9,1.7) -- (-1.3,-0.9) node[below,lbl]{shaft};
 \draw[ld] (5.57,1.1) -- (4.4,-0.9) node[below,lbl]{brake};
-\draw[ld] (6.1,2.1) -- (6.6,-0.9) node[below,lbl]{encoder (NDE)};
-\draw[ld] (3.0,0.9) -- (3.0,-0.9) node[below,lbl]{air gap};
+\draw[ld] (6.1,2.1) -- (6.4,-1.6) node[below,lbl]{encoder};
+\draw[ld] (3.0,0.9) -- (3.0,-1.6) node[below,lbl]{air gap};
 \end{tikzpicture}\\
-{\tiny\color{mkGray} Schematic longitudinal section of a PM servo motor (not to scale).}
+{\scriptsize\color{mkGray} Schematic cut through a PM servo motor (not to scale).}
 \end{column}
-\begin{column}{.53\textwidth}
-\footnotesize
+\begin{column}{.5\textwidth}
+\small
 \begin{itemize}\setlength\itemsep{2pt}
-\item \term{Stator}: laminated iron stack with slots and (three-phase) copper windings -- the heat source is on the outside, close to the housing.
-\item \term{Rotor}: shaft + magnets (PM) or cage (induction); low inertia is a design goal for servo motors (long, slim rotors).
-\item \term{Air gap}: $\approx$ \SIrange{0.3}{1}{\milli\metre}; all torque is produced here.
-\item \term{Feedback device}: encoder or resolver on the non-drive end (Day 5).
-\item \term{Holding brake} (optional, spring-applied), \term{bearings}, \term{shaft seal}, \term{connectors}.
-\item Ratings defined per IEC 60034-1 (duty types S1--S10), protection class IP65/67 typical.
+\item \term{Stator}: the fixed outer part -- iron stack with copper windings. Gets hot, so it sits next to the housing.
+\item \term{Rotor}: the turning part -- shaft with magnets. Long and slim, so it is light to accelerate.
+\item \term{Air gap}: thin gap ($<\SI{1}{\milli\metre}$) where the torque is made.
+\item \term{Encoder}: measures the rotor angle (Day 5).
+\item Optional \term{brake} holds the shaft when power is off.
 \end{itemize}
 \begin{notebox}
-Industrial ``AC servo'' usually means a \hl{PMSM} with sinusoidal back-EMF, encoder and a matched drive.
+An industrial ``AC servo motor'' is usually a \hl{PMSM}: permanent magnets on the rotor, three-phase winding on the stator, plus an encoder.
 \end{notebox}
 \end{column}
 \end{columns}
 \end{frame}
 
 % ---------------------------------------------------------------------
-\begin{frame}{Brushed (commutator) DC motor: construction}
+\begin{frame}{Brushed DC motor: construction and the commutator}
 \begin{columns}[T]
-\begin{column}{.40\textwidth}
+\begin{column}{.36\textwidth}
 \centering
-\begin{tikzpicture}[scale=.9]
+\begin{tikzpicture}[scale=.85]
 \fill[mkGray!40] (0,0) circle (2.0); \fill[white] (0,0) circle (1.65);
-% magnets
 \fill[mkRed!70] (100:1.65) arc (100:260:1.65) -- (260:1.35) arc (260:100:1.35) -- cycle;
 \fill[mkMid] (-80:1.65) arc (-80:80:1.65) -- (80:1.35) arc (80:-80:1.35) -- cycle;
 \node[white,font=\scriptsize\bfseries] at (180:1.5) {N}; \node[white,font=\scriptsize\bfseries] at (0:1.5) {S};
-% rotor
 \fill[mkSky!50] (0,0) circle (1.22);
 \foreach \a in {0,30,...,330}{ \fill[white] (\a:1.05) circle (0.1);}
 \foreach \a in {120,150,180,210,240}{ \draw[mkOrange,line width=.7pt] (\a:1.05) circle (0.09); \fill[mkOrange] (\a:1.05) circle (0.025);}
 \foreach \a in {-60,-30,0,30,60}{ \draw[mkOrange,line width=.7pt] (\a:1.05) circle (0.09);
    \draw[mkOrange,line width=.6pt] ($(\a:1.05)+(-0.06,-0.06)$) -- ($(\a:1.05)+(0.06,0.06)$) ($(\a:1.05)+(-0.06,0.06)$) -- ($(\a:1.05)+(0.06,-0.06)$);}
-% commutator & brushes
 \fill[mkAmber] (0,0) circle (0.42); \foreach \a in {0,45,...,315} \draw[white] (0,0) -- (\a:0.42);
 \fill[mkNavy] (-0.42,-0.1) rectangle (-0.7,0.1); \fill[mkNavy] (0.42,-0.1) rectangle (0.7,0.1);
 \fill[mkGray] (0,0) circle (0.12);
 \draw[-{Stealth},mkNavy,line width=1pt] (60:2.25) arc (60:120:2.25) node[left,font=\scriptsize]{$T$};
-\node[font=\tiny,text=mkGray] at (0,-2.3) {stator magnets, armature, commutator, brushes};
+\node[font=\scriptsize,text=mkGray] at (0,-2.35) {magnets, armature, commutator};
 \end{tikzpicture}
 \end{column}
-\begin{column}{.30\textwidth}
+\begin{column}{.27\textwidth}
 \centering
-\figph{width=\linewidth,height=4.6cm,keepaspectratio}{d1_brushed_dc.jpg}\\
+\figph{width=\linewidth,height=2.6cm,keepaspectratio}{d1_brushed_dc.jpg}\\
 \credit{Jfer91, CC BY-SA 3.0, via Wikimedia Commons}
-\end{column}
-\begin{column}{.28\textwidth}
-\footnotesize
-\begin{itemize}\setlength\itemsep{2pt}
-\item Field from \term{stator magnets} (or field winding).
-\item Current-carrying \term{armature} rotates.
-\item \term{Commutator + brushes} reverse coil currents so that conductors under N always carry the same direction.
-\item Armature MMF stays \hl{perpendicular} to the field $\Rightarrow$ maximum torque per ampere, automatically.
-\end{itemize}
-\end{column}
-\end{columns}
-\end{frame}
-
-% ---------------------------------------------------------------------
-\begin{frame}{Mechanical commutation and torque ripple}
-\begin{columns}[T]
-\begin{column}{.52\textwidth}
 \begin{tikzpicture}
-\begin{axis}[mkplot,width=7.4cm,height=4.2cm,xmin=0,xmax=360,ymin=0,ymax=1.15,
-  xtick={0,90,180,270,360},xlabel={rotor angle $\theta$ (deg)},ylabel={$T/T_\text{max}$},legend pos=south east,legend columns=1]
-\addplot[mkSky,thick,domain=0:360,samples=181]{abs(sin(x))}; \addlegendentry{1 coil, 2 segments}
+\begin{axis}[mkplot,width=4.2cm,height=2.7cm,xmin=0,xmax=360,ymin=0,ymax=1.15,
+  xtick={0,180,360},xlabel={rotor angle (deg)},ylabel={$T/T_\text{max}$},legend pos=south east,legend style={font=\tiny}]
+\addplot[mkSky,thick,domain=0:360,samples=181]{abs(sin(x))}; \addlegendentry{1 coil}
 \addplot[mkOrange,thick,domain=0:360,samples=361]{max(abs(sin(x)),abs(sin(x+60)),abs(sin(x+120)))}; \addlegendentry{3 coils}
-\addplot[mkBlue,thick,domain=0:360,samples=721]{max(abs(sin(x)),abs(sin(x+15)),abs(sin(x+30)),abs(sin(x+45)),abs(sin(x+60)),abs(sin(x+75)),abs(sin(x+90)),abs(sin(x+105)),abs(sin(x+120)),abs(sin(x+135)),abs(sin(x+150)),abs(sin(x+165)))}; \addlegendentry{12 coils}
 \end{axis}
-\end{tikzpicture}\\
-{\tiny\color{mkGray} Idealised: only the best-aligned coil group is counted.}
+\end{tikzpicture}
 \end{column}
-\begin{column}{.46\textwidth}
-\footnotesize
+\begin{column}{.35\textwidth}
+\small
 \begin{itemize}\setlength\itemsep{2pt}
-\item The commutator is a \hl{mechanical inverter}: it switches each coil's current as it passes the neutral zone.
-\item With $n$ coil groups, peak-to-peak ripple $\approx 1-\cos(\pi/2n)$:\\
-$n=3$: 13\,\%, \quad $n=12$: 0.9\,\%.
-\item Commutation sparks, brush wear (typically a few thousand hours), EMI, speed limit from brush bounce.
-\item Heat is generated in the \hl{rotor} $\Rightarrow$ poor cooling path, low continuous torque per volume.
-\item Simple drive: one H-bridge.
+\item \term{Stator magnets} make the field; the \term{armature} coils on the rotor carry the current.
+\item \term{Commutator + brushes}: a rotating switch that flips coil currents so torque always pushes the same way; more coils $\Rightarrow$ smoother (plot).
+\item Downsides: brush wear, sparks, heat trapped in the rotor.
 \end{itemize}
-\begin{keybox}[Idea for BLDC/PMSM]
-Replace the commutator by \hl{power electronics + rotor-position sensor} $\Rightarrow$ electronic commutation.
+\begin{keybox}[Idea for brushless motors]
+Replace the mechanical switch by \hl{electronic switches + a rotor-angle sensor}.
 \end{keybox}
 \end{column}
 \end{columns}
 \end{frame}
 
 % ---------------------------------------------------------------------
-\begin{frame}{Permanent-magnet brushless machines: BLDC and PMSM}
+\begin{frame}{Brushless motors (BLDC, PMSM) and electronic commutation}
 \begin{columns}[T]
-\begin{column}{.52\textwidth}
+\begin{column}{.48\textwidth}
 \centering
-\begin{tikzpicture}[scale=.75]
-\foreach \cx/\name in {0/SPM, 4.6/IPM}{
+\begin{tikzpicture}[scale=.62]
+\foreach \cx/\name in {0/SPM: magnets on surface, 4.6/IPM: magnets buried}{
 \begin{scope}[shift={(\cx,0)}]
  \fill[mkGray!40] (0,0) circle (2.0); \fill[white] (0,0) circle (1.48);
  \foreach \a in {0,30,...,330}{ \fill[mkGray!40,rotate=\a] (1.4,-0.13) rectangle (1.55,0.13);}
  \foreach \a in {15,45,...,345}{ \fill[mkOrange!60,rotate=\a] (1.55,-0.1) rectangle (1.85,0.1);}
  \fill[mkSky!50] (0,0) circle (1.1);
  \fill[mkGray] (0,0) circle (0.25);
- \node[font=\scriptsize\bfseries,text=mkNavy] at (0,-2.4) {\name};
+ \node[font=\scriptsize,text=mkNavy] at (0,-2.45) {\name};
 \end{scope}}
-% SPM magnets on surface
 \foreach \a/\c in {0/mkRed!70,90/mkMid,180/mkRed!70,270/mkMid}{
   \fill[\c] (\a-38:1.32) arc (\a-38:\a+38:1.32) -- (\a+38:1.1) arc (\a+38:\a-38:1.1) -- cycle;}
-% IPM V-shaped buried magnets
 \begin{scope}[shift={(4.6,0)}]
 \foreach \a/\c in {0/mkRed!70,90/mkMid,180/mkRed!70,270/mkMid}{
   \begin{scope}[rotate=\a]
@@ -459,196 +432,63 @@ Replace the commutator by \hl{power electronics + rotor-position sensor} $\Right
   \end{scope}}
 \end{scope}
 \end{tikzpicture}\\[1mm]
-\begin{tabular}{@{}ll@{}}
-\footnotesize\textbf{SPM}: & \scriptsize magnets glued on surface, $L_d\approx L_q$\\
-\footnotesize\textbf{IPM}: & \scriptsize buried magnets, $L_q>L_d$, reluctance torque
-\end{tabular}
-\end{column}
-\begin{column}{.46\textwidth}
-\footnotesize
-\begin{itemize}\setlength\itemsep{2pt}
-\item ``Inside-out'' DC motor: magnets on the \term{rotor}, three-phase winding in the \term{stator} $\Rightarrow$ heat close to the housing, no brushes.
-\item \term{BLDC}: concentrated windings, \hl{trapezoidal} back-EMF, six-step (block) commutation.
-\item \term{PMSM}: distributed (or optimised) windings, \hl{sinusoidal} back-EMF, sinusoidal / field-oriented control.
-\item $p$ pole pairs: $\theta_e=p\,\theta_m$, \; $\omega_e=p\,\omega_m$.
-\item Servo: mostly SPM; traction/spindles: IPM.
-\end{itemize}
-\centering
-\figph{width=.6\linewidth,height=1.6cm,keepaspectratio}{d1_bldc.jpg}\\
-\credit{Sebastian Koppehel, CC BY 3.0, via Wikimedia Commons}
-\end{column}
-\end{columns}
-\end{frame}
-
-% ---------------------------------------------------------------------
-\begin{frame}{Electronic commutation I: six-step (block) with Hall sensors}
-\begin{columns}[T]
-\begin{column}{.56\textwidth}
-\begin{tikzpicture}[x=0.0155cm,y=0.36cm]
-\foreach \y/\n in {9/$H_A$,7.5/$H_B$,6/$H_C$} \node[font=\tiny,anchor=east] at (-5,\y+0.4) {\n};
-\draw[mkBlue,thick] (0,9) -- (30,9) -- (30,9.8) -- (210,9.8) -- (210,9) -- (360,9);
-\draw[mkBlue,thick] (0,7.5) -- (150,7.5) -- (150,8.3) -- (330,8.3) -- (330,7.5) -- (360,7.5);
-\draw[mkBlue,thick] (0,6.8) -- (90,6.8) -- (90,6) -- (270,6) -- (270,6.8) -- (360,6.8);
-% back-emf & current a
-\node[font=\tiny,anchor=east] at (-5,3) {$e_a$};
-\draw[mkGray!60] (0,3) -- (360,3);
-\draw[mkSky,thick] (0,3) -- (30,4.5) -- (150,4.5) -- (210,1.5) -- (330,1.5) -- (360,3);
-\node[font=\tiny,anchor=east] at (-5,0) {$i_a$};
-\draw[mkGray!60] (0,0) -- (360,0);
-\draw[mkOrange,thick] (0,0) -- (30,0) -- (30,1.2) -- (150,1.2) -- (150,0) -- (210,0) -- (210,-1.2) -- (330,-1.2) -- (330,0) -- (360,0);
-\foreach \x in {30,90,...,330} \draw[mkGray,dashed,very thin] (\x,-1.6) -- (\x,10);
-\foreach \x/\l in {60/A+B$-$,120/A+C$-$,180/B+C$-$,240/B+A$-$,300/C+A$-$} \node[font=\tiny,rotate=90,text=mkMid] at (\x,-2.8) {\l};
-\node[font=\tiny,rotate=90,text=mkMid] at (15,-2.8) {C+B$-$};
-\node[font=\tiny,rotate=90,text=mkMid] at (345,-2.8) {C+B$-$};
-\draw[-{Stealth}] (0,-4.6) -- (370,-4.6) node[right,font=\tiny]{$\theta_e$};
-\foreach \x in {0,60,...,360} \node[font=\tiny,below] at (\x,-4.6) {\x$^\circ$};
-\end{tikzpicture}
-\end{column}
-\begin{column}{.42\textwidth}
-\scriptsize
-\renewcommand{\arraystretch}{1.0}
-\begin{tabular}{@{}cccl@{}}
-\toprule
-$\theta_e$ & $H_AH_BH_C$ & on & current path\\
-\midrule
-30--90 & 101 & A+ B$-$ & $i_a=-i_b=I$\\
-90--150 & 100 & A+ C$-$ & $i_a=-i_c=I$\\
-150--210 & 110 & B+ C$-$ & $i_b=-i_c=I$\\
-210--270 & 010 & B+ A$-$ & $i_b=-i_a=I$\\
-270--330 & 011 & C+ A$-$ & $i_c=-i_a=I$\\
-330--30 & 001 & C+ B$-$ & $i_c=-i_b=I$\\
-\bottomrule
-\end{tabular}
-
-\vspace{1mm}
-\footnotesize
-\begin{itemize}\setlength\itemsep{1pt}
-\item Three Hall sensors give \hl{60$^\circ_e$ resolution}: 6 states per electrical period.
-\item Two phases conduct, one floats: $T=\dfrac{e_ai_a+e_bi_b+e_ci_c}{\omega_m}=\dfrac{2E\,I}{\omega_m}$.
-\item Current transfers at each step $\Rightarrow$ \hl{commutation torque ripple} (10--20\,\%).
-\item Sensorless option: detect back-EMF zero crossing in the floating phase.
-\end{itemize}
-{\tiny\color{mkGray} Hall mounting/coding differs between manufacturers -- table is for the alignment shown.}
-\end{column}
-\end{columns}
-\end{frame}
-
-% ---------------------------------------------------------------------
-\begin{frame}{Electronic commutation II: sinusoidal commutation (PMSM)}
-\begin{columns}[T]
-\begin{column}{.4\textwidth}
-\centering
-\begin{tikzpicture}[scale=1.15]
-\draw[mkGray!60] (0,0) circle (1.5);
-\foreach \a/\n in {0/a,120/b,240/c}{\draw[mkGray,-{Stealth}] (0,0) -- (\a:1.75) node[font=\scriptsize,text=mkGray] at (\a:1.95) {\n};}
-\draw[-{Stealth[length=2.5mm]},mkMid,line width=1.6pt] (0,0) -- (35:1.2) node[pos=1.1,font=\scriptsize,text=mkMid,right]{$d$: $\psi_\text{PM}$};
-\draw[-{Stealth[length=2.5mm]},mkOrange,line width=1.6pt] (0,0) -- (125:1.3) node[above left,font=\scriptsize,text=mkOrange]{$\bm{i}_s=i_q$};
-\draw[mkGray,dashed] (0,0) -- (125:1.6) node[above,font=\tiny] {$q$};
-\coordinate (O) at (0,0); \coordinate (X) at (1,0); \coordinate (D) at (35:1); \coordinate (Q) at (125:1);
-\pic[draw=mkNavy,"$\theta_e$",angle radius=5mm,angle eccentricity=1.6,font=\tiny] {angle=X--O--D};
-\pic[draw=mkNavy,angle radius=3.5mm,"$90^\circ$",angle eccentricity=1.9,font=\tiny] {angle=D--O--Q};
-\draw[-{Stealth},mkNavy] (-20:1.65) arc (-20:15:1.65) node[right,font=\tiny]{$\omega_e$};
-\end{tikzpicture}
 \begin{tikzpicture}
-\begin{axis}[mkplot,width=5.6cm,height=3.0cm,xmin=0,xmax=360,ymin=-1.2,ymax=1.2,xtick={0,120,240,360},
-xlabel={$\theta_e$ (deg)},ytick={-1,0,1}]
+\begin{axis}[mkplot,width=6.0cm,height=3.0cm,xmin=0,xmax=360,ymin=-1.2,ymax=1.2,xtick={0,120,240,360},
+xlabel={electrical angle (deg)},ylabel={$i_a,i_b,i_c$},ytick={-1,0,1}]
 \addplot[mkBlue,thick,domain=0:360,samples=90]{sin(x)};
 \addplot[mkOrange,thick,domain=0:360,samples=90]{sin(x-120)};
 \addplot[mkSky,thick,domain=0:360,samples=90]{sin(x+120)};
 \end{axis}
 \end{tikzpicture}
 \end{column}
-\begin{column}{.58\textwidth}
-\footnotesize
-Impose phase currents \hl{in phase with the sinusoidal back-EMF}:
-\begin{eqbox}\small
-$e_x = k_{e,\text{ph}}\,\omega_m\sin(\theta_e-\varphi_x)$, \; $i_x=\hat I\sin(\theta_e-\varphi_x)$\\ $\varphi_x\in\{0,\tfrac{2\pi}{3},\tfrac{4\pi}{3}\}$ for $x=a,b,c$\\[1mm]
-$T=\dfrac{\sum_x e_x i_x}{\omega_m}=k_{e,\text{ph}}\hat I\sum_x\sin^2(\theta_e-\varphi_x)=\tfrac32\,k_{e,\text{ph}}\,\hat I=\text{const.}$
-\end{eqbox}
-\begin{itemize}\setlength\itemsep{1pt}
-\item Needs \hl{continuous rotor angle} (encoder/resolver), not just 6 Hall states.
-\item Current vector kept at $90^\circ_e$ to the magnet flux: $i_d=0$, $T=\tfrac32\,p\,\psi_\text{PM}\,i_q$.
-\item Ideally \hl{ripple-free} torque ($<2\,\%$ vs.\ 10--20\,\% for six-step).
-\item Implemented via Clarke/Park transforms = \term{field-oriented control} (Day 3--4).
+\begin{column}{.5\textwidth}
+\small
+\begin{itemize}\setlength\itemsep{2pt}
+\item ``Inside-out'' DC motor: \hl{magnets on the rotor}, three-phase coils on the stator $\Rightarrow$ no brushes, easy cooling.
+\item The drive switches the coil currents according to the rotor angle = \term{electronic commutation}.
+\item \term{BLDC}: 3 Hall sensors, 6 switching steps per turn (``block'' currents) -- simple, some torque ripple.
+\item \term{PMSM}: encoder gives the exact angle, currents are smooth \hl{sine waves} 120$^\circ$ apart (plot) -- very smooth torque.
 \end{itemize}
-
+\figph{width=.45\linewidth,height=1.5cm,keepaspectratio}{d1_bldc.jpg}
+\credit{Sebastian Koppehel, CC BY 3.0, via Wikimedia Commons}\\
+\gofurther{$p$ pole pairs: $\omega_e=p\,\omega_m$; PMSM torque $T=\tfrac32\,p\,\psi_\text{PM}\,i_q$ via field-oriented control (Day 3--4).}
 \end{column}
 \end{columns}
 \end{frame}
 
 % ---------------------------------------------------------------------
-\begin{frame}{Induction (asynchronous) motor: short introduction}
+\begin{frame}{Induction motor and stepper motor: short introduction}
 \begin{columns}[T]
-\begin{column}{.30\textwidth}
+\begin{column}{.22\textwidth}
 \centering
-\figph{width=\linewidth,height=3.4cm,keepaspectratio}{d1_squirrel_cage.jpg}\\
-\credit{Zureks, CC BY-SA 3.0, via Wikimedia Commons}
-\vspace{1mm}
-\footnotesize
-\begin{itemize}\setlength\itemsep{1pt}
-\item Rotating stator field induces rotor currents in a \term{squirrel cage}.
-\item Rotor must \hl{slip} behind the field to see induced voltage.
-\end{itemize}
-\end{column}
-\begin{column}{.40\textwidth}
-\begin{tikzpicture}
-\begin{axis}[mkplot,width=6.2cm,height=5.0cm,xmin=0,xmax=1.05,ymin=0,ymax=2.8,
-  xlabel={speed $n/n_s$},ylabel={$T/T_\text{N}$}]
-\addplot[mkBlue,thick,domain=0:0.999,samples=200]{2*2.5/(((1-x)/0.2)+(0.2/(1-x)))};
-\addplot[mkOrange,thick,dashed,domain=0:1]{1};
-\node[font=\tiny,text=mkBlue] at (axis cs:0.75,2.6) {$T_k$ (breakdown)};
-\node[font=\tiny,text=mkOrange] at (axis cs:0.25,1.15) {rated load};
-\node[circle,fill=mkOrange,inner sep=1.3pt] at (axis cs:0.958,1) {};
-\node[font=\tiny,anchor=east] at (axis cs:0.95,0.82) {$s_\text{N}\approx4\,\%$};
-\end{axis}
-\end{tikzpicture}
-\end{column}
-\begin{column}{.28\textwidth}
-\begin{eqbox}\footnotesize
-$n_s=\dfrac{60\,f}{p}$, \quad $s=\dfrac{n_s-n}{n_s}$\\[1mm]
-Kloss: $\dfrac{T}{T_k}\approx\dfrac{2}{s/s_k+s_k/s}$
-\end{eqbox}
-\footnotesize
-\begin{itemize}\setlength\itemsep{1pt}
-\item Robust, cheap, no magnets, field weakening easy.
-\item Rotor losses $\propto s$ heat the rotor.
-\item Servo use: spindles, large axes, with \hl{vector control} + encoder.
-\item Plot: $s_k=0.2$, $T_k=2.5\,T_N$.
-\end{itemize}
-\end{column}
-\end{columns}
-\end{frame}
-
-% ---------------------------------------------------------------------
-\begin{frame}{Stepper motor: short introduction}
-\begin{columns}[T]
-\begin{column}{.38\textwidth}
-\centering
-\figph{width=\linewidth,height=4.2cm,keepaspectratio}{d1_stepper.jpg}\\
+\figph{width=\linewidth,height=2.6cm,keepaspectratio}{d1_squirrel_cage.jpg}\\
+\credit{Zureks, CC BY-SA 3.0, via Wikimedia Commons}\\[1mm]
+\figph{width=\linewidth,height=2.6cm,keepaspectratio}{d1_stepper.jpg}\\
 \credit{tony\_duell, CC BY 2.0, via Wikimedia Commons}
 \end{column}
-\begin{column}{.30\textwidth}
-\begin{tikzpicture}
-\begin{axis}[mkplot,width=4.4cm,height=4.4cm,xmin=0,xmax=3000,ymin=0,ymax=1.1,
-  xlabel={step rate (full steps/s)},ylabel={$T/T_\text{hold}$},xtick={0,1000,2000,3000},
-  scaled x ticks=false]
-\addplot[mkBlue,thick,domain=0:3000,samples=80]{0.95/(1+(x/900)^1.6)};
-\addplot[mkSky,thick,dashed,domain=0:1500,samples=60]{0.95/(1+(x/450)^1.6)};
-\node[font=\tiny,text=mkBlue] at (axis cs:1900,0.38) {pull-out};
-\node[font=\tiny,text=mkSky] at (axis cs:600,0.12) {pull-in};
-\end{axis}
-\end{tikzpicture}\\
-{\tiny\color{mkGray}qualitative shape}
-\end{column}
-\begin{column}{.30\textwidth}
-\footnotesize
+\begin{column}{.38\textwidth}
+\small
+\textbf{Induction motor} (squirrel-cage rotor)
 \begin{itemize}\setlength\itemsep{1pt}
-\item Hybrid stepper: toothed rotor with axial magnet, 2 phases.
-\item Step angle: $\theta_\text{step}=\dfrac{360^\circ}{2\,m\,N_r}$;\\ $m=2$, $N_r=50$ $\Rightarrow$ \hl{1.8$^\circ$} (200 steps/rev).
-\item \term{Open-loop} positioning by counting steps; micro-stepping for smoothness.
-\item Torque falls with speed ($L$, back-EMF).
-\item Risk: \hl{lost steps} if load torque exceeds pull-out torque; resonance at low/medium speed.
+\item Rotating stator field \hl{induces} currents in the rotor bars -- no magnets.
+\item Rotor runs slightly slower than the field: \term{slip} $s$ (a few \%).
+\item Cheap, robust: pumps, fans, big spindles.
 \end{itemize}
+\begin{eqbox}
+$n_s=\dfrac{60f}{p}$, \quad $s=\dfrac{n_s-n}{n_s}$
+\end{eqbox}
+{\small Example: $f=\SI{50}{\hertz}$, $p=2$: $n_s=\SI{1500}{rpm}$; at \SI{1440}{rpm}, $s=4\,\%$.}
+\end{column}
+\begin{column}{.38\textwidth}
+\small
+\textbf{Stepper motor} (reluctance + magnet)
+\begin{itemize}\setlength\itemsep{1pt}
+\item Each current pulse moves the rotor one \term{step}, e.g.\ 1.8$^\circ$ (200 steps/rev).
+\item Position by \hl{counting steps}: no sensor needed (\term{open loop}).
+\item Risk: if the load is too heavy, steps are \hl{lost} and nobody notices.
+\item Torque drops quickly with speed.
+\end{itemize}
+\gofurther{torque--slip curve (Kloss formula), vector control of induction motors, micro-stepping and stepper resonance.}
 \end{column}
 \end{columns}
 \end{frame}
@@ -656,46 +496,71 @@ Kloss: $\dfrac{T}{T_k}\approx\dfrac{2}{s/s_k+s_k/s}$
 % ---------------------------------------------------------------------
 \begin{frame}{Comparison of machine types for motion control}
 \centering
-\footnotesize
-\renewcommand{\arraystretch}{1.1}
+\small
+\renewcommand{\arraystretch}{1.15}
 \begin{tabularx}{\textwidth}{@{}l*{5}{>{\centering\arraybackslash}X}@{}}
 \toprule
- & \textbf{Brushed DC} & \textbf{BLDC} & \textbf{PMSM (AC servo)} & \textbf{Induction} & \textbf{Hybrid stepper}\\
+ & \textbf{Brushed DC} & \textbf{BLDC} & \textbf{PMSM (AC servo)} & \textbf{Induction} & \textbf{Stepper}\\
 \midrule
-Commutation & mechanical & 6-step, Hall & sinusoidal / FOC & slip, vector ctrl. & phase sequencing\\
-Torque density & medium & high & \textcolor{mkGreen}{\textbf{very high}} & medium & high at low speed\\
-Torque ripple & low--medium & \textcolor{mkRed}{medium--high} & \textcolor{mkGreen}{\textbf{very low}} & low & \textcolor{mkRed}{high (detent)}\\
-Speed range & limited (brushes) & high & high & \textcolor{mkGreen}{\textbf{very high}} & \textcolor{mkRed}{low}\\
-Feedback & optional & Hall & encoder/resolver & encoder (servo) & \textcolor{mkGreen}{none needed}\\
+Switching of coils & brushes & 6 steps, Hall & smooth sine & induced & step pulses\\
+Torque per size & medium & high & \textcolor{mkGreen}{\textbf{very high}} & medium & high at low speed\\
+Smoothness & medium & \textcolor{mkRed}{medium} & \textcolor{mkGreen}{\textbf{very smooth}} & smooth & \textcolor{mkRed}{jerky}\\
+Max.\ speed & limited & high & high & \textcolor{mkGreen}{\textbf{very high}} & \textcolor{mkRed}{low}\\
+Sensor needed & no & Hall & encoder & optional & \textcolor{mkGreen}{none}\\
 Maintenance & \textcolor{mkRed}{brushes} & none & none & none & none\\
-Drive complexity & \textcolor{mkGreen}{\textbf{H-bridge}} & 3-ph. inverter & 3-ph. inverter + FOC & 3-ph. inverter & 2$\times$H-bridge\\
-Use & toys, small tools & fans, pumps, drones & robots, machine tools & spindles, pumps & printers, 3D printers\\
+Typical use & toys, tools & fans, drones & robots, machine tools & pumps, spindles & 3D printers\\
 \bottomrule
 \end{tabularx}
 
+\vspace{3mm}
 \begin{notebox}
-Rule of thumb for industrial servo axes: \hl{PMSM} below $\approx$\SI{10}{\kilo\watt} and where dynamics/precision dominate; induction for large spindles and rugged, high-speed applications.
+Rule of thumb: \hl{PMSM} for precise, dynamic axes up to $\approx$\SI{10}{\kilo\watt}; induction for large, rugged, high-speed drives; stepper when cheap and slow is enough.
 \end{notebox}
 \end{frame}
 
 % ---------------------------------------------------------------------
-\begin{frame}{Session 1.2 -- Summary / key take-aways}
+\begin{frame}{Session 1.2 -- Check your understanding}
 \begin{columns}[T]
-\begin{column}{.56\textwidth}
-\begin{itemize}
-\item All machines: stator, rotor, air gap; torque comes from interaction of two magnetic fields (or reluctance).
-\item \term{Commutation} keeps stator and rotor fields $\approx 90^\circ$ apart: commutator (DC), six-step + Hall (BLDC), continuous angle + sinusoidal currents (PMSM).
-\item BLDC/PMSM: windings on the stator $\Rightarrow$ better cooling, no wear.
-\item Induction: needs slip; stepper: open-loop steps, risk of step loss.
-\end{itemize}
-\end{column}
-\begin{column}{.40\textwidth}
-\begin{keybox}[Remember]
-\[\theta_e=p\,\theta_m\]
-\[T_\text{PMSM}=\tfrac32\,p\,\psi_\text{PM}\,i_q\]
-\[n_s=60f/p,\quad s=(n_s-n)/n_s\]
-\[\theta_\text{step}=360^\circ/(2mN_r)\]
+\begin{column}{.62\textwidth}
+\begin{keybox}[Check your understanding]
+\begin{enumerate}\setlength\itemsep{6pt}
+\item What job does the commutator do in a brushed DC motor -- and what does that job in a BLDC motor?
+\item Why is a brushless servo motor easier to cool than a brushed DC motor of the same size?
+\item A stepper motor is driving a heavy load and the controller counts 200 steps. Can you be sure the shaft turned exactly one revolution? Why?
+\end{enumerate}
 \end{keybox}
+\end{column}
+\begin{column}{.34\textwidth}
+\small
+\textbf{Hint:} think about \emph{where} the current flows (rotor or stator) and \emph{who} knows the rotor angle.
+\end{column}
+\end{columns}
+\end{frame}
+
+% ---------------------------------------------------------------------
+\begin{frame}{Session 1.2 -- Summary and key terms}
+\begin{columns}[T]
+\begin{column}{.55\textwidth}
+\small
+\begin{itemize}
+\item Every machine: stator, rotor, air gap.
+\item Coil currents must be switched as the rotor turns (\term{commutation}): brushes (DC), electronics + sensor (BLDC, PMSM).
+\item Brushless: coils on the stator $\Rightarrow$ cooler, no wear.
+\item Induction: needs slip, no magnets. Stepper: counts steps, may lose them.
+\end{itemize}
+\begin{keybox}[Remember]
+$n_s=60f/p$, \quad $s=(n_s-n)/n_s$, \quad stepper: 200 steps/rev $=1.8^\circ$
+\end{keybox}
+\end{column}
+\begin{column}{.42\textwidth}
+\begin{defbox}[Key terms]
+\small
+\term{Stator / rotor}: fixed / turning part.\\
+\term{Commutation}: switching coil currents with rotor angle.\\
+\term{BLDC / PMSM}: brushless magnet motors, block vs.\ sine currents.\\
+\term{Slip}: how much slower the rotor turns than the field.\\
+\term{Open loop}: no measurement of the result.
+\end{defbox}
 \end{column}
 \end{columns}
 \end{frame}
@@ -704,7 +569,53 @@ Rule of thumb for industrial servo axes: \hl{PMSM} below $\approx$\SI{10}{\kilo\
 \section{1.3 Electrical and mechanical models}
 % =====================================================================
 
-\begin{frame}{Equivalent circuit of the PM DC motor}
+\begin{frame}{Refresher: Newton's law for rotation}
+\begin{columns}[T]
+\begin{column}{.42\textwidth}
+\centering
+\begin{tikzpicture}[scale=.9]
+\fill[mkSky!60,draw=mkBlue] (0,0) circle (1.3);
+\fill[mkGray] (0,0) circle (0.15);
+\draw[-{Stealth},mkOrange,line width=1.4pt] (1.6,-0.6) arc (-20:60:1.7) node[above,font=\small,text=mkOrange]{$T$ (push)};
+\draw[-{Stealth},mkNavy,line width=1pt] (-1.55,0.6) arc (160:230:1.6) node[below left,font=\small]{$\omega$};
+\node[font=\small] at (0,-1.7) {disc with inertia $J$};
+\end{tikzpicture}
+
+\vspace{1mm}
+\small
+\renewcommand{\arraystretch}{1.1}
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Linear} & \textbf{Rotation} & \textbf{Unit}\\
+\midrule
+force $F$ & torque $T$ & \si{\newton\metre}\\
+mass $m$ & inertia $J$ & \si{\kilo\gram\metre\squared}\\
+velocity $v$ & angular speed $\omega$ & \si{\radian\per\second}\\
+$F=m\,\dfrac{dv}{dt}$ & $T=J\,\dfrac{d\omega}{dt}$ & \\
+\bottomrule
+\end{tabular}
+\end{column}
+\begin{column}{.55\textwidth}
+\small
+\textbf{Analogy:} a heavy playground roundabout is hard to start and hard to stop -- it has a large \term{moment of inertia} $J$.
+\begin{eqbox}
+$J\,\dfrac{d\omega}{dt} = \sum T = T_\text{motor} - T_\text{friction} - T_\text{load}$
+\end{eqbox}
+\begin{defbox}[Worked example]
+\small
+\begin{enumerate}\setlength\itemsep{1pt}
+\item Rotor $J=\SI{1e-4}{\kilo\gram\metre\squared}$, net torque $T=\SI{0.5}{\newton\metre}$.
+\item Acceleration $\alpha=T/J=\SI{5000}{\radian\per\second\squared}$.
+\item Time to reach \SI{314}{\radian\per\second} (3000 rpm): $t=314/5000=\SI{0.063}{\second}$.
+\end{enumerate}
+\end{defbox}
+Disc: $J=\tfrac12 m r^2$. \hl{Take-away:} net torque sets how fast the speed changes.
+\end{column}
+\end{columns}
+\end{frame}
+
+% ---------------------------------------------------------------------
+\begin{frame}{Equivalent circuit of the DC motor}
 \begin{columns}[T]
 \begin{column}{.55\textwidth}
 \centering
@@ -715,7 +626,6 @@ Rule of thumb for industrial servo axes: \hl{PMSM} below $\approx$\SI{10}{\kilo\
   to[short] (5.6,3)
   to[sV,v^<={$e=k_e\omega$},color=mkOrange] (5.6,0) -- (0,0);
 \draw[mkGray,dashed] (7.0,-0.4) -- (7.0,3.4);
-% mechanical
 \begin{scope}[shift={(8.3,1.5)}]
 \fill[mkSky!60] (0,-0.9) rectangle (0.5,0.9);
 \node[font=\scriptsize] at (0.25,-1.15) {$J$};
@@ -727,64 +637,66 @@ Rule of thumb for industrial servo axes: \hl{PMSM} below $\approx$\SI{10}{\kilo\
 \node[font=\scriptsize] at (2.0,0.95) {$T_L$};
 \node[font=\scriptsize] at (1.2,-1.0) {$\omega,\;B\omega$};
 \end{scope}
+\node[font=\scriptsize,text=mkGray] at (2.8,-0.8) {electrical side};
+\node[font=\scriptsize,text=mkGray] at (9.0,-0.8) {mechanical side};
 \end{circuitikz}
+
+\vspace{2mm}
+\small
+The electrical side is just the \hl{RL circuit} you know, plus one extra ``battery'' $e=k_e\omega$ that grows with speed and \hl{opposes} the supply.
 \end{column}
 \begin{column}{.43\textwidth}
-\footnotesize
+\small
 \begin{tabular}{@{}lll@{}}
 \toprule
 \textbf{Sym.} & \textbf{Meaning} & \textbf{Unit}\\
 \midrule
-$R$ & winding (terminal) resistance & \si{\ohm}\\
+$R$ & winding resistance & \si{\ohm}\\
 $L$ & winding inductance & \si{\henry}\\
 $k_e$ & back-EMF constant & \si{\volt\second\per\radian}\\
 $k_t$ & torque constant & \si{\newton\metre\per\ampere}\\
 $J$ & rotor (+ load) inertia & \si{\kilo\gram\metre\squared}\\
-$B$ & viscous friction coeff. & \si{\newton\metre\second\per\radian}\\
+$B$ & viscous friction & \si{\newton\metre\second\per\radian}\\
 $T_L$ & load torque & \si{\newton\metre}\\
 \bottomrule
 \end{tabular}
+
+\vspace{2mm}
+{\small\textbf{Signs:} $v,i$ positive into the motor; $T_L$ works against the motion.}
 \end{column}
 \end{columns}
-\vspace{2mm}
-\begin{notebox}
-\textbf{Sign convention:} motor (consumer) convention -- $v$ and $i$ positive into the terminals; $\omega$ and $T$ positive in the same direction; $T_L$ opposes motion. Valid for brushed DC and, per $q$-axis, for PMSM under FOC (Day 4).
-\end{notebox}
 \end{frame}
 
 % ---------------------------------------------------------------------
-\begin{frame}{Fundamental motor equations and why $k_t=k_e$}
+\begin{frame}{The two motor equations}
 \begin{columns}[T]
 \begin{column}{.52\textwidth}
-\begin{eqbox}\small
-\begin{tabular}{@{}ll@{}}
-\textbf{KVL:} & $v = R\,i + L\dfrac{di}{dt} + k_e\,\omega$\\[2mm]
-\textbf{Newton:} & $J\dfrac{d\omega}{dt} = k_t\,i - B\,\omega - T_L$\\[2mm]
-\textbf{Kinematics:} & $\dfrac{d\theta}{dt}=\omega$
-\end{tabular}
+\small
+\textbf{Electrical (KVL around the loop):}
+\[
+v = R\,i + L\frac{di}{dt} + k_e\,\omega
+\]
+\textbf{Mechanical (Newton for rotation):}
+\begin{eqbox}
+$J\dfrac{d\omega}{dt} = k_t\,i - B\,\omega - T_L$
 \end{eqbox}
-\footnotesize
-\vspace{1mm}
-Multiply KVL by $i$ and Newton by $\omega$:
-\[
-\underbrace{v\,i}_{P_\text{el}} = \underbrace{R i^2}_{\text{Cu loss}} + \underbrace{\tfrac{d}{dt}\big(\tfrac12 L i^2\big)}_{\text{magn. energy}} + \underbrace{k_e\,\omega\, i}_{P_\text{conv}}
-\]
-\[
-\underbrace{k_t\, i\,\omega}_{P_\text{conv}} = \underbrace{\tfrac{d}{dt}\big(\tfrac12 J\omega^2\big)}_{\text{kin. energy}} + \underbrace{B\omega^2}_{\text{friction}} + \underbrace{T_L\,\omega}_{\text{to load}}
-\]
+\begin{itemize}\setlength\itemsep{1pt}
+\item Linked both ways: $i$ makes torque, $\omega$ makes back-EMF.
+\item Two first-order ODEs $\Rightarrow$ one \hl{second-order} system.
+\end{itemize}
 \end{column}
 \begin{column}{.45\textwidth}
-\begin{keybox}[Energy conservation $\Rightarrow k_t{=}k_e$]
-The converted power must be identical on both sides: $e\,i = T\,\omega$\\
-$\Rightarrow\; k_e\,\omega\,i = k_t\,i\,\omega \;\Rightarrow\; \bm{k_t = k_e}$ \;(SI units).
+\begin{keybox}[Why k\textsubscript{t} equals k\textsubscript{e}: energy conservation]
+\small
+Power converted on the electrical side: $e\,i=k_e\,\omega\,i$\\
+Power delivered on the mechanical side: $T\,\omega=k_t\,i\,\omega$\\
+They must be equal $\Rightarrow$ $\bm{k_t=k_e}$ (SI units).
 \end{keybox}
-\footnotesize
-\begin{itemize}\setlength\itemsep{1pt}
-\item Datasheets often give $k_e$ in \si{\volt}/krpm: \\$k_e[\si{\volt\second\per\radian}]=k_e[\si{\volt}/\text{krpm}]\,/\,104.7$.
-\item Example: \SI{10.47}{\volt}/krpm $\Rightarrow$ \SI{0.1}{\volt\second\per\radian} $\Rightarrow k_t=\SI{0.1}{\newton\metre\per\ampere}$.
-\item Two linear, coupled 1st-order ODEs $\Rightarrow$ a \hl{2nd-order} system from $v$ to $\omega$.
-\item $k_t$ falls slightly at high current (saturation) and with magnet temperature ($\approx -0.1\,\%/\mathrm{K}$ for NdFeB).
-\end{itemize}
+\small
+\textbf{Datasheet units:} $k_e$ is often given in V per 1000 rpm.\\
+Divide by 104.7 to get \si{\volt\second\per\radian}:\\
+\SI{10.47}{\volt}/krpm $\Rightarrow$ $k_e=k_t=0.1$ SI.\\[1mm]
+\gofurther{three-phase datasheets use rms and line-to-line values, giving $k_t=\sqrt3\,k_e$; resistance rises 0.4\,\%/K when hot.}
 \end{column}
 \end{columns}
 \end{frame}
@@ -800,63 +712,63 @@ $\Rightarrow\; k_e\,\omega\,i = k_t\,i\,\omega \;\Rightarrow\; \bm{k_t = k_e}$ \
   every axis y label/.style={at={(current axis.above origin)},anchor=south,font=\scriptsize},
   legend style={at={(0.02,0.98)},anchor=north west}]
 \addplot[mkSky,thick,dashed,domain=0.001:3,samples=40]{0.25*x}; \addlegendentry{viscous $B\omega$}
-\addplot[mkMid,thick,dotted,domain=0.001:3,samples=2]{0.8}; \addlegendentry{Coulomb $T_C\,\mathrm{sgn}\,\omega$}
-\addplot[mkOrange,thick,domain=0.001:3,samples=120]{0.8+0.6*exp(-(x/0.35)^2)+0.25*x}; \addlegendentry{Stribeck + Coulomb + viscous}
+\addplot[mkMid,thick,dotted,domain=0.001:3,samples=2]{0.8}; \addlegendentry{Coulomb (constant)}
+\addplot[mkOrange,thick,domain=0.001:3,samples=120]{0.8+0.6*exp(-(x/0.35)^2)+0.25*x}; \addlegendentry{real friction}
 \addplot[mkSky,thick,dashed,domain=-3:-0.001,samples=40,forget plot]{0.25*x};
 \addplot[mkMid,thick,dotted,domain=-3:-0.001,samples=2,forget plot]{-0.8};
 \addplot[mkOrange,thick,domain=-3:-0.001,samples=120,forget plot]{-0.8-0.6*exp(-(x/0.35)^2)+0.25*x};
 \draw[mkOrange,thick] (axis cs:0,-1.4) -- (axis cs:0,1.4);
-\node[font=\tiny,anchor=west,text=mkOrange] at (axis cs:0.05,1.48) {static $T_s$ (stiction)};
+\node[font=\scriptsize,anchor=west,text=mkOrange] at (axis cs:0.05,1.48) {stiction};
 \end{axis}
 \end{tikzpicture}
 \end{column}
 \begin{column}{.5\textwidth}
-\begin{eqbox}\small
-$T_f(\omega) = \big[T_C + (T_s-T_C)\,e^{-(\omega/\omega_s)^2}\big]\,\mathrm{sgn}(\omega) + B\,\omega$
-\end{eqbox}
-\footnotesize
-\begin{itemize}\setlength\itemsep{1pt}
-\item \term{Viscous} $B\omega$: linear, enters the transfer function.
-\item \term{Coulomb} $T_C$ and \term{stiction} $T_s$: \hl{nonlinear} -- cause stick--slip, limit cycles and position errors at reversal (Day 2 linearisation, Day 4 compensation).
-\item \term{Load torque} $T_L$: process force, gravity ($m g r$ on vertical axes -- constant!), spring forces, cutting forces.
-\item In the linear model: $T_L$ is a \hl{disturbance input}, $B$ lumps all speed-proportional losses.
+\small
+\textbf{Analogy:} pushing a heavy box -- hard to get it moving, easier once it slides.
+\begin{itemize}\setlength\itemsep{2pt}
+\item \term{Viscous} friction $B\omega$: grows with speed, like stirring honey. Linear $\Rightarrow$ easy maths.
+\item \term{Coulomb} friction: constant, flips sign with direction.
+\item \term{Stiction}: extra ``sticking'' torque at standstill $\Rightarrow$ jerky start, small position errors.
+\item \term{Load torque} $T_L$: what the process demands -- gravity on a vertical axis, cutting forces, springs.
 \end{itemize}
+\begin{eqbox}
+model used today: $T_f\approx B\,\omega$ \quad (Day 2: the rest)
+\end{eqbox}
 {\scriptsize\color{mkGray}[Armstrong-H\'elouvry, Dupont \& Canudas de Wit, 1994]}
 \end{column}
 \end{columns}
 \end{frame}
 
 % ---------------------------------------------------------------------
-\begin{frame}{Steady-state characteristics at constant voltage}
+\begin{frame}{Steady state: the speed--torque line}
 \begin{columns}[T]
-\begin{column}{.62\textwidth}
+\begin{column}{.58\textwidth}
 \begin{tikzpicture}
-\begin{groupplot}[group style={group size=2 by 1,horizontal sep=12mm},mkplot,width=4.7cm,height=4.6cm,
-  xmin=0,xmax=4.8,xlabel={$T$ (\si{\newton\metre})}]
-\nextgroupplot[ymin=0,ymax=5000,ylabel={speed (rpm), current$\times$100 (A)},legend pos=north east,
-  scaled y ticks=false,yticklabel style={/pgf/number format/fixed}]
-\addplot[mkBlue,thick,domain=0:4.75]{(475-100*x)*9.549}; \addlegendentry{$n$}
-\addplot[mkOrange,thick,domain=0:4.75]{(10*x+0.5)*100}; \addlegendentry{$i$}
-\nextgroupplot[ymin=0,ymax=1,ylabel={$P/P_\text{max}$, $\eta$},legend pos=north east]
-\addplot[mkBlue,thick,domain=0:4.75,samples=60]{x*(475-100*x)/564}; \addlegendentry{$P$}
-\addplot[mkOrange,thick,domain=0.001:4.75,samples=120]{x*(475-100*x)/(48*(10*x+0.5))}; \addlegendentry{$\eta$}
-\end{groupplot}
+\begin{axis}[mkplot,width=7.6cm,height=5.0cm,xmin=0,xmax=5,ymin=0,ymax=5000,
+  xlabel={load torque $T$ (\si{\newton\metre})},ylabel={speed $n$ (rpm)},scaled y ticks=false,
+  yticklabel style={/pgf/number format/fixed},legend pos=north east]
+\addplot[mkBlue,thick,domain=0:4.8]{(480-100*x)*9.549}; \addlegendentry{$v=\SI{48}{\volt}$}
+\addplot[mkSky,thick,dashed,domain=0:2.4]{(240-100*x)*9.549}; \addlegendentry{$v=\SI{24}{\volt}$}
+\node[circle,fill=mkOrange,inner sep=1.4pt] at (axis cs:0,4584) {};
+\node[font=\scriptsize,anchor=west,text=mkOrange] at (axis cs:0.1,4700) {no-load speed};
+\node[circle,fill=mkOrange,inner sep=1.4pt] at (axis cs:4.8,0) {};
+\node[font=\scriptsize,anchor=south east,text=mkOrange] at (axis cs:4.8,150) {stall};
+\end{axis}
 \end{tikzpicture}\\
-{\tiny\color{mkGray} Example motor: $v=\SI{48}{\volt}$, $R=\SI{1}{\ohm}$, $k_t=k_e=0.1$ SI, no-load friction $T_0=\SI{0.05}{\newton\metre}$.}
+{\scriptsize\color{mkGray} Example motor: $R=\SI{1}{\ohm}$, $k_t=k_e=0.1$ SI, friction neglected.}
 \end{column}
-\begin{column}{.36\textwidth}
-\footnotesize
-Set $d/dt=0$:
-\begin{eqbox}\small
-$\omega=\dfrac{v}{k_e}-\dfrac{R}{k_ek_t}\,T$
+\begin{column}{.4\textwidth}
+\small
+Constant speed: set $\tfrac{d}{dt}=0$ in both equations:
+\begin{eqbox}
+$\omega=\dfrac{v}{k_e}-\dfrac{R}{k_e k_t}\,T$
 \end{eqbox}
-\begin{itemize}\setlength\itemsep{1pt}
-\item No-load speed $\omega_0=v/k_e$ (\SI{4584}{rpm} ideal).
-\item Stall torque $T_\text{st}=k_t v/R$ (\SI{4.8}{\newton\metre}, \SI{48}{\ampere}!).
-\item Slope $-R/(k_ek_t)$: speed \hl{droop} under load.
-\item $P_\text{max}=v^2/(4R)$ at $T_\text{st}/2$ -- never a servo operating point (50\,\% efficiency).
-\item $\eta_\text{max}=\big(1-\sqrt{i_0/i_\text{st}}\big)^2\approx 81\,\%$ near light load.
-\end{itemize}
+\begin{enumerate}\setlength\itemsep{1pt}
+\item No load: $\omega_0=48/0.1=\SI{480}{\radian\per\second}$ (\SI{4584}{rpm}).
+\item Stalled: $i=v/R=\SI{48}{\ampere}$, $T=k_t i=\SI{4.8}{\newton\metre}$.
+\item More load $\Rightarrow$ speed \hl{droops} along the line.
+\item Higher voltage $\Rightarrow$ line moves up.
+\end{enumerate}
 \end{column}
 \end{columns}
 \end{frame}
@@ -865,213 +777,159 @@ $\omega=\dfrac{v}{k_e}-\dfrac{R}{k_ek_t}\,T$
 \begin{frame}{Block diagram of the DC motor}
 \centering
 \begin{tikzpicture}[node distance=7mm]
-\node (v) {$V(s)$};
+\node (v) {$v$};
 \node[mksum,right=6mm of v] (s1) {};
-\node[mkblk,right=of s1] (el) {$\dfrac{1}{Ls+R}$};
-\node[mkblk,right=of el] (kt) {$k_t$};
+\node[mkblk,right=of s1,minimum width=18mm] (el) {electrical\\ RL circuit};
+\node[mkblk,right=of el] (kt) {$\times k_t$};
 \node[mksum,right=of kt] (s2) {};
-\node[mkblk,right=of s2] (me) {$\dfrac{1}{Js+B}$};
-\node[mkblk,right=10mm of me] (int) {$\dfrac{1}{s}$};
-\node[right=6mm of int] (th) {$\Theta(s)$};
-\node[above=6mm of s2] (tl) {$T_L(s)$};
-\node[mkblk,below=9mm of kt,fill=mkCream,draw=mkOrange] (ke) {$k_e$};
-\draw[mksig] (v) -- node[pos=.85,above,font=\tiny]{$+$} (s1);
+\node[mkblk,right=of s2,minimum width=18mm] (me) {inertia $J$\\ + friction $B$};
+\node[mkblk,right=10mm of me] (int) {integrate\\ $\int dt$};
+\node[right=6mm of int] (th) {$\theta$};
+\node[above=6mm of s2] (tl) {$T_L$};
+\node[mkblk,below=9mm of kt,fill=mkCream,draw=mkOrange] (ke) {$\times k_e$};
+\draw[mksig] (v) -- node[pos=.85,above,font=\scriptsize]{$+$} (s1);
 \draw[mksig] (s1) -- (el);
-\draw[mksig] (el) -- node[above,mklab]{$I$} (kt);
-\draw[mksig] (kt) -- node[above,mklab]{$T_m$} node[pos=.85,above,font=\tiny]{$+$} (s2);
-\draw[mksig] (tl) -- node[pos=.8,right,font=\tiny]{$-$} (s2);
+\draw[mksig] (el) -- node[above,mklab]{$i$} (kt);
+\draw[mksig] (kt) -- node[above,mklab]{$T$} node[pos=.85,above,font=\scriptsize]{$+$} (s2);
+\draw[mksig] (tl) -- node[pos=.8,right,font=\scriptsize]{$-$} (s2);
 \draw[mksig] (s2) -- (me);
-\draw[mksig] (me) -- node[above,mklab]{$\Omega$} coordinate[pos=.4] (wtap) (int);
+\draw[mksig] (me) -- node[above,mklab]{$\omega$} coordinate[pos=.4] (wtap) (int);
 \draw[mksig] (int) -- (th);
 \draw[mksig] (wtap) |- (ke);
-\draw[mksig] (ke) -| node[pos=.9,left,font=\tiny]{$-$} node[pos=.3,below,mklab]{$E$} (s1);
+\draw[mksig] (ke) -| node[pos=.9,left,font=\scriptsize]{$-$} node[pos=.3,below,mklab]{$e$} (s1);
 \end{tikzpicture}
 
 \vspace{4mm}
 \begin{columns}[T]
-\begin{column}{.48\textwidth}
-\footnotesize
-\begin{itemize}\setlength\itemsep{1pt}
-\item Two cascaded first-order lags: \hl{electrical} ($L,R$) and \hl{mechanical} ($J,B$).
-\item The back-EMF $k_e$ is an \term{internal feedback loop} -- it gives the motor its natural speed stabilisation (damping).
-\item $T_L$ enters as a \hl{disturbance} at the torque summing point.
+\begin{column}{.5\textwidth}
+\small
+\begin{itemize}\setlength\itemsep{2pt}
+\item A \term{block diagram} draws the equations as signal flow: boxes act on signals, circles add or subtract.
+\item Back-EMF is a built-in \term{feedback loop}: faster $\Rightarrow$ more $e$ $\Rightarrow$ less current $\Rightarrow$ less torque. The motor calms itself.
+\item $T_L$ enters as a \hl{disturbance}.
 \end{itemize}
 \end{column}
-\begin{column}{.48\textwidth}
+\begin{column}{.46\textwidth}
 \begin{notebox}
-Servo drives close a fast \textbf{current loop} around $1/(Ls+R)$, so that $T_m\approx k_t\,i^*$ -- the motor then appears as a pure torque source acting on $1/(Js+B)$ (Day 4: cascaded current/speed/position loops).
+Real servo drives control the \textbf{current} directly, so $T\approx k_t\,i^*$: the motor behaves like a \hl{torque source} (Day 4).
 \end{notebox}
+\gofurther{with the Laplace transform each box becomes a transfer function, e.g.\ $1/(Ls+R)$ and $1/(Js+B)$ (Day 2).}
 \end{column}
 \end{columns}
 \end{frame}
 
 % ---------------------------------------------------------------------
-\begin{frame}{Transfer functions and time constants}
+\begin{frame}{Refresher: first-order ODEs and the exponential response}
+\begin{columns}[T]
+\begin{column}{.5\textwidth}
+\begin{tikzpicture}
+\begin{axis}[mkplot,width=7.2cm,height=4.8cm,xmin=0,xmax=5,ymin=0,ymax=1.1,
+  xlabel={time $t/\tau$},ylabel={$y/y_\infty$},xtick={0,1,2,3,4,5}]
+\addplot[mkBlue,thick,domain=0:5,samples=80]{1-exp(-x)};
+\addplot[mkOrange,thick,dashed,domain=0:1]{x};
+\draw[dashed,mkGray] (axis cs:1,0) -- (axis cs:1,0.632) -- (axis cs:0,0.632);
+\draw[dashed,mkGray] (axis cs:3,0) -- (axis cs:3,0.95);
+\node[font=\scriptsize,anchor=west] at (axis cs:1.05,0.55) {63\,\% after $1\tau$};
+\node[font=\scriptsize,anchor=west] at (axis cs:3.05,0.85) {95\,\% after $3\tau$};
+\node[font=\scriptsize,text=mkOrange,anchor=west] at (axis cs:0.15,0.98) {initial slope};
+\end{axis}
+\end{tikzpicture}
+\end{column}
+\begin{column}{.48\textwidth}
+\small
+\textbf{You know this from RC charging:} the capacitor voltage rises fast at first, then slower and slower.
+\begin{eqbox}
+$\tau\dfrac{dy}{dt}+y=y_\infty \;\Rightarrow\; y(t)=y_\infty\big(1-e^{-t/\tau}\big)$
+\end{eqbox}
+\begin{itemize}\setlength\itemsep{1pt}
+\item $\tau$ = \term{time constant} [s]: RC circuit $\tau=RC$, RL circuit $\tau=L/R$.
+\item After $1\tau$: 63\,\%; after $3\tau$: 95\,\%; after $5\tau$: ``done''.
+\end{itemize}
+\textbf{Example:} $L=\SI{0.5}{\milli\henry}$, $R=\SI{1}{\ohm}$ $\Rightarrow$ $\tau=\SI{0.5}{\milli\second}$; current settles in $\approx\SI{1.5}{\milli\second}$.\\[1mm]
+\hl{Take-away:} one energy store $\Rightarrow$ one $\tau$ $\Rightarrow$ one exponential.
+\end{column}
+\end{columns}
+\end{frame}
+
+% ---------------------------------------------------------------------
+\begin{frame}{The motor's two time constants: worked example}
 \begin{columns}[T]
 \begin{column}{.55\textwidth}
-From the block diagram ($T_L=0$):
-\begin{eqbox}
-$G_{\omega v}(s)=\dfrac{\Omega(s)}{V(s)}=\dfrac{k_t}{(Ls+R)(Js+B)+k_tk_e}$\\[2mm]
-$\phantom{G_{\omega v}(s)}=\dfrac{k_t}{LJ\,s^2+(RJ+LB)\,s+(RB+k_tk_e)}$
-\end{eqbox}
-\vspace{1mm}
-\footnotesize
-Disturbance path:\quad $\dfrac{\Omega(s)}{T_L(s)}=-\dfrac{Ls+R}{(Ls+R)(Js+B)+k_tk_e}$\\[2mm]
-Position:\quad $\dfrac{\Theta(s)}{V(s)}=\dfrac{1}{s}\,G_{\omega v}(s)$ \; (type-1, integrating)
-\end{column}
-\begin{column}{.43\textwidth}
-\begin{defbox}[Time constants ($B\approx0$)]
-\small
-$\tau_e=\dfrac{L}{R}$ \quad electrical\\[1mm]
-$\tau_m=\dfrac{R\,J}{k_t\,k_e}$ \quad mechanical
-\end{defbox}
-\footnotesize
-\[
-G_{\omega v}(s)\approx\frac{1/k_e}{\tau_m\tau_e s^2+\tau_m s+1}
-\]
-\[
-\overset{\tau_m\gg\tau_e}{\approx}\;\frac{1/k_e}{(\tau_m s+1)(\tau_e s+1)}
-\]
-\begin{itemize}\setlength\itemsep{1pt}
-\item Real poles if $\tau_m>4\tau_e$; otherwise oscillatory.
-\item $\tau_m$ depends on \hl{total} inertia: load inertia slows the motor.
-\item Typical: $\tau_e\approx$ 0.5--5\,ms, $\tau_m\approx$ 2--20\,ms.
-\end{itemize}
-\end{column}
-\end{columns}
-\end{frame}
-
-% ---------------------------------------------------------------------
-\begin{frame}{Worked example: from parameters to poles}
-\begin{columns}[T]
-\begin{column}{.40\textwidth}
-\small
-\renewcommand{\arraystretch}{1.1}
-\begin{tabular}{@{}lr@{}}
-\toprule
-\textbf{Parameter} & \textbf{Value}\\
-\midrule
-Supply $v$ & \SI{48}{\volt}\\
-$R$ & \SI{1.0}{\ohm}\\
-$L$ & \SI{0.5}{\milli\henry}\\
-$k_t=k_e$ & \SI{0.1}{\newton\metre\per\ampere}\\
-$J$ (rotor) & \SI{1.0e-4}{\kilo\gram\metre\squared}\\
-$B$ & \SI{5e-5}{\newton\metre\second\per\radian}\\
-\bottomrule
-\end{tabular}
-\end{column}
-\begin{column}{.58\textwidth}
-\footnotesize
-\begin{enumerate}\setlength\itemsep{2pt}
-\item $\tau_e=L/R=\SI{0.5}{\milli\second}$, \quad $\tau_m=RJ/(k_tk_e)=\SI{10}{\milli\second}$ \;($\tau_m/\tau_e=20$).
-\item Denominator coefficients:\\
-$LJ=\num{5.0e-8}$, \; $RJ+LB=\num{1.0003e-4}$, \; $RB+k_tk_e=\num{1.005e-2}$.
-\item DC gain: $k_t/(RB+k_tk_e)=\SI{9.95}{\radian\per\second\per\volt}$ ($\approx 1/k_e$).
-\item Poles: $s^2+2000.5\,s+201\,000=0$\\
-$\Rightarrow s_1=\SI{-106.1}{\per\second}$ ($\tau=\SI{9.42}{\milli\second}\approx\tau_m$),\\
-$\phantom{\Rightarrow}\; s_2=\SI{-1894}{\per\second}$ ($\tau=\SI{0.53}{\milli\second}\approx\tau_e$).
-\item No-load speed at \SI{48}{\volt}: $\omega_0=\SI{477.6}{\radian\per\second}=\SI{4561}{rpm}$.
-\end{enumerate}
-\begin{keybox}[Check]
-Approximate $\tau_m,\tau_e$ are within 6\,\% of the exact pole time constants because $\tau_m\gg\tau_e$.
-\end{keybox}
-\end{column}
-\end{columns}
-\end{frame}
-
-% ---------------------------------------------------------------------
-\begin{frame}{Step response of the example motor (\SI{24}{\volt} step, $T_L=0$)}
-\begin{columns}[T]
-\begin{column}{.6\textwidth}
 \begin{tikzpicture}
-\begin{axis}[mkplot,width=8.2cm,height=5.4cm,xmin=0,xmax=50,ymin=0,ymax=260,
+\begin{axis}[mkplot,width=7.6cm,height=5.0cm,xmin=0,xmax=50,ymin=0,ymax=260,
   xlabel={$t$ (ms)},ylabel={$\omega$ (\si{\radian\per\second})},axis y line*=left,axis x line*=bottom]
 \addplot[mkBlue,thick,domain=0:50,samples=200]{238.81+14.169*exp(-1.8944*x)-252.97*exp(-0.10610*x)}; \label{pl:w}
 \draw[dashed,mkGray] (axis cs:9.42,0) -- (axis cs:9.42,151) -- (axis cs:0,151);
-\node[font=\tiny,text=mkGray,anchor=west] at (axis cs:9.8,140) {63\,\% at $\approx\tau_m$};
+\node[font=\scriptsize,text=mkGray,anchor=west] at (axis cs:9.8,140) {63\,\% at $\approx\tau_m$};
 \end{axis}
-\begin{axis}[mkplot,width=8.2cm,height=5.4cm,xmin=0,xmax=50,ymin=0,ymax=26,grid=none,
+\begin{axis}[mkplot,width=7.6cm,height=5.0cm,xmin=0,xmax=50,ymin=0,ymax=26,grid=none,
   axis y line*=right,axis x line=none,ylabel={$i$ (A)},legend pos=north east]
 \addlegendimage{/pgfplots/refstyle=pl:w}\addlegendentry{speed $\omega$}
 \addplot[mkOrange,thick,domain=0:50,samples=300]{0.1194-26.834*exp(-1.8944*x)+26.715*exp(-0.10610*x)}; \addlegendentry{current $i$}
 \end{axis}
-\end{tikzpicture}
+\end{tikzpicture}\\
+{\scriptsize\color{mkGray} Simulated \SI{24}{\volt} step, $R=\SI{1}{\ohm}$, $L=\SI{0.5}{\milli\henry}$, $k_t=k_e=0.1$, $J=\SI{1e-4}{\kilo\gram\metre\squared}$.}
 \end{column}
-\begin{column}{.38\textwidth}
-\footnotesize
-Exact solution (partial fractions):
-\[
-\omega(t)=238.8+14.2\,e^{-1894t}-253.0\,e^{-106.1t}
-\]
-\[
-i(t)=0.12-26.8\,e^{-1894t}+26.7\,e^{-106.1t}
-\]
-\begin{itemize}\setlength\itemsep{1pt}
-\item Current peaks at \hl{\SI{21.4}{\ampere}} after \SI{1.6}{\milli\second} -- 180$\times$ the no-load current!
-\item Back-EMF builds up and pulls the current down: inherent damping.
-\item Real drives \hl{limit the current}; with a current limit the speed ramps linearly ($\dot\omega=k_tI_\text{max}/J$).
-\end{itemize}
-\end{column}
-\end{columns}
-\end{frame}
-
-% ---------------------------------------------------------------------
-\begin{frame}{From datasheet to model -- units and pitfalls}
-\footnotesize
-\begin{columns}[T]
-\begin{column}{.52\textwidth}
-\renewcommand{\arraystretch}{1.15}
-\begin{tabular}{@{}lll@{}}
-\toprule
-\textbf{Datasheet item} & \textbf{Typical unit} & \textbf{Model value}\\
-\midrule
-Back-EMF const. & V/krpm & $\div\,104.7\to\si{\volt\second\per\radian}$\\
-Torque const. & \si{\newton\metre\per\ampere} (rms!) & $k_t$\\
-Terminal resistance & \si{\ohm} line--line & $R_\text{ph}=R_{LL}/2$ (Y)\\
-Terminal inductance & \si{\milli\henry} line--line & $L_\text{ph}=L_{LL}/2$ (Y)\\
-Rotor inertia & \si{\kilo\gram\centi\metre\squared} & $\times10^{-4}\to\si{\kilo\gram\metre\squared}$\\
-Mech. time const. & \si{\milli\second} & $\tau_m=RJ/(k_tk_e)$\\
-Thermal resistance & \si{\kelvin\per\watt} & $R_\text{th}$ (Session 1.5)\\
-\bottomrule
-\end{tabular}
-\end{column}
-\begin{column}{.45\textwidth}
-\begin{keybox}[Three-phase PMSM: watch the convention]
-With $k_e$ in $\mathrm{V_{rms,LL}}/(\si{\radian\per\second})$ and $k_t$ in $\mathrm{N\,m/A_{rms}}$ (phase current):
-\[
-k_t=\sqrt3\,k_e
-\]
-$k_t=k_e$ holds only in \hl{consistent per-phase / dq units}.
-\end{keybox}
-\begin{itemize}\setlength\itemsep{1pt}
-\item Example: \SI{33}{V_{rms}}/krpm $\Rightarrow$ $k_e=0.315$, $k_t=\SI{0.546}{\newton\metre\per\ampere}_\text{rms}$.
-\item Hot winding: $R$ rises $\approx$ 0.39\,\%/K (copper): +39\,\% at $\Delta T=\SI{100}{\kelvin}$.
-\item Datasheet values have \hl{$\pm$5--10\,\%} tolerance.
-\end{itemize}
-\end{column}
-\end{columns}
-\end{frame}
-
-% ---------------------------------------------------------------------
-\begin{frame}{Session 1.3 -- Summary / key take-aways}
-\begin{columns}[T]
-\begin{column}{.52\textwidth}
-\begin{itemize}
-\item Motor = RL circuit + back-EMF, coupled to an inertia with friction and load torque.
-\item Energy conservation gives $k_t=k_e$ in SI units.
-\item Transfer function $V\to\Omega$ is 2nd order with $\tau_e=L/R$ and $\tau_m=RJ/(k_tk_e)$.
-\item Friction: viscous (linear) + Coulomb/stiction (nonlinear); $T_L$ is a disturbance.
-\item Without current control, a voltage step causes large inrush current.
-\end{itemize}
-\end{column}
-\begin{column}{.45\textwidth}
-\begin{keybox}[Remember]
+\begin{column}{.43\textwidth}
 \small
-$v=Ri+L\dot i+k_e\omega$\\[1mm]
-$J\dot\omega=k_ti-B\omega-T_L$\\[1mm]
-$\dfrac{\Omega}{V}=\dfrac{k_t}{(Ls+R)(Js+B)+k_tk_e}$\\[1mm]
-$\tau_e=L/R,\quad \tau_m=RJ/(k_tk_e)$
+\begin{enumerate}\setlength\itemsep{2pt}
+\item Electrical: $\tau_e=L/R=\SI{0.5}{\milli\second}$.
+\item Mechanical: $\tau_m=\dfrac{RJ}{k_tk_e}=\dfrac{1\cdot10^{-4}}{0.01}=\SI{10}{\milli\second}$.
+\item Final speed: $\omega_\infty\approx v/k_e=\SI{240}{\radian\per\second}$.
+\item Start current: $\omega=0$, no back-EMF $\Rightarrow$ up to $v/R=\SI{24}{\ampere}$ (peak \SI{21}{\ampere}).
+\end{enumerate}
+\begin{eqbox}
+$\tau_e=\dfrac{L}{R}$ \quad $\ll$ \quad $\tau_m=\dfrac{RJ}{k_tk_e}$
+\end{eqbox}
+\hl{Take-away:} current is fast, speed is slow; more load inertia $\Rightarrow$ larger $\tau_m$. Real drives limit the start current.
+\end{column}
+\end{columns}
+\end{frame}
+
+% ---------------------------------------------------------------------
+\begin{frame}{Session 1.3 -- Check your understanding}
+\begin{columns}[T]
+\begin{column}{.62\textwidth}
+\begin{keybox}[Check your understanding]
+\begin{enumerate}\setlength\itemsep{6pt}
+\item A motor has $\tau_m=\SI{20}{\milli\second}$. Roughly how long until it reaches 95\,\% of its final speed after a voltage step?
+\item You attach a load that doubles the total inertia $J$. What happens to $\tau_m$?
+\item Why is the current so large in the first milliseconds after switching on, and why does it then fall?
+\end{enumerate}
 \end{keybox}
+\end{column}
+\begin{column}{.34\textwidth}
+\small
+\textbf{Hint:} use the 63\,\% / 95\,\% rule, the formula $\tau_m=RJ/(k_tk_e)$ and the back-EMF $e=k_e\omega$.
+\end{column}
+\end{columns}
+\end{frame}
+
+% ---------------------------------------------------------------------
+\begin{frame}{Session 1.3 -- Summary and key terms}
+\begin{columns}[T]
+\begin{column}{.55\textwidth}
+\small
+\begin{itemize}
+\item Motor = RL circuit + back-EMF, coupled to an inertia with friction and load.
+\item Energy conservation gives $k_t=k_e$ (SI units).
+\item Constant speed: straight speed--torque line.
+\item Two time constants: fast electrical $\tau_e$, slow mechanical $\tau_m$.
+\end{itemize}
+\begin{keybox}[Remember]
+$v=Ri+L\dfrac{di}{dt}+k_e\omega$, \quad $J\dfrac{d\omega}{dt}=k_ti-B\omega-T_L$\\[1mm]
+$\tau_e=L/R$, \quad $\tau_m=RJ/(k_tk_e)$
+\end{keybox}
+\end{column}
+\begin{column}{.42\textwidth}
+\begin{defbox}[Key terms]
+\small
+\term{Moment of inertia $J$}: resistance to changes of rotation speed.\\
+\term{Time constant $\tau$}: time to reach 63\,\%.\\
+\term{Stiction}: sticking friction at standstill.\\
+\term{Block diagram}: picture of equations as signal flow.\\
+\term{Disturbance}: unwanted input such as $T_L$.
+\end{defbox}
 \end{column}
 \end{columns}
 \end{frame}
@@ -1082,83 +940,80 @@ $\tau_e=L/R,\quad \tau_m=RJ/(k_tk_e)$
 
 \begin{frame}{Motion transmission options}
 \centering
-\scriptsize
-\renewcommand{\arraystretch}{1.05}
-\begin{tabularx}{\textwidth}{@{}l>{\centering\arraybackslash}X>{\centering\arraybackslash}X>{\centering\arraybackslash}X>{\centering\arraybackslash}X>{\centering\arraybackslash}X@{}}
+\small
+\renewcommand{\arraystretch}{1.12}
+\begin{tabularx}{\textwidth}{@{}l>{\centering\arraybackslash}X>{\centering\arraybackslash}X>{\centering\arraybackslash}X>{\centering\arraybackslash}X@{}}
 \toprule
-\textbf{Mechanism} & \textbf{Conversion constant} & \textbf{Speed} & \textbf{Stiffness} & \textbf{Accuracy / backlash} & \textbf{Stroke}\\
+\textbf{Mechanism} & \textbf{Converts} & \textbf{Speed} & \textbf{Stiffness} & \textbf{Play (backlash)}\\
 \midrule
-Ball screw & lead $p$ = 5--40\,mm/rev & $\le$ 1--2\,m/s & \textcolor{mkGreen}{high} & \textcolor{mkGreen}{$\mu$m, preloaded} & $\lesssim$ 3--4\,m (whip)\\
-Toothed belt & pulley radius $r$ & \textcolor{mkGreen}{$\le$ 5--10\,m/s} & \textcolor{mkRed}{low--medium} & 0.05--0.1\,mm & long\\
-Rack \& pinion & pinion radius $r$ & 2--5\,m/s & medium & backlash (dual pinion) & \textcolor{mkGreen}{unlimited}\\
-Linear motor & direct, $k_f$ in N/A & \textcolor{mkGreen}{$>$5\,m/s} & servo-defined & \textcolor{mkGreen}{nm--$\mu$m (encoder)} & unlimited\\
-Gearbox & ratio $N$ = 3--160 & motor-limited & medium & 1--10 arcmin & rotary\\
-Direct-drive torque motor & 1:1 & low--medium & \textcolor{mkGreen}{highest} & \textcolor{mkGreen}{no backlash} & rotary\\
+Ball screw & rotation $\to$ linear & $\le$ 1--2\,m/s & \textcolor{mkGreen}{high} & \textcolor{mkGreen}{very small}\\
+Toothed belt & rotation $\to$ linear & \textcolor{mkGreen}{$\le$ 5--10\,m/s} & \textcolor{mkRed}{low} & small\\
+Rack \& pinion & rotation $\to$ linear & 2--5\,m/s & medium & some\\
+Gearbox & fast rotation $\to$ slow & motor-limited & medium & small--some\\
+Linear motor / direct drive & none needed & \textcolor{mkGreen}{high} & \textcolor{mkGreen}{highest} & \textcolor{mkGreen}{none}\\
 \bottomrule
 \end{tabularx}
 
-\vspace{1mm}
+\vspace{3mm}
 \begin{columns}[T]
 \begin{column}{.48\textwidth}
-\begin{defbox}[Geared / converted drive]
-\footnotesize
-$+$ small, fast motor; load inertia reduced by $1/N^2$\\
-$-$ backlash, compliance, friction, wear, noise
+\begin{defbox}[With gear / screw]
+\small
+$+$ small, fast, cheap motor; load ``looks lighter''\\
+$-$ play, springiness, friction, wear, noise
 \end{defbox}
 \end{column}
 \begin{column}{.48\textwidth}
 \begin{defbox}[Direct drive]
-\footnotesize
-$+$ stiff, zero backlash, high bandwidth, low maintenance\\
-$-$ large, expensive motor; full load inertia and disturbances act on the motor
+\small
+$+$ stiff, no play, very precise\\
+$-$ big, expensive motor; feels the full load
 \end{defbox}
 \end{column}
 \end{columns}
 \end{frame}
 
 % ---------------------------------------------------------------------
-\begin{frame}{Linear electromechanical actuators: linear motor and voice coil}
+\begin{frame}{Linear actuators: linear motor and voice coil}
 \begin{columns}[T]
 \begin{column}{.34\textwidth}
 \centering
-\figph{width=\linewidth,height=2.9cm,keepaspectratio}{d1_linear_motor.jpg}\\
+\figph{width=\linewidth,height=3.0cm,keepaspectratio}{d1_linear_motor.jpg}\\
 \credit{Zureks, CC BY-SA 4.0, via Wikimedia Commons}
 \vspace{1mm}
-\footnotesize
+\small
 \begin{itemize}\setlength\itemsep{1pt}
-\item \term{Linear motor} = PMSM ``unrolled'': forcer (coil) + magnet track.
-\item \term{Iron-core}: high force, cogging, attraction force $\approx$ 3--10$\times$ thrust.
-\item \term{Ironless} (U-channel): no cogging, lower force, very smooth.
+\item \term{Linear motor} = a PMSM ``unrolled'' flat: coil carriage + magnet track.
+\item Very fast and precise, no screw needed.
 \end{itemize}
 \end{column}
-\begin{column}{.32\textwidth}
+\begin{column}{.30\textwidth}
 \centering
 \begin{tikzpicture}[scale=.75]
 \fill[mkGray!50] (0,0) rectangle (3.2,0.5);
 \fill[mkGray!50] (0,0) rectangle (0.5,3.2);
 \fill[mkGray!50] (1.2,0.5) rectangle (1.7,3.2);
-\fill[mkRed!70] (0.5,0.5) rectangle (1.2,2.0); \node[white,font=\tiny\bfseries] at (0.85,1.25) {PM};
+\fill[mkRed!70] (0.5,0.5) rectangle (1.2,2.0); \node[white,font=\scriptsize\bfseries] at (0.85,1.25) {PM};
 \fill[mkGray!50] (0.5,2.0) rectangle (1.2,3.2);
 \fill[mkGray!50] (2.4,0.5) rectangle (3.2,3.2);
 \fill[mkOrange] (1.85,1.4) rectangle (2.25,3.6);
-\node[font=\tiny,text=mkOrange,rotate=90] at (2.05,2.5) {coil};
+\node[font=\scriptsize,text=white,rotate=90] at (2.05,2.5) {coil};
 \foreach \y in {2.4,2.8} \draw[-{Stealth[length=1.3mm]},mkSky] (1.7,\y) -- (2.4,\y);
-\node[font=\tiny,text=mkSky] at (2.6,3.75) {$B$};
+\node[font=\scriptsize,text=mkSky] at (2.7,3.75) {$B$};
 \draw[-{Stealth},mkNavy,line width=1pt] (2.05,3.7) -- (2.05,4.4) node[above,font=\scriptsize]{$F=k_f\,i$};
 \draw[dashed,mkGray] (0,-0.2) -- (0,4.6);
-\node[font=\tiny,text=mkGray] at (1.6,-0.4) {axisymmetric half-section};
+\node[font=\scriptsize,text=mkGray] at (1.6,-0.45) {voice coil, half-section};
 \end{tikzpicture}
 \end{column}
-\begin{column}{.32\textwidth}
-\begin{eqbox}\small
-$F=k_f\,i$,\qquad $e=k_f\,v$\\[1mm]
-$k_f=N\,B\,l$\; [\si{\newton\per\ampere} = \si{\volt\second\per\metre}]\\[1mm]
-$m\,\ddot x = k_f\, i - b\,\dot x - F_L$
+\begin{column}{.34\textwidth}
+\small
+\textbf{Voice coil}: like a loudspeaker -- a coil in a magnet gap moves in and out.
+\begin{eqbox}
+$F=k_f\,i$, \quad $m\dfrac{dv}{dt}=k_f\,i-b\,v-F_L$
 \end{eqbox}
-\footnotesize
 \begin{itemize}\setlength\itemsep{1pt}
-\item \term{Voice coil}: moving coil in a radial field -- no commutation, no cogging, stroke mm to a few cm.
-\item Very high bandwidth: HDD head positioners, lens focus, fast tool servos, active vibration isolation.
+\item $k_f=NBl$ [\si{\newton\per\ampere}] -- the force law from Session 1.1.
+\item Short stroke (mm--cm), extremely fast: hard-disk heads, camera focus.
 \item Same equations as the DC motor with $T\to F$, $\omega\to v$, $J\to m$.
 \end{itemize}
 \end{column}
@@ -1166,129 +1021,163 @@ $m\,\ddot x = k_f\, i - b\,\dot x - F_L$
 \end{frame}
 
 % ---------------------------------------------------------------------
-\begin{frame}{Ball screw: kinematics and equivalent inertia}
+\begin{frame}{Refresher: gear ratio -- think bicycle gears}
 \begin{columns}[T]
-\begin{column}{.56\textwidth}
+\begin{column}{.44\textwidth}
 \centering
-\begin{tikzpicture}[scale=.85]
-\fill[mkBlue] (0,0.6) rectangle (1.4,2.0); \node[white,font=\scriptsize] at (0.7,1.3) {motor};
-\node[font=\tiny] at (0.7,0.4) {$J_m$};
-\fill[mkGray!70] (1.4,1.15) rectangle (1.9,1.45); \fill[mkAmber] (1.9,1.0) rectangle (2.3,1.6);
-\node[font=\tiny] at (2.1,0.8) {$J_c$};
-\fill[mkGray!40] (2.3,1.15) rectangle (8.2,1.45);
-\foreach \x in {2.4,2.6,...,8.0} \draw[mkGray] (\x,1.15) -- (\x+0.12,1.45);
-\fill[mkGray] (8.2,0.9) rectangle (8.5,1.7); \fill[mkGray] (2.3,0.9) rectangle (2.5,1.7);
-\fill[mkOrange] (4.4,0.95) rectangle (5.4,1.65); \node[font=\tiny,white] at (4.9,1.3) {nut};
-\fill[mkSky!70] (3.6,1.65) rectangle (6.2,2.3); \node[font=\scriptsize] at (4.9,1.98) {table $m$};
-\draw[mkGray,line width=1pt] (2.2,0.2) -- (8.6,0.2);
-\draw[-{Stealth},line width=1pt,mkNavy] (6.4,2.0) -- (7.3,2.0) node[right,font=\scriptsize]{$x,v$};
-\draw[-{Stealth},line width=.8pt,mkOrange] (1.65,1.8) arc (100:-100:0.25 and 0.5);
-\node[font=\scriptsize,text=mkOrange] at (1.6,2.45) {$\theta,\omega$};
-\node[font=\tiny] at (5.6,0.6) {screw $J_s$, lead $p$};
-\draw[-{Stealth},mkRed] (3.5,2.0) -- (2.8,2.0) node[left,font=\tiny,text=mkRed]{$F_L$};
+\begin{tikzpicture}[scale=.9]
+\fill[mkBlue] (0,0.4) rectangle (1.3,1.8); \node[white,font=\scriptsize] at (0.65,1.1) {motor};
+\draw[mkGray,line width=2pt] (1.3,1.1) -- (2.3,1.1);
+\fill[mkSky] (2.3,0.75) rectangle (2.5,1.45); \node[font=\scriptsize] at (2.4,1.7) {$z_1$};
+\fill[mkSky] (2.5,-1.1) rectangle (2.7,0.75); \node[font=\scriptsize] at (2.6,-1.35) {$z_2$};
+\draw[mkGray,line width=2pt] (2.7,-0.2) -- (4.0,-0.2);
+\fill[mkOrange] (4.0,-0.9) rectangle (4.6,0.5); \node[white,font=\scriptsize] at (4.3,-0.2) {load};
+\node[font=\scriptsize,text=mkOrange] at (1.8,1.5) {$\omega_m,T_m$};
+\node[font=\scriptsize,text=mkOrange] at (3.4,0.15) {$\omega_L,T_L$};
+\node[font=\scriptsize] at (2.4,-1.9) {small gear $z_1$ teeth drives big gear $z_2$};
 \end{tikzpicture}
 
-\vspace{1mm}
-\figph{width=.6\linewidth,height=2.3cm,keepaspectratio}{d1_ballscrew.jpg}\\
-\credit{Glenn McKechnie (Graibeard), CC BY-SA 3.0, via Wikimedia Commons}
+\vspace{2mm}
+\small
+\textbf{Bicycle:} low gear uphill -- you pedal fast and easily, the wheel turns slowly with a big push.
 \end{column}
-\begin{column}{.42\textwidth}
-\begin{eqbox}\small
-$x=\dfrac{p}{2\pi}\,\theta$, \qquad $v=\dfrac{p}{2\pi}\,\omega$\\[1mm]
-$T=\dfrac{p}{2\pi\,\eta}\,F$ \quad (driving)\\[1mm]
-$J_\text{eq}=J_m+J_c+J_s+m\left(\dfrac{p}{2\pi}\right)^2$
+\begin{column}{.53\textwidth}
+\small
+\begin{eqbox}
+$N=\dfrac{z_2}{z_1}=\dfrac{\omega_m}{\omega_L}$, \qquad $T_L=N\,T_m$ (ideal)
 \end{eqbox}
-\footnotesize
 \begin{itemize}\setlength\itemsep{1pt}
-\item Derivation: $\tfrac12 m v^2=\tfrac12\,m\left(\tfrac{p}{2\pi}\right)^2\omega^2$ (kinetic energy).
-\item Screw inertia: $J_s=\pi\rho L d^4/32$ -- grows with $d^4$!
-\item $\eta\approx 0.9$ (ball screw) vs.\ 0.3--0.6 (sliding lead screw).
-\item Limits: critical (whip) speed, buckling, nut DN value, axial stiffness.
+\item Speed goes \hl{down} by $N$, torque goes \hl{up} by $N$.
+\item Power is unchanged (no losses): $T_L\omega_L=T_m\omega_m$.
 \end{itemize}
+\begin{defbox}[Worked example: 20 teeth drive 60 teeth]
+\small
+\begin{enumerate}\setlength\itemsep{1pt}
+\item $N=60/20=3$.
+\item Motor \SI{3000}{rpm} $\Rightarrow$ load $3000/3=\SI{1000}{rpm}$.
+\item Motor \SI{1}{\newton\metre} $\Rightarrow$ load $3\cdot1=\SI{3}{\newton\metre}$.
+\item Power: $1\cdot314=3\cdot105\approx\SI{314}{\watt}$ on both sides.
+\end{enumerate}
+\end{defbox}
 \end{column}
 \end{columns}
 \end{frame}
 
 % ---------------------------------------------------------------------
-\begin{frame}{Gearboxes: planetary and harmonic (strain-wave) drives}
+\begin{frame}{Gearboxes: planetary and harmonic drives}
 \begin{columns}[T]
 \begin{column}{.25\textwidth}
 \centering
-\figph{width=\linewidth,height=2.5cm,keepaspectratio}{d1_planetary_diag.png}\\
+\figph{width=\linewidth,height=3.0cm,keepaspectratio}{d1_planetary_diag.png}\\
 \credit{Wapcaplet, CC BY-SA 3.0, via Wikimedia Commons}
 \end{column}
 \begin{column}{.25\textwidth}
 \centering
-\figph{width=\linewidth,height=2.5cm,keepaspectratio}{d1_harmonic_drive.jpg}\\
+\figph{width=\linewidth,height=3.0cm,keepaspectratio}{d1_harmonic_drive.jpg}\\
 \credit{Pieceofmetalwork, CC BY-SA 4.0, via Wikimedia Commons}
 \end{column}
-\begin{column}{.47\textwidth}
-\begin{eqbox}\footnotesize
-\textbf{Planetary} (ring fixed, sun in, carrier out): $N=1+\dfrac{Z_\text{ring}}{Z_\text{sun}}$\\[1mm]
-\textbf{Harmonic} (circular spline fixed, wave generator in, flexspline out):
-$N=\dfrac{Z_\text{fs}}{Z_\text{cs}-Z_\text{fs}}$ \;(reversed)
+\begin{column}{.46\textwidth}
+\small
+\begin{itemize}\setlength\itemsep{2pt}
+\item \term{Planetary gear}: sun gear in the middle, planets around it, ring outside. Compact, efficient, ratio 3--10 per stage.
+\item \term{Harmonic drive}: a flexible toothed cup is squeezed into an oval -- ratio 50--160 in one stage, almost no play. Used in robot joints.
+\end{itemize}
+\begin{eqbox}
+planetary (ring fixed): $N=1+\dfrac{z_\text{ring}}{z_\text{sun}}$
 \end{eqbox}
-\footnotesize
-Example: $Z_\text{fs}=200$, $Z_\text{cs}=202$ $\Rightarrow N=100$ in one stage.
+{\small Example: $z_\text{ring}=60$, $z_\text{sun}=20$ $\Rightarrow$ $N=4$.}
 \end{column}
 \end{columns}
-\vspace{1mm}
-\scriptsize
-\renewcommand{\arraystretch}{1.0}
-\begin{tabularx}{\textwidth}{@{}l*{5}{>{\centering\arraybackslash}X}@{}}
+\vspace{2mm}
+\small
+\renewcommand{\arraystretch}{1.05}
+\begin{tabularx}{\textwidth}{@{}l*{4}{>{\centering\arraybackslash}X}@{}}
 \toprule
- & \textbf{Ratio / stage} & \textbf{Efficiency} & \textbf{Backlash} & \textbf{Torsional stiffness} & \textbf{Typical use}\\
+ & \textbf{Ratio / stage} & \textbf{Efficiency} & \textbf{Play} & \textbf{Typical use}\\
 \midrule
-Planetary & 3--10 & \textcolor{mkGreen}{95--98\,\%} & 1--10 arcmin & high & servo axes, gantries\\
-Harmonic drive & 30--160 & 60--90\,\% & \textcolor{mkGreen}{$\approx$ 0} & \textcolor{mkRed}{low, nonlinear} & robot joints\\
-Cycloidal & 30--120 & 80--90\,\% & $<$ 1 arcmin & \textcolor{mkGreen}{very high} & heavy robot axes\\
-Worm & 5--100 & \textcolor{mkRed}{40--90\,\%} & medium & medium & self-locking drives\\
+Planetary & 3--10 & \textcolor{mkGreen}{95--98\,\%} & small & servo axes\\
+Harmonic drive & 50--160 & 60--90\,\% & \textcolor{mkGreen}{$\approx$ 0} & robot joints\\
+Worm & 5--100 & \textcolor{mkRed}{40--90\,\%} & medium & self-locking lifts\\
 \bottomrule
 \end{tabularx}
 \end{frame}
 
 % ---------------------------------------------------------------------
-\begin{frame}{Reflected inertia and load torque through a gear}
+\begin{frame}{Ball screw: from rotation to straight-line motion}
 \begin{columns}[T]
-\begin{column}{.46\textwidth}
+\begin{column}{.54\textwidth}
 \centering
-\begin{tikzpicture}[scale=.9]
-\fill[mkBlue] (0,0.4) rectangle (1.3,1.8); \node[white,font=\scriptsize] at (0.65,1.1) {$J_m$};
-\draw[mkGray,line width=2pt] (1.3,1.1) -- (2.3,1.1);
-\fill[mkSky] (2.3,0.75) rectangle (2.5,1.45); \node[font=\tiny] at (2.4,1.65) {$z_1$};
-\fill[mkSky] (2.5,-1.1) rectangle (2.7,0.75); \node[font=\tiny] at (2.6,-1.3) {$z_2$};
-\draw[mkGray,line width=2pt] (2.7,-0.2) -- (4.0,-0.2);
-\fill[mkOrange] (4.0,-0.9) rectangle (4.6,0.5); \node[white,font=\scriptsize] at (4.3,-0.2) {$J_L$};
-\node[font=\scriptsize,text=mkOrange] at (1.8,1.5) {$\omega_m,T_m$};
-\node[font=\scriptsize,text=mkOrange] at (3.4,0.15) {$\omega_L$};
-\draw[-{Stealth},mkRed] (5.2,0.3) arc (60:-60:0.5) node[right,font=\scriptsize,text=mkRed] {$T_L$};
-\node[font=\scriptsize] at (2.4,-1.8) {$N=z_2/z_1=\omega_m/\omega_L$};
+\begin{tikzpicture}[scale=.82]
+\fill[mkBlue] (0,0.6) rectangle (1.4,2.0); \node[white,font=\scriptsize] at (0.7,1.3) {motor};
+\fill[mkGray!70] (1.4,1.15) rectangle (1.9,1.45); \fill[mkAmber] (1.9,1.0) rectangle (2.3,1.6);
+\fill[mkGray!40] (2.3,1.15) rectangle (8.2,1.45);
+\foreach \x in {2.4,2.6,...,8.0} \draw[mkGray] (\x,1.15) -- (\x+0.12,1.45);
+\fill[mkGray] (8.2,0.9) rectangle (8.5,1.7); \fill[mkGray] (2.3,0.9) rectangle (2.5,1.7);
+\fill[mkOrange] (4.4,0.95) rectangle (5.4,1.65); \node[font=\scriptsize,white] at (4.9,1.3) {nut};
+\fill[mkSky!70] (3.6,1.65) rectangle (6.2,2.3); \node[font=\scriptsize] at (4.9,1.98) {table $m$};
+\draw[mkGray,line width=1pt] (2.2,0.2) -- (8.6,0.2);
+\draw[-{Stealth},line width=1pt,mkNavy] (6.4,2.0) -- (7.3,2.0) node[right,font=\scriptsize]{$x,v$};
+\draw[-{Stealth},line width=.8pt,mkOrange] (1.65,1.8) arc (100:-100:0.25 and 0.5);
+\node[font=\scriptsize,text=mkOrange] at (1.6,2.45) {$\theta,\omega$};
+\node[font=\scriptsize] at (5.6,0.6) {screw, lead $p$};
 \end{tikzpicture}
+
+\vspace{1mm}
+\figph{width=.55\linewidth,height=2.3cm,keepaspectratio}{d1_ballscrew.jpg}\\
+\credit{Glenn McKechnie (Graibeard), CC BY-SA 3.0, via Wikimedia Commons}
+\end{column}
+\begin{column}{.44\textwidth}
+\small
+\textbf{Analogy:} a nut on a bolt -- turn the bolt once, the nut moves by one thread pitch. The \term{lead} $p$ is that distance per turn.
+\begin{eqbox}
+$v=\dfrac{p}{2\pi}\,\omega$ \qquad ($p$ in m/rev)
+\end{eqbox}
+\begin{defbox}[Worked example: lead 10 mm]
+\small
+\begin{enumerate}\setlength\itemsep{1pt}
+\item \SI{3000}{rpm} $=$ \SI{50}{rev/s}.
+\item $v=50\cdot\SI{0.01}{\metre}=\SI{0.5}{\metre\per\second}$.
+\end{enumerate}
+\end{defbox}
+Balls roll between screw and nut $\Rightarrow$ $\eta\approx 0.9$, very little play.
+\end{column}
+\end{columns}
+\end{frame}
+
+% ---------------------------------------------------------------------
+\begin{frame}{Reflected inertia: what the motor ``feels''}
+\begin{columns}[T]
+\begin{column}{.44\textwidth}
+\centering
 \begin{tikzpicture}[scale=.9]
 \fill[mkBlue] (0,0) rectangle (1.3,1.2); \node[white,font=\scriptsize] at (0.65,0.6) {$J_m$};
 \draw[mkGray,line width=2pt] (1.3,0.6) -- (2.6,0.6);
 \fill[mkOrange!60] (2.6,0.1) rectangle (3.6,1.1); \node[font=\scriptsize] at (3.1,0.6) {$J_L/N^2$};
-\draw[-{Stealth},mkRed] (4.1,1.0) arc (60:-60:0.45) node[right,font=\scriptsize,text=mkRed] {$\dfrac{T_L}{N\eta}$};
-\node[font=\scriptsize,text=mkGray] at (1.8,-0.3) {equivalent at motor shaft};
+\draw[-{Stealth},mkRed] (4.1,1.0) arc (60:-60:0.45) node[right,font=\scriptsize,text=mkRed] {$\dfrac{T_L}{N}$};
+\node[font=\scriptsize,text=mkGray] at (1.8,-0.35) {equivalent load at the motor shaft};
 \end{tikzpicture}
+
+\vspace{3mm}
+\small
+\textbf{Bicycle again:} in a low gear the bike feels \hl{light} to accelerate -- but you must pedal fast.
 \end{column}
-\begin{column}{.52\textwidth}
-\footnotesize
-Kinetic energy must be preserved:
-\[
-\tfrac12 J_L\,\omega_L^2=\tfrac12\,\underbrace{\frac{J_L}{N^2}}_{J_L'}\,\omega_m^2
-\]
-Power balance with efficiency $\eta$:\quad $T_L'\,\omega_m\,\eta=T_L\,\omega_L\Rightarrow T_L'=\dfrac{T_L}{N\eta}$
-\begin{eqbox}\small
-$T_m=\Big(J_m+J_{g}+\dfrac{J_L}{N^2}\Big)\dot\omega_m+\dfrac{T_L}{N\eta}$
+\begin{column}{.53\textwidth}
+\small
+Kinetic energy must be the same on both sides:
+$\tfrac12 J_L\omega_L^2=\tfrac12\,\dfrac{J_L}{N^2}\,\omega_m^2$ \; (since $\omega_L=\omega_m/N$)
+\begin{eqbox}
+$J_\text{tot}=J_m+\dfrac{J_L}{N^2}$, \qquad load torque seen: $\dfrac{T_L}{N}$
 \end{eqbox}
+\textbf{Why $N^2$?} The load turns $N\times$ slower (one factor) \emph{and} the gear multiplies torque by $N$ (second factor).\\[1mm]
+\textbf{Example:} $J_L=\SI{9e-4}{\kilo\gram\metre\squared}$, $N=3$ $\Rightarrow$ $J_L/N^2=\SI{1e-4}{\kilo\gram\metre\squared}$.\\[1mm]
+\renewcommand{\arraystretch}{1.05}
 \begin{tabular}{@{}ll@{}}
 \toprule
-\textbf{Mechanism} & \textbf{Reflected inertia at motor}\\
+\textbf{Mechanism} & \textbf{Inertia at motor}\\
 \midrule
-Gear ratio $N$ & $J/N^2$\\
+Gear, ratio $N$ & $J_L/N^2$\\
 Ball screw, lead $p$ & $m\,(p/2\pi)^2$\\
-Belt / rack, radius $r$ & $m\,r^2$ (+ pulleys/pinion)\\
+Belt / rack, radius $r$ & $m\,r^2$\\
 \bottomrule
 \end{tabular}
 \end{column}
@@ -1296,12 +1185,12 @@ Belt / rack, radius $r$ & $m\,r^2$ (+ pulleys/pinion)\\
 \end{frame}
 
 % ---------------------------------------------------------------------
-\begin{frame}{Inertia ratio and the optimal gear ratio}
+\begin{frame}{Choosing the gear ratio: inertia matching}
 \begin{columns}[T]
 \begin{column}{.52\textwidth}
 \begin{tikzpicture}
 \begin{axis}[mkplot,width=7.4cm,height=5.2cm,xmin=0.5,xmax=20,ymin=0,ymax=1.08,xmode=log,
-  xlabel={gear ratio $N$},ylabel={$\alpha_L/\alpha_{L,\max}$},legend pos=south east,
+  xlabel={gear ratio $N$},ylabel={load acceleration (relative)},legend pos=south east,
   xtick={1,2,4,8,16},xticklabels={1,2,4,8,16}]
 \addplot[mkSky,thick,domain=0.5:20,samples=120]{2*x*2/(x^2+4)}; \addlegendentry{$J_L/J_m=4$}
 \addplot[mkBlue,thick,domain=0.5:20,samples=120]{2*x*4/(x^2+16)}; \addlegendentry{$J_L/J_m=16$}
@@ -1313,33 +1202,32 @@ Belt / rack, radius $r$ & $m\,r^2$ (+ pulleys/pinion)\\
 \end{tikzpicture}
 \end{column}
 \begin{column}{.46\textwidth}
-\footnotesize
-Load acceleration for a given motor torque $T_m$ (no friction):
-\[
-\alpha_L=\frac{N\,T_m}{J_mN^2+J_L}
-\]
-$d\alpha_L/dN=0$ gives
-\begin{eqbox}\small
-$N_\text{opt}=\sqrt{J_L/J_m}$ \;$\Leftrightarrow$\; $J_L/N^2=J_m$ (\hl{inertia matching})
+\small
+\begin{itemize}\setlength\itemsep{2pt}
+\item $N$ too small: motor must fight the full load inertia.
+\item $N$ too large: motor spins very fast and wastes torque on its \hl{own} inertia.
+\item Best acceleration in between (peak of each curve):
+\end{itemize}
+\begin{eqbox}
+$N_\text{opt}=\sqrt{J_L/J_m}$ \;$\Leftrightarrow$\; $J_L/N^2=J_m$
 \end{eqbox}
+\textbf{Example:} $J_L/J_m=16$ $\Rightarrow$ $N_\text{opt}=4$.
 \begin{itemize}\setlength\itemsep{1pt}
-\item The maximum is flat: $N$ within $\pm$30\,\% of $N_\text{opt}$ costs $<$\,6\,\%.
-\item In practice $N$ is set by \hl{speed}: $N\le\omega_{m,\max}/\omega_{L,\max}$.
-\item \term{Inertia ratio} $J_L'/J_m$: guideline $\le$ 3--10 for good servo tuning with compliant mechanics; direct drives tolerate more.
-\item Large ratios $\Rightarrow$ low mechanical resonance relative to bandwidth, sensitive tuning (Day 5).
+\item In practice the motor's \hl{maximum speed} often limits $N$.
+\item Rule: keep \term{inertia ratio} $J_L/(N^2J_m)$ below $\approx$ 3--10.
 \end{itemize}
 \end{column}
 \end{columns}
 \end{frame}
 
 % ---------------------------------------------------------------------
-\begin{frame}{Transmission non-idealities: efficiency, backlash, stiffness}
+\begin{frame}{Real transmissions: losses, play and springiness}
 \begin{columns}[T]
 \begin{column}{.33\textwidth}
 \centering
 \begin{tikzpicture}
 \begin{axis}[mkplot,width=5.0cm,height=4.4cm,xmin=-2,xmax=2,ymin=-1.6,ymax=1.6,axis lines=middle,
-  xlabel={$\theta_m/N$},ylabel={$\theta_L$},xtick=\empty,ytick=\empty,
+  xlabel={motor},ylabel={load},xtick=\empty,ytick=\empty,
   every axis x label/.style={at={(current axis.right of origin)},anchor=north east,font=\scriptsize},
   every axis y label/.style={at={(current axis.above origin)},anchor=north west,font=\scriptsize}]
 \addplot[mkGray,thin,dashed,domain=-1.2:1.9]{x-0.4};
@@ -1348,56 +1236,76 @@ $N_\text{opt}=\sqrt{J_L/J_m}$ \;$\Leftrightarrow$\; $J_L/N^2=J_m$ (\hl{inertia m
 \addplot[mkOrange,thick,-{Stealth}] coordinates {(1.4,1.0) (0.6,1.0)};
 \addplot[mkOrange,thick,-{Stealth}] coordinates {(0.6,1.0) (-1.0,-0.6)};
 \draw[mkNavy,{Stealth[length=1mm]}-{Stealth[length=1mm]}] (axis cs:0.6,1.2) -- (axis cs:1.4,1.2);
-\node[font=\tiny,text=mkNavy] at (axis cs:1.0,1.42) {$2\Delta$};
+\node[font=\scriptsize,text=mkNavy] at (axis cs:1.0,1.42) {play};
 \end{axis}
 \end{tikzpicture}\\
-{\tiny backlash: dead zone of width $2\Delta$}
+{\scriptsize \term{backlash}: on reversal the motor turns, the load does not}
 \end{column}
-\begin{column}{.33\textwidth}
+\begin{column}{.30\textwidth}
 \centering
 \begin{tikzpicture}[scale=.8]
 \fill[mkBlue] (0,0) rectangle (1,1.2); \node[white,font=\scriptsize] at (0.5,0.6) {$J_m$};
 \draw[decorate,decoration={coil,aspect=0.5,segment length=2mm,amplitude=2mm},mkNavy] (1,0.6) -- (2.6,0.6);
 \node[font=\scriptsize] at (1.8,1.1) {$k$};
 \fill[mkOrange] (2.6,0) rectangle (3.6,1.2); \node[white,font=\scriptsize] at (3.1,0.6) {$J_L'$};
-\end{tikzpicture}
-\[
-f_r=\frac{1}{2\pi}\sqrt{\frac{k\,(J_m+J_L')}{J_m\,J_L'}}
-\]
-{\tiny compliant gear/coupling/belt $\Rightarrow$ resonance (Session 2.1, Day 5)}
+\end{tikzpicture}\\[2mm]
+{\scriptsize a soft belt or shaft acts like a \hl{spring} between motor and load $\Rightarrow$ the load can wobble (\term{resonance}, Session 2.1)}
 \end{column}
-\begin{column}{.32\textwidth}
-\footnotesize
-\begin{itemize}\setlength\itemsep{2pt}
-\item \term{Efficiency} $\eta$: losses $\propto$ torque; back-driving efficiency differs (worm/lead screw may self-lock).
-\item \term{Backlash} $\Delta$: lost motion at reversal, limit cycles in position loops; reduce by preload, dual pinions, harmonic drives.
-\item \term{Stiffness} $k$: belts and harmonic drives are compliant; ball screws stiff axially but screw torsion/nut stiffness matter.
-\item Load-side encoder ``sees'' backlash and compliance -- dual-loop control (Day 5).
+\begin{column}{.34\textwidth}
+\small
+\begin{itemize}\setlength\itemsep{3pt}
+\item \term{Efficiency} $\eta<1$: part of the torque is lost to friction ($T_\text{out}=\eta N T_\text{in}$).
+\item \term{Backlash}: lost motion when direction changes -- position errors.
+\item \term{Stiffness} $k$: belts and harmonic drives twist under load.
+\item Fixes: preloaded nuts, stiff couplings, load-side encoder (Day 5).
 \end{itemize}
 \end{column}
 \end{columns}
 \end{frame}
 
 % ---------------------------------------------------------------------
-\begin{frame}{Session 1.4 -- Summary / key take-aways}
+\begin{frame}{Session 1.4 -- Check your understanding}
 \begin{columns}[T]
-\begin{column}{.54\textwidth}
+\begin{column}{.62\textwidth}
+\begin{keybox}[Check your understanding]
+\begin{enumerate}\setlength\itemsep{6pt}
+\item A gearbox has $N=5$. The motor runs at \SI{2500}{rpm} with \SI{0.4}{\newton\metre}. What are the load speed and (ideal) load torque?
+\item A load inertia of \SI{0.05}{\kilo\gram\metre\squared} sits behind that $N=5$ gearbox. What inertia does the motor feel?
+\item Why does backlash cause trouble exactly when the axis changes direction?
+\end{enumerate}
+\end{keybox}
+\end{column}
+\begin{column}{.34\textwidth}
+\small
+\textbf{Hint:} speed $\div N$, torque $\times N$, inertia $\div N^2$.
+\end{column}
+\end{columns}
+\end{frame}
+
+% ---------------------------------------------------------------------
+\begin{frame}{Session 1.4 -- Summary and key terms}
+\begin{columns}[T]
+\begin{column}{.55\textwidth}
+\small
 \begin{itemize}
-\item Transmissions trade motor size against stiffness, backlash and friction.
-\item Every load is reflected to the motor shaft by \hl{energy equivalence}.
-\item Optimal (acceleration) gear ratio: $N_\text{opt}=\sqrt{J_L/J_m}$; in practice speed limits $N$.
-\item Keep the reflected inertia ratio moderate; compliant drives need careful tuning.
-\item Linear motors and voice coils obey the same equations with $F,\,v,\,m$.
+\item Gears and screws trade speed for torque/force.
+\item The load is ``reflected'' to the motor shaft by \hl{energy equivalence}: inertia $\div N^2$.
+\item Best acceleration: $N_\text{opt}=\sqrt{J_L/J_m}$; speed limits often decide.
+\item Linear motors and voice coils: same equations with $F,v,m$.
 \end{itemize}
+\begin{keybox}[Remember]
+$N=\omega_m/\omega_L$, \; $J_L'=J_L/N^2$, \; $v=\dfrac{p}{2\pi}\omega$, \; $J'_\text{screw}=m\left(\dfrac{p}{2\pi}\right)^2$
+\end{keybox}
 \end{column}
 \begin{column}{.42\textwidth}
-\begin{keybox}[Remember]
+\begin{defbox}[Key terms]
 \small
-$J_L'=J_L/N^2$, \; $T_L'=T_L/(N\eta)$\\[1mm]
-$J_\text{screw}'=m\,(p/2\pi)^2$, \; $J_\text{belt}'=m\,r^2$\\[1mm]
-$N_\text{opt}=\sqrt{J_L/J_m}$\\[1mm]
-$f_r=\frac{1}{2\pi}\sqrt{k(J_m+J_L')/(J_mJ_L')}$
-\end{keybox}
+\term{Gear ratio $N$}: motor speed / load speed.\\
+\term{Lead $p$}: travel per screw revolution.\\
+\term{Reflected inertia}: load inertia as felt by the motor.\\
+\term{Backlash}: play in a transmission.\\
+\term{Stiffness}: resistance to twisting/stretching.
+\end{defbox}
 \end{column}
 \end{columns}
 \end{frame}
@@ -1417,31 +1325,30 @@ $f_r=\frac{1}{2\pi}\sqrt{k(J_m+J_L')/(J_mJ_L')}$
 \addplot[fill=mkPale,draw=none] coordinates {(0,0)(0,1.27)(3000,1.27)(5000,0.95)(5000,0)} -- cycle;
 \addplot[mkOrange,thick] coordinates {(0,3.82)(3300,3.82)(5000,1.6)};
 \addplot[mkBlue,thick] coordinates {(0,1.27)(3000,1.27)(5000,0.95)};
-\node[font=\scriptsize,text=mkBlue] at (axis cs:1500,0.7) {continuous (S1) zone};
-\node[font=\scriptsize,text=mkOrange] at (axis cs:1500,2.6) {intermittent zone};
-\node[font=\tiny,text=mkOrange,anchor=south west] at (axis cs:4250,2.7) {voltage limit};
-\node[font=\tiny,text=mkNavy,anchor=south] at (axis cs:1000,3.85) {$T_\text{peak}$ (current limit)};
-\node[font=\tiny,text=mkNavy,anchor=south] at (axis cs:4000,1.3) {$T_\text{cont}$};
+\node[font=\scriptsize,text=mkBlue] at (axis cs:1500,0.7) {continuous zone (forever)};
+\node[font=\scriptsize,text=mkOrange] at (axis cs:1500,2.6) {short-time zone (seconds)};
+\node[font=\scriptsize,text=mkOrange,anchor=south west] at (axis cs:4100,2.7) {voltage limit};
+\node[font=\scriptsize,text=mkNavy,anchor=south] at (axis cs:1200,3.85) {$T_\text{peak}$ (current limit)};
 \node[circle,fill=mkNavy,inner sep=1.2pt] at (axis cs:3000,1.27) {};
-\node[font=\tiny,anchor=north] at (axis cs:3000,1.2) {rated point};
+\node[font=\scriptsize,anchor=north] at (axis cs:3000,1.2) {rated point};
 \end{axis}
 \end{tikzpicture}\\
-{\tiny\color{mkGray} Generic 400\,W AC servo class: $T_N=\SI{1.27}{\newton\metre}$, $T_\text{peak}=\SI{3.82}{\newton\metre}$, $n_N=\SI{3000}{rpm}$.}
+{\scriptsize\color{mkGray} Typical 400\,W AC servo: $T_N=\SI{1.27}{\newton\metre}$, $T_\text{peak}=\SI{3.82}{\newton\metre}$, $n_N=\SI{3000}{rpm}$.}
 \end{column}
 \begin{column}{.40\textwidth}
-\footnotesize
+\small
+\textbf{Analogy:} you can sprint for 10 seconds, but you can only jog for an hour.
 \begin{itemize}\setlength\itemsep{2pt}
-\item \term{Continuous torque} $T_\text{cont}$: limited by \hl{winding temperature} at steady state (S1); decreases at speed (iron and friction losses).
-\item \term{Peak torque} $T_\text{peak}$: limited by drive current, magnet demagnetisation and saturation; allowed for short times only.
-\item \term{Voltage limit}: at high speed the back-EMF leaves no voltage reserve to force current $\Rightarrow$ $T_\text{peak}$ drops. Depends on \hl{DC bus voltage}.
-\item Curves are specified for a given ambient (40\,$^\circ$C), mounting flange and drive.
+\item \term{Continuous torque}: the motor can give this forever without overheating.
+\item \term{Peak torque}: about $3\times$ more, but only for short bursts (acceleration).
+\item \term{Voltage limit}: at high speed the back-EMF ``eats'' the supply voltage, so less current -- and torque -- gets in.
 \end{itemize}
 \end{column}
 \end{columns}
 \end{frame}
 
 % ---------------------------------------------------------------------
-\begin{frame}{Thermal limits: thermal model and time constant}
+\begin{frame}{Thermal limits: the motor as a first-order system}
 \begin{columns}[T]
 \begin{column}{.40\textwidth}
 \centering
@@ -1451,33 +1358,30 @@ $f_r=\frac{1}{2\pi}\sqrt{k(J_m+J_L')/(J_mJ_L')}$
 \draw (2,2.5) -- (4,2.5) to[C,l=$C_\text{th}$,color=mkNavy] (4,0) -- (2,0);
 \node[font=\scriptsize,above] at (3,2.5) {$\Delta\vartheta$};
 \draw (0,0) node[ground]{};
-\node[font=\scriptsize,text=mkGray] at (2.2,-0.8) {ambient = reference};
+\node[font=\scriptsize,text=mkGray] at (2.2,-0.8) {heat flows like current};
 \end{circuitikz}
-\begin{eqbox}\footnotesize
-$C_\text{th}\,\dfrac{d\Delta\vartheta}{dt}=P_\text{loss}-\dfrac{\Delta\vartheta}{R_\text{th}}$\\[1mm]
-$\Delta\vartheta(t)=P\,R_\text{th}\big(1-e^{-t/\tau_\text{th}}\big)$\\[1mm]
-$\tau_\text{th}=R_\text{th}\,C_\text{th}$
+\begin{eqbox}
+$\Delta\vartheta(t)=P_\text{loss}R_\text{th}\big(1-e^{-t/\tau_\text{th}}\big)$
 \end{eqbox}
+\small
+Same exponential as the RC circuit! $\tau_\text{th}=R_\text{th}C_\text{th}$.
 \end{column}
 \begin{column}{.58\textwidth}
 \begin{tikzpicture}
-\begin{axis}[mkplot,width=7.4cm,height=4.4cm,xmin=0,xmax=3,ymin=0,ymax=1.6,
-  xlabel={$t/\tau_\text{th}$},ylabel={$\Delta\vartheta/\Delta\vartheta_\text{max}$},legend pos=south east]
+\begin{axis}[mkplot,width=7.4cm,height=4.2cm,xmin=0,xmax=3,ymin=0,ymax=1.6,
+  xlabel={$t/\tau_\text{th}$},ylabel={temp.\ rise / allowed},legend pos=south east]
 \addplot[mkBlue,thick,domain=0:3,samples=60]{1-exp(-x)}; \addlegendentry{$T=T_N$}
 \addplot[mkSky,thick,domain=0:0.75,samples=40]{2.25*(1-exp(-x))}; \addlegendentry{$T=1.5\,T_N$}
 \addplot[mkOrange,thick,domain=0:0.5,samples=40]{4*(1-exp(-x))}; \addlegendentry{$T=2\,T_N$}
 \addplot[mkRed,dashed,domain=0:3]{1};
-\draw[mkGray,dotted] (axis cs:0.288,0) -- (axis cs:0.288,1);
-\draw[mkGray,dotted] (axis cs:0.588,0) -- (axis cs:0.588,1);
-\node[font=\tiny,anchor=south] at (axis cs:0.22,1.02) {0.29};
-\node[font=\tiny,anchor=south] at (axis cs:0.66,1.02) {0.59};
 \end{axis}
 \end{tikzpicture}
-\footnotesize
+\small
 \begin{itemize}\setlength\itemsep{1pt}
-\item Copper loss $\propto T^2$: overload $k=T/T_N$ reaches the limit after $t=-\tau_\text{th}\ln(1-1/k^2)$.
-\item $\tau_\text{th}$ (motor) $\approx$ 10--60 min, but the \hl{winding} has seconds-scale time constants: peak torque only for $\approx$ 0.1--few s.
-\item Insulation class F/H (155/180\,$^\circ$C); magnets degrade if too hot. Drives use $I^2t$ models and sensors (PTC/KTY/Pt1000).
+\item $\Delta\vartheta$: temperature rise [K]; $R_\text{th}$: thermal resistance [K/W]; $C_\text{th}$: heat capacity [J/K].
+\item Copper loss $\propto i^2 \propto T^2$: $2\times$ torque $=4\times$ heat.
+\item Example: $P=\SI{50}{\watt}$, $R_\text{th}=\SI{1.6}{\kelvin\per\watt}$ $\Rightarrow$ final rise \SI{80}{\kelvin}.
+\item $\tau_\text{th}$ is minutes $\Rightarrow$ short overloads are fine.
 \end{itemize}
 \end{column}
 \end{columns}
@@ -1495,78 +1399,73 @@ $\tau_\text{th}=R_\text{th}\,C_\text{th}$
 \nextgroupplot[ymin=-1.1,ymax=1.2,ylabel={$T$ (\si{\newton\metre})},xlabel={$t$ (s)}]
 \addplot[mkOrange,thick,const plot] coordinates {(0,0.924)(0.1,0.059)(0.4,-0.806)(0.5,0)(1.0,0)};
 \addplot[mkSky,thick,dashed,domain=0:1]{0.389};
-\addplot[mkSky,thick,dashed,domain=0:1]{-0.389};
-\node[font=\tiny,text=mkMid,anchor=west] at (axis cs:0.62,0.55) {$T_\text{rms}=0.389$};
-\node[font=\tiny] at (axis cs:0.05,0.6) {$T_1$};
-\node[font=\tiny] at (axis cs:0.25,0.25) {$T_2$};
-\node[font=\tiny] at (axis cs:0.45,-0.55) {$T_3$};
-\node[font=\tiny] at (axis cs:0.75,-0.2) {dwell};
+\node[font=\scriptsize,text=mkMid,anchor=west] at (axis cs:0.62,0.6) {$T_\text{rms}=0.389$};
+\node[font=\scriptsize] at (axis cs:0.05,0.6) {accel.};
+\node[font=\scriptsize] at (axis cs:0.25,0.3) {cruise};
+\node[font=\scriptsize] at (axis cs:0.45,-0.45) {brake};
+\node[font=\scriptsize] at (axis cs:0.75,-0.3) {wait};
 \end{groupplot}
 \end{tikzpicture}
 \end{column}
 \begin{column}{.46\textwidth}
-\footnotesize
-Copper losses $\propto i^2\propto T^2$. If the cycle time $t_\text{cyc}\ll\tau_\text{th}$, the winding sees the \hl{mean loss}:
-\begin{eqbox}\small
-$T_\text{rms}=\sqrt{\dfrac{1}{t_\text{cyc}}\displaystyle\sum_k T_k^2\,t_k}\;\le\;T_\text{cont}(\bar n)$
+\small
+Heat $\propto T^2$, and the motor heats up slowly, so it ``feels'' the \hl{average of $T^2$} over the cycle:
+\begin{eqbox}
+$T_\text{rms}=\sqrt{\dfrac{1}{t_\text{cyc}}\displaystyle\sum_k T_k^2\,t_k}\;\le\;T_\text{cont}$
 \end{eqbox}
 \begin{itemize}\setlength\itemsep{1pt}
-\item Trapezoidal profile: $T_1=J_\text{tot}\alpha+T_f$, $T_2=T_f$, $T_3=-J_\text{tot}\alpha+T_f$, dwell: $T_4=T_\text{hold}$.
-\item Include holding torque on \hl{vertical axes} (gravity) -- dwell is not free!
-\item Duty types per IEC 60034-1: S1 continuous, S2 short-time, S3 intermittent periodic, \dots
-\item Also check \hl{peak} $\max|T_k|\le T_\text{peak}(n)$ and $n_\text{max}$.
+\item $T_k$: torque in segment $k$, lasting $t_k$ seconds.
+\item Why not the plain average? Braking torque is negative but heats just as much.
+\item Also check: largest $|T_k|\le T_\text{peak}$, max speed $\le n_\text{max}$.
+\item Vertical axis: holding against gravity during ``wait'' also counts!
 \end{itemize}
 \end{column}
 \end{columns}
 \end{frame}
 
 % ---------------------------------------------------------------------
-\begin{frame}{Worked sizing example (1/2): load and move profile}
+\begin{frame}{Worked sizing example (1/2): move and inertia}
 \begin{columns}[T]
-\begin{column}{.40\textwidth}
+\begin{column}{.38\textwidth}
 \begin{defbox}[Given: horizontal ball-screw axis]
-\footnotesize
-Table + workpiece $m=\SI{50}{\kilo\gram}$\\
-Screw: lead $p=\SI{10}{\milli\metre}$, $d=\SI{20}{\milli\metre}$, $L=\SI{0.8}{\metre}$, steel, $\eta=0.9$\\
-Coupling $J_c=\SI{0.10e-4}{\kilo\gram\metre\squared}$\\
-Guide friction $\mu=0.01$; bearings/seal $T_b=\SI{0.05}{\newton\metre}$\\
-Move \SI{200}{\milli\metre}: $t_a=t_d=\SI{0.1}{\second}$, total \SI{0.5}{\second}, dwell \SI{0.5}{\second} ($t_\text{cyc}=\SI{1}{\second}$)
+\small
+Table + part $m=\SI{50}{\kilo\gram}$\\
+Screw lead $p=\SI{10}{\milli\metre}$; screw inertia $J_s=\SI{1.0e-4}{\kilo\gram\metre\squared}$\\
+Friction torque (all) $T_f=\SI{0.059}{\newton\metre}$\\
+Move: accelerate \SI{0.1}{\second}, cruise \SI{0.3}{\second}, brake \SI{0.1}{\second}, wait \SI{0.5}{\second}\\
+Top speed \SI{0.5}{\metre\per\second}
 \end{defbox}
 \end{column}
-\begin{column}{.58\textwidth}
-\footnotesize
-\textbf{1. Kinematics}\\
-$v_\text{max}=\dfrac{s}{t_a+t_c}=\dfrac{0.2}{0.4}=\SI{0.5}{\metre\per\second}$, \;
-$n=\dfrac{v}{p}=\SI{50}{rev/s}=\SI{3000}{rpm}$\\
-$\omega_\text{max}=\SI{314.2}{\radian\per\second}$, \; $\alpha=\omega_\text{max}/t_a=\SI{3142}{\radian\per\second\squared}$\\[1.5mm]
-\textbf{2. Inertia at the motor shaft}\\
-$J_s=\pi\rho L d^4/32=\pi\cdot7850\cdot0.8\cdot0.02^4/32=\SI{0.99e-4}{\kilo\gram\metre\squared}$\\
-$J_t=m\,(p/2\pi)^2=50\,(0.01/2\pi)^2=\SI{1.27e-4}{\kilo\gram\metre\squared}$\\
-$J_L=J_s+J_t+J_c=\SI{2.35e-4}{\kilo\gram\metre\squared}$\\[1.5mm]
-\textbf{3. Friction torque}\\
-$T_f=\dfrac{\mu m g\,p}{2\pi\eta}+T_b=\dfrac{0.01\cdot50\cdot9.81\cdot0.01}{2\pi\cdot0.9}+0.05=\SI{0.059}{\newton\metre}$
+\begin{column}{.6\textwidth}
+\small
+\textbf{Step 1 -- motor speed}\\
+$n=v/p=0.5/0.01=\SI{50}{rev/s}=\SI{3000}{rpm}$ $\Rightarrow$ $\omega=\SI{314}{\radian\per\second}$\\[2mm]
+\textbf{Step 2 -- acceleration}\\
+$\alpha=\omega/t_a=314/0.1=\SI{3140}{\radian\per\second\squared}$\\[2mm]
+\textbf{Step 3 -- table inertia seen by the motor}\\
+$J_t=m\,(p/2\pi)^2=50\cdot(0.01/6.28)^2=\SI{1.27e-4}{\kilo\gram\metre\squared}$\\[2mm]
+\textbf{Step 4 -- total load inertia} (incl.\ coupling \SI{0.1e-4}{})\\
+$J_L=1.0+1.27+0.1=\SI{2.37e-4}{\kilo\gram\metre\squared}$
 \begin{notebox}
-Assumption: efficiency applied to friction only, not to inertia (conservative alternative: $J_t/\eta$).
+Screw inertia grows with diameter$^4$: $J_s=\pi\rho L d^4/32$ (here $d=\SI{20}{\milli\metre}$, $L=\SI{0.8}{\metre}$, steel).
 \end{notebox}
 \end{column}
 \end{columns}
 \end{frame}
 
 % ---------------------------------------------------------------------
-\begin{frame}{Worked sizing example (2/2): torques, RMS and check}
+\begin{frame}{Worked sizing example (2/2): torques and checks}
 \begin{columns}[T]
 \begin{column}{.52\textwidth}
-\footnotesize
-\textbf{4. Candidate:} 400\,W servo, $J_m=\SI{0.40e-4}{\kilo\gram\metre\squared}$, $T_N=1.27$, $T_\text{peak}=\SI{3.82}{\newton\metre}$, $n_N=\SI{3000}{rpm}$\\
-Inertia ratio $J_L/J_m=5.9$ \;\textcolor{mkGreen}{\checkmark}\quad $J_\text{tot}=\SI{2.75e-4}{\kilo\gram\metre\squared}$\\[1.5mm]
-\textbf{5. Segment torques}\\
-$J_\text{tot}\alpha=2.75\cdot10^{-4}\cdot3142=\SI{0.865}{\newton\metre}$\\
-$T_1=0.865+0.059=\SI{0.924}{\newton\metre}$ \;(0.1\,s)\\
-$T_2=\SI{0.059}{\newton\metre}$ \;(0.3\,s), \quad $T_3=-0.865+0.059=\SI{-0.806}{\newton\metre}$ \;(0.1\,s), \quad $T_4=0$\\[1.5mm]
-\textbf{6. RMS torque}\\
-$T_\text{rms}=\sqrt{\dfrac{0.924^2\cdot0.1+0.059^2\cdot0.3+0.806^2\cdot0.1}{1.0}}$ $=$ \hl{\SI{0.389}{\newton\metre}}\\[1.5mm]
-\textbf{7. Checks}: peak $0.924<3.82$ \textcolor{mkGreen}{\checkmark}; \; RMS $0.389<1.27$ (31\,\%) \textcolor{mkGreen}{\checkmark}; \; $n_\text{max}=3000\le n_N$ \textcolor{mkGreen}{\checkmark}\\
-Regenerated energy per stop: $\tfrac12J_\text{tot}\omega^2=\SI{13.6}{\joule}$ (bus capacitor / brake resistor).
+\small
+\textbf{Step 5 -- candidate:} 400\,W servo, $J_m=\SI{0.40e-4}{\kilo\gram\metre\squared}$, $T_N=\SI{1.27}{\newton\metre}$, $T_\text{peak}=\SI{3.82}{\newton\metre}$.\\
+$J_\text{tot}=2.37+0.40=\SI{2.77e-4}{\kilo\gram\metre\squared}$ (ratio $J_L/J_m\approx6$ \textcolor{mkGreen}{\checkmark})\\[1.5mm]
+\textbf{Step 6 -- torque per segment} ($T=J\alpha\pm T_f$)\\
+accel.\ $0.87+0.06=\SI{0.92}{\newton\metre}$; cruise \SI{0.06}{\newton\metre};\\ brake $-0.87+0.06=\SI{-0.81}{\newton\metre}$; wait 0\\[1.5mm]
+\textbf{Step 7 -- RMS torque}\\
+$T_\text{rms}=\sqrt{(0.92^2\cdot0.1+0.06^2\cdot0.3+0.81^2\cdot0.1)/1}=$ \hl{\SI{0.39}{\newton\metre}}\\[1.5mm]
+\textbf{Step 8 -- checks}\\
+peak $0.92<3.82$ \textcolor{mkGreen}{\checkmark}\; RMS $0.39<1.27$ \textcolor{mkGreen}{\checkmark}\; speed $3000\le3000$ \textcolor{mkGreen}{\checkmark}
 \end{column}
 \begin{column}{.46\textwidth}
 \begin{tikzpicture}
@@ -1579,12 +1478,12 @@ Regenerated energy per stop: $\tfrac12J_\text{tot}\omega^2=\SI{13.6}{\joule}$ (b
 \addplot[mkRed,thick,mark=*,mark size=1.2pt] coordinates {(0,0.924)(3000,0.924)};
 \addplot[mkMid,thick,mark=*,mark size=1.2pt] coordinates {(3000,0.806)(0,0.806)};
 \addplot[only marks,mark=diamond*,mark size=2.5pt,mkNavy] coordinates {(1200,0.389)};
-\node[font=\tiny,text=mkRed,anchor=south] at (axis cs:1500,0.93) {accel.};
-\node[font=\tiny,text=mkNavy,anchor=west] at (axis cs:1300,0.33) {$T_\text{rms}$ at $\bar n=1200$};
+\node[font=\scriptsize,text=mkRed,anchor=south] at (axis cs:1500,0.93) {accel.};
+\node[font=\scriptsize,text=mkNavy,anchor=west] at (axis cs:1300,0.33) {$T_\text{rms}$};
 \end{axis}
 \end{tikzpicture}
 \begin{notebox}
-A 200\,W motor ($J_m=\SI{0.18e-4}{}$, $T_N=0.64$, $T_\text{pk}=\SI{1.91}{\newton\metre}$) gives $T_\text{rms}=0.358$, $T_\text{pk}=0.854$ -- thermally OK, but inertia ratio 13: \hl{tuning/stiffness decides}.
+All points inside the envelope: the motor is big enough, with 3$\times$ thermal margin.
 \end{notebox}
 \end{column}
 \end{columns}
@@ -1594,32 +1493,32 @@ A 200\,W motor ($J_m=\SI{0.18e-4}{}$, $T_N=0.64$, $T_\text{pk}=\SI{1.91}{\newton
 \begin{frame}{Motor--drive matching and selection checklist}
 \begin{columns}[T]
 \begin{column}{.5\textwidth}
-\footnotesize
-\textbf{Voltage}: the drive must supply back-EMF + drops at top speed
-\begin{eqbox}\small
-$V_\text{req}\approx k_e\,\omega_\text{max}+R\,I_\text{pk}\;(+\,\omega_eL\,I)\;\le\;V_\text{avail}(V_\text{DC})$
+\small
+\textbf{Voltage:} at top speed the drive must beat the back-EMF:
+\begin{eqbox}
+$V_\text{supply}\;\gtrsim\;k_e\,\omega_\text{max}+R\,I_\text{peak}$
 \end{eqbox}
-\textbf{Current}: $I_\text{pk}=T_\text{pk}/k_t$, \; $I_\text{rms}=T_\text{rms}/k_t$ $\le$ drive peak / continuous ratings.\\[1mm]
-\textbf{Example} (motor above, $k_e=\SI{33}{V_{rms,LL}}$/krpm, $k_t=\SI{0.546}{\newton\metre\per\ampere}$):
-\begin{itemize}\setlength\itemsep{1pt}
-\item EMF at 3000 rpm: \SI{99}{V_{rms,LL}} $\Rightarrow V_\text{DC}\gtrsim\sqrt2\cdot99\approx\SI{140}{\volt}$ + margin.
-\item 230\,V drive ($V_\text{DC}\approx\SI{325}{\volt}$): \textcolor{mkGreen}{\checkmark}; \; 48\,V drive: $n_\text{max}\approx\SI{1000}{rpm}$ \textcolor{mkRed}{$\times$} $\Rightarrow$ low-voltage winding needed.
-\item $I_\text{pk}=0.924/0.546=\SI{1.7}{A_{rms}}$, \; $I_\text{rms}=\SI{0.71}{A_{rms}}$.
-\end{itemize}
-\textbf{Same motor frame, different winding}: $k_t\uparrow$ $\Leftrightarrow$ less current, but higher voltage per speed.
+\textbf{Current:} $I_\text{peak}=T_\text{peak}/k_t$ must be within the drive's rating.\\[1mm]
+\textbf{Example} ($k_e=k_t=\SI{0.3}{}$ SI):
+\begin{enumerate}\setlength\itemsep{1pt}
+\item Back-EMF at \SI{314}{\radian\per\second}: $0.3\cdot314\approx\SI{94}{\volt}$.
+\item A \SI{48}{\volt} drive is too small; a 230\,V drive (\SI{325}{\volt} DC) is fine.
+\item $I_\text{peak}=0.92/0.3\approx\SI{3}{\ampere}$.
+\end{enumerate}
+\gofurther{rms/line-to-line datasheet conventions, inductive voltage drop, braking (regenerated) energy.}
 \end{column}
 \begin{column}{.47\textwidth}
 \begin{keybox}[Selection checklist]
-\footnotesize
+\small
 \begin{enumerate}\setlength\itemsep{0pt}
-\item Define move profile, loads, cycle, environment.
-\item Reflect inertia/torques to the motor (gear, screw, belt).
-\item Choose ratio: speed range, $N_\text{opt}$, resolution.
-\item Peak torque at all speeds inside the \hl{intermittent zone}.
-\item $T_\text{rms}$ at mean speed inside the \hl{continuous zone} (with 20--30\,\% margin).
-\item Inertia ratio acceptable for the mechanics' stiffness.
-\item Drive: voltage, peak/continuous current, regen energy.
-\item Feedback resolution, brake, IP class, standards (IEC 60034, IEC 61800).
+\item Describe the move, the load and the cycle.
+\item Reflect inertia and torques to the motor.
+\item Choose the gear/screw ratio.
+\item Peak torque inside the \hl{short-time zone}.
+\item $T_\text{rms}$ inside the \hl{continuous zone} (+20--30\,\% margin).
+\item Inertia ratio OK for the mechanics.
+\item Drive: voltage and current.
+\item Encoder, brake, protection class.
 \end{enumerate}
 \end{keybox}
 \end{column}
@@ -1627,24 +1526,48 @@ $V_\text{req}\approx k_e\,\omega_\text{max}+R\,I_\text{pk}\;(+\,\omega_eL\,I)\;\
 \end{frame}
 
 % ---------------------------------------------------------------------
-\begin{frame}{Session 1.5 -- Summary / key take-aways}
+\begin{frame}{Session 1.5 -- Check your understanding}
 \begin{columns}[T]
-\begin{column}{.54\textwidth}
+\begin{column}{.62\textwidth}
+\begin{keybox}[Check your understanding]
+\begin{enumerate}\setlength\itemsep{6pt}
+\item A motor can deliver $3\times$ its rated torque. Why can it not do so permanently?
+\item In a 1-second cycle the motor gives \SI{1}{\newton\metre} for \SI{0.1}{\second} and zero the rest of the time. What is $T_\text{rms}$?
+\item Why do we use RMS torque instead of the ordinary average torque for the thermal check?
+\end{enumerate}
+\end{keybox}
+\end{column}
+\begin{column}{.34\textwidth}
+\small
+\textbf{Hint:} heat $\propto T^2$; the motor's thermal time constant is minutes.
+\end{column}
+\end{columns}
+\end{frame}
+
+% ---------------------------------------------------------------------
+\begin{frame}{Session 1.5 -- Summary and key terms}
+\begin{columns}[T]
+\begin{column}{.55\textwidth}
+\small
 \begin{itemize}
-\item The torque--speed envelope has a \hl{thermal} (continuous) and a \hl{current/voltage} (intermittent) boundary.
-\item Heat accumulates with $\tau_\text{th}$ of minutes: judge with RMS torque over the cycle.
-\item Peak torque must be available at the speed where it is needed.
-\item Motor and drive are matched through $k_t$, $k_e$, bus voltage and current ratings.
-\item Size systematically: kinematics $\to$ inertias $\to$ torques $\to$ RMS/peak $\to$ drive.
+\item The torque--speed envelope has a continuous (thermal) zone and a short-time (current/voltage) zone.
+\item The motor warms up like an RC circuit charges: exponentially, over minutes.
+\item Judge heating with $T_\text{rms}$, acceleration with $T_\text{peak}$.
+\item Size step by step: speed $\to$ inertia $\to$ torques $\to$ RMS/peak $\to$ drive.
 \end{itemize}
+\begin{keybox}[Remember]
+$T_\text{rms}=\sqrt{\tfrac{1}{t_\text{cyc}}\sum T_k^2t_k}$, \quad $V\gtrsim k_e\omega_\text{max}+RI_\text{pk}$
+\end{keybox}
 \end{column}
 \begin{column}{.42\textwidth}
-\begin{keybox}[Remember]
+\begin{defbox}[Key terms]
 \small
-$T_\text{rms}=\sqrt{\tfrac{1}{t_\text{cyc}}\sum T_k^2t_k}$\\[1mm]
-$\Delta\vartheta=P R_\text{th}(1-e^{-t/\tau_\text{th}})$\\[1mm]
-$I_\text{pk}=T_\text{pk}/k_t$, \; $V\gtrsim k_e\omega_\text{max}+RI_\text{pk}$
-\end{keybox}
+\term{Continuous torque}: torque possible forever.\\
+\term{Peak torque}: short-burst torque.\\
+\term{RMS torque}: ``heating-equivalent'' torque of a cycle.\\
+\term{Duty cycle}: repeating pattern of the move.\\
+\term{Thermal resistance}: K of rise per W of loss.
+\end{defbox}
 \end{column}
 \end{columns}
 \end{frame}
@@ -1659,22 +1582,22 @@ $I_\text{pk}=T_\text{pk}/k_t$, \; $V\gtrsim k_e\omega_\text{max}+RI_\text{pk}$
 \centering
 \begin{tikzpicture}[node distance=2.2mm,
   st/.style={mkblk,minimum width=40mm,text width=38mm,minimum height=6mm}]
-\node[st] (a) {1. System boundary, inputs, outputs};
-\node[st,below=of a] (b) {2. Idealise into lumped elements};
-\node[st,below=of b] (c) {3. Free-body diagrams / Kirchhoff laws};
-\node[st,below=of c] (d) {4. Constitutive laws of elements};
-\node[st,below=of d,fill=mkCream,draw=mkOrange] (e) {5. ODEs $\to$ TF / state space};
-\node[st,below=of e] (f) {6. Validate against measurement};
+\node[st] (a) {1. Define inputs and outputs};
+\node[st,below=of a] (b) {2. Simplify into ideal elements};
+\node[st,below=of b] (c) {3. Free-body diagram / KVL};
+\node[st,below=of c] (d) {4. Element laws ($F=kx$, \dots)};
+\node[st,below=of d,fill=mkCream,draw=mkOrange] (e) {5. Write the ODE};
+\node[st,below=of e] (f) {6. Compare with measurement};
 \foreach \x/\y in {a/b,b/c,c/d,d/e,e/f} \draw[mksig] (\x) -- (\y);
 \draw[mksig,mkGray,dashed] (f.east) -- ++(4mm,0) |- (b.east);
 \end{tikzpicture}
 \end{column}
 \begin{column}{.58\textwidth}
-\footnotesize
+\small
 \renewcommand{\arraystretch}{1.15}
 \begin{tabular}{@{}llll@{}}
 \toprule
-\textbf{Domain} & \textbf{Kinetic store} & \textbf{Potential store} & \textbf{Dissipator}\\
+\textbf{Domain} & \textbf{Motion store} & \textbf{Position store} & \textbf{Loss}\\
 \midrule
 Translation & mass $m$ & spring $k$ & damper $b$\\
 Rotation & inertia $J$ & torsion spring $k_\theta$ & damper $B$\\
@@ -1683,11 +1606,10 @@ Electrical & inductor $L$ & capacitor $C$ & resistor $R$\\
 \end{tabular}
 
 \vspace{2mm}
-\begin{itemize}\setlength\itemsep{1pt}
-\item \term{Lumped}: wave propagation neglected -- valid for frequencies well below the first ignored structural mode.
-\item Each independent energy store adds one state ($\Rightarrow$ system order).
-\item \term{Transformers} (gears, screws) and \term{gyrators} (motors: $T=k i$, $e=k\omega$) connect domains without storing energy.
-\item Choose the \hl{simplest model that answers the question} (Day 2: linearisation, identification).
+\begin{itemize}\setlength\itemsep{2pt}
+\item \term{Lumped}: each property sits in one ideal element (a mass is a point, a spring has no mass).
+\item Each energy store adds one first-order equation $\Rightarrow$ the \term{order} of the system.
+\item Use the \hl{simplest model that answers your question}.
 \end{itemize}
 {\scriptsize\color{mkGray}[Karnopp, Margolis \& Rosenberg, 2012; Ogata, 2010]}
 \end{column}
@@ -1695,9 +1617,9 @@ Electrical & inductor $L$ & capacitor $C$ & resistor $R$\\
 \end{frame}
 
 % ---------------------------------------------------------------------
-\begin{frame}{Mass--spring--damper: free-body diagram to transfer function}
+\begin{frame}{Mass--spring--damper: from free-body diagram to ODE}
 \begin{columns}[T]
-\begin{column}{.48\textwidth}
+\begin{column}{.46\textwidth}
 \centering
 \begin{tikzpicture}[scale=.9]
 \fill[pattern=north east lines,pattern color=mkGray] (-0.3,-0.2) rectangle (0,2.2); \draw[mkGray,line width=1pt] (0,-0.2) -- (0,2.2);
@@ -1720,32 +1642,31 @@ Electrical & inductor $L$ & capacitor $C$ & resistor $R$\\
 \end{scope}
 \end{tikzpicture}
 \end{column}
-\begin{column}{.50\textwidth}
-\footnotesize
-Newton: $\sum F = m\ddot x$ \; (positive $x$ to the right):
-\begin{eqbox}
-$m\,\ddot x + b\,\dot x + k\,x = F(t)$\\[1mm]
-$G(s)=\dfrac{X(s)}{F(s)}=\dfrac{1}{ms^2+bs+k}$\\[1mm]
-$\phantom{G(s)}=\dfrac{1}{k}\,\dfrac{\omega_n^2}{s^2+2\zeta\omega_n s+\omega_n^2}$
-\end{eqbox}
-\begin{defbox}[Characteristic parameters]
+\begin{column}{.52\textwidth}
 \small
-$\omega_n=\sqrt{k/m}$ \quad natural frequency\\
-$\zeta=\dfrac{b}{2\sqrt{km}}$ \quad damping ratio\\
-$\omega_d=\omega_n\sqrt{1-\zeta^2}$ \quad damped frequency
+\textbf{Analogy:} a car's suspension -- spring carries the car, shock absorber (damper) stops the bouncing.\\[1mm]
+Newton $\sum F=m\ddot x$ with spring force $kx$ and damper force $b\dot x$:
+\begin{eqbox}
+$m\,\ddot x + b\,\dot x + k\,x = F(t)$
+\end{eqbox}
+\begin{defbox}[Two numbers describe it]
+\small
+$\omega_n=\sqrt{k/m}$ \; \term{natural frequency} [rad/s]: how fast it bounces\\
+$\zeta=\dfrac{b}{2\sqrt{km}}$ \; \term{damping ratio} [--]: how quickly bouncing dies
 \end{defbox}
-Example: $m=\SI{2}{\kilo\gram}$, $k=\SI{2e5}{\newton\per\metre}$, $b=\SI{120}{\newton\second\per\metre}$ $\Rightarrow$ $\omega_n=\SI{316}{\radian\per\second}$ (\SI{50.3}{\hertz}), $\zeta=0.095$.
+\textbf{Example:} $m=\SI{2}{\kilo\gram}$, $k=\SI{2e5}{\newton\per\metre}$, $b=\SI{120}{\newton\second\per\metre}$:\\
+$\omega_n=\sqrt{10^5}=\SI{316}{\radian\per\second}$ (\SI{50}{\hertz}), \; $\zeta=120/1265=0.095$.
 \end{column}
 \end{columns}
 \end{frame}
 
 % ---------------------------------------------------------------------
-\begin{frame}{Second-order step responses and pole locations}
+\begin{frame}{Second-order step responses: the role of damping}
 \begin{columns}[T]
 \begin{column}{.60\textwidth}
 \begin{tikzpicture}
 \begin{axis}[mkplot,width=8.4cm,height=5.6cm,xmin=0,xmax=14,ymin=0,ymax=1.85,
-  xlabel={normalised time $\omega_n t$},ylabel={$x(t)\,k/F_0$},legend pos=north east,legend columns=2,
+  xlabel={normalised time $\omega_n t$},ylabel={$x(t)/x_\infty$},legend pos=north east,legend columns=2,
   cycle list={{mkOrange,thick},{mkAmber,thick},{mkBlue,thick},{mkMid,thick,dashed},{mkSky,thick}}]
 \addplot+[mark=none,domain=0:14,samples=300]{1-exp(-0.1*x)/sqrt(1-0.01)*sin(deg(sqrt(1-0.01)*x)+deg(acos(0.1)))}; \addlegendentry{$\zeta=0.1$}
 \addplot+[mark=none,domain=0:14,samples=200]{1-exp(-0.3*x)/sqrt(1-0.09)*sin(deg(sqrt(1-0.09)*x)+deg(acos(0.3)))}; \addlegendentry{$\zeta=0.3$}
@@ -1756,27 +1677,18 @@ Example: $m=\SI{2}{\kilo\gram}$, $k=\SI{2e5}{\newton\per\metre}$, $b=\SI{120}{\n
 \end{tikzpicture}
 \end{column}
 \begin{column}{.38\textwidth}
-\centering
-\begin{tikzpicture}[scale=.9]
-\draw[-{Stealth},mkGray] (-2.6,0) -- (0.5,0) node[right,font=\tiny]{Re};
-\draw[-{Stealth},mkGray] (0,-1.5) -- (0,1.5) node[above,font=\tiny]{Im};
-\draw[mkSky,dotted,line width=.6pt] (0,0) circle (1.2);
-\foreach \z/\c in {0.1/mkOrange,0.3/mkAmber,0.707/mkBlue}{
- \pgfmathsetmacro{\re}{-1.2*\z} \pgfmathsetmacro{\im}{1.2*sqrt(1-\z*\z)}
- \node[text=\c,font=\small] at (\re,\im) {$\times$}; \node[text=\c,font=\small] at (\re,-\im) {$\times$};}
-\node[text=mkMid,font=\small] at (-1.2,0) {$\times$};
-\node[text=mkSky,font=\small] at (-0.32,0) {$\times$}; \node[text=mkSky,font=\small] at (-2.4,0.0) {$\times$};
-\draw[mkGray,dashed] (0,0) -- (135:1.35);
-\node[font=\tiny,text=mkGray] at (-1.3,1.25) {$\zeta=0.707$};
-\node[font=\tiny,text=mkGray] at (0.75,-1.1) {$|s|=\omega_n$};
-\end{tikzpicture}
-
-\footnotesize
-\begin{itemize}\setlength\itemsep{1pt}
-\item Poles $s=-\zeta\omega_n\pm j\omega_n\sqrt{1-\zeta^2}$.
-\item Overshoot $M_p=e^{-\pi\zeta/\sqrt{1-\zeta^2}}$: 73\,\%, 37\,\%, 4.3\,\%.
-\item Lightly damped mechanics ($\zeta<0.1$) is the norm in servo structures.
+\small
+Push the mass with a constant force (a \term{step}) and watch $x(t)$:
+\begin{itemize}\setlength\itemsep{2pt}
+\item $\zeta<1$: \hl{overshoots and rings} -- a car with worn shock absorbers.
+\item $\zeta\approx0.7$: fast, tiny overshoot (4\,\%) -- a good design target.
+\item $\zeta\ge1$: no overshoot, but sluggish.
 \end{itemize}
+\begin{eqbox}
+overshoot $\approx e^{-\pi\zeta/\sqrt{1-\zeta^2}}$
+\end{eqbox}
+{\small $\zeta=0.1$: 73\,\%, \; $\zeta=0.3$: 37\,\%.}\\[1mm]
+\gofurther{the poles $s=-\zeta\omega_n\pm j\omega_n\sqrt{1-\zeta^2}$ in the complex plane (Day 2).}
 \end{column}
 \end{columns}
 \end{frame}
@@ -1784,7 +1696,7 @@ Example: $m=\SI{2}{\kilo\gram}$, $k=\SI{2e5}{\newton\per\metre}$, $b=\SI{120}{\n
 % ---------------------------------------------------------------------
 \begin{frame}{Rotational mechanical systems}
 \begin{columns}[T]
-\begin{column}{.48\textwidth}
+\begin{column}{.46\textwidth}
 \centering
 \begin{tikzpicture}[scale=.9]
 \fill[pattern=north east lines,pattern color=mkGray] (-0.3,0.2) rectangle (0,2.2); \draw[mkGray,line width=1pt] (0,0.2) -- (0,2.2);
@@ -1792,27 +1704,27 @@ Example: $m=\SI{2}{\kilo\gram}$, $k=\SI{2e5}{\newton\per\metre}$, $b=\SI{120}{\n
 \node[font=\scriptsize] at (1.2,1.55) {shaft $k_\theta$};
 \fill[mkSky!70,draw=mkBlue] (2.4,0) rectangle (2.9,2.4); \node[font=\scriptsize] at (2.65,2.65) {$J$};
 \draw[mkGray,line width=1.5pt] (2.9,1.2) -- (3.6,1.2);
-\fill[mkGray!40] (3.6,0.8) rectangle (4.0,1.6); \node[font=\tiny] at (3.8,0.55) {$B$ (bearing)};
+\fill[mkGray!40] (3.6,0.8) rectangle (4.0,1.6); \node[font=\scriptsize] at (3.8,0.55) {$B$ (bearing)};
 \draw[-{Stealth},mkOrange,line width=1pt] (3.2,1.8) arc (100:260:0.25 and 0.6);
 \node[font=\scriptsize,text=mkOrange] at (3.35,2.15) {$T(t)$};
 \draw[-{Stealth},mkNavy] (2.65,-0.2) arc (-90:30:0.35) ;
 \node[font=\scriptsize] at (3.2,-0.3) {$\theta$};
 \end{tikzpicture}
-\begin{eqbox}\small
-$J\,\ddot\theta + B\,\dot\theta + k_\theta\,\theta = T(t)$\\[1mm]
-$\dfrac{\Theta(s)}{T(s)}=\dfrac{1}{Js^2+Bs+k_\theta}$
+\begin{eqbox}
+$J\,\ddot\theta + B\,\dot\theta + k_\theta\,\theta = T(t)$
 \end{eqbox}
+\small
+Exactly the mass--spring--damper with $m\to J$, $b\to B$, $k\to k_\theta$, $F\to T$.
 \end{column}
-\begin{column}{.50\textwidth}
-\footnotesize
-\begin{itemize}\setlength\itemsep{2pt}
-\item Euler's law: $\sum T = J\ddot\theta$ about a fixed axis.
-\item Torsional stiffness of a solid shaft: $k_\theta=\dfrac{G\,I_p}{l}=\dfrac{G\,\pi d^4}{32\,l}$.
-\item Example: steel ($G=\SI{80}{\giga\pascal}$), $d=\SI{10}{\milli\metre}$, $l=\SI{100}{\milli\metre}$\\
-$\Rightarrow k_\theta=\SI{785}{\newton\metre\per\radian}$.
-\item Disc inertia $J=\tfrac12 m r^2$, hollow cylinder $J=\tfrac12 m(r_o^2+r_i^2)$.
-\item Couplings, gear meshes and belts are springs too: series stiffness $1/k=\sum 1/k_i$ (softest element dominates).
-\item Servo motor without load: $k_\theta=0$ $\Rightarrow$ $\Theta/T=1/(s(Js+B))$ -- a double integrator for $B\to0$.
+\begin{column}{.52\textwidth}
+\small
+\begin{itemize}\setlength\itemsep{3pt}
+\item Newton for rotation: $\sum T = J\ddot\theta$.
+\item A shaft twists like a spring: torsional stiffness $k_\theta$ [\si{\newton\metre\per\radian}].
+\item Solid shaft: $k_\theta=\dfrac{G\,\pi d^4}{32\,l}$ ($G$: shear modulus).
+\item Example: steel ($G=\SI{80}{\giga\pascal}$), $d=\SI{10}{\milli\metre}$, $l=\SI{100}{\milli\metre}$ $\Rightarrow$ $k_\theta\approx\SI{785}{\newton\metre\per\radian}$.
+\item Couplings, belts and gear teeth are springs too -- the \hl{softest one dominates}.
+\item Motor without load: $k_\theta=0$, so only $J\ddot\theta+B\dot\theta=T$.
 \end{itemize}
 \end{column}
 \end{columns}
@@ -1830,107 +1742,66 @@ $\Rightarrow k_\theta=\SI{785}{\newton\metre\per\radian}$.
  to[C,l=$C$,v^<=$v_C$,color=mkOrange] (5,0) -- (0,0);
 \end{circuitikz}
 \begin{eqbox}
-$L\,\ddot q + R\,\dot q + \dfrac{1}{C}\,q = v(t)$, \quad $i=\dot q$\\[1mm]
-$\dfrac{V_C(s)}{V(s)}=\dfrac{1}{LCs^2+RCs+1}$
+$L\,\ddot q + R\,\dot q + \dfrac{1}{C}\,q = v(t)$, \quad $i=\dot q$
 \end{eqbox}
 \end{column}
 \begin{column}{.52\textwidth}
-\footnotesize
-\begin{itemize}\setlength\itemsep{2pt}
-\item KVL around the loop: $v=v_R+v_L+v_C$; constitutive laws $v_R=Ri$, $v_L=L\,di/dt$, $i=C\,dv_C/dt$.
-\item Same structure as the mass--spring--damper:\\
-$\omega_n=\dfrac{1}{\sqrt{LC}}$, \quad $\zeta=\dfrac{R}{2}\sqrt{\dfrac{C}{L}}$.
-\item In drives: DC-link $LC$ input filter, sine/d$v$/d$t$ output filters, cable resonances.
-\item Example: $L=\SI{1}{\milli\henry}$, $C=\SI{470}{\micro\farad}$, $R=\SI{0.1}{\ohm}$\\
-$\Rightarrow f_n=\SI{232}{\hertz}$, $\zeta=0.034$ -- a lightly damped filter.
-\item Motor winding alone ($C\to\infty$): first-order $1/(Ls+R)$, $\tau_e=L/R$.
-\end{itemize}
-\end{column}
-\end{columns}
-\end{frame}
-
-% ---------------------------------------------------------------------
-\begin{frame}{Analogies and energy-based modelling}
-\begin{columns}[T]
-\begin{column}{.56\textwidth}
-\scriptsize
-\renewcommand{\arraystretch}{1.15}
-\begin{tabular}{@{}llll@{}}
-\toprule
-\textbf{Translational} & \textbf{Rotational} & \textbf{Force--voltage} & \textbf{Force--current}\\
-\midrule
-force $F$ & torque $T$ & voltage $v$ & current $i$\\
-velocity $\dot x$ & speed $\omega$ & current $i$ & voltage $v$\\
-mass $m$ & inertia $J$ & inductance $L$ & capacitance $C$\\
-damper $b$ & damper $B$ & resistance $R$ & conductance $1/R$\\
-spring $k$ & torsion $k_\theta$ & elastance $1/C$ & reciprocal ind. $1/L$\\
-$\tfrac12 m\dot x^2$ & $\tfrac12 J\omega^2$ & $\tfrac12 L i^2$ & $\tfrac12 C v^2$\\
-$\tfrac12 k x^2$ & $\tfrac12 k_\theta\theta^2$ & $\tfrac12 q^2/C$ & $\tfrac12 \lambda^2/L$\\
-\bottomrule
-\end{tabular}\\[1mm]
-{\scriptsize Product of \textbf{effort} and \textbf{flow} is always \hl{power}: $Fv$, $T\omega$, $vi$.}
-\end{column}
-\begin{column}{.42\textwidth}
-\begin{defbox}[Lagrange's equations]
 \small
-$\mathcal{L}=T_\text{kin}-V_\text{pot}$, \; $D$ = Rayleigh dissipation
-\[
-\frac{d}{dt}\frac{\partial\mathcal{L}}{\partial\dot q_j}-\frac{\partial\mathcal{L}}{\partial q_j}+\frac{\partial D}{\partial\dot q_j}=Q_j
-\]
-\end{defbox}
-\footnotesize
-MSD: $\mathcal{L}=\tfrac12m\dot x^2-\tfrac12kx^2$, $D=\tfrac12b\dot x^2$, $Q=F$\\
-$\Rightarrow m\ddot x+b\dot x+kx=F$ \;\textcolor{mkGreen}{\checkmark}
-\begin{itemize}\setlength\itemsep{1pt}
-\item Energy view gives the model \hl{without free-body diagrams} -- useful for multi-body and coupled systems.
-\item Same Lagrangian approach with $q$ = charge yields the RLC equation.
+\begin{itemize}\setlength\itemsep{3pt}
+\item KVL: $v=v_R+v_L+v_C$ with $v_R=Ri$, $v_L=L\,di/dt$, $v_C=q/C$.
+\item Write it with the charge $q$: the \hl{same form} as $m\ddot x+b\dot x+kx=F$!
+\item $L$ acts like mass, $R$ like damper, $1/C$ like spring.
+\item $\omega_n=\dfrac{1}{\sqrt{LC}}$, \quad $\zeta=\dfrac{R}{2}\sqrt{\dfrac{C}{L}}$.
+\item Example: $L=\SI{1}{\milli\henry}$, $C=\SI{470}{\micro\farad}$, $R=\SI{0.1}{\ohm}$ $\Rightarrow$ $f_n=\SI{232}{\hertz}$, $\zeta=0.034$: rings a lot.
 \end{itemize}
 \end{column}
 \end{columns}
 \end{frame}
 
 % ---------------------------------------------------------------------
-\begin{frame}{Electromechanical coupling: the motor as a gyrator}
+\begin{frame}{Analogies: one equation, three domains -- and the motor links them}
 \begin{columns}[T]
-\begin{column}{.52\textwidth}
+\begin{column}{.5\textwidth}
+\small
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Translation} & \textbf{Rotation} & \textbf{Electrical}\\
+\midrule
+force $F$ & torque $T$ & voltage $v$\\
+velocity $\dot x$ & speed $\omega$ & current $i$\\
+mass $m$ & inertia $J$ & inductance $L$\\
+damper $b$ & damper $B$ & resistance $R$\\
+spring $k$ & torsion $k_\theta$ & $1/C$\\
+$\tfrac12 m\dot x^2$ & $\tfrac12 J\omega^2$ & $\tfrac12 L i^2$\\
+\bottomrule
+\end{tabular}\\[2mm]
+Always: (push) $\times$ (flow) $=$ \hl{power}: $Fv$, $T\omega$, $vi$.
+\end{column}
+\begin{column}{.48\textwidth}
 \centering
 \resizebox{\linewidth}{!}{\begin{tikzpicture}[font=\scriptsize]
 \node[mkblk,minimum width=17mm,minimum height=13mm] (e) {electrical\\ $R,\;L$};
-\node[mkblk,minimum width=17mm,minimum height=13mm,fill=mkCream,draw=mkOrange,right=9mm of e] (g) {gyrator\\ $k=k_t=k_e$};
+\node[mkblk,minimum width=17mm,minimum height=13mm,fill=mkCream,draw=mkOrange,right=9mm of e] (g) {motor\\ $k=k_t=k_e$};
 \node[mkblk,minimum width=17mm,minimum height=13mm,right=9mm of g] (m) {mechanical\\ $J,\;B$};
 \draw[mksig,{Stealth}-{Stealth}] (e) -- node[above]{$e,\,i$} (g);
 \draw[mksig,{Stealth}-{Stealth}] (g) -- node[above]{$T,\,\omega$} (m);
-\draw[mksig] ($(e.west)+(-7mm,0)$) -- node[above]{$v$} (e);
-\draw[mksig] ($(m.east)+(7mm,0)$) -- node[above]{$T_L$} (m);
-\node[below=2mm of g,align=center,text=mkNavy] {$T=k\,i,\quad e=k\,\omega$\\ (effort $\leftrightarrow$ flow swapped)};
+\node[below=2mm of g,align=center,text=mkNavy] {$T=k\,i,\quad e=k\,\omega$};
 \end{tikzpicture}}
 
 \vspace{2mm}
-\begin{eqbox}\scriptsize
-State $\bm{x}=[i\;\;\omega]^\mathsf{T}$:\\
-$\dfrac{d}{dt}\begin{bmatrix} i\\ \omega\end{bmatrix}=
-\begin{bmatrix}-R/L & -k/L\\ k/J & -B/J\end{bmatrix}\begin{bmatrix} i\\ \omega\end{bmatrix}
-+\begin{bmatrix}1/L & 0\\ 0 & -1/J\end{bmatrix}\begin{bmatrix} v\\ T_L\end{bmatrix}$
-\end{eqbox}
-\end{column}
-\begin{column}{.46\textwidth}
-\footnotesize
-\textbf{Energy balance} of the coupled system:
-\[
-v\,i=\underbrace{R i^2 + B\omega^2}_{\text{dissipated}}+\frac{d}{dt}\underbrace{\Big(\tfrac12Li^2+\tfrac12J\omega^2\Big)}_{\text{stored}}+T_L\,\omega
-\]
-\begin{itemize}\setlength\itemsep{1pt}
-\item The coupling terms ($\pm k$) form a \hl{skew-symmetric} (power-conserving) interconnection: they exchange energy, never create or dissipate it.
-\item Seen from the terminals, inertia $J$ looks like a \hl{capacitance} $J/k^2$ and damping $B$ like a conductance $B/k^2$.
-\item Two energy stores $\Rightarrow$ 2nd-order system, as found in Session 1.3.
-\item State-space form in detail: Day 2 (session 2.2).
+\small
+\begin{itemize}\setlength\itemsep{2pt}
+\item The motor is the bridge: it converts power between the domains without storing any.
+\item Two energy stores ($L$ and $J$) $\Rightarrow$ 2nd-order system, as in Session 1.3.
 \end{itemize}
+\gofurther{energy-based modelling with Lagrange's equations; ``gyrator'' in bond-graph language; state-space form $\dot{\bm x}=A\bm x+B\bm u$ (Day 2).}
 \end{column}
 \end{columns}
 \end{frame}
 
 % ---------------------------------------------------------------------
-\begin{frame}{Preview: two-inertia system (motor -- compliant shaft -- load)}
+\begin{frame}{Preview: two-inertia system (motor -- springy shaft -- load)}
 \begin{columns}[T]
 \begin{column}{.42\textwidth}
 \centering
@@ -1944,58 +1815,81 @@ v\,i=\underbrace{R i^2 + B\omega^2}_{\text{dissipated}}+\frac{d}{dt}\underbrace{
 \fill[mkOrange] (2.8,0) rectangle (3.8,1.4); \node[white,font=\scriptsize] at (3.3,0.7) {$J_L$};
 \node[font=\scriptsize] at (0.5,-0.3) {$\theta_m$}; \node[font=\scriptsize] at (3.3,-0.3) {$\theta_L$};
 \end{tikzpicture}
-\begin{eqbox}\footnotesize
-$J_m\ddot\theta_m=T_m-k(\theta_m-\theta_L)-c(\dot\theta_m-\dot\theta_L)$\\
-$J_L\ddot\theta_L=k(\theta_m-\theta_L)+c(\dot\theta_m-\dot\theta_L)-T_L$
+
+\vspace{2mm}
+\small
+\textbf{Analogy:} a playground swing -- push at just the right rhythm and it swings higher and higher: \term{resonance}.
+\begin{eqbox}
+$\omega_r=\sqrt{\dfrac{k\,(J_m+J_L)}{J_m\,J_L}}$
 \end{eqbox}
-\footnotesize
-$\dfrac{\Omega_m}{T_m}=\dfrac{J_Ls^2+cs+k}{s\,[J_mJ_Ls^2+c(J_m+J_L)s+k(J_m+J_L)]}$
 \end{column}
 \begin{column}{.56\textwidth}
 \begin{tikzpicture}
 \begin{axis}[mkplot,width=7.8cm,height=4.6cm,xmode=log,xmin=10,xmax=2000,ymin=-30,ymax=45,
-  xlabel={frequency (\si{\hertz})},ylabel={$|\Omega_m/T_m|$ (dB)},legend pos=north east]
+  xlabel={shaking frequency (\si{\hertz})},ylabel={motor response (dB)},legend pos=north east]
 \addplot[mkBlue,thick,domain=1:3.301,samples=500] ({10^x},
  {20*log10( sqrt((300-6e-4*(2*pi*10^x)^2)^2+(0.02*2*pi*10^x)^2) / ( (2*pi*10^x)*sqrt((0.24-1.2e-7*(2*pi*10^x)^2)^2+(1.6e-5*2*pi*10^x)^2) ) )});
-\addlegendentry{two-inertia}
+\addlegendentry{springy shaft}
 \addplot[mkOrange,thick,dashed,domain=1:3.301,samples=50] ({10^x},{20*log10(1/(8e-4*2*pi*10^x))});
-\addlegendentry{rigid $1/((J_m+J_L)s)$}
-\addplot[mkSky,thick,dotted,domain=1:3.301,samples=50] ({10^x},{20*log10(1/(2e-4*2*pi*10^x))});
-\addlegendentry{motor only $1/(J_ms)$}
-\node[font=\tiny,text=mkNavy] at (axis cs:112,-26) {anti-res.\ 113\,Hz};
-\node[font=\tiny,text=mkNavy] at (axis cs:330,30) {res.\ 225\,Hz};
+\addlegendentry{rigid shaft}
+\node[font=\scriptsize,text=mkNavy] at (axis cs:112,-26) {anti-res.\ 113\,Hz};
+\node[font=\scriptsize,text=mkNavy] at (axis cs:330,30) {res.\ 225\,Hz};
 \end{axis}
 \end{tikzpicture}\\
-{\tiny $J_m=\SI{2e-4}{}$, $J_L=\SI{6e-4}{\kilo\gram\metre\squared}$, $k=\SI{300}{\newton\metre\per\radian}$, $c=\SI{0.02}{\newton\metre\second\per\radian}$}
-\footnotesize
+{\scriptsize $J_m=\SI{2e-4}{}$, $J_L=\SI{6e-4}{\kilo\gram\metre\squared}$, $k=\SI{300}{\newton\metre\per\radian}$}
+\small
 \begin{itemize}\setlength\itemsep{1pt}
-\item Anti-resonance $\omega_{ar}=\sqrt{k/J_L}$; resonance $\omega_r=\sqrt{k(J_m+J_L)/(J_mJ_L)}$.
-\item Limits achievable servo bandwidth; motivates notch filters (Day 3, Day 5).
+\item Plot: how strongly the motor moves when driven by a sine torque of each frequency.
+\item The resonance peak limits how fast the servo can be tuned (Day 3, Day 5).
 \end{itemize}
 \end{column}
 \end{columns}
 \end{frame}
 
 % ---------------------------------------------------------------------
-\begin{frame}{Session 2.1 (part 1) -- Summary / key take-aways}
+\begin{frame}{Session 2.1 -- Check your understanding}
 \begin{columns}[T]
-\begin{column}{.54\textwidth}
+\begin{column}{.62\textwidth}
+\begin{keybox}[Check your understanding]
+\begin{enumerate}\setlength\itemsep{6pt}
+\item You fit a stiffer spring ($4\times k$) to a mass--spring--damper. What happens to the natural frequency $\omega_n$?
+\item In the RLC circuit, which element plays the role of the mass? Which plays the damper?
+\item A step response overshoots by 40\,\%. Should you increase or decrease the damping $b$? Why?
+\end{enumerate}
+\end{keybox}
+\end{column}
+\begin{column}{.34\textwidth}
+\small
+\textbf{Hint:} $\omega_n=\sqrt{k/m}$, $\zeta=b/(2\sqrt{km})$, and the analogy table.
+\end{column}
+\end{columns}
+\end{frame}
+
+% ---------------------------------------------------------------------
+\begin{frame}{Session 2.1 (part 1) -- Summary and key terms}
+\begin{columns}[T]
+\begin{column}{.55\textwidth}
+\small
 \begin{itemize}
-\item Lumped models: stores of kinetic and potential energy plus dissipators; each store adds a state.
-\item Mass--spring--damper, torsional system and RLC circuit share one 2nd-order form with $\omega_n,\zeta$.
-\item Analogies (force--voltage, force--current) let us reuse intuition and tools across domains.
-\item The motor is a gyrator: $T=ki$, $e=k\omega$; it couples the RL circuit to the inertia.
-\item Compliance between motor and load creates resonance and anti-resonance.
+\item Lumped models: masses, springs, dampers (and $L$, $C$, $R$).
+\item Mass--spring--damper, shaft and RLC circuit share one 2nd-order ODE with $\omega_n$ and $\zeta$.
+\item Low damping $\Rightarrow$ overshoot and ringing.
+\item The motor links the electrical and mechanical worlds.
+\item A springy shaft between motor and load creates resonance.
 \end{itemize}
+\begin{keybox}[Remember]
+$m\ddot x+b\dot x+kx=F$, \quad $\omega_n=\sqrt{k/m}$, \quad $\zeta=\dfrac{b}{2\sqrt{km}}$
+\end{keybox}
 \end{column}
 \begin{column}{.42\textwidth}
-\begin{keybox}[Remember]
+\begin{defbox}[Key terms]
 \small
-$m\ddot x+b\dot x+kx=F$\\[1mm]
-$\omega_n=\sqrt{k/m},\;\;\zeta=b/(2\sqrt{km})$\\[1mm]
-$\omega_{ar}=\sqrt{k/J_L}$\\[1mm]
-$\omega_r=\sqrt{k(J_m+J_L)/(J_mJ_L)}$
-\end{keybox}
+\term{Lumped model}: system built from ideal elements.\\
+\term{Natural frequency $\omega_n$}: speed of free oscillation.\\
+\term{Damping ratio $\zeta$}: how fast oscillation dies.\\
+\term{Step response}: reaction to a sudden constant input.\\
+\term{Resonance}: big response at one special frequency.
+\end{defbox}
 \end{column}
 \end{columns}
 \end{frame}
@@ -2006,30 +1900,30 @@ $\omega_r=\sqrt{k(J_m+J_L)/(J_mJ_L)}$
 \begin{frame}{Day 1 summary}
 \begin{columns}[T]
 \begin{column}{.5\textwidth}
-\footnotesize
+\small
 \begin{defbox}[Machines]
-Lorentz/Faraday $\Rightarrow$ $k_t=k_e$; reluctance $\tfrac12 i^2dL/d\theta$.\\
-DC, BLDC (six-step), PMSM (sinusoidal), induction (slip), stepper (open loop).
+Current $+$ field $=$ force; motion $+$ field $=$ voltage; $k_t=k_e$.\\
+DC (brushes), BLDC/PMSM (electronic), induction (slip), stepper (steps).
 \end{defbox}
 \begin{defbox}[Models]
 $v=Ri+L\dot i+k_e\omega$, \; $J\dot\omega=k_ti-B\omega-T_L$\\
-$\tau_e=L/R$, $\tau_m=RJ/(k_tk_e)$; friction is nonlinear.
+Fast $\tau_e=L/R$, slow $\tau_m=RJ/(k_tk_e)$.
 \end{defbox}
 \end{column}
 \begin{column}{.48\textwidth}
-\footnotesize
+\small
 \begin{defbox}[Transmissions and sizing]
-$J/N^2$, $m(p/2\pi)^2$, $mr^2$; $N_\text{opt}=\sqrt{J_L/J_m}$.\\
-Peak in intermittent zone, $T_\text{rms}$ in continuous zone; match $V_\text{DC}$, $k_e$, currents.
+Speed $\div N$, torque $\times N$, inertia $\div N^2$; $N_\text{opt}=\sqrt{J_L/J_m}$.\\
+Peak torque in the short-time zone, $T_\text{rms}$ in the continuous zone.
 \end{defbox}
 \begin{defbox}[Dynamic modelling]
-Lumped elements, FBD, analogies, Lagrange; 2nd-order prototype $\omega_n,\zeta$; two-inertia resonance.
+Lumped elements, analogies; 2nd-order system with $\omega_n,\zeta$; resonance.
 \end{defbox}
 \end{column}
 \end{columns}
 \vspace{2mm}
 \begin{keybox}[One sentence]
-A servo axis is an \hl{energy converter} (motor) plus a \hl{mechanical network} (transmission, load) -- both described by the same lumped, energy-based equations.
+A servo axis is an \hl{energy converter} (motor) plus a \hl{mechanical network} (transmission, load) -- both described by the same kind of ODEs.
 \end{keybox}
 \end{frame}
 
@@ -2054,7 +1948,7 @@ A servo axis is an \hl{energy converter} (motor) plus a \hl{mechanical network} 
 \begin{column}{.42\textwidth}
 \begin{notebox}
 \textbf{Bring along from today:}\\
-the DC-motor model and its transfer function, the two time constants, the friction nonlinearity, and the 2nd-order prototype with $\omega_n$ and $\zeta$ -- they are the plants we will linearise, identify and control tomorrow.
+the two DC-motor equations, the time constants $\tau_e$ and $\tau_m$, friction, and the mass--spring--damper with $\omega_n$ and $\zeta$. Tomorrow we learn a tool (the Laplace transform) that turns these ODEs into algebra -- and then we control them.
 \end{notebox}
 \end{column}
 \end{columns}
@@ -2069,7 +1963,7 @@ the DC-motor model and its transfer function, the two time constants, the fricti
 \textbf{Slide} & \textbf{File (Wikimedia Commons)} & \textbf{Author} & \textbf{License}\\
 \midrule
 Brushed DC motor & Motor disassembeled.JPG & Jfer91 & CC BY-SA 3.0\\
-BLDC / PMSM & Floppy drive spindle motor open.jpg & Sebastian Koppehel & CC BY 3.0\\
+Brushless motors & Floppy drive spindle motor open.jpg & Sebastian Koppehel & CC BY 3.0\\
 Induction motor & Wirnik by Zureks.jpg & Zureks & CC BY-SA 3.0\\
 Stepper motor & Positioner Stepper Motor parts.jpg & tony\_duell & CC BY 2.0\\
 Linear actuators & Linear motor by Zureks.jpg & Zureks & CC BY-SA 4.0\\
@@ -2093,9 +1987,7 @@ All other drawings, plots and diagrams: own work for this course (TikZ / pgfplot
 \item N. Mohan, \textit{Electric Drives: An Integrative Approach}, MNPERE, 2003.
 \item A. Hughes, B. Drury, \textit{Electric Motors and Drives}, 4th ed., Newnes, 2013.
 \item W. Leonhard, \textit{Control of Electrical Drives}, 3rd ed., Springer, 2001.
-\item J.\,R. Hendershot, T.\,J.\,E. Miller, \textit{Design of Brushless Permanent-Magnet Machines}, Motor Design Books, 2010.
 \item T. Kenjo, A. Sugawara, \textit{Stepping Motors and Their Microprocessor Controls}, 2nd ed., Oxford Univ. Press, 1994.
-\item H. Gro\ss, J. Hamann, G. Wiegärtner, \textit{Electrical Feed Drives in Automation}, Publicis MCD (Siemens), 2001.
 \item G. Ellis, \textit{Control System Design Guide}, 4th ed., Butterworth-Heinemann, 2012.
 \item K. Ogata, \textit{Modern Control Engineering}, 5th ed., Prentice Hall, 2010.
 \item G.\,F. Franklin, J.\,D. Powell, A. Emami-Naeini, \textit{Feedback Control of Dynamic Systems}, 7th ed., Pearson, 2015.

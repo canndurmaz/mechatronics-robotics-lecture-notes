@@ -20,6 +20,8 @@
 }
 \newcommand{\src}[1]{\par\vspace{1mm}{\color{mkGray}\fontsize{6}{7}\selectfont #1\par}}
 \newcommand{\sumsym}{\scalebox{.7}{$\Sigma$}}
+% "Going further" flag for conceptual-only frames
+\newcommand{\gofurther}{{\color{mkGray}\scriptsize\itshape Going further --- conceptual only: one picture, one idea. Not needed for the rest of the course.}\par\vspace{1mm}}
 
 \begin{document}
 
@@ -29,48 +31,118 @@
 % ==================================================================== AGENDA
 \begin{frame}{Agenda and learning objectives}
 \begin{columns}[T]
-\begin{column}{.52\textwidth}
-\footnotesize
+\begin{column}{.50\textwidth}
+\small
 \begin{tabular}{@{}l l r@{}}
 \toprule
 \textbf{Code} & \textbf{Session} & \textbf{Time}\\
 \midrule
-2.6 & Filters and compensation in control loops & 60 min\\
-2.7 & Introduction to modern (state-space) control & 60 min\\
-2.8 & Adaptive and robust control (concepts) & 60 min\\
+2.6 & Filters and compensation & 60 min\\
+2.7 & Modern (state-space) control & 60 min\\
+2.8 & Adaptive and robust control & 60 min\\
 2.9 & Discrete-time control & 60 min\\
 3.1 & Servo system architecture & 30 min\\
-3.2a & Power electronics I: rectifier, DC bus, inverter & 30 min\\
+3.2a & Rectifier, DC bus, inverter & 30 min\\
 \midrule
  & \textbf{Net teaching time} & \textbf{5 h}\\
 \bottomrule
 \end{tabular}
 
 \vspace{2mm}
-{\scriptsize\color{mkGray}Short breaks ($\approx$10 min) after each 1-h block are not included in the net time.}
+{\scriptsize\color{mkGray}Short breaks ($\approx$10 min) after each 1-h block are extra.}
 \end{column}
-\begin{column}{.45\textwidth}
-\begin{keybox}[After today you can \dots]
-\scriptsize
-\checkitem\ quantify the phase cost of LPF/notch filters and design lead/lag compensators\\[.5mm]
-\checkitem\ place poles with state feedback and build a Luenberger observer\\[.5mm]
-\checkitem\ explain MRAC, Lyapunov adaptation, gain scheduling and the robust-stability test $|WT|<1$\\[.5mm]
-\checkitem\ discretise controllers correctly and budget sampling delay\\[.5mm]
-\checkitem\ sketch a servo drive from mains to motor shaft
+\begin{column}{.48\textwidth}
+\begin{keybox}[By the end of today you can \dots]
+\checkitem\ \textbf{explain} what a filter does and \textbf{calculate} the phase it costs a loop\\[.5mm]
+\checkitem\ \textbf{sketch} state feedback and \textbf{place} two poles by matching coefficients\\[.5mm]
+\checkitem\ \textbf{explain} why gains must adapt or be robust when the load changes\\[.5mm]
+\checkitem\ \textbf{calculate} the phase lost to sampling delay\\[.5mm]
+\checkitem\ \textbf{draw} a servo drive from mains plug to motor shaft
 \end{keybox}
 \end{column}
 \end{columns}
+\end{frame}
+
+% ==================================================================== RECAP
+\begin{frame}{What we learned so far (Day 2 in one slide)}
+\begin{columns}[T]
+\begin{column}{.48\textwidth}
+\centering
+\begin{tikzpicture}
+  \node[sumn] (S) {\sumsym};
+  \node[blk,right=6mm of S] (C) {$C(s)$\\[-.5mm]\tiny controller};
+  \node[blk,right=6mm of C] (G) {$G(s)$\\[-.5mm]\tiny plant};
+  \draw[sig] ($(S.west)+(-6mm,0)$) node[left,font=\scriptsize]{$r$} -- (S);
+  \draw[sig] (S) -- node[above,font=\tiny]{$e$} (C);
+  \draw[sig] (C) -- node[above,font=\tiny]{$u$} (G);
+  \draw[sig] (G.east) -- ++(7mm,0) node[right,font=\scriptsize]{$y$};
+  \draw[sig] ($(G.east)+(3.5mm,0)$) -- ++(0,-8mm) -| node[pos=.95,left,font=\tiny]{$-$} (S);
+\end{tikzpicture}
+
 \vspace{1mm}
-\begin{notebox}
-Notation (whole course): plant $G(s)$, controller $C(s)$, loop $L(s)=C(s)G(s)$, crossover $\omega_c$, phase margin PM, gain margin GM,
-$S=1/(1+L)$, $T=L/(1+L)$. Mechanical: $J$ [kg\,m$^2$], $B$ [N\,m\,s/rad], torque $T_m$, load torque $T_L$.
-\end{notebox}
+\small
+\begin{itemize}\setlength\itemsep{.4mm}
+\item \term{feedback}: measure $y$, compare with $r$, correct --- like cruise control
+\item \term{PID}: P reacts to error now, I to accumulated error, D to its trend
+\item loop gain $L(s)=C(s)G(s)$
+\end{itemize}
+\end{column}
+\begin{column}{.50\textwidth}
+\small
+\begin{itemize}\setlength\itemsep{.4mm}
+\item \term{Bode plot}: gain and phase of $L(j\omega)$ vs.\ frequency
+\item \term{crossover} $\omega_c$: where $|L|=1$ (0\,dB) $\approx$ loop bandwidth
+\item \term{phase margin} PM $=180^\circ+\angle L(j\omega_c)$: distance from instability
+\item rule: PM $\approx 45$--$60^\circ$ for a well-damped response
+\end{itemize}
+\begin{keybox}[Today's thread]
+Almost everything today either \hl{costs phase} (filters, delay, resonances) or \hl{buys it back} (lead, faster sampling).
+\end{keybox}
+\end{column}
+\end{columns}
 \end{frame}
 
 % ####################################################################
 \section{2.6 Filters and Compensation in Control Systems}
 % ####################################################################
 
+\begin{frame}{Refresher: what does a filter do?}
+\begin{columns}[T]
+\begin{column}{.48\textwidth}
+\begin{defbox}[Refresher: a filter is a music equaliser]
+A \term{filter} passes some frequencies and weakens others.
+\begin{itemize}\setlength\itemsep{0mm}
+\item \term{low-pass}: treble down, bass kept
+\item \term{high-pass}: bass down (removes DC)
+\item \term{notch}: removes one tone (50\,Hz hum)
+\end{itemize}
+\end{defbox}
+\small
+\vspace{-1mm}
+\begin{eqbox}
+\[ |F(f)|=\frac{1}{\sqrt{1+(f/f_f)^2}},\qquad f_f=\frac{1}{2\pi RC}\ \text{[Hz]} \]
+\end{eqbox}
+RC low-pass: $R=\SI{1}{k\ohm}$, $C=\SI{1}{\micro F}$ $\Rightarrow$ $f_f=\SI{159}{Hz}$; at \SI{1.59}{kHz} only $0.1$ passes.
+\end{column}
+\begin{column}{.50\textwidth}
+\centering
+\begin{tikzpicture}
+\begin{axis}[mkplot,xmode=log,width=7.2cm,height=4.3cm,xmin=0.01,xmax=100,ymin=-45,ymax=5,
+  xlabel={frequency $f/f_f$},ylabel={gain [dB]},legend style={at={(0.03,0.03)},anchor=south west}]
+\addplot[mkBlue,thick,domain=-2:2,samples=120] ({10^x},{-10*log10(1+10^(2*x))});\addlegendentry{low-pass}
+\addplot[mkOrange,thick,domain=-2:2,samples=120] ({10^x},{20*x-10*log10(1+10^(2*x))});\addlegendentry{high-pass}
+\addplot[mkMid,thick,densely dashed,domain=-2:2,samples=200] ({10^x},{10*log10(((1-10^(2*x))^2+(0.04*10^x)^2)/((1-10^(2*x))^2+(10^x)^2))});\addlegendentry{notch}
+\end{axis}
+\end{tikzpicture}
+
+\begin{keybox}[Take-away]
+Every filter that weakens a signal also \hl{delays} it a little. In a control loop that delay is a cost.
+\end{keybox}
+\end{column}
+\end{columns}
+\end{frame}
+
+% --------------------------------------------------------------------
 \begin{frame}{Why filters in a servo loop --- and where they sit}
 \begin{columns}[T]
 \begin{column}{.58\textwidth}
@@ -94,55 +166,43 @@ $S=1/(1+L)$, $T=L/(1+L)$. Mechanical: $J$ [kg\,m$^2$], $B$ [N\,m\,s/rad], torque
   \draw[sig] ($(G.east)+(2.5mm,0)$) |- (Sen);
   \draw[sig] (Sen) -- (Fy);
   \draw[sig] (Fy) -| node[pos=.95,left,font=\tiny]{$-$} (S);
-  \node[font=\tiny,text=mkRed,above=6mm of Fe.north west,anchor=west] (n1) {inside the loop: costs phase at $\omega_c$};
+  \node[font=\tiny,text=mkRed,above=6mm of Fe.north west,anchor=west] {inside the loop: costs phase at $\omega_c$};
   \draw[mkRed,densely dotted] ($(S.north)+(-1mm,2mm)$) rectangle ($(G.south east)+(1mm,-1.6cm)$);
   \node[font=\tiny,text=mkGreen,below=1.5mm of Fr] {outside: free};
-  \draw[sig,mkSky] ($(n1.west)+(0,-1mm)$) -- ($(n1.west)+(0,-1mm)$);
 \end{tikzpicture}
 \end{column}
 \begin{column}{.40\textwidth}
-\footnotesize
+\small
 \textbf{What we filter against}
 \begin{itemize}\setlength\itemsep{.3mm}
-\item encoder quantisation \& current-sensor noise
-\item mechanical resonances (couplings, belts, frames)
-\item DC offsets of analogue sensors
-\item steps in the reference (jerk, overshoot)
-\end{itemize}
-\textbf{Placement rules}
-\begin{itemize}\setlength\itemsep{.3mm}
-\item $F_r$: shapes response only --- \hl{no stability cost}
-\item $F_e$, $F_u$, $F_y$: \hl{in the loop}, their phase adds to $\angle L(j\omega_c)$
-\item $F_y$ also hides the true $y$ from the controller
+\item sensor noise (encoder steps, current sensor)
+\item mechanical resonances (belts, couplings)
+\item offsets of analogue sensors
+\item sudden steps in the command
 \end{itemize}
 \end{column}
 \end{columns}
-\vspace{1mm}
-\vspace{-3mm}
+\vspace{2mm}
 \begin{keybox}[Rule]
-Every in-loop filter is part of $L(s)$: design it together with $C(s)$, never ``add it later''.
+A filter \hl{inside} the loop becomes part of $L(s)$ and eats phase margin. A filter on the reference ($F_r$) only shapes the response --- no stability cost.
 \end{keybox}
 \end{frame}
 
 % --------------------------------------------------------------------
-\begin{frame}{Low-pass filter: cut-off, order, roll-off, phase}
+\begin{frame}{Low-pass filter: cut-off, order and phase}
 \begin{columns}[T]
 \begin{column}{.43\textwidth}
-\footnotesize
+\small
 \begin{eqbox}
-\[
-F_1(s)=\frac{\omega_f}{s+\omega_f},\qquad
-F_2(s)=\frac{\omega_f^2}{s^2+2\zeta\omega_f s+\omega_f^2}
-\]
+\[ F_1(s)=\frac{\omega_f}{s+\omega_f} \]
 \end{eqbox}
 \begin{itemize}\setlength\itemsep{.4mm}
-\item \term{cut-off} $\omega_f$: $-3$\,dB point ($\zeta=1/\sqrt2$)
-\item \term{order} $n$: roll-off $-20n$\,dB/dec
-\item \term{phase}: $-45^\circ n$ at $\omega_f$ (Butterworth), $\to -90^\circ n$
-\item \term{Butterworth}: maximally flat, $\zeta=0.707$
-\item $\zeta<0.7$: peaking --- a filter can \hl{amplify} near $\omega_f$
-\item group delay at DC: $\tau_g=1/\omega_f$ (1st), $\sqrt2/\omega_f$ (2nd BW)
+\item \term{cut-off} $\omega_f$ [rad/s]: the $-3$\,dB point
+\item \term{order} $n$: steeper roll-off, $-20n$\,dB per decade
+\item \term{phase}: $-45^\circ$ per order at $\omega_f$
+\item 2nd order with low damping \hl{peaks}: it amplifies near $\omega_f$
 \end{itemize}
+\textbf{Take-away:} higher order = cleaner signal but much more phase lag.
 \end{column}
 \begin{column}{.55\textwidth}
 \centering
@@ -152,8 +212,8 @@ F_2(s)=\frac{\omega_f^2}{s^2+2\zeta\omega_f s+\omega_f^2}
 \nextgroupplot[ylabel={$|F|$ [dB]},ymin=-90,ymax=8,ytick={-80,-60,-40,-20,0},
   legend style={at={(0.02,0.05)},anchor=south west}]
 \addplot table[x=w,y=m1]{data/lpf_bode.dat};\addlegendentry{1st order}
-\addplot table[x=w,y=m2]{data/lpf_bode.dat};\addlegendentry{2nd Butterworth}
-\addplot table[x=w,y=m4]{data/lpf_bode.dat};\addlegendentry{4th Butterworth}
+\addplot table[x=w,y=m2]{data/lpf_bode.dat};\addlegendentry{2nd order}
+\addplot table[x=w,y=m4]{data/lpf_bode.dat};\addlegendentry{4th order}
 \nextgroupplot[ylabel={$\angle F$ [$^\circ$]},xlabel={$\omega/\omega_f$},ymin=-370,ymax=10,ytick={-360,-270,-180,-90,0}]
 \addplot table[x=w,y=p1]{data/lpf_bode.dat};
 \addplot table[x=w,y=p2]{data/lpf_bode.dat};
@@ -166,61 +226,55 @@ F_2(s)=\frac{\omega_f^2}{s^2+2\zeta\omega_f s+\omega_f^2}
 \end{frame}
 
 % --------------------------------------------------------------------
-\begin{frame}{The price of filtering: phase at crossover and the noise--bandwidth trade-off}
+\begin{frame}{The price of filtering: phase lost at crossover}
 \begin{columns}[T]
 \begin{column}{.47\textwidth}
 \centering
 \begin{tikzpicture}
-\begin{axis}[mkplot,xmode=log,width=6.6cm,height=3.9cm,xmin=1,xmax=30,ymin=0,ymax=90,
+\begin{axis}[mkplot,xmode=log,width=6.6cm,height=4.6cm,xmin=1,xmax=30,ymin=0,ymax=90,
    xlabel={ratio $\omega_f/\omega_c$},ylabel={phase lost at $\omega_c$ [$^\circ$]},
    xtick={1,2,5,10,20,30},xticklabels={1,2,5,10,20,30},legend style={at={(0.97,0.97)},anchor=north east}]
 \addplot table[x=r,y=p1]{data/phase_loss.dat};\addlegendentry{1st order}
-\addplot table[x=r,y=p2]{data/phase_loss.dat};\addlegendentry{2nd BW}
-\addplot table[x=r,y=p4]{data/phase_loss.dat};\addlegendentry{4th BW}
+\addplot table[x=r,y=p2]{data/phase_loss.dat};\addlegendentry{2nd order}
+\addplot table[x=r,y=p4]{data/phase_loss.dat};\addlegendentry{4th order}
 \draw[mkRed,densely dashed] (axis cs:1,10) -- (axis cs:30,10) node[pos=.02,above,font=\tiny,anchor=south west]{10$^\circ$ budget};
 \end{axis}
 \end{tikzpicture}
 \end{column}
 \begin{column}{.51\textwidth}
-\footnotesize
+\small
 \begin{eqbox}
-\[
-\Delta\varphi_1=\arctan\frac{\omega_c}{\omega_f}\;\approx\;\omega_c\,\tau_g \quad(\omega_f\gg\omega_c)
-\]
+\[ \Delta\varphi=\arctan\frac{\omega_c}{\omega_f}\quad\text{(1st-order LPF)} \]
 \end{eqbox}
-\textbf{Worked example.} Velocity loop $f_c=150$\,Hz, allowed loss $10^\circ$:
-$f_f\ge f_c/\tan 10^\circ = 5.67\,f_c\approx \SI{850}{Hz}$ (1st order). A 2nd-order BW filter needs $f_f\gtrsim\SI{1.2}{kHz}$.
-
-\vspace{1mm}
-\textbf{Noise path:} meas. noise $n$ reaches the torque command via
-\[ u = -\,C(s)S(s)\,n \;\approx\; -C(s)\,n \quad (\omega\gg\omega_c)\]
-\begin{itemize}\setlength\itemsep{.2mm}
-\item high $K_p$/$K_d$ $\Rightarrow$ high-frequency noise in torque, audible, heating
-\item lower $\omega_f$ $\Rightarrow$ quieter, but less PM $\Rightarrow$ must lower $\omega_c$
-\end{itemize}
+\textbf{Worked example.} Velocity loop crossover $f_c=150$\,Hz; we allow $10^\circ$ loss.
+\begin{enumerate}\setlength\itemsep{.3mm}
+\item need $f_c/f_f\le\tan10^\circ=0.176$
+\item $f_f\ge 150\,\text{Hz}/0.176=\SI{850}{Hz}$
+\item check: $\arctan(150/850)=10.0^\circ$ \checkmark
+\end{enumerate}
 \end{column}
 \end{columns}
+\vspace{1mm}
 \begin{keybox}[Trade-off]
-Bandwidth, noise and filter phase form a triangle: you can pick two. Typical: $\omega_f \approx (5\ldots10)\,\omega_c$.
+Lower $\omega_f$ = quieter motor but less phase margin. Rule of thumb: $\omega_f\approx(5\ldots10)\,\omega_c$.
 \end{keybox}
 \end{frame}
 
 % --------------------------------------------------------------------
-\begin{frame}{High-pass filter: DC and offset rejection}
+\begin{frame}{High-pass filter: removing offsets}
 \begin{columns}[T]
 \begin{column}{.48\textwidth}
-\footnotesize
+\small
 \begin{eqbox}
-\[ F_{HP}(s)=\frac{s}{s+\omega_h}\qquad \angle F_{HP}(j\omega)=90^\circ-\arctan\frac{\omega}{\omega_h}\]
+\[ F_{HP}(s)=\frac{s}{s+\omega_h} \]
 \end{eqbox}
 \begin{itemize}\setlength\itemsep{.4mm}
-\item blocks DC: removes \term{offsets} and slow drift (analogue current/Hall sensors, accelerometers, strain gauges)
-\item \term{washout}: passes only changes --- e.g.\ acceleration or vibration feedback that must not fight a constant load
-\item step response decays with $\tau=1/\omega_h$
-\item \hl{phase lead} below $\omega_h$ (up to $+90^\circ$)
+\item blocks DC: removes sensor \term{offsets} and slow drift
+\item \term{washout}: passes only \emph{changes} (vibration, acceleration)
+\item gives phase \hl{lead} (up to $+90^\circ$) below $\omega_h$
 \end{itemize}
 \begin{notebox}
-\textbf{Pitfall:} an HPF in the \emph{main} feedback path destroys DC information --- the loop can no longer hold position against a constant load, and integral action becomes useless.
+\textbf{Pitfall:} never in the \emph{main} feedback path --- the loop would no longer see a constant position error and could not hold a load.
 \end{notebox}
 \end{column}
 \begin{column}{.50\textwidth}
@@ -231,7 +285,6 @@ Bandwidth, noise and filter phase form a triangle: you can pick two. Typical: $\
 \nextgroupplot[ylabel={$|F_{HP}|$ [dB]},ymin=-45,ymax=5]
 \addplot[mkOrange,thick] table[x=w,y=m]{data/hpf_bode.dat};
 \draw[mkGray,densely dashed] (axis cs:1,-45) -- (axis cs:1,5);
-\node[font=\tiny,text=mkGray,anchor=south west] at (axis cs:0.012,-42) {$+20$\,dB/dec};
 \nextgroupplot[ylabel={$\angle F_{HP}$ [$^\circ$]},xlabel={$\omega/\omega_h$},ymin=-5,ymax=95,ytick={0,45,90}]
 \addplot[mkOrange,thick] table[x=w,y=p]{data/hpf_bode.dat};
 \draw[mkGray,densely dashed] (axis cs:1,-5) -- (axis cs:1,95);
@@ -242,37 +295,29 @@ Bandwidth, noise and filter phase form a triangle: you can pick two. Typical: $\
 \end{frame}
 
 % --------------------------------------------------------------------
-\begin{frame}{Notch filter: centre, width, Q and depth}
+\begin{frame}{Notch filter: cutting out one frequency}
 \begin{columns}[T]
-\begin{column}{.47\textwidth}
-\footnotesize
+\begin{column}{.45\textwidth}
+\small
+\textbf{Picture:} a playground swing has one natural frequency; a mechanical axis too. A \term{notch} removes the controller's ``push'' at exactly that frequency.
 \begin{eqbox}
-\[
-N(s)=\frac{s^2+2\zeta_z\omega_n s+\omega_n^2}{s^2+2\zeta_p\omega_n s+\omega_n^2},\qquad \zeta_z<\zeta_p
-\]
+\[ N(s)=\frac{s^2+2\zeta_z\omega_n s+\omega_n^2}{s^2+2\zeta_p\omega_n s+\omega_n^2} \]
 \end{eqbox}
-\begin{tabular}{@{}ll@{}}
-\term{centre} & $\omega_n$ (set to the resonance)\\
-\term{depth} & $|N(j\omega_n)|=\zeta_z/\zeta_p$\\
-\term{width} & $\Delta\omega_{-3\,\mathrm{dB}}\approx 2\zeta_p\omega_n$\\
-\term{quality} & $Q=1/(2\zeta_p)=\omega_n/\Delta\omega$\\
-\end{tabular}
-\vspace{1mm}
 \begin{itemize}\setlength\itemsep{.3mm}
-\item unity gain far away; \hl{phase lag below} $\omega_n$, lead above
-\item wide notch $\Rightarrow$ robust to resonance drift, but more phase loss at $\omega_c$
-\item narrow, deep notch $\Rightarrow$ cheap in phase, but fails if $\omega_r$ moves
+\item \term{centre} $\omega_n$: set to the resonance
+\item \term{depth}: $\zeta_z/\zeta_p$ (e.g.\ $0.1\to-20$\,dB)
+\item \term{width}: set by $\zeta_p$ --- wide = robust to drift, but more phase lag
 \end{itemize}
 \end{column}
-\begin{column}{.51\textwidth}
+\begin{column}{.53\textwidth}
 \centering
 \begin{tikzpicture}
 \begin{groupplot}[group style={group size=1 by 2,vertical sep=2mm,xticklabels at=edge bottom},
   mkplot,xmode=log,width=7.1cm,height=3.35cm,xmin=0.1,xmax=10]
 \nextgroupplot[ylabel={$|N|$ [dB]},ymin=-45,ymax=3,legend style={at={(0.02,0.04)},anchor=south west}]
-\addplot table[x=w,y=m1]{data/notch_bode.dat};\addlegendentry{$\zeta_z/\zeta_p=0.01$ ($-40$\,dB)}
-\addplot table[x=w,y=m2]{data/notch_bode.dat};\addlegendentry{$0.1$ ($-20$\,dB)}
-\addplot table[x=w,y=m3]{data/notch_bode.dat};\addlegendentry{$0.3$ ($-10.5$\,dB)}
+\addplot table[x=w,y=m1]{data/notch_bode.dat};\addlegendentry{$\zeta_z/\zeta_p=0.01$}
+\addplot table[x=w,y=m2]{data/notch_bode.dat};\addlegendentry{$0.1$}
+\addplot table[x=w,y=m3]{data/notch_bode.dat};\addlegendentry{$0.3$}
 \nextgroupplot[ylabel={$\angle N$ [$^\circ$]},xlabel={$\omega/\omega_n$ \quad ($\zeta_p=0.5$)},ymin=-95,ymax=95,ytick={-90,-45,0,45,90}]
 \addplot table[x=w,y=p1]{data/notch_bode.dat};
 \addplot table[x=w,y=p2]{data/notch_bode.dat};
@@ -284,31 +329,25 @@ N(s)=\frac{s^2+2\zeta_z\omega_n s+\omega_n^2}{s^2+2\zeta_p\omega_n s+\omega_n^2}
 \end{frame}
 
 % --------------------------------------------------------------------
-\begin{frame}{Notch in practice: suppressing a 1\,kHz mechanical resonance}
+\begin{frame}{Notch in practice: taming a 1\,kHz resonance}
 \begin{columns}[T]
 \begin{column}{.40\textwidth}
-\scriptsize
-\textbf{Two-mass axis} (motor $J_M$ -- shaft -- load $J_L$), velocity measured on the motor:
-\[
-G(s)=\frac{1}{(J_M+J_L)s}\cdot\frac{s^2/\omega_a^2+2\zeta s/\omega_a+1}{s^2/\omega_r^2+2\zeta s/\omega_r+1}
-\]
-$J_M=J_L=\SI{1e-3}{kg\,m^2}$, $f_r=\SI{1}{kHz}$, $f_a=f_r/\sqrt2$, $\zeta=0.02$.\\
-PI with $f_c=\SI{100}{Hz}$; delay $1.5T$ at 8\,kHz; 2\,kHz current loop.
+\small
+\textbf{Axis:} motor -- flexible shaft -- load, resonance at $f_r=\SI{1}{kHz}$. Velocity PI with $f_c=\SI{100}{Hz}$.
 
 \vspace{1mm}
 \begin{tabular}{@{}lcc@{}}
 \toprule
- & no notch & with notch\\
+ & no notch & notch\\
 \midrule
-crossovers & 3 & 1\\
+0\,dB crossings & 3 & 1\\
 PM at 100\,Hz & $65^\circ$ & $61^\circ$\\
-PM at $\approx$1.04\,kHz & \textcolor{mkRed}{$-4^\circ$} & ---\\
 closed loop & \textcolor{mkRed}{unstable} & \textcolor{mkGreen}{stable}\\
 \bottomrule
 \end{tabular}
 
 \vspace{1mm}
-Notch: $\omega_n=\omega_r$, $\zeta_z=0.02$, $\zeta_p=0.35$ ($-25$\,dB); costs only $\approx4^\circ$ at $f_c$.
+The resonance lifts $|L|$ above 0\,dB near 1\,kHz with no phase margin left. A $-25$\,dB notch at 1\,kHz removes that peak and costs only $\approx4^\circ$ at 100\,Hz.
 \end{column}
 \begin{column}{.58\textwidth}
 \centering
@@ -327,31 +366,24 @@ Notch: $\omega_n=\omega_r$, $\zeta_z=0.02$, $\zeta_p=0.35$ ($-25$\,dB); costs on
 \end{tikzpicture}
 \end{column}
 \end{columns}
-\src{Model and numbers computed for this course; cf.\ [Ellis, 2012, ch.~16], [Franklin et al., 2019].}
+\src{Model and numbers computed for this course; cf.\ [Ellis, 2012, ch.~16].}
 \end{frame}
 
 % --------------------------------------------------------------------
-\begin{frame}{Phase-lead compensator}
+\begin{frame}{Phase-lead compensator: buying phase back}
 \begin{columns}[T]
 \begin{column}{.46\textwidth}
-\footnotesize
+\small
 \begin{eqbox}
 \[ C_{\text{lead}}(s)=K\,\frac{1+\alpha T s}{1+T s},\qquad \alpha>1 \]
 \end{eqbox}
-Zero at $1/(\alpha T)$, pole at $1/T$. Maximum phase at the geometric mean:
-\begin{eqbox}
-\[
-\omega_m=\frac{1}{T\sqrt{\alpha}},\quad
-\sin\varphi_{\max}=\frac{\alpha-1}{\alpha+1},\quad
-\alpha=\frac{1+\sin\varphi_{\max}}{1-\sin\varphi_{\max}}
-\]
-\end{eqbox}
-\begin{itemize}\setlength\itemsep{.3mm}
-\item gain at $\omega_m$: $K\sqrt\alpha$ ($10\log_{10}\alpha$\,dB); at HF: $K\alpha$
-\item $\alpha=3\to30^\circ$, $7.5\to50^\circ$, $20\to65^\circ$
-\item $\varphi_{\max}>60^\circ$: HF gain explodes --- use two stages
-\item a lead is a \hl{band-limited PD}: $K_d s/(T s+1)$ plus $K_p$
+\begin{itemize}\setlength\itemsep{.4mm}
+\item a zero before a pole: phase goes \hl{up} between them
+\item maximum lead at $\omega_m=1/(T\sqrt\alpha)$ --- put it at $\omega_c$
+\item $\alpha=3\to30^\circ$, $\alpha=7.5\to50^\circ$, $\alpha=20\to65^\circ$
+\item price: high-frequency gain $\times\alpha$ $\Rightarrow$ more noise
 \end{itemize}
+\textbf{Take-away:} a lead is a PD controller with a filtered D.
 \end{column}
 \begin{column}{.52\textwidth}
 \centering
@@ -377,24 +409,22 @@ Zero at $1/(\alpha T)$, pole at $1/T$. Maximum phase at the geometric mean:
 % --------------------------------------------------------------------
 \begin{frame}{Lead design --- worked example: position loop on a pure inertia}
 \begin{columns}[T]
-\begin{column}{.47\textwidth}
-\scriptsize
-Plant (ideal torque loop): $G(s)=\dfrac{1}{J s^2}$, $J=\SI{2e-4}{kg\,m^2}$.
-A pure gain gives $\angle L=-180^\circ$ $\Rightarrow$ PM $=0$.\\[1mm]
-\textbf{Spec:} $f_c=\SI{50}{Hz}$ ($\omega_c=\SI{314.2}{rad/s}$), PM $=50^\circ$.
+\begin{column}{.48\textwidth}
+\small
+Plant $G=1/(Js^2)$, $J=\SI{2e-4}{kg\,m^2}$: phase is $-180^\circ$ everywhere, so PM $=0$ with a plain gain.
+\textbf{Goal:} $f_c=\SI{50}{Hz}$ ($\omega_c=\SI{314}{rad/s}$), PM $=50^\circ$.
 \begin{enumerate}\setlength\itemsep{.4mm}
-\item $\alpha=\dfrac{1+\sin50^\circ}{1-\sin50^\circ}=7.55$
-\item put $\omega_m=\omega_c$: $T=\dfrac{1}{\omega_c\sqrt\alpha}=\SI{1.159}{ms}$\\
-  zero $1/(\alpha T)=\SI{114}{rad/s}$ (18.2\,Hz), pole $1/T=\SI{863}{rad/s}$ (137\,Hz)
-\item $|C G|=1$ at $\omega_c$: $K=\dfrac{J\omega_c^2}{\sqrt\alpha}=\SI{7.18}{N\,m/rad}$
+\item need $50^\circ$ of lead $\Rightarrow\alpha=7.55$ (table/graph)
+\item centre it: $T=1/(\omega_c\sqrt\alpha)=\SI{1.16}{ms}$
+\item gain for $|L|=1$ at $\omega_c$: $K=J\omega_c^2/\sqrt\alpha=\SI{7.2}{N\,m/rad}$
+\item check (computed): $f_c=\SI{49.5}{Hz}$, PM $=50^\circ$ \checkmark
 \end{enumerate}
-\textbf{Check} (computed): $f_c=\SI{49.5}{Hz}$, PM $=50.0^\circ$, GM $=\infty$.\\
-Step overshoot \hl{28\,\%} --- higher than the 2nd-order estimate ($\approx$17\,\%) because of the lead zero; a reference prefilter $F_r$ removes it.
+Step overshoot 28\,\% (the lead zero adds some); a reference filter $F_r$ can remove it.
 \end{column}
-\begin{column}{.51\textwidth}
+\begin{column}{.50\textwidth}
 \centering
 \begin{tikzpicture}
-\begin{groupplot}[group style={group size=1 by 2,vertical sep=10mm},mkplot,width=7.1cm,height=3.25cm]
+\begin{groupplot}[group style={group size=1 by 2,vertical sep=10mm},mkplot,width=7.0cm,height=3.25cm]
 \nextgroupplot[xmode=log,xmin=1,xmax=10000,ymin=-200,ymax=-120,ylabel={$\angle L$ [$^\circ$]},xlabel={$f$ [Hz]},
    ytick={-180,-160,-140,-130}]
 \addplot[mkBlue,thick] table[x=f,y=pL]{data/lead_bode.dat};
@@ -413,19 +443,18 @@ Step overshoot \hl{28\,\%} --- higher than the 2nd-order estimate ($\approx$17\,
 \begin{frame}{Phase-lag compensator and lead--lag}
 \begin{columns}[T]
 \begin{column}{.47\textwidth}
-\footnotesize
+\small
 \begin{eqbox}
 \[ C_{\text{lag}}(s)=\beta\,\frac{1+T s}{1+\beta T s},\qquad \beta>1 \]
 \end{eqbox}
-\begin{itemize}\setlength\itemsep{.3mm}
-\item low-frequency gain $\times\beta$ $\Rightarrow$ steady-state error $\div\beta$, \hl{stiffer} against load torque
-\item HF gain unchanged $\Rightarrow$ $\omega_c$ and noise unchanged
-\item max.\ lag $\sin\varphi=(\beta-1)/(\beta+1)$ at $1/(T\sqrt\beta)$
-\item rule: zero $1/T\approx\omega_c/10$ $\Rightarrow$ phase cost at $\omega_c$ $=\arctan0.1-\arctan(0.1/\beta)$ $=5.1^\circ$ for $\beta=10$
+\begin{itemize}\setlength\itemsep{.4mm}
+\item boosts gain at \hl{low} frequency by $\beta$ $\Rightarrow$ smaller steady error, stiffer against load
+\item leaves high frequencies (and noise) alone
+\item put its zero a decade below $\omega_c$: costs only $\approx5^\circ$
+\item \term{lead--lag}: lead buys PM, lag buys stiffness
 \end{itemize}
-\textbf{Lead--lag:} $C=C_{\text{lead}}C_{\text{lag}}$ --- lead buys PM at $\omega_c$, lag buys LF gain.
 \begin{notebox}
-PID $\equiv$ lead--lag: PI = lag with pole at $s=0$ ($\beta\to\infty$); filtered D = lead.
+PID is a lead--lag in disguise: PI $\approx$ lag, filtered D $\approx$ lead.
 \end{notebox}
 \end{column}
 \begin{column}{.51\textwidth}
@@ -447,62 +476,113 @@ PID $\equiv$ lead--lag: PI = lag with pole at $s=0$ ($\beta\to\infty$); filtered
 \end{frame}
 
 % --------------------------------------------------------------------
-\begin{frame}{Session 2.6 summary: filter and compensator scope list}
-\scriptsize
-\begin{tabularx}{\textwidth}{@{}l X X X@{}}
-\toprule
-\textbf{Element} & \textbf{Design parameters} & \textbf{Typical servo use} & \textbf{Cost / risk}\\
-\midrule
-LPF & cut-off $\omega_f$, order $n$, $\zeta$; roll-off $-20n$\,dB/dec & encoder/current noise, torque-command smoothing & phase $\approx\omega_c/\omega_f$ rad per order\\
-HPF & corner $\omega_h$ & offset removal, washout, AC-coupled sensors & kills DC info if in main loop\\
-Notch & centre $\omega_n$, width $2\zeta_p\omega_n$, $Q$, depth $\zeta_z/\zeta_p$ & mechanical resonance, belt/coupling modes & phase lag below $\omega_n$; detuning\\
-Lead & $\alpha$, $T$ ($\varphi_{\max}$, $\omega_m$) & add PM for inertia/double-integrator plants & HF gain $\times\alpha$ $\Rightarrow$ noise\\
-Lag & $\beta$, $T$ & stiffness, steady-state accuracy & slow tail; small PM loss\\
-\bottomrule
-\end{tabularx}
-\vspace{2mm}
+\begin{frame}{Session 2.6 summary and key terms}
+\begin{columns}[T]
+\begin{column}{.52\textwidth}
 \begin{keybox}[Key take-aways]
 \begin{itemize}\setlength\itemsep{.3mm}
-\item Filters in the loop are part of $L(s)$: budget their phase at $\omega_c$ (rule: $\omega_f\ge5$--$10\,\omega_c$).
-\item Notch filters convert an unstable resonant loop into a well-damped one at a few degrees of PM.
-\item Lead: $\alpha$ from $\varphi_{\max}$, centre at $\omega_c$; lag: zero a decade below $\omega_c$.
+\item In-loop filters are part of $L(s)$: budget their phase ($\omega_f\approx5$--$10\,\omega_c$).
+\item A notch removes one resonance for a few degrees of PM.
+\item Lead adds phase at $\omega_c$; lag adds low-frequency stiffness.
 \end{itemize}
 \end{keybox}
+\end{column}
+\begin{column}{.46\textwidth}
+\begin{defbox}[Key terms]
+\small
+\term{cut-off} $-3$\,dB frequency $\cdot$ \term{order} steepness of roll-off $\cdot$ \term{low/high-pass} keeps slow/fast parts $\cdot$ \term{notch} removes one frequency $\cdot$ \term{resonance} frequency where a structure swings strongly $\cdot$ \term{lead/lag} compensator adding phase / low-frequency gain
+\end{defbox}
+\end{column}
+\end{columns}
+\end{frame}
+
+% --------------------------------------------------------------------
+\begin{frame}{Check your understanding --- filters and compensation}
+\begin{keybox}[Check your understanding]
+\begin{enumerate}\setlength\itemsep{2mm}
+\item A colleague adds a 4th-order low-pass at $2\,f_c$ to the velocity feedback ``to clean it up''. What happens to the phase margin?
+\item Why does a reference filter $F_r$ not change stability, but a feedback filter $F_y$ does?
+\item Your machine whistles at 800\,Hz when you raise the gain. Which filter do you reach for, and where do you set its centre?
+\end{enumerate}
+\end{keybox}
+\vspace{2mm}
+{\small\color{mkGray}Discuss in pairs for 2 minutes, then we compare answers.}
 \end{frame}
 
 % ####################################################################
 \section{2.7 Introduction to Modern Control}
 % ####################################################################
 
+\begin{frame}{Refresher: matrices and eigenvalues}
+\begin{columns}[T]
+\begin{column}{.52\textwidth}
+\begin{defbox}[Refresher: eigenvalues = natural rhythms]
+A matrix $A$ maps a vector to a new vector. Special directions are only \emph{stretched}:
+\[ A\bm v=\lambda\bm v \]
+$\lambda$ = \term{eigenvalue}. Find them from $\det(\lambda I-A)=0$.
+\end{defbox}
+\small
+\textbf{Example:} $A=\begin{bmatrix}0&1\\-2&-3\end{bmatrix}$
+\begin{enumerate}\setlength\itemsep{.3mm}
+\item $\det(\lambda I-A)=\lambda(\lambda+3)+2=\lambda^2+3\lambda+2$
+\item roots: $\lambda_1=-1$, $\lambda_2=-2$ [1/s]
+\item so $\dot{\bm x}=A\bm x$ contains $e^{-t}$ and $e^{-2t}$: both decay
+\end{enumerate}
+\end{column}
+\begin{column}{.46\textwidth}
+\centering
+\begin{tikzpicture}[x=1cm,y=1cm]
+  \fill[mkPale] (-2.6,-1.6) rectangle (0,1.6);
+  \draw[mkGray,-{Latex[length=1.5mm]}] (-2.6,0) -- (1.4,0) node[below,font=\tiny]{Re $\lambda$};
+  \draw[mkGray,-{Latex[length=1.5mm]}] (0,-1.6) -- (0,1.7) node[left,font=\tiny]{Im $\lambda$};
+  \node[mkOrange,font=\large] at (-1,0) {$\times$};
+  \node[mkOrange,font=\large] at (-2,0) {$\times$};
+  \node[font=\tiny,below] at (-1,-0.1) {$-1$};
+  \node[font=\tiny,below] at (-2,-0.1) {$-2$};
+  \node[font=\tiny,text=mkBlue] at (-1.3,1.2) {stable: decays};
+  \node[font=\tiny,text=mkRed] at (0.7,1.2) {grows};
+\end{tikzpicture}
+
+\vspace{2mm}
+\begin{keybox}[Take-away]
+Eigenvalues of $A$ = poles of the system. Like a guitar string's natural notes, they set how the system ``rings'' and whether it dies out (left half-plane).
+\end{keybox}
+\end{column}
+\end{columns}
+\end{frame}
+
+% --------------------------------------------------------------------
 \begin{frame}{State-space model of a servo axis}
 \begin{columns}[T]
 \begin{column}{.5\textwidth}
-\footnotesize
+\small
+\term{State} $\bm x$: the smallest set of numbers that remembers everything about the system (here: where it is, how fast it moves).
 \begin{eqbox}
-\[ \dot{\bm x}=A\bm x+B u,\qquad y=C\bm x+Du \]
-\[ G(s)=C\,(sI-A)^{-1}B+D \]
+\[ \dot{\bm x}=A\bm x+B u,\qquad y=C\bm x \]
 \end{eqbox}
-\textbf{Axis with ideal torque loop}, $J\dot\omega=-B_v\omega+u-T_L$, $\bm x=[\theta\ \ \omega]^{\mathsf T}$, $u=T_m$:
+\textbf{Axis} $J\dot\omega=-B_v\omega+u$ with $\bm x=[\theta\ \ \omega]^{\mathsf T}$, $u=$ torque:
 \[
 A=\begin{bmatrix}0&1\\0&-a\end{bmatrix},\;
 B=\begin{bmatrix}0\\ b\end{bmatrix},\;
-C=\begin{bmatrix}1&0\end{bmatrix},\quad a=\tfrac{B_v}{J},\ b=\tfrac1J
+C=\begin{bmatrix}1&0\end{bmatrix}
 \]
-$\Rightarrow G(s)=\dfrac{1}{s(Js+B_v)}$.\\[1mm]
-\textbf{Numbers used in this session:} $J=\SI{1e-3}{kg\,m^2}$, $B_v=\SI{2e-3}{N\,m\,s/rad}$ $\Rightarrow a=\SI{2}{s^{-1}}$, $b=1000$.
+$a=B_v/J$, $b=1/J$.
 \end{column}
 \begin{column}{.48\textwidth}
-\footnotesize
-\textbf{Including the electrical state} (DC/PM motor, $\bm x=[\theta\ \omega\ i]^{\mathsf T}$, $u=v$):
-\[
-A=\begin{bmatrix}0&1&0\\0&-\frac{B_v}{J}&\frac{k_t}{J}\\0&-\frac{k_e}{L}&-\frac{R}{L}\end{bmatrix},\quad
-B=\begin{bmatrix}0\\0\\\frac1L\end{bmatrix}
-\]
-\begin{itemize}\setlength\itemsep{.3mm}
-\item state = \term{memory} of the system (energy stores: $L$, $J$, position)
-\item works for MIMO, time-domain design, observers
-\item transfer function hides internal (e.g.\ cancelled) modes --- the state model does not
+\small
+\textbf{Numbers for this session:}\\
+$J=\SI{1e-3}{kg\,m^2}$, $B_v=\SI{2e-3}{N\,m\,s/rad}$\\
+$\Rightarrow a=\SI{2}{s^{-1}}$, $b=\SI{1000}{1/(kg\,m^2)}$.
+\vspace{2mm}
+\begin{itemize}\setlength\itemsep{.4mm}
+\item row 1: $\dot\theta=\omega$ (definition of speed)
+\item row 2: Newton for rotation
+\item one state per energy store (mass, inertia, inductor, \dots)
+\item same model works for many inputs and outputs
 \end{itemize}
+\begin{notebox}
+Adding the motor current $i$ as a third state gives a $3\times3$ model --- same idea, one more row.
+\end{notebox}
 \end{column}
 \end{columns}
 \end{frame}
@@ -512,7 +592,7 @@ B=\begin{bmatrix}0\\0\\\frac1L\end{bmatrix}
 \begin{columns}[T]
 \begin{column}{.5\textwidth}
 \centering
-\begin{tikzpicture}
+\resizebox{\linewidth}{!}{\begin{tikzpicture}
   \node[blk] (N) {$N$};
   \node[sumn,right=5mm of N] (S) {\sumsym};
   \node[blk,right=5mm of S] (B) {$B$};
@@ -537,73 +617,46 @@ B=\begin{bmatrix}0\\0\\\frac1L\end{bmatrix}
   \begin{scope}[on background layer]
    \node[fit=(B)(S2)(I)(A)(C),draw=mkSky,dashed,rounded corners,inner sep=2mm,label={[font=\tiny,text=mkGray]above:plant}] {};
   \end{scope}
-\end{tikzpicture}
+\end{tikzpicture}}
+
+\vspace{2mm}
+\small
+\textbf{Picture:} a driver who watches \emph{both} the position and the speed of the car, not just the distance error.
 \end{column}
 \begin{column}{.48\textwidth}
-\footnotesize
+\small
 \begin{eqbox}
-\[ u=-K\bm x+N r\ \Rightarrow\ \dot{\bm x}=(A-BK)\bm x+BN\,r \]
+\[ u=-K\bm x+N r \]\[ \Rightarrow\ \dot{\bm x}=(A-BK)\bm x+BN\,r \]
 \end{eqbox}
 \begin{itemize}\setlength\itemsep{.4mm}
-\item closed-loop poles $=\mathrm{eig}(A-BK)$
-\item if $(A,B)$ is \term{controllable}, \hl{all} poles can be placed arbitrarily
-\item $N$ scales the reference for zero steady-state error (nominal)
-\item all states must be measured --- or \term{estimated} (observer)
+\item new system matrix $A-BK$: its eigenvalues are the \hl{closed-loop poles}
+\item choose $K$ $\Rightarrow$ choose the poles (speed and damping)
+\item $N$ scales $r$ so that $y\to r$
+\item needs every state --- measured or \term{estimated}
 \end{itemize}
-\textbf{Choosing poles:} from $\omega_n,\zeta$ of a dominant pair (overshoot, settling), extra poles 3--5$\times$ faster.\\[.5mm]
-\hl{Limits:} actuator saturation, sensor noise, sampling rate and unmodelled resonances bound how fast poles can go.
+\textbf{Limit:} faster poles need more torque and amplify noise.
 \end{column}
 \end{columns}
-\end{frame}
-
-% --------------------------------------------------------------------
-\begin{frame}{Controllability and Ackermann's formula}
-\begin{columns}[T]
-\begin{column}{.5\textwidth}
-\footnotesize
-\begin{defbox}[Controllability]
-$(A,B)$ is controllable $\iff$
-\[ \operatorname{rank}\mathcal C=n,\qquad \mathcal C=\begin{bmatrix}B & AB & \cdots & A^{n-1}B\end{bmatrix} \]
-\end{defbox}
-\begin{itemize}\setlength\itemsep{.3mm}
-\item every state can be driven anywhere in finite time
-\item an uncontrollable mode keeps its eigenvalue whatever $K$ is
-\item servo example: a load mode whose \emph{node} sits at the motor cannot be damped from the motor torque
-\end{itemize}
-\end{column}
-\begin{column}{.48\textwidth}
-\footnotesize
-\begin{defbox}[Ackermann (single input)]
-\[ K=\begin{bmatrix}0&\cdots&0&1\end{bmatrix}\mathcal C^{-1}\,\varphi_d(A) \]
-$\varphi_d(s)=\prod_i(s-p_i)$: desired characteristic polynomial, evaluated with the matrix $A$.
-\end{defbox}
-\textbf{Servo axis:}
-\[
-\mathcal C=\begin{bmatrix}0&b\\ b&-ab\end{bmatrix}=\begin{bmatrix}0&1000\\1000&-2000\end{bmatrix}
-\]
-$\det\mathcal C=-b^2=-10^6\neq0$ $\Rightarrow$ controllable.
-\end{column}
-\end{columns}
-\src{[Ogata, 2010, ch.~10]; [{\AA}str\"om \& Murray, 2021, ch.~7].}
 \end{frame}
 
 % --------------------------------------------------------------------
 \begin{frame}{Worked example: placing the poles of the servo axis}
 \begin{columns}[T]
-\begin{column}{.55\textwidth}
-\scriptsize
-Desired: $\omega_n=\SI{100}{rad/s}$, $\zeta=0.7$ $\Rightarrow \varphi_d(s)=s^2+140s+10^4$, poles $-70\pm j71.4$.\\[1mm]
-$A^2=\begin{bmatrix}0&-2\\0&4\end{bmatrix}$,\quad
-$\varphi_d(A)=A^2+140A+10^4I=\begin{bmatrix}10^4&138\\0&9724\end{bmatrix}$\\[1mm]
-$\mathcal C^{-1}=\begin{bmatrix}0.002&0.001\\0.001&0\end{bmatrix}$,\quad $[0\ 1]\,\mathcal C^{-1}=[0.001\ \ 0]$\\[1mm]
+\begin{column}{.56\textwidth}
+\small
+\textbf{Goal:} $\omega_n=\SI{100}{rad/s}$, $\zeta=0.7$. With $K=[k_1\ k_2]$:
+\begin{enumerate}\setlength\itemsep{.6mm}
+\item desired polynomial: $s^2+2\zeta\omega_n s+\omega_n^2=s^2+140s+10^4$
+\item closed loop: $\det(sI-A+BK)=s^2+(a+bk_2)s+bk_1$
+\item match the last terms: $1000\,k_1=10^4\Rightarrow k_1=\SI{10}{N\,m/rad}$
+\item match the middle terms: $2+1000\,k_2=140\Rightarrow k_2=\SI{0.138}{N\,m\,s/rad}$
+\end{enumerate}
 \begin{eqbox}
-\[ K=[0.001\ \ 0]\,\varphi_d(A)=[\,10\ \ \ 0.138\,] \]
+\[ K=[\,10\ \ \ 0.138\,] \]
 \end{eqbox}
-$k_1=\SI{10}{N\,m/rad}$ (stiffness), $k_2=\SI{0.138}{N\,m\,s/rad}$ (damping).\\[1mm]
-\textbf{Check:} $\det(sI-A+BK)=s^2+(a+bk_2)s+bk_1=s^2+140s+10^4$ \checkmark\\[1mm]
-$\Rightarrow$ for this plant state feedback \hl{is} a PD position controller with velocity feedback; $N=k_1$ gives $\theta\to r$.
+\textbf{Take-away:} $k_1$ acts as a spring, $k_2$ as a damper --- for this plant state feedback \hl{is} PD control.
 \end{column}
-\begin{column}{.43\textwidth}
+\begin{column}{.42\textwidth}
 \centering
 \begin{tikzpicture}[x=0.95cm,y=0.95cm]
   \draw[mkGray,-{Latex[length=1.5mm]}] (-4.2,0) -- (0.6,0) node[below,font=\tiny]{$\sigma$};
@@ -615,7 +668,6 @@ $\Rightarrow$ for this plant state feedback \hl{is} a PD position controller wit
   \draw[mkSky] (1,0) arc (0:180:1) ;
   \node[font=\tiny,text=mkMid,anchor=south west] at (0.05,0.95) {$\omega_n=100$};
   \foreach \y in {0.714,-0.714} \node[mkOrange,font=\large] at (-0.7,\y) {$\times$};
-  \foreach \y in {3.57,-3.57} \node[mkBlue,font=\large] at (-3.5,\y*0.5) {};
   \node[mkBlue,font=\large] at (-3.5,1.785) {$\times$};
   \node[mkBlue,font=\large] at (-3.5,-1.785) {$\times$};
   \node[font=\tiny,text=mkOrange,anchor=west] at (-0.6,-0.95) {controller};
@@ -627,22 +679,19 @@ $\Rightarrow$ for this plant state feedback \hl{is} a PD position controller wit
 \end{frame}
 
 % --------------------------------------------------------------------
-\begin{frame}{Observability and the Luenberger observer}
+\begin{frame}{The observer: estimating states we do not measure}
 \begin{columns}[T]
 \begin{column}{.47\textwidth}
-\footnotesize
-\begin{defbox}[Observability]
-$\operatorname{rank}\mathcal O=n,\quad \mathcal O=\left[C;\ CA;\ \cdots;\ CA^{n-1}\right]$
-\end{defbox}
-\begin{itemize}\setlength\itemsep{.3mm}
-\item $y=\theta$ (encoder): $\mathcal O=I$ $\Rightarrow$ observable
-\item $y=\omega$ only: $\mathcal O=\left[\begin{smallmatrix}0&1\\0&-2\end{smallmatrix}\right]$, rank 1 $\Rightarrow$ \hl{$\theta$ unobservable}
-\end{itemize}
+\small
+\textbf{Picture:} a ship's navigator without GPS uses a model (speed $\times$ time) and corrects it whenever a lighthouse is seen.
 \begin{eqbox}
-\[ \dot{\hat{\bm x}}=A\hat{\bm x}+Bu+L\,(y-C\hat{\bm x}) \]
-\[ \bm e=\bm x-\hat{\bm x}:\quad \dot{\bm e}=(A-LC)\,\bm e \]
+\[ \dot{\hat{\bm x}}=\underbrace{A\hat{\bm x}+Bu}_{\text{model}}+\underbrace{L\,(y-C\hat{\bm x})}_{\text{correction}} \]
 \end{eqbox}
-$\mathrm{eig}(A-LC)$: 2--6$\times$ faster than controller poles (dual Ackermann on $(A^{\mathsf T},C^{\mathsf T})$).
+\begin{itemize}\setlength\itemsep{.3mm}
+\item estimation error dies out with poles $\mathrm{eig}(A-LC)$
+\item make them 2--6$\times$ faster than the controller poles
+\item \term{observable}: the measurement ``sees'' every state (encoder angle: yes; speed only: angle cannot be recovered)
+\end{itemize}
 \end{column}
 \begin{column}{.51\textwidth}
 \centering
@@ -664,7 +713,7 @@ $\mathrm{eig}(A-LC)$: 2--6$\times$ faster than controller poles (dual Ackermann 
 \end{tikzpicture}
 \vspace{1mm}
 \begin{notebox}
-The observer is a \emph{simulation} of the plant, continuously corrected by the measured output.
+\term{Separation principle}: design $K$ and $L$ separately; together the poles are those of $A-BK$ plus those of $A-LC$.
 \end{notebox}
 \end{column}
 \end{columns}
@@ -675,14 +724,14 @@ The observer is a \emph{simulation} of the plant, continuously corrected by the 
 \begin{frame}{Observer example: velocity from a 16-bit encoder}
 \begin{columns}[T]
 \begin{column}{.40\textwidth}
-\scriptsize
-Same axis, $y=\theta$ quantised to $2\pi/2^{16}$, sampled at 4\,kHz.\\[1mm]
-\textbf{Observer poles:} $\omega_o=\SI{500}{rad/s}$, $\zeta=0.7$ (5$\times$ controller):
-\[ \det(sI-A+LC)=s^2+(a+l_1)s+(a\,l_1+l_2) \]
-\[ \stackrel{!}{=}s^2+700s+2.5\cdot10^5 \]
-$\Rightarrow l_1=\SI{698}{s^{-1}}$, $l_2=\SI{2.486e5}{s^{-2}}$.\\[1mm]
-\textbf{Finite difference} $\Delta\theta/T$: one count $=\SI{0.38}{rad/s}$ $\Rightarrow$ staircase noise.\\[1mm]
-\textbf{Observer}: smooth $\hat\omega$, initial error ($\hat\omega(0)=0$ vs.\ 0.5\,rad/s) dies in $\approx\!10$\,ms, and uses the torque command $u$ $\Rightarrow$ \hl{less phase lag} than differentiation + LPF.
+\small
+Same axis; only the angle $\theta$ is measured (65\,536 counts/rev), sampled at 4\,kHz.
+\begin{enumerate}\setlength\itemsep{.4mm}
+\item \textbf{finite difference} $\Delta\theta/T$: one count $=\SI{0.38}{rad/s}$ $\Rightarrow$ staircase noise
+\item \textbf{observer} with poles at \SI{500}{rad/s} (5$\times$ controller)
+\item result: smooth $\hat\omega$; start-up error gone in $\approx$10\,ms
+\end{enumerate}
+\textbf{Take-away:} the observer uses the torque command too, so it lags less than ``differentiate and filter''.
 \end{column}
 \begin{column}{.58\textwidth}
 \centering
@@ -700,55 +749,21 @@ $\Rightarrow l_1=\SI{698}{s^{-1}}$, $l_2=\SI{2.486e5}{s^{-2}}$.\\[1mm]
 \end{frame}
 
 % --------------------------------------------------------------------
-\begin{frame}{The separation principle}
-\begin{columns}[T]
-\begin{column}{.52\textwidth}
-\footnotesize
-Feed back the estimate: $u=-K\hat{\bm x}+Nr=-K\bm x+K\bm e+Nr$.
-\begin{eqbox}
-\[
-\begin{bmatrix}\dot{\bm x}\\ \dot{\bm e}\end{bmatrix}=
-\begin{bmatrix}A-BK & BK\\ 0 & A-LC\end{bmatrix}
-\begin{bmatrix}\bm x\\ \bm e\end{bmatrix}+\begin{bmatrix}BN\\0\end{bmatrix}r
-\]
-\end{eqbox}
-Block-triangular $\Rightarrow$
-\[ \mathrm{eig}(\text{closed loop})=\mathrm{eig}(A-BK)\ \cup\ \mathrm{eig}(A-LC) \]
-\hl{Design $K$ and $L$ independently.}\\[1mm]
-Observer + state feedback together form an ordinary dynamic compensator $C(s)$ of order $n$.
-\end{column}
-\begin{column}{.46\textwidth}
-\begin{keybox}[Caveats in real servos]
-\footnotesize
-\begin{itemize}\setlength\itemsep{.3mm}
-\item exact only for a perfect model: errors in $J$, $B_v$, $k_t$ bias $\hat{\bm x}$
-\item no guaranteed stability margins for observer-based (LQG) designs [Doyle, 1978] --- always check PM/GM of the resulting $L(s)$
-\item load torque is unmodelled $\Rightarrow$ add it as an extra state $\dot T_L=0$ (disturbance-estimating observer)
-\item observer runs in the sampled controller: discretise it properly (Session 2.9)
-\end{itemize}
-\end{keybox}
-\end{column}
-\end{columns}
-\end{frame}
-
-% --------------------------------------------------------------------
 \begin{frame}{Integral action in state feedback}
 \begin{columns}[T]
 \begin{column}{.45\textwidth}
-\scriptsize
-Augment with the integral of the tracking error:
+\small
+Add one extra state: the accumulated error.
 \begin{eqbox}
 \[ \dot z=r-y,\qquad u=-k_1\theta-k_2\omega+k_I z \]
 \end{eqbox}
-\[ \det=s^3+(a+bk_2)s^2+bk_1 s+bk_I \]
-Desired $(s+50)(s^2+140s+10^4)=s^3+190s^2+17000s+5\cdot10^5$:
-\[ k_1=17,\quad k_2=0.188,\quad k_I=\SI{500}{N\,m/(rad\,s)} \]
-\textbf{Test:} 1\,rad step at $t=0$, load step $T_L=\SI{0.5}{N\,m}$ at 150\,ms.
-\begin{itemize}\setlength\itemsep{.2mm}
-\item without $z$: error $=T_L/k_1=\SI{0.05}{rad}$ (2.9$^\circ$) remains
-\item with $z$: error $\to0$ --- \hl{type-1 robustness} to constant loads and parameter errors
+Third pole at $-50$ added to the earlier pair gives
+$k_1=17$, $k_2=0.188$, $k_I=500$ (SI units).\\[1mm]
+\textbf{Test:} 1\,rad step, then a load torque of 0.5\,N\,m at 150\,ms.
+\begin{itemize}\setlength\itemsep{.3mm}
+\item without $z$ ($k_1=10$): error $T_L/k_1=\SI{0.05}{rad}$ stays
+\item with $z$: error $\to0$, just like the I in PI
 \end{itemize}
-Implement with anti-windup (Session 2.9).
 \end{column}
 \begin{column}{.53\textwidth}
 \centering
@@ -766,68 +781,62 @@ Implement with anti-windup (Session 2.9).
 \end{frame}
 
 % --------------------------------------------------------------------
-\begin{frame}{Optimal state feedback: LQR in one slide}
+\begin{frame}{Going further: controllability, Ackermann's formula and LQR}
+\gofurther
 \begin{columns}[T]
-\begin{column}{.52\textwidth}
-\footnotesize
-Instead of choosing poles, choose a \term{cost}:
-\begin{eqbox}
-\[ J=\int_0^\infty\!\left(\bm x^{\mathsf T}Q\bm x+u^{\mathsf T}Ru\right)dt,\quad Q\succeq0,\ R\succ0 \]
-\end{eqbox}
-Optimal law $u=-K\bm x$ with
-\begin{eqbox}
-\[ K=R^{-1}B^{\mathsf T}P,\qquad A^{\mathsf T}P+PA-PBR^{-1}B^{\mathsf T}P+Q=0 \]
-\end{eqbox}
-(continuous algebraic Riccati equation; solved numerically).
+\begin{column}{.48\textwidth}
+\begin{defbox}[Controllability and Ackermann]
+\small
+\term{Controllable}: the input can push every state anywhere. Test: $\mathcal C=[B\ \ AB\ \cdots]$ has full rank.\\[1mm]
+\term{Ackermann's formula} computes $K$ directly from $\mathcal C$ and the desired poles --- what software does for larger systems. For our $2\times2$ axis it gives the same $K=[10\ \ 0.138]$.
+\end{defbox}
 \end{column}
-\begin{column}{.46\textwidth}
-\footnotesize
-\begin{itemize}\setlength\itemsep{.5mm}
-\item \term{Bryson's rule}: $Q_{ii}=1/x_{i,\max}^2$, $R=1/u_{\max}^2$ --- weights in physical units
-\item increasing $Q/R$ $\Rightarrow$ faster, more aggressive
-\item SISO, full-state LQR guarantees PM $\ge60^\circ$ and GM $\in[\tfrac12,\infty)$
-\item the observer counterpart is the \term{Kalman filter}; together: LQG (margins \hl{not} guaranteed)
-\end{itemize}
-\begin{notebox}
-In drives LQR is used for multi-mass axes and gantry/crane anti-sway, where poles are hard to choose by hand.
-\end{notebox}
+\begin{column}{.50\textwidth}
+\begin{defbox}[LQR: optimal state feedback]
+\small
+Instead of choosing poles, choose what you care about:
+\[ J=\int_0^\infty\!\left(\bm x^{\mathsf T}Q\bm x+u^{\mathsf T}Ru\right)dt \]
+large $Q$ = ``errors are expensive'', large $R$ = ``torque is expensive''. Software returns the best $K$; good margins come for free. Used for multi-mass axes and crane anti-sway.
+\end{defbox}
 \end{column}
 \end{columns}
-\src{[Anderson \& Moore, 1990]; [{\AA}str\"om \& Murray, 2021, ch.~7]; [Doyle, 1978].}
+\src{[Ogata, 2010, ch.~10]; [{\AA}str\"om \& Murray, 2021, ch.~7]; [Anderson \& Moore, 1990].}
 \end{frame}
 
 % --------------------------------------------------------------------
-\begin{frame}{Session 2.7 summary}
+\begin{frame}{Session 2.7 summary and key terms}
 \begin{columns}[T]
-\begin{column}{.55\textwidth}
+\begin{column}{.52\textwidth}
 \begin{keybox}[Key take-aways]
-\footnotesize
-\begin{itemize}\setlength\itemsep{.5mm}
-\item State model $\dot{\bm x}=A\bm x+Bu$ exposes every energy store and mode.
-\item Controllable $\Rightarrow$ all poles placeable by $u=-K\bm x$ (Ackermann).
-\item Observable $\Rightarrow$ unmeasured states estimated by $\dot{\hat{\bm x}}=A\hat{\bm x}+Bu+L(y-C\hat{\bm x})$.
-\item Separation: $K$ and $L$ designed independently --- but verify margins.
-\item Integral state removes steady error under load.
-\item LQR: choose weights, get gains with good margins.
+\begin{itemize}\setlength\itemsep{.4mm}
+\item $\dot{\bm x}=A\bm x+Bu$: one state per energy store.
+\item Poles = eigenvalues; $u=-K\bm x$ moves them to $\mathrm{eig}(A-BK)$.
+\item 2nd-order case: match coefficients to get $K$.
+\item An observer estimates unmeasured states (model + correction).
+\item An integral state removes steady error under load.
 \end{itemize}
 \end{keybox}
 \end{column}
-\begin{column}{.43\textwidth}
-\scriptsize
-\begin{tabular}{@{}ll@{}}
-\toprule
-\textbf{Tool} & \textbf{Test / formula}\\
-\midrule
-controllability & rank $[B\ AB\cdots]$\\
-observability & rank $[C;\,CA;\cdots]$\\
-pole placement & $K=[0\cdots1]\mathcal C^{-1}\varphi_d(A)$\\
-observer & $\mathrm{eig}(A-LC)$ 2--6$\times$ faster\\
-integral & augment $\dot z=r-y$\\
-LQR & $K=R^{-1}B^{\mathsf T}P$\\
-\bottomrule
-\end{tabular}
+\begin{column}{.46\textwidth}
+\begin{defbox}[Key terms]
+\small
+\term{state} system memory $\cdot$ \term{eigenvalue} natural rate / pole $\cdot$ \term{state feedback} $u=-K\bm x$ $\cdot$ \term{pole placement} choosing $K$ for given poles $\cdot$ \term{observer} model-based estimator $\cdot$ \term{separation principle} $K$ and $L$ designed independently
+\end{defbox}
 \end{column}
 \end{columns}
+\end{frame}
+
+% --------------------------------------------------------------------
+\begin{frame}{Check your understanding --- state space}
+\begin{keybox}[Check your understanding]
+\begin{enumerate}\setlength\itemsep{2mm}
+\item A system has eigenvalues $-5$ and $+1$\,s$^{-1}$. Is it stable? Which one causes trouble?
+\item In the worked example, which gain do you increase to make the axis respond faster, and which to add damping?
+\item Why do we place the observer poles faster than the controller poles --- and why not 100$\times$ faster?
+\end{enumerate}
+\end{keybox}
+\vspace{2mm}
+{\small\color{mkGray}Discuss in pairs for 2 minutes, then we compare answers.}
 \end{frame}
 
 % ####################################################################
@@ -837,26 +846,28 @@ LQR & $K=R^{-1}B^{\mathsf T}P$\\
 \begin{frame}{Why fixed gains are not enough: parameter variation}
 \begin{columns}[T]
 \begin{column}{.45\textwidth}
-\scriptsize
-\begin{tabular}{@{}p{1.7cm}p{3.6cm}@{}}
+\small
+\textbf{Picture:} a crane driver handles an empty hook and a 10-tonne load differently. A controller with fixed gains cannot.
+\vspace{1mm}
+
+\begin{tabular}{@{}ll@{}}
 \toprule
-\textbf{Parameter} & \textbf{Typical variation in servos}\\
+\textbf{Parameter} & \textbf{varies with}\\
 \midrule
-inertia $J$ & robot arm pose, payload, winding roll: 1:3 \dots 1:10+\\
-friction & temperature, lubrication, wear\\
-torque const.\ $k_t$ & magnet temperature, saturation at peak current\\
-resonance $f_r$ & axis position, load mass, belt tension\\
-delay & sample rate, comms, filters\\
+inertia $J$ & payload, robot pose (1:10)\\
+friction & temperature, wear\\
+torque const.\ $k_t$ & magnet temperature\\
+resonance $f_r$ & position, belt tension\\
 \bottomrule
 \end{tabular}
 \vspace{1mm}
 
-Velocity PI tuned for $J_0$ ($f_c=100$\,Hz): $\omega_c\approx K_p/J$, so a 5$\times$ inertia shifts $f_c$ to $\approx27$\,Hz where the PI zero now costs $\approx43^\circ$ $\Rightarrow$ \hl{34\,\% overshoot}.
+Velocity PI tuned for $J_0$: with $5J_0$ the overshoot rises to \hl{34\,\%}.
 \end{column}
 \begin{column}{.53\textwidth}
 \centering
 \begin{tikzpicture}
-\begin{axis}[mkplot,width=7.6cm,height=5.3cm,xmin=0,xmax=60,ymin=0,ymax=1.45,xlabel={$t$ [ms]},ylabel={$\omega/\omega_{\text{ref}}$},
+\begin{axis}[mkplot,width=7.6cm,height=5.0cm,xmin=0,xmax=60,ymin=0,ymax=1.45,xlabel={$t$ [ms]},ylabel={$\omega/\omega_{\text{ref}}$},
    legend style={at={(0.97,0.03)},anchor=south east}]
 \addplot table[x=t,y=y1]{data/jvar.dat};\addlegendentry{$J=J_0$ (design)}
 \addplot table[x=t,y=y5]{data/jvar.dat};\addlegendentry{$J=5J_0$}
@@ -867,112 +878,58 @@ Velocity PI tuned for $J_0$ ($f_c=100$\,Hz): $\omega_c\approx K_p/J$, so a 5$\ti
 \end{column}
 \end{columns}
 \begin{notebox}
-Two answers: \textbf{adapt} the controller to the actual parameters, or design \textbf{one robust} controller that works for the whole set.
+Two answers: \textbf{adapt} the controller to the actual parameters, or design \textbf{one robust} controller that works for all of them.
 \end{notebox}
 \end{frame}
 
 % --------------------------------------------------------------------
-\begin{frame}{Describing model uncertainty}
+\begin{frame}{Robust control: one controller for a whole family of plants}
 \begin{columns}[T]
-\begin{column}{.52\textwidth}
-\footnotesize
-\begin{tabular}{@{}ll@{}}
-\term{additive} & $G=G_0+W_a\Delta$\\[1mm]
-\term{multiplicative} & $G=G_0\,(1+W\Delta)$\\[1mm]
- & $\|\Delta\|_\infty\le1$ (any stable $\Delta$)
-\end{tabular}
-\vspace{1mm}
-\begin{itemize}\setlength\itemsep{.3mm}
-\item \term{parametric}: $J\in[J_{\min},J_{\max}]$ --- structured
-\item \term{unstructured}: unmodelled resonances, delay, current loop --- covered by a weight $|W(j\omega)|$ that \hl{grows with frequency}
+\begin{column}{.48\textwidth}
+\small
+\textbf{Picture:} a car suspension designed for an empty car \emph{and} a full one --- not perfect for either, safe for both.
+\begin{itemize}\setlength\itemsep{.4mm}
+\item model uncertainty: the true $G$ lies somewhere near our model $G_0$
+\item uncertainty \hl{grows with frequency} (resonances, delays we did not model)
+\item so robustness is decided around and above $\omega_c$
+\item price: robust designs are more cautious (lower bandwidth)
 \end{itemize}
-\textbf{Robust stability (Nyquist):} at each $\omega$ the true $L$ lies in a disc of radius $|W L_0|$ around $L_0$. Stability for all members iff no disc covers $-1$:
-\begin{eqbox}
-\[ |W L_0|<|1+L_0|\iff \left|W(j\omega)\,T_0(j\omega)\right|<1\ \ \forall\omega \]
-\end{eqbox}
+\textbf{Plot:} the 1\,kHz resonance from Session 2.6. The closed-loop gain must stay below the grey ``uncertainty'' line --- it does only with the notch.
 \end{column}
-\begin{column}{.46\textwidth}
-\centering
-\begin{tikzpicture}[scale=1.55]
-  \draw[mkGray,-{Latex[length=1.4mm]}] (-2.05,0) -- (0.5,0) node[below,font=\tiny]{Re};
-  \draw[mkGray,-{Latex[length=1.4mm]}] (0,-2.25) -- (0,0.5) node[left,font=\tiny]{Im};
-  \begin{scope}
-  \clip (-2.05,-2.25) rectangle (0.5,0.5);
-  \fill[mkSky,opacity=.25] (-1.176,-1.961) circle (0.48);
-  \fill[mkSky,opacity=.25] (-0.884,-0.982) circle (0.416);
-  \fill[mkSky,opacity=.25] (-0.595,-0.458) circle (0.341);
-  \fill[mkSky,opacity=.25] (-0.32,-0.16) circle (0.25);
-  \draw[mkBlue,thick,domain=0.55:8,samples=80,variable=\t] plot ({-1.6/(1+\t*\t)},{-1.6/(\t*(1+\t*\t))});
-  \end{scope}
-  \node[mkRed,font=\scriptsize] at (-1,0) {$\bm\times$};
-  \node[mkRed,font=\tiny,above] at (-1,0.02) {$-1$};
-  \draw[mkOrange,thick,-{Latex[length=1.2mm]}] (-0.595,-0.458) -- ++(0.341,0) node[midway,below,font=\tiny,text=mkOrange]{$|WL_0|$};
-  \draw[mkRed,thick,densely dashed] (-1,0) -- (-0.595,-0.458) node[pos=.35,left,font=\tiny,text=mkRed]{$|1{+}L_0|$};
-  \node[font=\tiny,text=mkBlue,anchor=west] at (-1.0,-1.45) {$L_0(j\omega)$};
-\end{tikzpicture}
-\end{column}
-\end{columns}
-\src{[Skogestad \& Postlethwaite, 2005, ch.~7]; [Zhou, Doyle \& Glover, 1996].}
-\end{frame}
-
-% --------------------------------------------------------------------
-\begin{frame}{Small-gain theorem, $H_\infty$ idea and a robust-stability test}
-\begin{columns}[T]
-\begin{column}{.46\textwidth}
-\scriptsize
-\begin{center}
-\begin{tikzpicture}
-  \node[blkO] (D) {$\Delta$};
-  \node[blk,below=5mm of D,minimum width=12mm] (M) {$M(s)$};
-  \draw[sig] (D.east) -- ++(6mm,0) |- (M.east);
-  \draw[sig] (M.west) -- ++(-6mm,0) |- (D.west);
-\end{tikzpicture}
-\end{center}
-\vspace{-1mm}
-\textbf{Small gain:} $M,\Delta$ stable and
-\begin{eqbox}
-\[ \|M\|_\infty\,\|\Delta\|_\infty<1\ \Rightarrow\ \text{loop stable} \]
-\end{eqbox}
-$\|M\|_\infty=\sup_\omega|M(j\omega)|$ = peak gain. Multiplicative case: $M=WT_0$ $\Rightarrow$ $|WT_0|<1$.\\[1mm]
-\textbf{$H_\infty$ design:} find $C$ with
-\[ \left\|\begin{matrix}W_1S\\ W_3T\end{matrix}\right\|_\infty<1 \]
-$S+T=1$: not both small --- performance at LF, robustness at HF.
-\end{column}
-\begin{column}{.52\textwidth}
+\begin{column}{.50\textwidth}
 \centering
 \begin{tikzpicture}
-\begin{axis}[mkplot,xmode=log,width=7.5cm,height=4.5cm,xmin=10,xmax=3000,ymin=-60,ymax=40,xlabel={$f$ [Hz]},ylabel={[dB]},
+\begin{axis}[mkplot,xmode=log,width=7.3cm,height=4.6cm,xmin=10,xmax=3000,ymin=-60,ymax=40,xlabel={$f$ [Hz]},ylabel={[dB]},
    legend style={at={(0.02,0.03)},anchor=south west}]
-\addplot[mkGray,thick] table[x=f,y=invW]{data/robust.dat};\addlegendentry{$1/|W|$ (rigid vs.\ two-mass model)}
+\addplot[mkGray,thick] table[x=f,y=invW]{data/robust.dat};\addlegendentry{allowed limit $1/|W|$}
 \addplot[mkRed,thick] table[x=f,y=T0]{data/robust.dat};\addlegendentry{$|T_0|$ no notch}
 \addplot[mkGreen,thick] table[x=f,y=Tn]{data/robust.dat};\addlegendentry{$|T_0|$ with notch}
 \end{axis}
 \end{tikzpicture}
-\scriptsize
-$\max|WT_0|=2.7$ without notch (\textcolor{mkRed}{test fails}), $0.14$ with notch (\textcolor{mkGreen}{robustly stable}).
+
+\vspace{1mm}
+{\scriptsize\color{mkGray}Going further: this is the robust-stability test $|W T_0|<1$ (small-gain theorem). $H_\infty$ design finds the controller that best satisfies such tests automatically [Zhou, Doyle \& Glover, 1996].}
 \end{column}
 \end{columns}
-\src{[Zhou, Doyle \& Glover, 1996]; [Skogestad \& Postlethwaite, 2005]. Example: the 1\,kHz resonance of Session 2.6.}
 \end{frame}
 
 % --------------------------------------------------------------------
-\begin{frame}{Gain scheduling}
+\begin{frame}{Gain scheduling: a pre-computed gain table}
 \begin{columns}[T]
 \begin{column}{.5\textwidth}
-\footnotesize
-\begin{itemize}\setlength\itemsep{.5mm}
-\item design linear controllers at several operating points $\rho_1,\dots,\rho_m$
-\item measure a \term{scheduling variable} $\rho$: robot joint angle, payload, roll diameter, speed, DC-bus voltage
-\item interpolate gains between grid points
+\small
+\textbf{Picture:} the gear you choose depends on the road slope --- decided by a rule, not learned.
+\begin{itemize}\setlength\itemsep{.4mm}
+\item tune the controller at a few operating points
+\item measure a \term{scheduling variable} $\rho$ (robot angle, payload, roll diameter)
+\item interpolate the gains in between
 \end{itemize}
-\textbf{Servo example:} keep $\omega_c$ constant while $J$ changes:
 \begin{eqbox}
-\[ K_p(\rho)=\hat J(\rho)\,\omega_c,\qquad K_i(\rho)=K_p(\rho)\,\omega_c/4 \]
+\[ K_p(\rho)=\hat J(\rho)\,\omega_c \quad\text{(keeps $\omega_c$ constant)} \]
 \end{eqbox}
 \begin{itemize}\setlength\itemsep{.3mm}
-\item open-loop adaptation: no learning, fast, transparent, certifiable
-\item needs a good model of $J(\rho)$; $\rho$ must vary \hl{slowly} vs.\ loop dynamics
-\item switch gains bumplessly (rescale the integrator state)
+\item simple, fast, easy to certify
+\item needs a model of $J(\rho)$; $\rho$ must change slowly
 \end{itemize}
 \end{column}
 \begin{column}{.48\textwidth}
@@ -987,7 +944,7 @@ $\max|WT_0|=2.7$ without notch (\textcolor{mkRed}{test fails}), $0.14$ with notc
   \draw[sig] (C) -- node[above,font=\tiny]{$u$} (G);
   \draw[sig] (G.east) -- ++(6mm,0) node[right,font=\scriptsize]{$y$};
   \draw[sig] ($(G.east)+(3mm,0)$) -- ++(0,-7mm) -| node[pos=.9,left,font=\tiny]{$-$} (S);
-  \draw[sig] ($(G.north)+(0,9mm)$) node[above,font=\tiny]{$\rho$ (measured)} -- ++(0,0) ;
+  \node[font=\tiny,above] at ($(G.north)+(0,9mm)$) {$\rho$ (measured)};
   \draw[sig,mkOrange] ($(G.north)+(0,9mm)$) -- (Sch.east |- {$(G.north)+(0,9mm)$});
   \draw[sig,mkOrange] (Sch) -- (C);
 \end{tikzpicture}
@@ -1000,19 +957,19 @@ $\max|WT_0|=2.7$ without notch (\textcolor{mkRed}{test fails}), $0.14$ with notc
 \end{axis}
 \end{tikzpicture}
 
-{\scriptsize\color{mkGray} illustrative inertia profile of a 2-link arm; dots = grid points}
+{\scriptsize\color{mkGray} illustrative 2-link arm; dots = tuned grid points}
 \end{column}
 \end{columns}
 \end{frame}
 
 % --------------------------------------------------------------------
-\begin{frame}{Model-reference adaptive control (MRAC): structure}
+\begin{frame}{Model-reference adaptive control (MRAC)}
 \begin{columns}[T]
-\begin{column}{.56\textwidth}
+\begin{column}{.52\textwidth}
 \centering
 \begin{tikzpicture}
   \node[blk,minimum width=18mm] (Mod) {reference model\\$G_m(s)$};
-  \node[blk,below=7mm of Mod,minimum width=14mm] (Ctl) {controller\\$u=\bm\theta^{\mathsf T}\bm\phi$};
+  \node[blk,below=7mm of Mod,minimum width=14mm] (Ctl) {controller\\gain $\theta$};
   \node[blk,right=8mm of Ctl,minimum width=12mm] (P) {plant\\$G(s)$};
   \node[sumn,right=22mm of Mod] (E) {\sumsym};
   \node[blkO,below=7mm of P,minimum width=14mm,xshift=-10mm] (Ad) {adaptation\\law};
@@ -1025,101 +982,65 @@ $\max|WT_0|=2.7$ without notch (\textcolor{mkRed}{test fails}), $0.14$ with notc
   \draw[sig] (P.east) -- ++(10mm,0) node[right,font=\scriptsize]{$y$};
   \draw[sig] ($(P.east)+(6mm,0)$) -- (E.south) node[pos=.9,right,font=\tiny]{$+$};
   \draw[sig] (E.east) -- ++(5mm,0) node[above,font=\tiny]{$e$} |- (Ad.east);
-  \draw[sig,mkOrange,thick] (Ad.west) -| node[pos=.3,below,font=\tiny]{$\hat{\bm\theta}$} ($(Ctl.south)$);
-  \draw[sig] ($(P.east)+(3mm,0)$) -- ++(0,-5mm) -| ($(Ctl.south east)+(-2mm,0)$);
+  \draw[sig,mkOrange,thick] (Ad.west) -| node[pos=.3,below,font=\tiny]{$\theta$} ($(Ctl.south)$);
 \end{tikzpicture}
-\end{column}
-\begin{column}{.42\textwidth}
-\footnotesize
-\begin{itemize}\setlength\itemsep{.5mm}
-\item \term{reference model} $G_m$ states the desired closed-loop behaviour
-\item \term{inner loop}: ordinary feedback with adjustable parameters $\hat{\bm\theta}$
-\item \term{outer loop}: slow adaptation drives $e=y-y_m\to0$
-\item \term{direct} MRAC adapts controller gains; \term{indirect} (self-tuning) estimates $J,B_v$ online and recomputes gains
-\end{itemize}
-\begin{notebox}
-Needs \textbf{persistent excitation} for parameters to converge; otherwise only the tracking error converges.
-\end{notebox}
-\end{column}
-\end{columns}
-\src{[{\AA}str\"om \& Wittenmark, 1995, ch.~5]; [Ioannou \& Sun, 1996].}
-\end{frame}
 
-% --------------------------------------------------------------------
-\begin{frame}{The MIT rule (gradient adaptation)}
-\begin{columns}[T]
-\begin{column}{.44\textwidth}
-\scriptsize
-Minimise $J(\theta)=\tfrac12e^2$ by steepest descent:
-\begin{eqbox}
-\[ \frac{d\theta}{dt}=-\gamma\,e\,\frac{\partial e}{\partial\theta} \]
-\end{eqbox}
-\textbf{Adapting a feed-forward gain:} plant $kG(s)$, model $k_0G(s)$, $u=\theta u_c$, $k$ unknown:
-\[ e=(k\theta-k_0)\,G u_c\ \Rightarrow\ \frac{\partial e}{\partial\theta}=kGu_c=\frac{k}{k_0}y_m \]
-\begin{eqbox}
-\[ \frac{d\theta}{dt}=-\gamma'\,e\,y_m \]
-\end{eqbox}
-Simulation: $G=\frac{1}{s+1}$, $k=1$, $k_0=2$ $\Rightarrow\theta^*=2$; $u_c$ = square wave.
-\begin{itemize}\setlength\itemsep{.2mm}
-\item larger $\gamma$: faster, but \hl{no stability guarantee} --- large $\gamma u_c^2$ can diverge
-\end{itemize}
+\vspace{1mm}
+\small
+\textbf{Picture:} a learner driver copies the instructor (model); every mismatch $e$ nudges their technique.
 \end{column}
-\begin{column}{.54\textwidth}
-\centering
+\begin{column}{.46\textwidth}
+\small
+\textbf{MIT rule}: change the gain $\theta$ so that $e^2$ shrinks:
+\begin{eqbox}
+\[ \frac{d\theta}{dt}=-\gamma\,e\,y_m \]
+\end{eqbox}
+\vspace{-1mm}
 \begin{tikzpicture}
-\begin{groupplot}[group style={group size=1 by 2,vertical sep=2mm,xticklabels at=edge bottom},mkplot,width=7.7cm,height=3.45cm,xmin=0,xmax=100]
-\nextgroupplot[ylabel={$\theta$},ymin=0,ymax=2.6,legend style={at={(0.98,0.04)},anchor=south east},legend columns=3]
+\begin{axis}[mkplot,width=6.4cm,height=3.4cm,xmin=0,xmax=100,ymin=0,ymax=2.6,xlabel={$t$ [s]},ylabel={$\theta$},
+  legend style={at={(0.98,0.04)},anchor=south east},legend columns=3]
 \addplot table[x=t,y=th05]{data/mrac.dat};\addlegendentry{$\gamma=0.5$}
 \addplot table[x=t,y=th1]{data/mrac.dat};\addlegendentry{$\gamma=1$}
 \addplot table[x=t,y=th2]{data/mrac.dat};\addlegendentry{$\gamma=2$}
 \draw[mkGray,densely dashed] (axis cs:0,2) -- (axis cs:100,2);
-\nextgroupplot[ylabel={$y,\ y_m$},xlabel={$t$ [s]},ymin=-2.6,ymax=2.6,legend style={at={(0.98,0.04)},anchor=south east},legend columns=2]
-\addplot[mkSky,thick] table[x=t,y=ym]{data/mrac.dat};\addlegendentry{$y_m$}
-\addplot[mkOrange,thick] table[x=t,y=y]{data/mrac.dat};\addlegendentry{$y$ ($\gamma=1$)}
-\end{groupplot}
+\end{axis}
 \end{tikzpicture}
+
+{\scriptsize $\gamma$ = learning rate: larger = faster, but too large can go unstable.}
 \end{column}
 \end{columns}
 \src{Classical example after [{\AA}str\"om \& Wittenmark, 1995]; simulated for this course.}
 \end{frame}
 
 % --------------------------------------------------------------------
-\begin{frame}{Lyapunov stability and Lyapunov-based adaptation}
+\begin{frame}{Going further: Lyapunov stability and provably stable adaptation}
+\gofurther
 \begin{columns}[T]
-\begin{column}{.35\textwidth}
-\footnotesize
-\textbf{Lyapunov's idea:} find an ``energy'' $V(\bm x)>0$ with
-\[ \dot V(\bm x)<0\ \ (\bm x\ne0) \]
-$\Rightarrow$ trajectories roll downhill: stable --- without solving the ODE.
+\begin{column}{.42\textwidth}
 \centering
 \begin{tikzpicture}
-\begin{axis}[mkplot,width=4.9cm,height=4.4cm,xmin=-2.2,xmax=2.2,ymin=-2.2,ymax=2.2,axis equal image,
+\begin{axis}[mkplot,width=5.4cm,height=5.0cm,xmin=-2.2,xmax=2.2,ymin=-2.2,ymax=2.2,axis equal image,
    xlabel={$x$},ylabel={$\dot x$},xtick={-2,0,2},ytick={-2,0,2}]
 \foreach \r in {0.5,1,1.5,2} {\addplot[mkSky,thin,domain=0:360,samples=60] ({\r*cos(x)},{\r*sin(x)});}
 \addplot[mkOrange,thick] table[x=x,y=v]{data/lyap.dat};
 \end{axis}
 \end{tikzpicture}
 
-{\tiny\color{mkGray}$\ddot x+0.4\dot x+x=0$, $V=x^2+\dot x^2$, $\dot V=-0.8\dot x^2\le0$}
+{\tiny\color{mkGray}damped oscillator: energy circles (blue), trajectory (orange) spirals inwards}
 \end{column}
-\begin{column}{.63\textwidth}
-\scriptsize
-\textbf{First-order MRAC with stability proof} (cf.\ velocity loop $J\dot\omega=-B_v\omega+u$):\\
-plant $\dot y=-ay+bu$, model $\dot y_m=-a_my_m+b_mr$, control $u=\theta_1r-\theta_2y$.\\
-Ideal gains $\theta_1^*=b_m/b$, $\theta_2^*=(a_m-a)/b$; error $e=y-y_m$:
-\[ \dot e=-a_me+b\,\tilde\theta_1 r-b\,\tilde\theta_2 y,\qquad \tilde\theta_i=\theta_i-\theta_i^* \]
+\begin{column}{.56\textwidth}
+\small
+\textbf{Idea:} a marble in a bowl. If some ``energy'' $V$ is always positive and \emph{always decreasing}, the system must settle --- we never need to solve the ODE.
 \begin{eqbox}
-\[ V=\tfrac12e^2+\tfrac{b}{2\gamma}\left(\tilde\theta_1^2+\tilde\theta_2^2\right) \]
-\[ \dot\theta_1=-\gamma\,e\,r,\quad \dot\theta_2=\gamma\,e\,y\ \Rightarrow\ \dot V=-a_me^2\le0 \]
+\[ V(\bm x)>0,\qquad \dot V(\bm x)<0\ \Rightarrow\ \text{stable} \]
 \end{eqbox}
-\begin{itemize}\setlength\itemsep{.3mm}
-\item stable for \hl{any} $\gamma>0$ (needs $\operatorname{sign} b$ known, $b>0$ here)
-\item compare: MIT rule uses $y_m$, Lyapunov law uses the signals $r,y$ --- similar form, but proven
-\item Barbalat's lemma $\Rightarrow e\to0$; $\tilde\theta\to0$ only with persistent excitation
+\begin{itemize}\setlength\itemsep{.4mm}
+\item \term{Lyapunov-based MRAC}: choose the adaptation law so that $\dot V\le0$ is guaranteed
+\item result looks like the MIT rule, but is proven stable for any learning rate $\gamma>0$
 \end{itemize}
 \end{column}
 \end{columns}
-\src{[Slotine \& Li, 1991, ch.~3 \& 8]; [{\AA}str\"om \& Wittenmark, 1995].}
+\src{[Slotine \& Li, 1991, ch.~3 \& 8]; [{\AA}str\"om \& Wittenmark, 1995]; [Ioannou \& Sun, 1996].}
 \end{frame}
 
 % --------------------------------------------------------------------
@@ -1148,11 +1069,12 @@ Ideal gains $\theta_1^*=b_m/b$, $\theta_2^*=(a_m-a)/b$; error $e=y-y_m$:
   \draw[sig] (Q.west) -| node[pos=.8,left,font=\tiny]{$-$} node[pos=.4,below,font=\tiny]{$\hat d$} (S1.south);
 \end{tikzpicture}
 \vspace{1mm}
+\small
+
+\textbf{Idea:} ``What torque \emph{should} have produced this motion?'' minus ``what torque did I command?'' = the unknown disturbance $\hat d$. Subtract it.
 \begin{eqbox}
-\[ \hat d=Q(s)\left[P_n^{-1}(s)\,y-u\right],\qquad u=u_c-\hat d \]
+\[ \hat d=Q(s)\left[P_n^{-1}(s)\,y-u\right] \]
 \end{eqbox}
-\scriptsize
-Velocity axis: $P_n^{-1}=J_ns$ (inverse inertia model), $Q=\frac{1}{\tau s+1}$ makes it proper.
 \end{column}
 \begin{column}{.46\textwidth}
 \centering
@@ -1163,11 +1085,10 @@ Velocity axis: $P_n^{-1}=J_ns$ (inverse inertia model), $Q=\frac{1}{\tau s+1}$ m
 \addplot table[x=t,y=w1]{data/dob.dat};\addlegendentry{P + DOB}
 \end{axis}
 \end{tikzpicture}
-\scriptsize
-$J=\SI{2e-3}{kg\,m^2}$, P loop 50\,Hz, $Q$: 200\,Hz, load step 0.5\,N\,m at 10\,ms. Without DOB: $-0.80$\,rad/s steady error; with DOB: $\to0$.
+\small
+Load step 0.5\,N\,m at 10\,ms: without DOB a speed error of $-0.8$\,rad/s remains; with DOB it returns to 0.
 \begin{itemize}\setlength\itemsep{.2mm}
-\item inside the $Q$ bandwidth the plant behaves like $P_n$ $\Rightarrow$ \hl{robust to $J$, friction, $T_L$}
-\item $Q$ bandwidth limited by noise, delay, resonances
+\item $Q$ = low-pass; its bandwidth is limited by noise and delay
 \end{itemize}
 \end{column}
 \end{columns}
@@ -1175,32 +1096,83 @@ $J=\SI{2e-3}{kg\,m^2}$, P loop 50\,Hz, $Q$: 200\,Hz, load step 0.5\,N\,m at 10\,
 \end{frame}
 
 % --------------------------------------------------------------------
-\begin{frame}{Session 2.8 summary}
-\scriptsize
-\begin{tabularx}{\textwidth}{@{}l X X X@{}}
+\begin{frame}{Session 2.8 summary and key terms}
+\small
+\begin{tabularx}{\textwidth}{@{}l X X@{}}
 \toprule
-\textbf{Approach} & \textbf{Idea} & \textbf{Strength} & \textbf{Weakness}\\
+\textbf{Approach} & \textbf{Idea} & \textbf{Trade-off}\\
 \midrule
-Robust ($H_\infty$, small gain) & one fixed $C$ for the whole uncertainty set: $|WT|<1$ & guaranteed, simple to run & conservative: less bandwidth\\
-Gain scheduling & pre-computed gains vs.\ measured $\rho$ & transparent, fast & needs model of $J(\rho)$, slow $\rho$\\
-MRAC (MIT / Lyapunov) & adjust $\hat{\bm\theta}$ online so $y\to y_m$ & copes with unknown parameters & excitation, transients, bursting\\
-Disturbance observer & estimate lumped disturbance, cancel it & strong load rejection & $Q$ bandwidth vs.\ noise/delay\\
+Robust & one fixed $C$ that works for the whole family & safe, but less bandwidth\\
+Gain scheduling & pre-computed gains vs.\ measured $\rho$ & needs a model of $J(\rho)$\\
+MRAC & adjust gains online so $y$ follows $y_m$ & learning transients, tuning $\gamma$\\
+Disturbance observer & estimate the disturbance and cancel it & $Q$ bandwidth vs.\ noise\\
 \bottomrule
 \end{tabularx}
 \vspace{2mm}
+\begin{columns}[T]
+\begin{column}{.5\textwidth}
 \begin{keybox}[Key take-aways]
 \begin{itemize}\setlength\itemsep{.3mm}
-\item Model uncertainty grows with frequency: robust stability is decided around and above $\omega_c$.
-\item Lyapunov functions prove stability without solving the dynamics --- and give adaptation laws for free.
-\item In industrial drives: auto-tuning + gain scheduling + DOB/observers dominate; full MRAC is rare.
+\item Real parameters drift; fixed gains can lose performance.
+\item In drives: auto-tuning + scheduling + DOB are common; full MRAC is rare.
 \end{itemize}
 \end{keybox}
+\end{column}
+\begin{column}{.48\textwidth}
+\begin{defbox}[Key terms]
+\term{uncertainty} gap model--reality $\cdot$ \term{robust} works for all members $\cdot$ \term{adaptive} changes itself online $\cdot$ \term{reference model} desired behaviour
+\end{defbox}
+\end{column}
+\end{columns}
+\end{frame}
+
+% --------------------------------------------------------------------
+\begin{frame}{Check your understanding --- adaptive and robust control}
+\begin{keybox}[Check your understanding]
+\begin{enumerate}\setlength\itemsep{2mm}
+\item A robot picks up a payload that triples the joint inertia. What happens to the crossover frequency of a fixed velocity PI, and why?
+\item Gain scheduling vs.\ MRAC: which one ``learns''? Which one would you rather certify for a safety-critical machine?
+\item Why is model uncertainty usually largest at high frequency?
+\end{enumerate}
+\end{keybox}
+\vspace{2mm}
+{\small\color{mkGray}Discuss in pairs for 2 minutes, then we compare answers.}
 \end{frame}
 
 % ####################################################################
 \section{2.9 Discrete-Time Control}
 % ####################################################################
 
+\begin{frame}{Refresher: sampling a signal}
+\begin{columns}[T]
+\begin{column}{.46\textwidth}
+\begin{defbox}[Refresher: sampling = taking snapshots]
+A film camera shows motion as 24 photos per second. A digital controller sees a signal only at the instants $t=kT$:
+\[ f_s=\frac1T\quad\text{[Hz]},\qquad y_k=y(kT) \]
+Between samples the output is \term{held} constant (zero-order hold, ZOH): a staircase.
+\end{defbox}
+\small
+\textbf{Example:} $f_s=8$\,kHz $\Rightarrow T=\SI{125}{\micro s}$; a 100\,Hz sine gets 80 samples per period.
+\end{column}
+\begin{column}{.52\textwidth}
+\centering
+\begin{tikzpicture}
+\begin{axis}[mkplot,width=7.6cm,height=4.6cm,xmin=0,xmax=1,ymin=-1.5,ymax=1.5,xlabel={$t/T_0$ \quad ($T=T_0/12$)},ylabel={signal},
+  legend style={at={(0.99,0.99)},anchor=north east,font=\tiny}]
+\addplot[mkBlue,thick] table[x=t,y=y]{data/zoh_cont.dat};\addlegendentry{$y(t)$}
+\addplot[mkOrange,thick,const plot] table[x=t,y=y]{data/zoh_samp.dat};\addlegendentry{held samples}
+\addplot[mkSky,thick,densely dashed] table[x=t,y=yd]{data/zoh_cont.dat};\addlegendentry{$y(t-T/2)$}
+\addplot[mkOrange,only marks,mark=*,mark size=1.2pt,forget plot] table[x=t,y=y]{data/zoh_samp.dat};
+\end{axis}
+\end{tikzpicture}
+\begin{keybox}[Take-away]
+The staircase follows the signal \hl{half a sample late} on average: holding costs a delay of $T/2$.
+\end{keybox}
+\end{column}
+\end{columns}
+\end{frame}
+
+% --------------------------------------------------------------------
 \begin{frame}{Anatomy of a digital servo loop}
 \centering
 \begin{tikzpicture}
@@ -1222,15 +1194,15 @@ Disturbance observer & estimate lumped disturbance, cancel it & strong load reje
 \vspace{2mm}
 \begin{columns}[T]
 \begin{column}{.5\textwidth}
-\footnotesize
+\small
 \begin{itemize}\setlength\itemsep{.4mm}
-\item signals exist only at $t=kT$; between samples the actuator \term{holds}
-\item quantisation: ADC bits, encoder counts, PWM resolution
-\item computation takes time: $u_k$ is usually applied at $(k{+}1)T$
+\item the computer sees $y$ only at $t=kT$
+\item the output is held until the next update
+\item computing takes time: $u_k$ is usually applied one sample later
 \end{itemize}
 \end{column}
 \begin{column}{.48\textwidth}
-\scriptsize
+\small
 \begin{tabular}{@{}lcc@{}}
 \toprule
 Loop & typical $f_s$ & typical $f_c$\\
@@ -1245,55 +1217,22 @@ position & 1--8\,kHz & 20--100\,Hz\\
 \end{frame}
 
 % --------------------------------------------------------------------
-\begin{frame}{Sampling and the zero-order hold}
-\begin{columns}[T]
-\begin{column}{.55\textwidth}
-\centering
-\begin{tikzpicture}
-\begin{axis}[mkplot,width=8.0cm,height=5.0cm,xmin=0,xmax=1,ymin=-1.5,ymax=1.5,xlabel={$t/T_0$ \quad ($T=T_0/12$)},ylabel={signal},
-  legend style={at={(0.99,0.99)},anchor=north east,font=\tiny}]
-\addplot[mkBlue,thick] table[x=t,y=y]{data/zoh_cont.dat};\addlegendentry{$y(t)$}
-\addplot[mkOrange,thick,const plot] table[x=t,y=y]{data/zoh_samp.dat};\addlegendentry{ZOH output}
-\addplot[mkSky,thick,densely dashed] table[x=t,y=yd]{data/zoh_cont.dat};\addlegendentry{$y(t-T/2)$}
-\addplot[mkOrange,only marks,mark=*,mark size=1.2pt,forget plot] table[x=t,y=y]{data/zoh_samp.dat};
-\end{axis}
-\end{tikzpicture}
-\end{column}
-\begin{column}{.43\textwidth}
-\footnotesize
-\begin{eqbox}
-\[ G_{\text{ZOH}}(s)=\frac{1-e^{-sT}}{s} \]
-\[ G_{\text{ZOH}}(j\omega)=T\,\frac{\sin(\omega T/2)}{\omega T/2}\,e^{-j\omega T/2} \]
-\end{eqbox}
-\begin{itemize}\setlength\itemsep{.4mm}
-\item the staircase follows $y(t-T/2)$ on average: \hl{half-sample delay}
-\item phase lag $-\omega T/2$ (linear in $\omega$)
-\item amplitude droop: $-0.9$\,dB at $\omega=\omega_s/4$
-\item delay is invisible in the sampled values but \emph{not} to the loop
-\end{itemize}
-\end{column}
-\end{columns}
-\src{[Franklin, Powell \& Workman, 1998, ch.~4 \& 6].}
-\end{frame}
-
-% --------------------------------------------------------------------
 \begin{frame}{Delay budget and phase loss at crossover}
 \begin{columns}[T]
 \begin{column}{.48\textwidth}
-\footnotesize
+\small
+\textbf{Picture:} a shower with a long pipe --- you turn the tap, the water changes later, and you overcorrect.
 \begin{eqbox}
-\[ T_d\approx\underbrace{\tfrac{T}{2}}_{\text{ZOH}}+\underbrace{T_{\text{calc}}}_{\approx T}+T_{\text{filter}}+T_{\text{sensor}} \]
-\[ \Delta\varphi=\omega_cT_d\ \text{[rad]}=360^\circ f_cT_d \]
+\[ \Delta\varphi=360^\circ\cdot f_c\cdot T_d,\qquad T_d\approx1.5\,T \]
 \end{eqbox}
-\textbf{Worked example.} Velocity loop sampled at $f_s=4$\,kHz, one-sample calculation delay: $T_d=1.5T=\SI{375}{\micro s}$.
-\begin{itemize}\setlength\itemsep{.2mm}
-\item $f_c=200$\,Hz: $\Delta\varphi=360\cdot200\cdot375\cdot10^{-6}=$ \hl{27$^\circ$}
-\item at 8\,kHz: $13.5^\circ$; at 16\,kHz: $6.8^\circ$
-\item add a 1\,kHz 1st-order LPF: $+\arctan(0.2)=11.3^\circ$
-\end{itemize}
-\begin{notebox}
-Delay is the dominant phase thief in digital drives --- double $f_s$, halve the loss.
-\end{notebox}
+($T/2$ from the hold + $T$ for computing.)\\[1mm]
+\textbf{Worked example:} $f_s=4$\,kHz, $f_c=200$\,Hz.
+\begin{enumerate}\setlength\itemsep{.3mm}
+\item $T=1/4000=\SI{250}{\micro s}$
+\item $T_d=1.5\times250=\SI{375}{\micro s}$
+\item $\Delta\varphi=360\cdot200\cdot0.000375=$ \hl{27$^\circ$}
+\item at 8\,kHz: $13.5^\circ$ --- double $f_s$, halve the loss
+\end{enumerate}
 \end{column}
 \begin{column}{.50\textwidth}
 \centering
@@ -1315,24 +1254,17 @@ Delay is the dominant phase thief in digital drives --- double $f_s$, halve the 
 \begin{frame}{From the $s$-plane to the $z$-plane}
 \begin{columns}[T]
 \begin{column}{.46\textwidth}
-\footnotesize
+\small
+In discrete time a pole is a number $z$ that multiplies the signal every sample: $x_{k+1}=z\,x_k$.
 \begin{eqbox}
-\[ z=e^{sT}\qquad\text{stable}\iff|z_i|<1 \]
+\[ z=e^{sT}\qquad\text{stable}\iff|z|<1 \]
 \end{eqbox}
-\begin{tabular}{@{}ll@{}}
-$s$-plane & $z$-plane\\
-\midrule
-left half-plane & inside unit circle\\
-$j\omega$ axis & unit circle\\
-$s=0$ & $z=1$\\
-$\omega=\pi/T$ (Nyquist) & $z=-1$\\
-\end{tabular}
-\vspace{1mm}
 \begin{itemize}\setlength\itemsep{.3mm}
-\item closer to the origin $\Rightarrow$ faster decay
-\item poles near $z=-1$: ringing at $f_s/2$
-\item \textbf{example:} $s=-70\pm j71.4$, $T=1$\,ms $\Rightarrow z=e^{-0.07}e^{\pm j0.0714}=0.930\pm j0.0665$ --- fast sampling crowds poles near $z=1$ (numerics!)
+\item $|z|<1$: each sample smaller $\Rightarrow$ decays
+\item left half $s$-plane $\to$ inside the unit circle
+\item near $z=1$: slow; near $z=-1$: rings at $f_s/2$
 \end{itemize}
+\textbf{Example:} $s=-70\pm j71$, $T=1$\,ms $\Rightarrow z\approx0.93\pm j0.07$, inside the circle: stable.
 \end{column}
 \begin{column}{.52\textwidth}
 \centering
@@ -1345,86 +1277,37 @@ $\omega=\pi/T$ (Nyquist) & $z=-1$\\
 \addplot[mkAmber,thin] table[x=x,y=y]{data/wn.dat};
 \addplot[mkBlue,thick,domain=0:180,samples=90] ({cos(x)},{sin(x)});
 \addplot[mkOrange,only marks,mark=x,mark size=2.5pt,thick] coordinates {(0.930,0.0665)};
-\node[font=\tiny,text=mkMid,anchor=west] at (axis cs:0.32,0.25) {$\zeta=0.8$};
-\node[font=\tiny,text=mkMid,anchor=south] at (axis cs:0.0,1.02) {$\zeta=0$ (unit circle)};
-\node[font=\tiny,text=mkAmber!70!mkNavy,anchor=south] at (axis cs:-0.55,0.62) {$\omega_nT=\frac{3\pi}{5}$};
+\node[font=\tiny,text=mkMid,anchor=south] at (axis cs:0.0,1.02) {unit circle = stability limit};
 \node[font=\tiny,text=mkOrange,anchor=south] at (axis cs:0.93,0.1) {example};
 \end{axis}
 \end{tikzpicture}
 
-{\scriptsize\color{mkGray} blue-grey: constant $\zeta=0,0.2,\dots,0.8$; amber: constant $\omega_nT=k\pi/5$}
+{\scriptsize\color{mkGray} thin lines: constant damping (blue-grey) and constant frequency (amber)}
 \end{column}
 \end{columns}
 \end{frame}
 
 % --------------------------------------------------------------------
-\begin{frame}{Discretisation methods}
-\scriptsize
-\begin{tabularx}{\textwidth}{@{}l l X l@{}}
-\toprule
-\textbf{Method} & \textbf{Substitution / rule} & \textbf{Properties} & \textbf{Use}\\
-\midrule
-Forward Euler & $s\leftarrow\dfrac{z-1}{T}$ & stable $s$ may map \textcolor{mkRed}{unstable} ($\omega_fT>2$) & avoid for fast poles\\
-Backward Euler & $s\leftarrow\dfrac{z-1}{zT}$ & always stable; distorts, adds damping & integrators, D-term\\
-Tustin (bilinear) & $s\leftarrow\dfrac{2}{T}\dfrac{z-1}{z+1}$ & LHP $\leftrightarrow$ unit disc exactly; frequency warping & PI/PID, filters (pre-warp)\\
-ZOH equivalent & $G(z)=(1-z^{-1})\,\mathcal Z\{G(s)/s\}$ & exact at samples for staircase input & plant models\\
-Pole--zero matching & $z_i=e^{s_iT}$, match DC gain & preserves pole locations & filters, notches\\
-\bottomrule
-\end{tabularx}
-\vspace{1mm}
+\begin{frame}{Going further: discretisation methods and pre-warping}
+\gofurther
 \begin{columns}[T]
-\begin{column}{.54\textwidth}
-\centering
-\begin{tikzpicture}[scale=0.62]
- \foreach \xo/\name in {0/Forward Euler,4.1/Backward Euler,8.2/Tustin}{
-   \begin{scope}[xshift=\xo cm]
-    \draw[mkGray,-{Latex[length=1mm]}] (-1.6,0) -- (1.7,0);
-    \draw[mkGray,-{Latex[length=1mm]}] (0,-1.5) -- (0,1.5);
-    \draw[mkBlue,densely dashed] (0,0) circle (1);
-    \node[font=\tiny,text=mkNavy] at (0,-1.85) {\name};
-   \end{scope}}
- \fill[mkOrange,opacity=.3] (-1.6,-1.4) rectangle (1,1.4);
- \fill[mkOrange,opacity=.3] (4.6,0) circle (0.5);
- \fill[mkOrange,opacity=.3] (8.2,0) circle (1);
-\end{tikzpicture}
-
-{\tiny\color{mkGray}orange: image of the stable $s$ half-plane; dashed: unit circle}
+\begin{column}{.48\textwidth}
+\small
+To run $C(s)$ on a computer, replace $s$ by an expression in $z$. Common choices:
+\begin{itemize}\setlength\itemsep{.4mm}
+\item \term{forward Euler} --- simplest, can turn a stable filter \hl{unstable}
+\item \term{backward Euler} --- always stable, slightly distorted
+\item \term{Tustin} (bilinear) --- standard for PI/PID and filters
+\item \term{ZOH equivalent} --- exact for plant models
+\end{itemize}
+Tustin squeezes frequencies near $f_s/2$: an 800\,Hz notch at $f_s=4$\,kHz lands at 714\,Hz unless it is \term{pre-warped}.
 \end{column}
-\begin{column}{.44\textwidth}
-\scriptsize
-\textbf{Example:} LPF pole $\omega_f=2\pi\cdot500$, $T=\SI{250}{\micro s}$ ($\omega_fT=0.785$):\\[.5mm]
-\begin{tabular}{@{}lc@{}}
-exact / ZOH / matched & $z_p=e^{-\omega_fT}=0.456$\\
-Tustin & $0.436$\\
-backward Euler & $0.560$\\
-forward Euler & $0.215$\\
-\end{tabular}\\[.5mm]
-At $f_f=1.5$\,kHz, forward Euler gives $z_p=-1.36$: \hl{unstable}.
-\end{column}
-\end{columns}
-\end{frame}
-
-% --------------------------------------------------------------------
-\begin{frame}{Tustin frequency warping --- why notch filters need pre-warping}
-\begin{columns}[T]
-\begin{column}{.44\textwidth}
-\footnotesize
-Tustin maps the analogue frequency $\omega_a$ to the digital frequency $\omega_d$ by
-\begin{eqbox}
-\[ \omega_a=\frac{2}{T}\tan\frac{\omega_dT}{2} \]
-\end{eqbox}
-Fine for $\omega\ll\omega_s$, but compresses everything towards $f_s/2$.\\[1mm]
-\textbf{Example:} 800\,Hz notch, $f_s=4$\,kHz:\\
-without pre-warp the notch lands at
-$\frac{2}{T}\arctan\frac{\omega_0T}{2}=2\pi\cdot$\hl{714\,Hz} ($-11\,\%$) and misses the resonance.\\[1mm]
-\textbf{Pre-warp:} design the analogue prototype at $\omega_{pw}=\frac{2}{T}\tan\frac{\omega_0T}{2}$ $\Rightarrow$ exact at 800\,Hz.
-\end{column}
-\begin{column}{.54\textwidth}
+\begin{column}{.50\textwidth}
 \centering
 \begin{tikzpicture}
-\begin{axis}[mkplot,width=7.6cm,height=5.4cm,xmin=300,xmax=1300,ymin=-26,ymax=2,xlabel={$f$ [Hz]},ylabel={$|N|$ [dB]},
+\begin{axis}[mkplot,width=7.0cm,height=4.8cm,xmin=300,xmax=1300,ymin=-26,ymax=2,xlabel={$f$ [Hz]},ylabel={$|N|$ [dB]},
   legend style={at={(0.98,0.03)},anchor=south east}]
-\addplot[mkGray,thick] table[x=f,y=ma]{data/warp.dat};\addlegendentry{analogue prototype}
+\addplot[mkGray,thick] table[x=f,y=ma]{data/warp.dat};\addlegendentry{analogue design}
 \addplot[mkRed,thick] table[x=f,y=m0]{data/warp.dat};\addlegendentry{Tustin, no pre-warp}
 \addplot[mkBlue,thick,densely dashed] table[x=f,y=m1]{data/warp.dat};\addlegendentry{Tustin, pre-warped}
 \draw[mkOrange,densely dashed] (axis cs:800,-26) -- (axis cs:800,2);
@@ -1432,55 +1315,46 @@ $\frac{2}{T}\arctan\frac{\omega_0T}{2}=2\pi\cdot$\hl{714\,Hz} ($-11\,\%$) and mi
 \end{tikzpicture}
 \end{column}
 \end{columns}
-\src{[Oppenheim \& Schafer, 2010, ch.~7]; [Franklin, Powell \& Workman, 1998, ch.~6].}
+\src{[Franklin, Powell \& Workman, 1998, ch.~6]; [Oppenheim \& Schafer, 2010, ch.~7].}
 \end{frame}
 
 % --------------------------------------------------------------------
 \begin{frame}[fragile]{Discrete PID implementation}
 \begin{columns}[T]
-\begin{column}{.47\textwidth}
-\scriptsize
-$C(s)=K_p+\dfrac{K_i}{s}+\dfrac{K_d s}{T_f s+1}$, period $T$:
-\begin{eqbox}
-\vspace{-2mm}
-\begin{align*}
-I_k&=I_{k-1}+K_iT\,e_k \qquad\text{(backward Euler)}\\
-D_k&=\tfrac{T_f}{T_f+T}D_{k-1}-\tfrac{K_d}{T_f+T}\,(y_k-y_{k-1})\\
-u_k&=\operatorname{sat}\!\left(K_pe_k+I_k+D_k\right)
-\end{align*}
-\vspace{-4mm}
-\end{eqbox}
-\begin{itemize}\setlength\itemsep{.3mm}
-\item D acts on $-y$ (no derivative kick on reference steps)
-\item \term{anti-windup}: stop or back-calculate $I$ when $u$ saturates
-\item \term{incremental form} $\Delta u_k$: bumpless switching
-\item fixed-point: scale $K_iT$ carefully (tiny numbers)
+\begin{column}{.45\textwidth}
+\small
+Every $T$ seconds the controller runs a few lines:
+\begin{itemize}\setlength\itemsep{.4mm}
+\item \textbf{I}: add up the error: $I_k=I_{k-1}+K_iT\,e_k$
+\item \textbf{D}: difference of the measurement, filtered
+\item \textbf{saturation}: the output is limited (max.\ current)
+\item \term{anti-windup}: when saturated, stop the integrator growing --- otherwise big overshoot later
 \end{itemize}
+\textbf{Picture:} windup = keeping your foot down on the accelerator while the car is already at full power.
 \end{column}
-\begin{column}{.51\textwidth}
+\begin{column}{.53\textwidth}
 \begin{notebox}
 \scriptsize
 \begin{semiverbatim}
-// executed every T (ISR synchronised to PWM)
+// executed every T (ISR synced to PWM)
 e  = r - y;
-I += Ki*T*e;                         // integrate
-D  = a*D - b*(y - y_old);            // a=Tf/(Tf+T)
-y_old = y;                           // b=Kd/(Tf+T)
+I += Ki*T*e;                    // integrate
+D  = a*D - b*(y - y_old);       // filtered D on y
+y_old = y;              // a=Tf/(Tf+T), b=Kd/(Tf+T)
 u  = Kp*e + I + D;
 if (u > UMAX)      \{ I -= u - UMAX; u = UMAX; \}
 else if (u < -UMAX)\{ I -= u + UMAX; u = -UMAX;\}
 write_pwm(u);       // takes effect next period
 \end{semiverbatim}
 \end{notebox}
-\vspace{-1mm}
-{\scriptsize Anti-windup above: clamping by back-calculation with gain 1 (integrator absorbs the excess).}
+{\scriptsize D acts on $-y$ so a step in $r$ does not cause a ``kick''.}
 \end{column}
 \end{columns}
 \src{[{\AA}str\"om \& H\"agglund, 2006, ch.~3]; [Franklin, Powell \& Workman, 1998].}
 \end{frame}
 
 % --------------------------------------------------------------------
-\begin{frame}{Aliasing: a teaser}
+\begin{frame}{Aliasing: the wagon-wheel effect}
 \begin{columns}[T]
 \begin{column}{.5\textwidth}
 \centering
@@ -1489,19 +1363,17 @@ write_pwm(u);       // takes effect next period
 {\scriptsize red: $f=0.9$, blue: $f=0.1$, sampled at $f_s=1$ --- identical samples}
 \end{column}
 \begin{column}{.48\textwidth}
-\footnotesize
+\small
+\textbf{Picture:} in films a fast wheel seems to turn slowly or backwards --- the camera samples too slowly.
 \begin{eqbox}
-\[ f_{\text{alias}}=\left|f-k\,f_s\right|,\quad k=\operatorname{round}(f/f_s) \]
+\[ f_{\text{alias}}=\left|f-k\,f_s\right|,\ \ k=\mathrm{round}(f/f_s) \]
 \end{eqbox}
 \begin{itemize}\setlength\itemsep{.4mm}
-\item anything above $f_s/2$ folds back into $[0,f_s/2]$
-\item \textbf{example:} 4.6\,kHz structural/switching component sampled at 4\,kHz $\Rightarrow$ appears at \hl{600\,Hz} --- inside the loop's range
-\item after sampling it cannot be separated: filter \emph{before} the sampler
-\item remedies: analogue RC anti-alias filter, oversampling + decimation, sampling synchronous to the PWM centre
+\item anything above $f_s/2$ folds back below it
+\item 4.6\,kHz vibration sampled at 4\,kHz looks like \hl{600\,Hz}
+\item cure: filter \emph{before} sampling (anti-alias RC filter)
 \end{itemize}
-\begin{notebox}
-More in Day 5 (sensing and signal acquisition).
-\end{notebox}
+{\scriptsize\color{mkGray}More on Day 5 (sensing).}
 \end{column}
 \end{columns}
 \end{frame}
@@ -1514,7 +1386,7 @@ More in Day 5 (sensing and signal acquisition).
 \begin{tikzpicture}
 \begin{axis}[mkplot,width=7.5cm,height=5.4cm,xmin=0,xmax=30,ymin=0,ymax=2.0,xlabel={$t$ [ms]},ylabel={$\omega/\omega_{\text{ref}}$},
    legend style={at={(0.97,0.97)},anchor=north east}]
-\addplot[mkBlue,thick] table[x=t,y=w]{data/fs_20000.dat};\addlegendentry{$f_s=20$\,kHz (14\,\%)}
+\addplot[mkBlue,thick] table[x=t,y=w]{data/fs_20000.dat};\addlegendentry{$f_s=20$\,kHz (14\,\% overshoot)}
 \addplot[mkOrange,thick] table[x=t,y=w]{data/fs_4000.dat};\addlegendentry{$f_s=4$\,kHz (16\,\%)}
 \addplot[mkRed,thick] table[x=t,y=w]{data/fs_1000.dat};\addlegendentry{$f_s=1$\,kHz (95\,\%)}
 \draw[mkGray,densely dashed] (axis cs:0,1) -- (axis cs:30,1);
@@ -1522,15 +1394,14 @@ More in Day 5 (sensing and signal acquisition).
 \end{tikzpicture}
 \end{column}
 \begin{column}{.46\textwidth}
-\footnotesize
-Same velocity PI ($f_c=100$\,Hz, $J=\SI{2e-3}{kg\,m^2}$), discrete, 1-sample calculation delay.\\[1mm]
-At 1\,kHz: $T_d=1.5$\,ms $\Rightarrow\Delta\varphi=54^\circ$ $\Rightarrow$ near-unstable.
+\small
+Same velocity PI ($f_c=100$\,Hz), only $f_s$ changes.\\[1mm]
+At 1\,kHz: $T_d=1.5$\,ms $\Rightarrow\Delta\varphi=360\cdot100\cdot0.0015=54^\circ$ $\Rightarrow$ almost unstable.
 \begin{keybox}[Rules of thumb]
 \begin{itemize}\setlength\itemsep{.3mm}
-\item $f_s\ge 20$--$40\times$ closed-loop bandwidth for near-continuous behaviour
-\item check $360^\circ f_cT_d$ fits the PM budget
-\item nested loops: inner loops sample faster
-\item sensor and PWM rate must match $f_s$
+\item $f_s\ge 20$--$40\times$ the loop bandwidth
+\item check $360^\circ f_cT_d$ against the PM budget
+\item inner loops sample faster
 \end{itemize}
 \end{keybox}
 \end{column}
@@ -1539,39 +1410,39 @@ At 1\,kHz: $T_d=1.5$\,ms $\Rightarrow\Delta\varphi=54^\circ$ $\Rightarrow$ near-
 \end{frame}
 
 % --------------------------------------------------------------------
-\begin{frame}{Session 2.9 summary}
+\begin{frame}{Session 2.9 summary and key terms}
 \begin{columns}[T]
-\begin{column}{.55\textwidth}
+\begin{column}{.52\textwidth}
 \begin{keybox}[Key take-aways]
-\footnotesize
-\begin{itemize}\setlength\itemsep{.5mm}
-\item Sampling + ZOH + calculation $\approx1.5T$ delay $\Rightarrow$ phase loss $360^\circ f_cT_d$.
-\item Stability in $z$: all poles inside the unit circle; $z=e^{sT}$.
-\item Tustin for controllers (pre-warp notches), ZOH-equivalent for plants, avoid forward Euler for fast poles.
-\item Discrete PID: backward-Euler I, filtered D on measurement, anti-windup, saturation.
-\item Filter analogue signals before sampling (aliasing).
-\item Choose $f_s$ from the bandwidth \emph{and} the phase budget.
+\begin{itemize}\setlength\itemsep{.4mm}
+\item Sampling + hold + computing $\approx1.5T$ delay.
+\item Phase lost: $360^\circ f_cT_d$ --- double $f_s$, halve it.
+\item Discrete stability: all poles inside the unit circle.
+\item Discrete PID needs saturation and anti-windup.
+\item Filter before sampling to avoid aliasing.
 \end{itemize}
 \end{keybox}
 \end{column}
-\begin{column}{.43\textwidth}
-\scriptsize
-\begin{tabular}{@{}lc@{}}
-\toprule
-$f_s$ (with $f_c=200$\,Hz) & $\Delta\varphi$ at $T_d=1.5T$\\
-\midrule
-2\,kHz & $54^\circ$\\
-4\,kHz & $27^\circ$\\
-8\,kHz & $13.5^\circ$\\
-16\,kHz & $6.8^\circ$\\
-\bottomrule
-\end{tabular}
-\vspace{2mm}
-\begin{notebox}
-Next: how these loops are stacked inside a real servo drive.
-\end{notebox}
+\begin{column}{.46\textwidth}
+\begin{defbox}[Key terms]
+\small
+\term{sample rate} $f_s=1/T$ $\cdot$ \term{ZOH} holds the output between samples $\cdot$ \term{$z$-plane} map of discrete poles $\cdot$ \term{anti-windup} stops the integrator in saturation $\cdot$ \term{aliasing} fast signal masquerading as slow
+\end{defbox}
 \end{column}
 \end{columns}
+\end{frame}
+
+% --------------------------------------------------------------------
+\begin{frame}{Check your understanding --- discrete-time control}
+\begin{keybox}[Check your understanding]
+\begin{enumerate}\setlength\itemsep{2mm}
+\item A current loop crosses at 2\,kHz and is sampled at 16\,kHz. How much phase does the $1.5T$ delay cost?
+\item A discrete pole sits at $z=1.05$. What does the signal do from one sample to the next?
+\item Why does the integrator ``wind up'' when the drive hits its current limit?
+\end{enumerate}
+\end{keybox}
+\vspace{2mm}
+{\small\color{mkGray}Discuss in pairs for 2 minutes, then we compare answers.}
 \end{frame}
 
 % ####################################################################
@@ -1605,10 +1476,11 @@ Next: how these loops are stacked inside a real servo drive.
 \end{tikzpicture}
 \vspace{2mm}
 
-\footnotesize
+\small
 \begin{itemize}\setlength\itemsep{.3mm}
-\item \term{drive} = power stage + control loops + protection; \term{feedback} closes every loop
-\item the motion controller sends set-points (position/velocity/torque) every 0.25--4\,ms
+\item \term{drive} = power electronics + control loops + protection
+\item \term{motion controller} sends targets every 0.25--4\,ms
+\item \term{feedback} (encoder) closes every loop
 \end{itemize}
 \end{column}
 \begin{column}{.30\textwidth}
@@ -1617,38 +1489,35 @@ Next: how these loops are stacked inside a real servo drive.
 \credit{Tero Kontkanen, CC BY-SA 3.0, via Wikimedia Commons}\\[1mm]
 \includegraphics[width=.38\linewidth]{../figures/d3_encoder.jpg}\\
 \credit{Projuktiponno, CC BY-SA 4.0, via Wikimedia Commons}\\
-{\tiny compact servo drives on a daisy-chained fieldbus; incremental encoder}
+{\tiny compact servo drives on a fieldbus; incremental encoder}
 \end{column}
 \end{columns}
 \end{frame}
 
 % --------------------------------------------------------------------
 \begin{frame}{Torque, velocity and position control modes}
-\scriptsize
+\small
 \begin{tabularx}{\textwidth}{@{}l X X l X@{}}
 \toprule
-\textbf{Mode} & \textbf{Command from controller} & \textbf{Loops closed in the drive} & \textbf{Typ.\ BW} & \textbf{Applications}\\
+\textbf{Mode} & \textbf{Controller sends} & \textbf{Loops in the drive} & \textbf{Typ.\ BW} & \textbf{Example}\\
 \midrule
-Torque (current) & $T^*$ or $i_q^*$ & current loop only & 1--3\,kHz & winders/tension, press-fit force, master--slave torque sharing\\
-Velocity & $\omega^*$ & velocity + current & 100--500\,Hz & spindles, conveyors, CNC with position loop in the controller\\
-Position & $\theta^*$ (or profile) & position + velocity + current & 20--100\,Hz & point-to-point, robots, synchronised axes\\
+Torque & torque $T^*$ & current only & 1--3\,kHz & winder tension, press force\\
+Velocity & speed $\omega^*$ & velocity + current & 100--500\,Hz & spindle, conveyor\\
+Position & angle $\theta^*$ & position + velocity + current & 20--100\,Hz & robot, pick-and-place\\
 \bottomrule
 \end{tabularx}
-\vspace{2mm}
+\vspace{3mm}
 \begin{columns}[T]
 \begin{column}{.52\textwidth}
-\footnotesize
-\textbf{Where is each loop closed?}
-\begin{itemize}\setlength\itemsep{.3mm}
-\item cyclic synchronous modes (CiA\,402 / IEC\,61800-7): \term{CSP}, \term{CSV}, \term{CST} --- set-points every cycle
-\item profile modes (PP, PV): the drive generates the trajectory itself
-\item the faster the inner loop, the closer it must sit to the power stage
-\end{itemize}
+\small
+\textbf{Analogy:} telling a driver ``press the pedal this much'' (torque), ``drive at 50\,km/h'' (velocity) or ``stop at that line'' (position).
+\vspace{1mm}
+
+{\scriptsize\color{mkGray}Going further: fieldbus drive profiles (CiA\,402) name these modes CST, CSV, CSP --- Day 5.}
 \end{column}
 \begin{column}{.46\textwidth}
 \begin{keybox}[Selection rule]
-\footnotesize
-Close a loop where its \textbf{sensor} and its \textbf{update rate} are; send the controller only what it can update fast enough.
+Close each loop where its \textbf{sensor} is and where it can be updated \textbf{fast enough}.
 \end{keybox}
 \end{column}
 \end{columns}
@@ -1657,7 +1526,7 @@ Close a loop where its \textbf{sensor} and its \textbf{update rate} are; send th
 % --------------------------------------------------------------------
 \begin{frame}{Cascade control structure of a servo drive}
 \centering
-\begin{tikzpicture}[node distance=4.5mm]
+\resizebox{\linewidth}{!}{\begin{tikzpicture}[node distance=4.5mm]
   \node[sumn] (Sp) {\sumsym};
   \node[blk,right=of Sp] (Cp) {$K_{pp}$\\[-.5mm]\tiny position P};
   \node[sumn,right=6mm of Cp] (Sv) {\sumsym};
@@ -1670,7 +1539,7 @@ Close a loop where its \textbf{sensor} and its \textbf{update rate} are; send th
   \node[blk,right=of Kt] (Mech) {$\frac{1}{Js}$};
   \node[blk,right=of Mech] (Int) {$\frac1s$};
   \draw[sig] ($(Sp.west)+(-5mm,0)$) node[left,font=\scriptsize]{$\theta^*$} -- (Sp);
-  \draw[sig] (Sp) -- (Cp); \draw[sig] (Cp) -- (Sv); \draw[sig] (Sv) -- node[above,font=\tiny]{} (Cv);
+  \draw[sig] (Sp) -- (Cp); \draw[sig] (Cp) -- (Sv); \draw[sig] (Sv) -- (Cv);
   \draw[sig] (Cv) -- (Si); \draw[sig] (Si) -- (Ci); \draw[sig] (Ci) -- (Inv);
   \draw[sig] (Inv) -- node[above,font=\tiny]{$v$} (Mot); \draw[sig] (Mot) -- node[above,font=\tiny]{$i$} (Kt);
   \draw[sig] (Kt) -- node[above,font=\tiny]{$T_m$} (Mech); \draw[sig] (Mech) -- node[above,font=\tiny]{$\omega$} (Int);
@@ -1678,25 +1547,21 @@ Close a loop where its \textbf{sensor} and its \textbf{update rate} are; send th
   \draw[sig] ($(Int.east)+(2mm,0)$) -- ++(0,-14mm) -| node[pos=.97,left,font=\tiny]{$-$} (Sp);
   \draw[sig] ($(Mech.east)!.5!(Int.west)$) -- ++(0,-9mm) -| node[pos=.95,left,font=\tiny]{$-$} (Sv);
   \draw[sig] ($(Mot.east)!.5!(Kt.west)$) -- ++(0,-4.5mm) -| node[pos=.9,left,font=\tiny]{$-$} (Si);
-  % feedforward
   \draw[sig,mkOrange,densely dashed] ($(Sp.west)+(-3mm,0)$) -- ++(0,9mm) -| node[pos=.25,above,font=\tiny,text=mkOrange]{velocity feed-forward $\dot\theta^*$} (Sv.north);
-  \draw[sig,mkOrange,densely dashed] ($(Sp.west)+(-3mm,9mm)$) -- ++(0,6mm) -| node[pos=.2,above,font=\tiny,text=mkOrange]{torque/acceleration feed-forward $\hat J\ddot\theta^*$} (Si.north);
-  \node[font=\tiny,text=mkGray,below=13mm of Cv] {velocity feedback $\omega$ (encoder, differentiated/observed)};
-\end{tikzpicture}
-\vspace{1mm}
+  \draw[sig,mkOrange,densely dashed] ($(Sp.west)+(-3mm,9mm)$) -- ++(0,6mm) -| node[pos=.2,above,font=\tiny,text=mkOrange]{torque feed-forward $\hat J\ddot\theta^*$} (Si.north);
+\end{tikzpicture}}
+\vspace{2mm}
 \begin{columns}[T]
 \begin{column}{.5\textwidth}
-\footnotesize
-\begin{itemize}\setlength\itemsep{.3mm}
-\item each inner loop makes the outer plant simple: current loop $\to$ ``torque source'', velocity loop $\to$ ``integrator''
-\item bandwidth separation \hl{3--10$\times$} between loops
-\end{itemize}
+\small
+\textbf{Picture:} Russian dolls --- each inner loop turns its part into something simple for the next one (current loop $\to$ ``ideal torque source'').
 \end{column}
 \begin{column}{.48\textwidth}
-\footnotesize
+\small
 \begin{itemize}\setlength\itemsep{.3mm}
-\item feed-forwards give tracking without high feedback gains
-\item tuned inside-out: current $\to$ velocity $\to$ position
+\item each inner loop \hl{3--10$\times$} faster than the next
+\item tune from inside out: current $\to$ velocity $\to$ position
+\item feed-forward: act on the plan before an error appears
 \end{itemize}
 \end{column}
 \end{columns}
@@ -1720,14 +1585,15 @@ Close a loop where its \textbf{sensor} and its \textbf{update rate} are; send th
 \end{column}
 \begin{column}{.46\textwidth}
 \begin{keybox}[Key take-aways]
-\footnotesize
 \begin{itemize}\setlength\itemsep{.4mm}
-\item Servo = supply + drive + motor + transmission + load + feedback + motion controller.
-\item Three modes: torque, velocity, position --- defined by which loops the drive closes.
-\item Cascade: current $\gg$ velocity $\gg$ position bandwidth (factor 3--10 each).
-\item Feed-forward for tracking, feedback for disturbances.
+\item Servo = supply + drive + motor + transmission + load + encoder + controller.
+\item Mode = which loops the drive closes.
+\item Cascade: current $\gg$ velocity $\gg$ position bandwidth.
 \end{itemize}
 \end{keybox}
+\begin{defbox}[Key terms]
+\term{cascade} loops inside loops $\cdot$ \term{feed-forward} act on the reference $\cdot$ \term{bandwidth} how fast a loop follows
+\end{defbox}
 \end{column}
 \end{columns}
 \end{frame}
@@ -1736,6 +1602,51 @@ Close a loop where its \textbf{sensor} and its \textbf{update rate} are; send th
 \section{3.2 Power Electronics I: Rectifier, DC Bus and Inverter}
 % ####################################################################
 
+\begin{frame}{Refresher: diode, capacitor and transistor switch}
+\begin{columns}[T]
+\begin{column}{.32\textwidth}
+\centering
+\begin{circuitikz}[scale=.8,transform shape]
+\draw (0,0) to[D*,l=$D$] (2.2,0);
+\end{circuitikz}
+\begin{defbox}[Diode]
+\small
+A one-way \term{valve}: current flows only from anode to cathode. Turns AC into DC (rectifier).
+\end{defbox}
+\end{column}
+\begin{column}{.32\textwidth}
+\centering
+\begin{circuitikz}[scale=.8,transform shape]
+\draw (0,0) to[eC,l=$C$] (2.2,0);
+\end{circuitikz}
+\begin{defbox}[Capacitor]
+\small
+An energy \term{tank}: smooths the voltage and buffers bursts of current.
+\[ E=\tfrac12CV^2 \]
+\end{defbox}
+\end{column}
+\begin{column}{.32\textwidth}
+\centering
+\begin{circuitikz}[scale=.8,transform shape]
+\draw (0,0) node[nigbt,rotate=90](T){};
+\node[font=\scriptsize,anchor=north] at (T.G) {gate};
+\end{circuitikz}
+\begin{defbox}[Transistor switch]
+\small
+A tap opened by a small \term{gate} signal. Used only fully \hl{on} or fully \hl{off}.
+\end{defbox}
+\end{column}
+\end{columns}
+\vspace{1mm}
+\small
+\textbf{Why only on/off?} Power loss $P=V\cdot I$ in the switch. At $I=\SI{10}{A}$:
+on: $V\approx\SI{1.5}{V}\Rightarrow\SI{15}{W}$; off: $I\approx0\Rightarrow\SI{0}{W}$; half-way ($V=\SI{280}{V}$): \hl{2.8\,kW} --- it would melt.
+\begin{keybox}[Take-away]
+A drive builds any voltage by switching very fast between on and off and averaging (PWM).
+\end{keybox}
+\end{frame}
+
+% --------------------------------------------------------------------
 \begin{frame}{Power stage of a servo drive: overview}
 \begin{columns}[T]
 \begin{column}{.77\textwidth}
@@ -1743,9 +1654,7 @@ Close a loop where its \textbf{sensor} and its \textbf{update rate} are; send th
 \resizebox{\linewidth}{!}{%
 \begin{circuitikz}[scale=1,transform shape,line width=.6pt]
 \ctikzset{bipoles/length=.85cm,diodes/scale=.8}
-% rails
 \draw (1,3) -- (2.9,3); \draw (1,0) -- (11.4,0);
-% rectifier legs
 \foreach \x in {1,1.8,2.6}{
   \draw (\x,1.85) to[D*] (\x,3);
   \draw (\x,0) to[D*] (\x,1.15);
@@ -1756,19 +1665,15 @@ Close a loop where its \textbf{sensor} and its \textbf{update rate} are; send th
 \draw (-0.3,1.5) node[ocirc,label={[font=\scriptsize]left:L2}]{} -- (1.8,1.5) node[circ]{};
 \draw (-0.3,1.3) node[ocirc,label={[font=\scriptsize]left:L3}]{} -- (2.6,1.3) node[circ]{};
 \node[font=\scriptsize,text=mkBlue] at (1.8,3.55) {diode rectifier};
-% precharge
 \draw (2.6,3) -- (3.0,3) to[R,l=\scriptsize$R_{pc}$] (4.4,3) -- (4.8,3);
 \draw (3.0,3) -- (3.0,3.7) to[nos,l=\scriptsize bypass] (4.4,3.7) -- (4.4,3);
-% DC link
 \draw (4.8,3) -- (5.4,3) to[eC,l_=\scriptsize$C_{dc}$] (5.4,0);
 \draw (5.0,2.6) node[font=\scriptsize,text=mkOrange]{$+$};
 \draw[mkOrange,-{Latex[length=1.6mm]}] (4.75,0.4) -- (4.75,2.4) node[midway,left,font=\scriptsize,text=mkOrange]{$V_{dc}$};
-% brake chopper
 \draw (5.4,3) -- (6.6,3) to[R,l=\scriptsize$R_b$] (6.6,1.7);
 \draw (6.6,1.7) node[nigbt,anchor=C,scale=.8](Tb){};
 \draw (Tb.E) -- (6.6,0);
 \node[font=\scriptsize,text=mkBlue] at (6.6,3.55) {brake chopper};
-% inverter legs
 \draw (6.6,3) -- (10.6,3);
 \foreach \x/\n in {8.0/a,9.3/b,10.6/c}{
   \draw (\x,3) node[nigbt,anchor=C,scale=.8](T\n u){};
@@ -1779,7 +1684,6 @@ Close a loop where its \textbf{sensor} and its \textbf{update rate} are; send th
   \draw (T\n l.C) -- ++(0.45,0) to[D*,diodes/scale=.6] ($(T\n l.E)+(0.45,0)$) -- (T\n l.E);
 }
 \node[font=\scriptsize,text=mkBlue] at (9.3,3.55) {three-phase inverter};
-% outputs
 \coordinate (ua) at (8.0,1.75); \coordinate (ub) at (9.3,1.6); \coordinate (uc) at (10.6,1.45);
 \draw (ua) node[circ]{} -- (11.9,1.75); \draw (ub) node[circ]{} -- (11.9,1.6); \draw (uc) node[circ]{} -- (11.9,1.45);
 \draw[fill=mkPale,draw=mkBlue,thick] (12.45,1.6) circle (0.5) node[font=\small]{M};
@@ -1789,13 +1693,12 @@ Close a loop where its \textbf{sensor} and its \textbf{update rate} are; send th
 \begin{column}{.21\textwidth}
 \centering
 \includegraphics[width=\linewidth]{../figures/d3_servo_drive_motor.jpg}\\
-\credit{Projuktiponno, CC BY-SA 4.0, via Wikimedia Commons}\\[1mm]
-{\tiny Terminals: L1/L2(/L3) mains, L1C/L2C control supply, B1/B2 brake resistor, $\oplus/\ominus$ DC bus, U/V/W motor}
+\credit{Projuktiponno, CC BY-SA 4.0, via Wikimedia Commons}
 \end{column}
 \end{columns}
 \vspace{1mm}
-\footnotesize
-\textbf{AC $\to$ DC $\to$ AC:} uncontrolled rectifier charges the DC link; pre-charge resistor limits inrush; the brake chopper dumps regenerated energy; the two-level inverter synthesises variable-voltage, variable-frequency three-phase voltages by PWM.
+\small
+\textbf{AC $\to$ DC $\to$ AC:} diodes rectify the mains $\to$ the capacitor stores it as a steady DC voltage $\to$ six transistor switches chop it into motor voltages of any amplitude and frequency. The brake chopper burns surplus energy when the motor brakes.
 \end{frame}
 
 % --------------------------------------------------------------------
@@ -1811,24 +1714,23 @@ Close a loop where its \textbf{sensor} and its \textbf{update rate} are; send th
 \draw[mkBlue,densely dashed] (axis cs:0,540) -- (axis cs:40,540);
 \end{axis}
 \end{tikzpicture}
-\scriptsize
-6-pulse output = envelope of the six line-to-line voltages; ripple at $6f=\SI{300}{Hz}$.
+\small
+The diodes always pick the highest of the six line-to-line voltages: a bumpy DC.
 \end{column}
 \begin{column}{.48\textwidth}
-\footnotesize
+\small
 \begin{eqbox}
-\[ V_{dc,\text{avg}}=\frac{3\sqrt2}{\pi}V_{LL}=1.35\,V_{LL},\qquad \hat V=\sqrt2\,V_{LL} \]
+\[ V_{dc}\approx1.35\,V_{LL}\ \text{(average)},\quad \hat V=\sqrt2\,V_{LL} \]
 \end{eqbox}
-400\,V mains: 540\,V average, 566\,V peak (light load, capacitor charges to peak).
+400\,V mains: $1.35\times400=\SI{540}{V}$; capacitor charges to the peak $\approx\SI{566}{V}$.
 \begin{itemize}\setlength\itemsep{.2mm}
-\item $C_{dc}$: ripple current, energy buffer, low-inductance commutation loop
-\item pre-charge resistor + bypass relay: limit inrush into an empty $C_{dc}$
-\item diode front end is \hl{not regenerative}
+\item $C_{dc}$ smooths the bumps
+\item pre-charge resistor limits the inrush into an empty $C_{dc}$
+\item diodes cannot send energy \hl{back} to the mains
 \end{itemize}
-\vspace{-1mm}
 \begin{center}
-\includegraphics[height=1.55cm]{../figures/d3_diode_module.jpg}\hspace{1mm}
-\includegraphics[height=1.55cm]{../figures/d3_dclink_caps.jpg}\\
+\includegraphics[height=1.45cm]{../figures/d3_diode_module.jpg}\hspace{1mm}
+\includegraphics[height=1.45cm]{../figures/d3_dclink_caps.jpg}\\
 \credit{left: Hiro36, CC BY-SA 3.0; right: Giovanna 27, CC BY 4.0; via Wikimedia Commons}
 \end{center}
 \end{column}
@@ -1838,34 +1740,32 @@ Close a loop where its \textbf{sensor} and its \textbf{update rate} are; send th
 % --------------------------------------------------------------------
 \begin{frame}{Regeneration and the brake chopper}
 \begin{columns}[T]
-\begin{column}{.47\textwidth}
-\scriptsize
-\textbf{Worked example.} $J=\SI{0.05}{kg\,m^2}$ decelerated linearly from 3000\,rpm ($\SI{314}{rad/s}$) to 0 in 0.5\,s:
-\begin{itemize}\setlength\itemsep{.2mm}
-\item kinetic energy $E=\tfrac12J\omega^2=\SI{2467}{J}$
-\item torque $J\alpha=\SI{31.4}{N\,m}$, peak power $P=T\omega=\SI{9.87}{kW}$
-\item $C_{dc}=\SI{1}{mF}$ from 565 to 780\,V absorbs only $\tfrac12C(780^2-565^2)=\SI{145}{J}$ (6\,\%)
-\item resistor must take peak power at $V_{on}$: $R_b\le V_{on}^2/P=\SI{61.6}{\ohm}$ $\Rightarrow$ choose \hl{56\,$\Omega$}
-\end{itemize}
-\vspace{-1mm}
-\begin{center}
-\includegraphics[height=2.0cm]{../figures/d3_brake_resistor.jpg}\\
-\credit{Glogger, CC BY-SA 3.0, via Wikimedia Commons}
-\end{center}
+\begin{column}{.48\textwidth}
+\small
+\textbf{Picture:} braking a motor turns it into a generator --- energy flows back into the drive.\\[1mm]
+\textbf{Worked example:} $J=\SI{0.05}{kg\,m^2}$ stops from $\SI{314}{rad/s}$ (3000\,rpm) in 0.5\,s.
+\begin{enumerate}\setlength\itemsep{.3mm}
+\item energy: $E=\tfrac12J\omega^2=\tfrac12\cdot0.05\cdot314^2=\SI{2.47}{kJ}$
+\item capacitor (1\,mF, 565$\to$780\,V) takes only $\tfrac12C(780^2-565^2)=\SI{145}{J}$
+\item peak power $P=J\alpha\,\omega=31.4\cdot314=\SI{9.9}{kW}$
+\item resistor: $R_b\le V^2/P=780^2/9870=\SI{62}{\ohm}$ $\Rightarrow$ \hl{56\,$\Omega$}
+\end{enumerate}
 \end{column}
-\begin{column}{.51\textwidth}
+\begin{column}{.50\textwidth}
 \centering
 \begin{tikzpicture}
-\begin{groupplot}[group style={group size=1 by 2,vertical sep=2mm,xticklabels at=edge bottom},mkplot,width=7.3cm,xmin=0,xmax=700]
-\nextgroupplot[height=3.9cm,ylabel={$V_{dc}$ [V]},ymin=540,ymax=820,ytick={565,760,780}]
+\begin{groupplot}[group style={group size=1 by 2,vertical sep=2mm,xticklabels at=edge bottom},mkplot,width=7.1cm,xmin=0,xmax=700]
+\nextgroupplot[height=3.6cm,ylabel={$V_{dc}$ [V]},ymin=540,ymax=820,ytick={565,760,780}]
 \addplot[mkOrange,thin] table[x=t,y=v]{data/vdc_brake.dat};
 \draw[mkRed,densely dashed] (axis cs:0,780) -- (axis cs:700,780);
-\nextgroupplot[height=2.5cm,ylabel={$P_{\text{regen}}$ [kW]},xlabel={$t$ [ms]},ymin=0,ymax=11]
+\nextgroupplot[height=2.4cm,ylabel={$P_{\text{regen}}$ [kW]},xlabel={$t$ [ms]},ymin=0,ymax=11]
 \addplot[mkBlue,thick] table[x=t,y=p]{data/vdc_brake.dat};
 \end{groupplot}
 \end{tikzpicture}
-\scriptsize
-Hysteresis chopper: on at 780\,V, off at 760\,V. Alternatives: common DC bus between axes, active (regenerative) front end.
+\small
+Chopper on at 780\,V, off at 760\,V.\\
+\includegraphics[height=1.3cm]{../figures/d3_brake_resistor.jpg}\
+\credit{Glogger, CC BY-SA 3.0, via Wikimedia Commons}
 \end{column}
 \end{columns}
 \end{frame}
@@ -1894,54 +1794,53 @@ Hysteresis chopper: on at 780\,V, off at 760\,V. Alternatives: common DC bus bet
 \draw (4.2,1.45) node[circ]{} -- (5.3,1.45) node[right,font=\scriptsize]{$c$};
 \end{circuitikz}
 
-{\tiny\color{mkGray}antiparallel (freewheeling) diodes omitted for clarity --- see photo}
+{\tiny\color{mkGray}freewheeling diodes omitted for clarity}
 \end{column}
 \begin{column}{.48\textwidth}
-\footnotesize
+\small
 \begin{itemize}\setlength\itemsep{.3mm}
-\item each leg ties its phase to $+V_{dc}/2$ or $-V_{dc}/2$: \term{two-level}
-\item $S^+$ and $S^-$ of a leg switch \hl{complementarily} --- never both on
-\item $2^3=8$ switching states: 6 active, 2 zero vectors
-\item average leg voltage set by duty: $\bar v_{aN}=(2d_a-1)V_{dc}/2$
-\item freewheeling diodes carry current during dead time and regeneration
+\item each \term{leg} = two switches; the output is tied to $+$ or $-$
+\item top and bottom are \hl{never on together} (short circuit!)
+\item average output set by the on-time fraction (\term{duty cycle} $d$):
 \end{itemize}
+\begin{eqbox}
+\[ \bar v_{aN}=(2d-1)\,\frac{V_{dc}}{2} \]
+\end{eqbox}
+$d=0.75$, $V_{dc}=\SI{560}{V}$: $\bar v_{aN}=0.5\cdot280=\SI{140}{V}$.
 \begin{center}
-\includegraphics[height=1.9cm]{../figures/d3_igbt_module.jpg}\\
-\credit{Sthdhk, CC BY-SA 4.0, via Wikimedia Commons}\\
-{\tiny dual (half-bridge) IGBT module}
+\includegraphics[height=1.5cm]{../figures/d3_igbt_module.jpg}\\
+\credit{Sthdhk, CC BY-SA 4.0, via Wikimedia Commons}
 \end{center}
 \end{column}
 \end{columns}
 \end{frame}
 
 % --------------------------------------------------------------------
-\begin{frame}{Power switches: IGBT, MOSFET and wide band-gap}
+\begin{frame}{Power switches: IGBT, MOSFET and SiC}
 \begin{columns}[T]
 \begin{column}{.64\textwidth}
-\scriptsize
+\small
 \begin{tabularx}{\linewidth}{@{}l X X X@{}}
 \toprule
  & \textbf{Si IGBT} & \textbf{Si MOSFET} & \textbf{SiC MOSFET}\\
 \midrule
-voltage class & 600--1700\,V & $\le$ 250\,V (low-voltage drives) & 650--1700\,V\\
-conduction & $V_{CE(sat)}\approx1.5$--2\,V & $R_{DS(on)}$: m$\Omega$ & $R_{DS(on)}$, low\\
-switching & tail current, slower & very fast & very fast\\
+voltage & 600--1700\,V & $\le$ 250\,V & 650--1700\,V\\
+switching & slower & very fast & very fast\\
 typ.\ $f_{sw}$ & 4--16\,kHz & 20--100\,kHz & 16--100\,kHz\\
-servo use & 400\,V industrial drives & 24--72\,V axes, robots, AGVs & compact/high-$f_s$ drives\\
+used in & 400\,V drives & 24--72\,V robots, AGVs & compact drives\\
 \bottomrule
 \end{tabularx}
 \vspace{2mm}
-\footnotesize
 \begin{itemize}\setlength\itemsep{.3mm}
-\item higher $f_{sw}$ $\Rightarrow$ less current ripple, faster current loop, smaller filters
-\item but high $dv/dt$ stresses motor insulation and causes bearing currents and EMI
+\item faster switching $\Rightarrow$ smoother current, faster current loop
+\item but steep voltage edges stress motor insulation and cause EMI
 \end{itemize}
 \end{column}
 \begin{column}{.34\textwidth}
 \centering
 \includegraphics[width=\linewidth]{../figures/d3_igbt_module_open.jpg}\\
 \credit{Pslawinski, CC BY-SA 3.0, via Wikimedia Commons}\\
-{\tiny opened IGBT module: paralleled IGBT dies and freewheeling diodes with bond wires}
+{\tiny opened IGBT module: chips and bond wires}
 \end{column}
 \end{columns}
 \src{[Mohan, Undeland \& Robbins, 2003, ch.~8 \& 22]; [Krishnan, 2001].}
@@ -1951,15 +1850,14 @@ servo use & 400\,V industrial drives & 24--72\,V axes, robots, AGVs & compact/hi
 \begin{frame}{Gate drivers and dead time (preview)}
 \begin{columns}[T]
 \begin{column}{.43\textwidth}
-\footnotesize
-\textbf{Gate driver functions}
+\small
+\textbf{Gate driver}: the ``muscle'' between the microcontroller and the power switch.
 \begin{itemize}\setlength\itemsep{.3mm}
-\item level shift / \term{galvanic isolation} for the high-side switch (bootstrap or isolated supply)
-\item peak gate current of several A; typical IGBT drive $+15$\,V / $-8$\,V
-\item \term{desaturation} (short-circuit) detection, soft turn-off within $\approx\SI{10}{\micro s}$
-\item Miller clamp, under-voltage lock-out
+\item \term{isolation}: the top switch floats at hundreds of volts
+\item fast gate current (several A)
+\item short-circuit protection
 \end{itemize}
-\textbf{Dead time} $t_d$: both switches off after each transition to prevent \hl{shoot-through}.
+\term{Dead time} $t_d$: a short pause with \emph{both} switches off at every change, to avoid \hl{shoot-through}.
 \end{column}
 \begin{column}{.55\textwidth}
 \centering
@@ -1980,79 +1878,70 @@ servo use & 400\,V industrial drives & 24--72\,V axes, robots, AGVs & compact/hi
   \draw[mkGray,densely dashed] (1,0.2) -- (1,0.8); \draw[mkGray,densely dashed] (4,0.2) -- (4,0.8);
 \end{tikzpicture}\par
 \vspace{1mm}
-\scriptsize
-During $t_d$ the diode conducts, so $v_{aN}$ depends on the \emph{current sign}: for $i>0$ the pulse is shortened by $t_d$.
+\small
+Price: a small voltage error,
 \begin{eqbox}
-\[ \Delta\bar v\approx\frac{t_d}{T_{sw}}\,V_{dc}\,\operatorname{sign}(i) \]
+\[ \Delta\bar v\approx\frac{t_d}{T_{sw}}\,V_{dc} \]
 \end{eqbox}
-\textbf{Example:} $t_d=\SI{2}{\micro s}$, $f_{sw}=10$\,kHz, $V_{dc}=560$\,V $\Rightarrow\Delta\bar v=$ \hl{11.2\,V} --- distortion at low speed; compensation on Day 4.
+$t_d=\SI{2}{\micro s}$, $f_{sw}=10$\,kHz ($T_{sw}=\SI{100}{\micro s}$), $V_{dc}=560$\,V $\Rightarrow$ \hl{11.2\,V} --- compensated on Day 4.
 \end{column}
 \end{columns}
 \src{[Balogh, TI SLUA618]; [Mohan, Undeland \& Robbins, 2003].}
 \end{frame}
 
 % --------------------------------------------------------------------
-\begin{frame}{Session 3.2 (part 1) summary}
+\begin{frame}{Session 3.2 summary, key terms and check}
 \begin{columns}[T]
-\begin{column}{.55\textwidth}
+\begin{column}{.5\textwidth}
 \begin{keybox}[Key take-aways]
-\footnotesize
-\begin{itemize}\setlength\itemsep{.5mm}
-\item Drive power path: rectifier $\to$ pre-charge $\to$ DC link $\to$ brake chopper $\to$ inverter $\to$ motor.
-\item $V_{dc}\approx1.35V_{LL}$ (540\,V at 400\,V mains).
-\item Braking energy mostly exceeds what $C_{dc}$ can store: size $R_b$ from $V_{on}^2/P_{\text{peak}}$.
-\item Two-level inverter: 8 states, complementary switching per leg.
-\item Gate driver: isolation, protection; dead time prevents shoot-through but costs volts.
+\begin{itemize}\setlength\itemsep{.3mm}
+\item Rectifier $\to$ DC link $\to$ brake chopper $\to$ inverter $\to$ motor.
+\item $V_{dc}\approx1.35V_{LL}$ = 540\,V at 400\,V mains.
+\item Braking energy goes into $R_b$, not the capacitor.
+\item Switches only on/off; dead time prevents shoot-through.
 \end{itemize}
 \end{keybox}
+\begin{defbox}[Key terms]
+\small
+\term{DC link} capacitor bus $\cdot$ \term{leg} pair of switches $\cdot$ \term{duty cycle} on-time fraction $\cdot$ \term{shoot-through} both switches on
+\end{defbox}
 \end{column}
-\begin{column}{.43\textwidth}
-\scriptsize
-\begin{tabular}{@{}ll@{}}
-\toprule
-\textbf{Quantity} & \textbf{Value (400\,V drive)}\\
-\midrule
-$V_{dc}$ nominal & 540--565\,V\\
-chopper on & $\approx$780\,V\\
-over-voltage trip & $\approx$800--850\,V\\
-IGBT class & 1200\,V\\
-$f_{sw}$ & 4--16\,kHz\\
-dead time & 0.5--3\,\textmu s\\
-\bottomrule
-\end{tabular}
-
-{\tiny\color{mkGray}typical orders of magnitude; check the specific drive datasheet}
+\begin{column}{.48\textwidth}
+\begin{keybox}[Check your understanding]
+\begin{enumerate}\setlength\itemsep{1.5mm}
+\item Why can a servo drive not simply use a resistor-like ``half-on'' transistor to set the motor voltage?
+\item A drive trips on DC-bus over-voltage only while braking. What is missing or too small?
+\item In a cascade, which loop must be tuned first, and why?
+\end{enumerate}
+\end{keybox}
 \end{column}
 \end{columns}
 \end{frame}
 
 % ====================================================================  closing
 \section*{Wrap-up}
-\begin{frame}{Day 3 summary}
+\begin{frame}{Day 3 summary and glossary}
 \begin{columns}[T]
 \begin{column}{.5\textwidth}
-\footnotesize
 \begin{defbox}[Control]
 \begin{itemize}\setlength\itemsep{.3mm}
-\item in-loop filters cost phase; notches tame resonances; lead adds PM, lag adds stiffness
-\item state feedback + observer: pole placement, separation, integral state, LQR
-\item robust: $|WT|<1$; adaptive: MRAC with MIT or Lyapunov laws; scheduling and DOB in practice
-\item digital: $T_d\approx1.5T$, $z=e^{sT}$, Tustin + pre-warp, anti-windup
+\item filters cost phase; notches remove resonances; lead buys phase back
+\item state feedback places poles; observers estimate states
+\item robust vs.\ adaptive: one safe design vs.\ self-adjusting gains
+\item sampling delay $\approx1.5T$ costs $360^\circ f_cT_d$
 \end{itemize}
 \end{defbox}
 \end{column}
 \begin{column}{.48\textwidth}
-\footnotesize
 \begin{defbox}[Servo hardware]
 \begin{itemize}\setlength\itemsep{.3mm}
-\item servo = drive + motor + transmission + feedback + motion controller
-\item torque / velocity / position modes, cascaded loops with feed-forward
-\item rectifier, DC link, brake chopper, two-level inverter, gate drivers, dead time
+\item drive + motor + transmission + encoder + controller
+\item cascaded current/velocity/position loops
+\item rectifier, DC link, brake chopper, inverter, dead time
 \end{itemize}
 \end{defbox}
 \begin{keybox}[One sentence]
-\footnotesize
-The achievable servo bandwidth is set by phase: filters, delay and resonances spend it, compensators and fast sampling buy it back.
+Servo bandwidth is limited by phase: filters, delay and resonances spend it; compensators and fast sampling buy it back.
 \end{keybox}
 \end{column}
 \end{columns}
@@ -2061,19 +1950,19 @@ The achievable servo bandwidth is set by phase: filters, delay and resonances sp
 \begin{frame}{Preview of Day 4}
 \begin{columns}[T]
 \begin{column}{.55\textwidth}
-\footnotesize
+\small
 \textbf{Day 4 --- Servo drives in depth}
 \begin{itemize}\setlength\itemsep{.5mm}
-\item PWM techniques: sinusoidal PWM, space-vector modulation, over-modulation
-\item dead-time effects and compensation (continuing today's preview)
-\item field-oriented control: Clarke/Park transforms, $i_d$/$i_q$ current loops, decoupling
+\item PWM: how the inverter switches build a sine wave
+\item dead-time effects and compensation
+\item field-oriented control of a PMSM: $i_d$/$i_q$ current loops
 \item current, velocity and position loop tuning in practice
-\item feed-forward, resonance handling and auto-tuning in commercial drives
+\item feed-forward, resonance handling and auto-tuning
 \end{itemize}
 \end{column}
 \begin{column}{.43\textwidth}
 \begin{notebox}
-\textbf{Bring with you:} the delay-budget formula $360^\circ f_cT_d$, the notch-filter parameters and the cascade structure --- Day 4 tunes exactly these loops on a PMSM drive.
+\textbf{Bring with you:} the delay formula $360^\circ f_cT_d$, the notch filter and the cascade structure --- Day 4 tunes exactly these loops.
 \end{notebox}
 \end{column}
 \end{columns}
@@ -2113,13 +2002,11 @@ d3\_igbt\_module\_open.jpg & File:CM600DU-24NFH.jpg & Pslawinski, CC BY-SA 3.0\\
 \item J.~J.~E.~Slotine, W.~Li, \emph{Applied Nonlinear Control}, Prentice Hall, 1991.
 \item P.~A.~Ioannou, J.~Sun, \emph{Robust Adaptive Control}, Prentice Hall, 1996.
 \item K.~Zhou, J.~C.~Doyle, K.~Glover, \emph{Robust and Optimal Control}, Prentice Hall, 1996.
-\item S.~Skogestad, I.~Postlethwaite, \emph{Multivariable Feedback Control}, 2nd ed., Wiley, 2005.
 \item B.~D.~O.~Anderson, J.~B.~Moore, \emph{Optimal Control: Linear Quadratic Methods}, Prentice Hall, 1990.
 \end{itemize}
 \end{column}
 \begin{column}{.5\textwidth}
 \begin{itemize}\setlength\itemsep{.2mm}
-\item J.~C.~Doyle, ``Guaranteed margins for LQG regulators,'' \emph{IEEE Trans.\ Autom.\ Control}, 23(4), 1978.
 \item D.~G.~Luenberger, ``Observing the state of a linear system,'' \emph{IEEE Trans.\ Mil.\ Electron.}, 8(2), 1964.
 \item K.~Ohnishi, M.~Shibata, T.~Murakami, ``Motion control for advanced mechatronics,'' \emph{IEEE/ASME Trans.\ Mechatronics}, 1(1), 1996.
 \item G.~Ellis, \emph{Control System Design Guide}, 4th ed., Butterworth-Heinemann, 2012.

@@ -1,6 +1,6 @@
 \beamer@sectionintoc {1}{1.1 Fundamental principles and classification}{3}{0}{1}
-\beamer@sectionintoc {2}{1.2 Structure of electrical machines}{10}{0}{2}
-\beamer@sectionintoc {3}{1.3 Electrical and mechanical models}{21}{0}{3}
-\beamer@sectionintoc {4}{1.4 Actuators and motion transmission}{32}{0}{4}
+\beamer@sectionintoc {2}{1.2 Structure of electrical machines}{11}{0}{2}
+\beamer@sectionintoc {3}{1.3 Electrical and mechanical models}{19}{0}{3}
+\beamer@sectionintoc {4}{1.4 Actuators and motion transmission}{30}{0}{4}
 \beamer@sectionintoc {5}{1.5 Characteristics and selection criteria}{41}{0}{5}
-\beamer@sectionintoc {6}{2.1 Modelling of dynamic systems -- fundamental physical models}{49}{0}{6}
+\beamer@sectionintoc {6}{2.1 Modelling of dynamic systems -- fundamental physical models}{50}{0}{6}

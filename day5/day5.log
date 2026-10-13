@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.5.24)  13 OCT 2026 10:47
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.5.24)  13 OCT 2026 12:34
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -681,7 +681,7 @@ Package: amsthm 2020/05/29 v2.20.6
 \beamer@dimb=\dimen293
 )
 (/usr/share/texlive/texmf-dist/tex/latex/beamer/beamerouterthemedefault.sty)))
-(../common/beamerthememekatronik.sty
+(/home/ukssb/Workspaces/tunaakan/common/beamerthememekatronik.sty
 Package: beamerthememekatronik 2026/10/13 Mechatronics training theme
 
 (/usr/share/texlive/texmf-dist/tex/latex/base/fontenc.sty
@@ -1402,9 +1402,9 @@ Package siunitx Info: Option "detect-all" has been deprecated in this release.
 (/usr/share/texlive/texmf-dist/tex/latex/beamer/beamerfontthemeprofessionalfont
 s.sty))
 Package translations Info: No language package found. I am going to use `englis
-h' as default language. on input line 21.
+h' as default language. on input line 23.
 LaTeX Font Info:    Trying to load font information for T1+lmss on input line 2
-1.
+3.
  (/usr/share/texmf/tex/latex/lm/t1lmss.fd
 File: t1lmss.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
@@ -1416,24 +1416,24 @@ File: l3backend-pdftex.def 2024-01-04 L3 backend support: PDF output (pdfTeX)
 (./day5.aux)
 \openout1 = `day5.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 21.
-LaTeX Font Info:    ... okay on input line 21.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 21.
-LaTeX Font Info:    ... okay on input line 21.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 21.
-LaTeX Font Info:    ... okay on input line 21.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 21.
-LaTeX Font Info:    ... okay on input line 21.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 21.
-LaTeX Font Info:    ... okay on input line 21.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 21.
-LaTeX Font Info:    ... okay on input line 21.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 21.
-LaTeX Font Info:    ... okay on input line 21.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 21.
-LaTeX Font Info:    ... okay on input line 21.
-LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 21.
-LaTeX Font Info:    ... okay on input line 21.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 23.
+LaTeX Font Info:    ... okay on input line 23.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 23.
+LaTeX Font Info:    ... okay on input line 23.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 23.
+LaTeX Font Info:    ... okay on input line 23.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 23.
+LaTeX Font Info:    ... okay on input line 23.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 23.
+LaTeX Font Info:    ... okay on input line 23.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 23.
+LaTeX Font Info:    ... okay on input line 23.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 23.
+LaTeX Font Info:    ... okay on input line 23.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 23.
+LaTeX Font Info:    ... okay on input line 23.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 23.
+LaTeX Font Info:    ... okay on input line 23.
 
 *geometry* driver: auto-detecting
 *geometry* detected driver: pdftex
@@ -1491,7 +1491,7 @@ Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 4
 File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Liv
 e
 ))
-Package hyperref Info: Link coloring OFF on input line 21.
+Package hyperref Info: Link coloring OFF on input line 23.
 
 (./day5.out) (./day5.out)
 \@outlinefile=\write5
@@ -1528,7 +1528,7 @@ File: translations-basic-dictionary-english.trsl (english translation file `tra
 nslations-basic-dictionary')
 )
 Package translations Info: loading dictionary `translations-basic-dictionary' f
-or `english'. on input line 21.
+or `english'. on input line 23.
 
 Package pgfplots notification 'compat/show suggested version=true': document ha
 s been generated with the most recent feature set (\pgfplotsset{compat=1.18}).
@@ -1540,7 +1540,7 @@ Package: inputenc 2021/02/14 v1.3d Input encoding file
 \inpenc@posthook=\toks63
 ) (./day5.nav)
 LaTeX Font Info:    Trying to load font information for TS1+lmss on input line 
-23.
+25.
 
 (/usr/share/texmf/tex/latex/lm/ts1lmss.fd
 File: ts1lmss.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
@@ -1553,104 +1553,90 @@ e/texmf/tex/latex/lm/ot1lmr.fd)
 (/usr/share/texmf/tex/latex/lm/omslmsy.fd)
 (/usr/share/texmf/tex/latex/lm/omxlmex.fd)
 (/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsa.fd)
-(/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsb.fd)
-LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <8> on input line 60.
- [2
-
-{/usr/share/texmf/fonts/enc/dvips/lm/lm-mathit.enc}] [3
+(/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsb.fd) [2
 
 ]
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <7> on input line 100.
- [4
+(Font)              <7> on input line 89.
+LaTeX Font Info:    Font shape `T1/lmss/m/it' in size <9> not available
+(Font)              Font shape `T1/lmss/m/sl' tried instead on input line 89.
+ [3
 
-{/usr/share/texmf/fonts/enc/dvips/lm/lm-rm.enc}{/usr/share/texmf/fonts/enc/dvip
-s/lm/lm-mathsy.enc}]
-Overfull \hbox (7.10059pt too wide) in paragraph at lines 155--155
- [][] 
- []
-
-[5
+{/usr/share/texmf/fonts/enc/dvips/lm/lm-mathit.enc}{/usr/share/texmf/fonts/enc/
+dvips/lm/lm-rm.enc}] [4
 
 ]
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <10> on input line 193.
-LaTeX Font Info:    Font shape `T1/lmss/m/it' in size <8> not available
-(Font)              Font shape `T1/lmss/m/sl' tried instead on input line 193.
+(Font)              <10> on input line 138.
 LaTeX Font Info:    Trying to load font information for OT1+lmss on input line 
-193.
+138.
  (/usr/share/texmf/tex/latex/lm/ot1lmss.fd
 File: ot1lmss.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
-)
-Overfull \hbox (3.53748pt too wide) detected at line 193
-[]
- []
+) [5
 
-[6
+{/usr/share/texmf/fonts/enc/dvips/lm/lm-mathex.enc}{/usr/share/texmf/fonts/enc/
+dvips/lm/lm-mathsy.enc}] [6
 
-{/usr/share/texmf/fonts/enc/dvips/lm/lm-mathex.enc}]
-Package pgfplots info on input line 222: Using 'lua backend=false' for axis: xm
-ode=log unsupported (yet).
-PGFPlots: reading {data/twomass.dat}
-PGFPlots: reading {data/twomass.dat}
+]
+LaTeX Font Info:    External font `lmex10' loaded for size
+(Font)              <8> on input line 210.
  [7
 
+] [8
+
 ]
-Package pgfplots info on input line 247: Using 'lua backend=false' for axis: xm
+Package pgfplots info on input line 281: Using 'lua backend=false' for axis: xm
 ode=log unsupported (yet).
 PGFPlots: reading {data/twomass.dat}
 PGFPlots: reading {data/twomass.dat}
-PGFPlots: reading {data/twomass.dat}
-LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <12> on input line 247.
- [8
+
+Underfull \hbox (badness 3861) in paragraph at lines 281--281
+[]\T1/lmss/m/n/9 Bicycle-gear anal-ogy: a gear-box
+ []
+
+[9
 
 ]
-Package pgfplots info on input line 279: Using 'lua backend=false' for axis: xm
+Package pgfplots info on input line 313: Using 'lua backend=false' for axis: xm
 ode=log unsupported (yet).
 PGFPlots: reading {data/velloop.dat}
 PGFPlots: reading {data/velloop.dat}
 PGFPlots: reading {data/velloop.dat}
-Package pgfplots info on input line 279: Using 'lua backend=false' for axis: xm
+Package pgfplots info on input line 313: Using 'lua backend=false' for axis: xm
 ode=log unsupported (yet).
 PGFPlots: reading {data/velloop.dat}
 PGFPlots: reading {data/velloop.dat}
 PGFPlots: reading {data/velloop.dat}
- [9
-
-] [10
+ [10
 
 ]
-Package pgfplots info on input line 348: Using 'lua backend=false' for axis: xm
+Package pgfplots info on input line 341: Using 'lua backend=false' for axis: xm
 ode=log unsupported (yet).
 PGFPlots: reading {data/notch.dat}
 PGFPlots: reading {data/notch.dat}
-PGFPlots: reading {data/notch.dat}
-PGFPlots: reading {data/notch.dat}
-Package pgfplots info on input line 348: Using 'lua backend=false' for axis: xm
+Package pgfplots info on input line 341: Using 'lua backend=false' for axis: xm
 ode=log unsupported (yet).
 PGFPlots: reading {data/notch.dat}
 PGFPlots: reading {data/notch.dat}
-PGFPlots: reading {data/notch.dat}
-PGFPlots: reading {data/notch.dat}
-
-[11
+ [11
 
 ] [12
 
 ]
-Package pgfplots info on input line 410: Using 'lua backend=false' for axis: xm
+Package pgfplots info on input line 390: Using 'lua backend=false' for axis: xm
 ode=log unsupported (yet).
 PGFPlots: reading {data/lpf.dat}
 PGFPlots: reading {data/lpf.dat}
-Package pgfplots info on input line 410: Using 'lua backend=false' for axis: xm
+Package pgfplots info on input line 390: Using 'lua backend=false' for axis: xm
 ode=log unsupported (yet).
 PGFPlots: reading {data/lpf.dat}
 PGFPlots: reading {data/lpf.dat}
  [13
 
-] [14
+]
+LaTeX Font Info:    External font `lmex10' loaded for size
+(Font)              <12> on input line 404.
+ [14
 
 ] [15
 
@@ -1659,71 +1645,52 @@ PGFPlots: reading {data/lpf.dat}
 ] [17
 
 ]
-<../figures/d5_smd_shunt.jpg, id=258, 935.495pt x 1077.02374pt>
+<../figures/d5_smd_shunt.jpg, id=260, 935.495pt x 1077.02374pt>
 File: ../figures/d5_smd_shunt.jpg Graphic file (type jpg)
 <use ../figures/d5_smd_shunt.jpg>
-Package pdftex.def Info: ../figures/d5_smd_shunt.jpg  used on input line 562.
-(pdftex.def)             Requested size: 28.42049pt x 32.72049pt.
-<../figures/d5_hall_current.jpg, id=259, 602.25pt x 602.25pt>
+Package pdftex.def Info: ../figures/d5_smd_shunt.jpg  used on input line 513.
+(pdftex.def)             Requested size: 20.99776pt x 24.18501pt.
+<../figures/d5_hall_current.jpg, id=261, 602.25pt x 602.25pt>
 File: ../figures/d5_hall_current.jpg Graphic file (type jpg)
 <use ../figures/d5_hall_current.jpg>
-Package pdftex.def Info: ../figures/d5_hall_current.jpg  used on input line 562
+Package pdftex.def Info: ../figures/d5_hall_current.jpg  used on input line 513
 .
-(pdftex.def)             Requested size: 32.7149pt x 32.72049pt.
+(pdftex.def)             Requested size: 24.17778pt x 24.18501pt.
 
-Underfull \hbox (badness 3354) in paragraph at lines 562--562
-[]|\T1/lmss/m/n/7 no (needs isol.
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 562--562
-[]|\T1/lmss/m/n/7 1--3% / 0.2--
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 562--562
-[]|\T1/lmss/m/n/7 DC--[][] []
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 562--562
-[]|\T1/lmss/m/n/7 DC--[][] []
- []
-
-
-Overfull \vbox (0.80644pt too high) detected at line 562
+Underfull \hbox (badness 10000) in paragraph at lines 513--513
+[]|\T1/lmss/m/n/9 zero-flux
  []
 
 [18
 
  <../figures/d5_smd_shunt.jpg> <../figures/d5_hall_current.jpg>]
-<../figures/d5_strain_gauge.jpg, id=271, 596.2275pt x 387.4475pt>
+<../figures/d5_strain_gauge.jpg, id=273, 596.2275pt x 387.4475pt>
 File: ../figures/d5_strain_gauge.jpg Graphic file (type jpg)
 <use ../figures/d5_strain_gauge.jpg>
-Package pdftex.def Info: ../figures/d5_strain_gauge.jpg  used on input line 598
+Package pdftex.def Info: ../figures/d5_strain_gauge.jpg  used on input line 552
 .
 (pdftex.def)             Requested size: 74.42818pt x 48.36958pt.
-<../figures/d5_load_cell.jpg, id=272, 509.7444pt x 399.4122pt>
+<../figures/d5_load_cell.jpg, id=274, 509.7444pt x 399.4122pt>
 File: ../figures/d5_load_cell.jpg Graphic file (type jpg)
 <use ../figures/d5_load_cell.jpg>
-Package pdftex.def Info: ../figures/d5_load_cell.jpg  used on input line 598.
+Package pdftex.def Info: ../figures/d5_load_cell.jpg  used on input line 552.
 (pdftex.def)             Requested size: 61.7267pt x 48.36958pt.
  [19
 
  <../figures/d5_strain_gauge.jpg> <../figures/d5_load_cell.jpg>]
-Package pgfplots info on input line 628: Using 'lua backend=false' for axis: ym
+Package pgfplots info on input line 584: Using 'lua backend=false' for axis: ym
 ode=log unsupported (yet).
 PGFPlots: reading {data/temp.dat}
 PGFPlots: reading {data/temp.dat}
-<../figures/d5_pt100.jpg, id=283, 1927.2pt x 1445.4pt>
+<../figures/d5_pt100.jpg, id=285, 1927.2pt x 1445.4pt>
 File: ../figures/d5_pt100.jpg Graphic file (type jpg)
 <use ../figures/d5_pt100.jpg>
-Package pdftex.def Info: ../figures/d5_pt100.jpg  used on input line 628.
+Package pdftex.def Info: ../figures/d5_pt100.jpg  used on input line 584.
 (pdftex.def)             Requested size: 66.37083pt x 49.79231pt.
-<../figures/d5_thermocouple.jpg, id=284, 1927.2pt x 1445.4pt>
+<../figures/d5_thermocouple.jpg, id=286, 1927.2pt x 1445.4pt>
 File: ../figures/d5_thermocouple.jpg Graphic file (type jpg)
 <use ../figures/d5_thermocouple.jpg>
-Package pdftex.def Info: ../figures/d5_thermocouple.jpg  used on input line 628
+Package pdftex.def Info: ../figures/d5_thermocouple.jpg  used on input line 584
 .
 (pdftex.def)             Requested size: 66.37083pt x 49.79231pt.
  [20
@@ -1732,27 +1699,43 @@ Package pdftex.def Info: ../figures/d5_thermocouple.jpg  used on input line 628
 
 ] [22
 
+] [23
+
+] [24
+
 ]
-<../figures/d5_encoder_model.jpg, id=309, 1182.4175pt x 652.4375pt>
+<../figures/d5_encoder_model.jpg, id=331, 1182.4175pt x 652.4375pt>
 File: ../figures/d5_encoder_model.jpg Graphic file (type jpg)
 <use ../figures/d5_encoder_model.jpg>
-Package pdftex.def Info: ../figures/d5_encoder_model.jpg  used on input line 67
-0.
+Package pdftex.def Info: ../figures/d5_encoder_model.jpg  used on input line 68
+7.
 (pdftex.def)             Requested size: 186.91734pt x 103.13774pt.
- [23
-
- <../figures/d5_encoder_model.jpg>] [24
-
-]
-<../figures/d5_gray_encoder.jpg, id=328, 1139.25626pt x 2183.15625pt>
-File: ../figures/d5_gray_encoder.jpg Graphic file (type jpg)
-<use ../figures/d5_gray_encoder.jpg>
-Package pdftex.def Info: ../figures/d5_gray_encoder.jpg  used on input line 759
-.
-(pdftex.def)             Requested size: 34.14143pt x 65.44142pt.
  [25
 
- <../figures/d5_gray_encoder.jpg>] [26
+ <../figures/d5_encoder_model.jpg>]
+Underfull \hbox (badness 1852) in paragraph at lines 717--717
+[]$\OML/lmm/m/it/9 N \OT1/lmr/m/n/9 = 2500$\T1/lmss/m/n/9 : $\OT1/lmr/m/n/9 4\O
+ML/lmm/m/it/9 N \OT1/lmr/m/n/9 = 10 000$
+ []
+
+
+Underfull \hbox (badness 2837) in paragraph at lines 717--717
+\T1/lmss/m/n/9 counts/rev $\OMS/lmsy/m/n/9 )$ $\OT1/lmr/m/n/9 360[]\OML/lmm/m/i
+t/9 =\OT1/lmr/m/n/9 10 000 =
+ []
+
+[26
+
+]
+<../figures/d5_gray_encoder.jpg, id=351, 1139.25626pt x 2183.15625pt>
+File: ../figures/d5_gray_encoder.jpg Graphic file (type jpg)
+<use ../figures/d5_gray_encoder.jpg>
+Package pdftex.def Info: ../figures/d5_gray_encoder.jpg  used on input line 745
+.
+(pdftex.def)             Requested size: 47.50945pt x 91.04872pt.
+ [27
+
+ <../figures/d5_gray_encoder.jpg>] [28
 
 ]
 PGFPlots: reading {data/resolver.dat}
@@ -1760,203 +1743,179 @@ PGFPlots: reading {data/resolver.dat}
 PGFPlots: reading {data/resolver.dat}
 PGFPlots: reading {data/resolver.dat}
 PGFPlots: reading {data/resolver.dat}
-<../figures/d5_resolver_principle.png, id=348, 301.125pt x 282.05376pt>
+<../figures/d5_resolver_principle.png, id=370, 301.125pt x 282.05376pt>
 File: ../figures/d5_resolver_principle.png Graphic file (type png)
 <use ../figures/d5_resolver_principle.png>
 Package pdftex.def Info: ../figures/d5_resolver_principle.png  used on input li
-ne 836.
-(pdftex.def)             Requested size: 64.3045pt x 60.2315pt.
+ne 817.
+(pdftex.def)             Requested size: 53.58754pt x 50.19077pt.
 
-Underfull \hbox (badness 1360) in paragraph at lines 836--836
-[]\T1/lmss/m/n/5 Hasee, pub-lic do-main, via
+Underfull \hbox (badness 1331) in paragraph at lines 817--817
+[]\T1/lmss/m/n/5 Hasee, pub-lic do-main,
  []
 
-[27
 
- <../figures/d5_resolver_principle.png>] [28
+Underfull \hbox (badness 10000) in paragraph at lines 817--817
+\T1/lmss/m/n/5 via Wiki-me-dia
+ []
 
-] [29
+[29
 
-]
-Package pgfplots info on input line 964: Using 'lua backend=false' for axis: xm
-ode=log unsupported (yet).
-Package pgfplots info on input line 964: Using 'lua backend=false' for axis: ym
-ode=log unsupported (yet).
-PGFPlots: reading {data/velmeas.dat}
-PGFPlots: reading {data/velmeas.dat}
-PGFPlots: reading {data/velmeas.dat}
- [30
+ <../figures/d5_resolver_principle.png>]
+Underfull \hbox (badness 10000) in paragraph at lines 851--851
+\T1/lmss/m/n/9 2. One count per sam-ple $\OT1/lmr/m/n/9 =
+ []
+
+
+Underfull \hbox (badness 1609) in paragraph at lines 851--851
+[][] \T1/lmss/m/n/9 steps), longer win-dows, fil-ter-ing
+ []
+
+[30
 
 ] [31
 
 ] [32
 
-]
-Underfull \hbox (badness 10000) in paragraph at lines 1048--1048
-[]|\T1/lmss/m/n/7 kS/s--MS/s (af-ter
- []
+] [33
 
-
-Underfull \hbox (badness 10000) in paragraph at lines 1048--1048
-[]|\T1/lmss/m/n/7 isolated cur-rent
- []
-
-
-Underfull \hbox (badness 3179) in paragraph at lines 1048--1048
-\T1/lmss/m/n/7 meas., load cells,
- []
-
-[33
-
-]
-PGFPlots: reading {data/quant.dat}
-PGFPlots: reading {data/quant.dat}
-PGFPlots: reading {data/quant.dat}
- [34
+] [34
 
 ]
 PGFPlots: reading {data/alias_c.dat}
 PGFPlots: reading {data/alias_c.dat}
 PGFPlots: reading {data/alias_s.dat}
-
-Overfull \hbox (7.91121pt too wide) in paragraph at lines 1127--1127
- [][] 
- []
-
-
-Overfull \hbox (9.87085pt too wide) detected at line 1127
-\OML/lmm/m/it/10 f[] \OT1/lmr/m/n/10 = [] \OML/lmm/m/it/10 ;  k \OT1/lmr/m/n/10
- = [](\OML/lmm/m/it/10 f=f[]\OT1/lmr/m/n/10 )
- []
-
-[35
-
-] [36
+ [35
 
 ]
-LaTeX Font Info:    Font shape `T1/lmss/m/it' in size <9> not available
-(Font)              Font shape `T1/lmss/m/sl' tried instead on input line 1196.
+PGFPlots: reading {data/quant.dat}
+PGFPlots: reading {data/quant.dat}
+PGFPlots: reading {data/quant.dat}
+ [36
 
- [37
+]
+Underfull \hbox (badness 3849) in paragraph at lines 1037--1037
+[]|\T1/lmss/m/n/9 load cells, iso-
+ []
+
+[37
 
 ] [38
 
 ]
-Package pgfplots info on input line 1232: Using 'lua backend=false' for axis: x
-mode=log unsupported (yet).
-Package pgfplots info on input line 1232: Using 'lua backend=false' for axis: x
-mode=log unsupported (yet).
-Package pgfplots info on input line 1232: Using 'lua backend=false' for axis: x
-mode=log unsupported (yet).
-Package pgfplots info on input line 1232: Using 'lua backend=false' for axis: x
-mode=log unsupported (yet).
+LaTeX Font Info:    Font shape `T1/lmss/m/it' in size <12> not available
+(Font)              Font shape `T1/lmss/m/sl' tried instead on input line 1087.
+
  [39
 
 ] [40
 
+] [41
+
+]
+Package pgfplots info on input line 1149: Using 'lua backend=false' for axis: x
+mode=log unsupported (yet).
+Package pgfplots info on input line 1149: Using 'lua backend=false' for axis: x
+mode=log unsupported (yet).
+Package pgfplots info on input line 1149: Using 'lua backend=false' for axis: x
+mode=log unsupported (yet).
+Package pgfplots info on input line 1149: Using 'lua backend=false' for axis: x
+mode=log unsupported (yet).
+ [42
+
+]
+LaTeX Font Info:    Trying to load font information for T1+lmtt on input line 1
+183.
+ (/usr/share/texmf/tex/latex/lm/t1lmtt.fd
+File: t1lmtt.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
+)
+[43
+
 ]
 PGFPlots: reading {data/mavg.dat}
 PGFPlots: reading {data/mavg.dat}
 PGFPlots: reading {data/mavg.dat}
- [41
-
-] [42
-
-]
-Package pgfplots info on input line 1400: Using 'lua backend=false' for axis: x
-mode=log unsupported (yet).
-PGFPlots: reading {data/bwbs.dat}
-PGFPlots: reading {data/bwbs.dat}
-Package pgfplots info on input line 1400: Using 'lua backend=false' for axis: x
-mode=log unsupported (yet).
-PGFPlots: reading {data/bwbs.dat}
-PGFPlots: reading {data/bwbs.dat}
-PGFPlots: reading {data/bwbs_step.dat}
-PGFPlots: reading {data/bwbs_step.dat}
- [43
-
-]
-Package pgfplots info on input line 1437: Using 'lua backend=false' for axis: x
-mode=log unsupported (yet).
  [44
 
 ]
-PGFPlots: reading {data/velnoise.dat}
-PGFPlots: reading {data/velnoise.dat}
-PGFPlots: reading {data/velnoise.dat}
+LaTeX Font Info:    Font shape `T1/lmss/m/it' in size <7> not available
+(Font)              Font shape `T1/lmss/m/sl' tried instead on input line 1272.
+
  [45
 
 ]
-Overfull \hbox (18.14886pt too wide) in paragraph at lines 1504--1504
- [][] 
- []
-
-[46
+Package pgfplots info on input line 1304: Using 'lua backend=false' for axis: x
+mode=log unsupported (yet).
+PGFPlots: reading {data/bwbs.dat}
+PGFPlots: reading {data/bwbs.dat}
+PGFPlots: reading {data/bwbs_step.dat}
+PGFPlots: reading {data/bwbs_step.dat}
+ [46
 
 ]
-\openout4 = `day5.vrb'.
-
- (./day5.vrb
-LaTeX Font Info:    Trying to load font information for T1+lmtt on input line 2
-3.
- (/usr/share/texmf/tex/latex/lm/t1lmtt.fd
-File: t1lmtt.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
-)) [47
+PGFPlots: reading {data/velnoise.dat}
+PGFPlots: reading {data/velnoise.dat}
+PGFPlots: reading {data/velnoise.dat}
+ [47
 
 ] [48
 
 ] [49
 
-]
-Underfull \hbox (badness 10000) in paragraph at lines 1616--1616
-[]|\T1/lmss/m/n/7 EtherCAT, PROFINET IRT,
- []
-
-[50
+] [50
 
 ] [51
 
 ] [52
 
-] [53
+]
+Underfull \hbox (badness 10000) in paragraph at lines 1474--1474
+[]|\T1/lmss/m/n/9 EtherCAT, PROFINET,
+ []
+
+
+Overfull \vbox (1.46593pt too high) detected at line 1474
+ []
+
+[53
 
 ] [54
 
+] [55
+
 ]
-<../figures/d5_ethercat_esc.jpg, id=607, 1204.5pt x 1003.75pt>
+<../figures/d5_ethercat_esc.jpg, id=618, 1204.5pt x 1003.75pt>
 File: ../figures/d5_ethercat_esc.jpg Graphic file (type jpg)
 <use ../figures/d5_ethercat_esc.jpg>
-Package pdftex.def Info: ../figures/d5_ethercat_esc.jpg  used on input line 179
-6.
-(pdftex.def)             Requested size: 49.8472pt x 41.53691pt.
- [55
+Package pdftex.def Info: ../figures/d5_ethercat_esc.jpg  used on input line 157
+3.
+(pdftex.def)             Requested size: 34.13011pt x 28.45274pt.
+ [56
 
- <../figures/d5_ethercat_esc.jpg>] [56
+ <../figures/d5_ethercat_esc.jpg>] [57
 
-] [57
-
-]
-[58
+] [58
 
 ] [59
 
+] [60
+
 ]
-Overfull \vbox (2.2311pt too high) detected at line 1916
- []
-
-[60
-
-] [61
+[61
 
 ] [62
 
-] [63
-
 ]
-LaTeX Font Info:    Font shape `T1/lmss/m/it' in size <7> not available
-(Font)              Font shape `T1/lmss/m/sl' tried instead on input line 2016.
+Overfull \vbox (2.09088pt too high) detected at line 1725
+ []
 
- [64
+[63
+
+] [64
+
+] [65
+
+] [66
 
 ]
 \tf@nav=\write6
@@ -1974,16 +1933,16 @@ LaTeX2e <2023-11-01> patch level 1
 L3 programming layer <2024-01-22>
  ***********
 Package rerunfilecheck Info: File `day5.out' has not changed.
-(rerunfilecheck)             Checksum: EA99243EB658089BEB1AC5C657096654;1643.
+(rerunfilecheck)             Checksum: 7110BA6BC727DF24CF06608600508035;1554.
  ) 
 Here is how much of TeX's memory you used:
- 68965 strings out of 476106
- 1793239 string characters out of 5793933
- 4147698 words of memory out of 5000000
- 89816 multiletter control sequences out of 15000+600000
- 689813 words of font info for 129 fonts, out of 8000000 for 9000
+ 68886 strings out of 476106
+ 1793301 string characters out of 5793933
+ 4142310 words of memory out of 5000000
+ 89735 multiletter control sequences out of 15000+600000
+ 687754 words of font info for 130 fonts, out of 8000000 for 9000
  59 hyphenation exceptions out of 8191
- 101i,22n,118p,754b,2990s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 101i,22n,118p,754b,2947s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/share/texmf/fonts/type1/public/lm/lmbsy10.pfb></usr/share/texmf/fonts/t
 ype1/public/lm/lmbx10.pfb></usr/share/texmf/fonts/type1/public/lm/lmex10.pfb></
 usr/share/texmf/fonts/type1/public/lm/lmmi10.pfb></usr/share/texmf/fonts/type1/
@@ -1996,20 +1955,21 @@ type1/public/lm/lmr5.pfb></usr/share/texmf/fonts/type1/public/lm/lmr6.pfb></usr
 /share/texmf/fonts/type1/public/lm/lmr7.pfb></usr/share/texmf/fonts/type1/publi
 c/lm/lmr8.pfb></usr/share/texmf/fonts/type1/public/lm/lmr9.pfb></usr/share/texm
 f/fonts/type1/public/lm/lmss10.pfb></usr/share/texmf/fonts/type1/public/lm/lmss
-8.pfb></usr/share/texmf/fonts/type1/public/lm/lmss9.pfb></usr/share/texmf/fonts
-/type1/public/lm/lmssbx10.pfb></usr/share/texmf/fonts/type1/public/lm/lmsso8.pf
-b></usr/share/texmf/fonts/type1/public/lm/lmsso9.pfb></usr/share/texmf/fonts/ty
-pe1/public/lm/lmsy10.pfb></usr/share/texmf/fonts/type1/public/lm/lmsy5.pfb></us
-r/share/texmf/fonts/type1/public/lm/lmsy6.pfb></usr/share/texmf/fonts/type1/pub
-lic/lm/lmsy7.pfb></usr/share/texmf/fonts/type1/public/lm/lmsy8.pfb></usr/share/
-texmf/fonts/type1/public/lm/lmsy9.pfb></usr/share/texmf/fonts/type1/public/lm/l
-mtt8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/symbols/msa
-m10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/symbols/msam
-7.pfb>
-Output written on day5.pdf (64 pages, 3326250 bytes).
+12.pfb></usr/share/texmf/fonts/type1/public/lm/lmss8.pfb></usr/share/texmf/font
+s/type1/public/lm/lmss9.pfb></usr/share/texmf/fonts/type1/public/lm/lmssbx10.pf
+b></usr/share/texmf/fonts/type1/public/lm/lmsso12.pfb></usr/share/texmf/fonts/t
+ype1/public/lm/lmsso8.pfb></usr/share/texmf/fonts/type1/public/lm/lmsso9.pfb></
+usr/share/texmf/fonts/type1/public/lm/lmsy10.pfb></usr/share/texmf/fonts/type1/
+public/lm/lmsy5.pfb></usr/share/texmf/fonts/type1/public/lm/lmsy6.pfb></usr/sha
+re/texmf/fonts/type1/public/lm/lmsy7.pfb></usr/share/texmf/fonts/type1/public/l
+m/lmsy8.pfb></usr/share/texmf/fonts/type1/public/lm/lmsy9.pfb></usr/share/texmf
+/fonts/type1/public/lm/lmtt8.pfb></usr/share/texmf/fonts/type1/public/lm/lmtt9.
+pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/symbols/msam10.p
+fb>
+Output written on day5.pdf (66 pages, 3281056 bytes).
 PDF statistics:
- 875 PDF objects out of 1000 (max. 8388607)
- 578 compressed objects within 6 object streams
- 136 named destinations out of 1000 (max. 500000)
- 299 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 912 PDF objects out of 1000 (max. 8388607)
+ 603 compressed objects within 7 object streams
+ 140 named destinations out of 1000 (max. 500000)
+ 297 words of extra memory for PDF output out of 10000 (max. 10000000)
 

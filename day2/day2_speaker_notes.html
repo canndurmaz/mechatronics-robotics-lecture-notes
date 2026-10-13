@@ -43,11 +43,12 @@
   @media print{nav.toc{display:none}.slide{break-inside:avoid;box-shadow:none;border:1px solid #ccc}}
 </style>
 </head>
+
 <body>
 <header><div class="wrap">
   <div class="day">DAY 2 / 5 · SPEAKER NOTES</div>
   <h1>System Dynamics and Control</h1>
-  <p>Mechatronics: Electrical Machines, Control, Servo Systems and Sensing · 5 h net teaching time</p>
+  <p>Mechatronics: Electrical Machines, Control, Servo Systems and Sensing · 5 h net teaching time · revised for 2nd-year students</p>
 </div></header>
 <nav class="toc"><a href="#plan">Plan</a><a href="#s1">2.1 · Nonlinear effects and linearisation</a><a href="#s2">2.2 · Transfer functions and state space</a><a href="#s3">2.3 · System identification and frequency response</a><a href="#s4">2.4 · PID and basic control structures</a><a href="#s5">2.5 · Stability and performance analysis (+ wrap-up)</a></nav>
 <main>
@@ -56,400 +57,392 @@
     <table class="plan"><tr><th>Block</th><th>Topic</th><th>Slides</th><th>Duration</th></tr>
       <tr><td>2.1</td><td>Nonlinear effects and linearisation</td><td>2–10</td><td>30 min</td></tr>
       <tr><td>–</td><td><i>Break (extra, not counted)</i></td><td>–</td><td>10 min</td></tr>
-      <tr><td>2.2</td><td>Transfer functions and state space</td><td>12–22</td><td>60 min</td></tr>
+      <tr><td>2.2</td><td>Transfer functions and state space</td><td>12–24</td><td>60 min</td></tr>
       <tr><td>–</td><td><i>Break (extra, not counted)</i></td><td>–</td><td>10 min</td></tr>
-      <tr><td>2.3</td><td>System identification and frequency response</td><td>24–33</td><td>60 min</td></tr>
+      <tr><td>2.3</td><td>System identification and frequency response</td><td>26–36</td><td>60 min</td></tr>
       <tr><td>–</td><td><i>Break (extra, not counted)</i></td><td>–</td><td>10 min</td></tr>
-      <tr><td>2.4</td><td>PID and basic control structures</td><td>35–47</td><td>90 min</td></tr>
+      <tr><td>2.4</td><td>PID and basic control structures</td><td>38–50</td><td>90 min</td></tr>
       <tr><td>–</td><td><i>Break (extra, not counted)</i></td><td>–</td><td>10 min</td></tr>
-      <tr><td>2.5</td><td>Stability and performance analysis (+ wrap-up)</td><td>49–62</td><td>60 min</td></tr>
-      <tr><td></td><td><b>Total net teaching time</b></td><td>1–62</td><td><b>300 min</b></td></tr>
+      <tr><td>2.5</td><td>Stability and performance analysis (+ wrap-up)</td><td>52–64</td><td>60 min</td></tr>
+      <tr><td></td><td><b>Total net teaching time</b></td><td>1–64</td><td><b>300 min</b></td></tr>
     </table>
-    <p class="say">PDF page numbers are used below. Section divider pages (3, 11, 23, 34, 48, 58) need no commentary. Suggested 10-min breaks after sessions 2.1+2.2 are not mandatory; place them roughly every hour.</p>
+    <p class="say">PDF page numbers are used below. Section divider pages (3, 11, 25, 37, 51, 61) need no commentary. Audience: 2nd-year students new to control. Blue “Refresher” boxes cover missing prerequisites; grey “Going further” text is optional and can be skipped. Answers to the “Check your understanding” questions are only in these notes.</p>
   </section>
 
   <section id="s1">
     <h2 class="session">Session 2.1 · Nonlinear effects and linearisation <small>Curriculum code 2.1 · 30 min</small></h2>
     <div class="slide">
-      <h3><span class="num">Slide 2</span>Agenda and learning objectives<span class="time">~2 min</span></h3>
-      <p class="say">Good morning. Yesterday we built physical models of machines and actuators. Today we turn those models into tools for control. We first finish the modelling thread with nonlinear effects and linearisation, then learn the two standard linear descriptions, transfer functions and state space. After that we see how models are obtained from measurements, how PID controllers are built and tuned in practice, and finally how we judge stability and robustness. Please note the notation box: L of s is always the loop transfer function C times G, so the armature inductance is written L_a today.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Five sessions, 5 h net, one consistent notation for the whole day.</li><li>L(s)=C(s)G(s); S and T will appear in every session.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Do we need yesterday&#x27;s motor equations? <b>A:</b> Yes, the DC motor model returns in 2.2 and in the cascade-control slide.</li></ul></div>
-      <p class="trans">Transition: Let us start with what makes real servo axes nonlinear.</p>
+      <h3><span class="num">Slide 2</span>Agenda and learning objectives<span class="time">~3 min</span></h3>
+      <p class="say">Good morning. Today we go from physical models to control. Most of today's tools are new for you: Laplace transform, Bode plots, feedback and PID. Whenever we need maths you have not seen yet, a blue Refresher box explains it first. Grey 'Going further' text is optional; skip it on first reading. Read the five objectives aloud: by tonight you should be able to turn an ODE into a transfer function, read a Bode plot, explain PID with a cruise control and judge stability.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Refresher boxes fill the gaps; Going-further text is optional.</li><li>Misconception: 'control = PID tuning by trial'. Today shows why models matter.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Do we need yesterday's motor equations? <b>A:</b> Yes, the DC motor returns in 2.2 and in the cascade slide.</li></ul></div>
+      <p class="trans">Transition: Let us start with what makes real machines nonlinear.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 4</span>Static nonlinearities in real servo axes<span class="time">~5 min</span></h3>
-      <p class="say">Linear theory assumes that doubling the input doubles the output. Real axes violate this in three classic ways. Saturation: the inverter cannot deliver more than the DC-link voltage, and the drive limits current to protect motor and power stage. Dead-zone: small inputs produce no output, for example due to IGBT dead-time or valve overlap. Backlash: in a gear the load does not move until the gap of width two beta is closed, so the load position lags behind the motor at every reversal. These maps are static, but inside a feedback loop they create dynamics: windup, limit cycles and position errors. The describing function treats them as amplitude-dependent gains and is the classical tool to predict limit cycles.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Saturation, dead-zone and backlash exist in every servo axis.</li><li>They cause windup, limit cycles and reversal errors that linear models cannot predict.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Is backlash a problem if the motor encoder is used for feedback? <b>A:</b> The motor loop stays stable, but the load position error at reversal remains; with a load encoder backlash enters the loop and can cause limit cycles.</li></ul></div>
-      <p class="trans">Transition: A fourth, very important nonlinearity is friction.</p>
+      <h3><span class="num">Slide 4</span>What “nonlinear” means: limits, gaps and play<span class="time">~5 min</span></h3>
+      <p class="say">Linear means: double the input, double the output. Use everyday pictures: a gas pedal already on the floor cannot give more (saturation); a loose steering wheel does nothing for small turns (dead-zone); gear teeth have a gap, so the load does not move until the gap is closed (backlash). Magnetic saturation is like a full sponge: more current gives less extra flux, so the inductance drops. Show the backlash picture and let students guess what happens when the motor reverses.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Every real axis has limits and play.</li><li>Misconception: 'nonlinear' means 'complicated maths'. Here it just means the straight-line rule breaks.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Can we just ignore these effects? <b>A:</b> For small signals around a working point often yes; that is exactly linearisation.</li></ul></div>
+      <p class="trans">Transition: A fourth, very common nonlinearity is friction.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 5</span>Friction: Coulomb, viscous and Stribeck<span class="time">~5 min</span></h3>
-      <p class="say">Friction has three parts. Viscous friction is proportional to velocity and is linear. Coulomb friction is a constant force opposing motion. Near zero speed the breakaway force F_S is higher than F_C, and the force falls with speed in the Stribeck region. Two features matter for control. At zero velocity the friction force can take any value between minus and plus F_S, so it is set-valued and cannot be linearised. In the Stribeck region the slope is negative, which acts like negative damping and causes stick-slip. With an integrator in the position loop, stiction produces hunting around the set-point. At velocity reversal the friction jumps, which shows up as quadrant glitches on CNC circles. Friction feedforward and observers are the standard remedies.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Stiction is set-valued: no Taylor expansion at v = 0.</li><li>Integral action plus stiction gives hunting limit cycles.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Can a larger integral gain remove the hunting? <b>A:</b> Usually not; it changes the amplitude and frequency. Feedforward of Coulomb friction or a dead-band on the integrator is more effective.</li></ul></div>
-      <p class="trans">Transition: Next, a nonlinearity inside the motor itself: magnetic saturation.</p>
+      <h3><span class="num">Slide 5</span>Friction: hard to start, easier to keep moving<span class="time">~4 min</span></h3>
+      <p class="say">Ask who has moved a heavy wardrobe: starting needs a big push, keeping it sliding needs less. That is breakaway (static) friction versus Coulomb friction. Viscous friction grows with speed and is linear. At zero speed the force jumps, so there is no slope and no tangent: we cannot linearise there. In machines this gives stick-slip, jerky motion at low speed, and hunting around the target. The practical fix is to add the expected friction force as feedforward.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>At v = 0 friction has no slope: it cannot be linearised.</li><li>Misconception: friction is just a damper. Only the viscous part is.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why does hunting happen? <b>A:</b> The integrator builds up force until breakaway, the axis jumps past the target, and the cycle repeats.</li></ul></div>
+      <p class="trans">Transition: How do we handle the smooth nonlinearities? With a tangent line.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 6</span>Magnetic saturation<span class="time">~4 min</span></h3>
-      <p class="say">Iron saturates. The flux linkage psi grows linearly at small current and then bends over. What the current controller sees is the incremental inductance, the slope d psi over d i. In the example curve it falls from 10 millihenry at zero current to about 2.8 millihenry at 24 ampere. The plant of the current loop is 1 over L_inc s plus R, so its gain increases at high current. A PI controller tuned at rated current therefore becomes more aggressive at peak current, crossover moves up and phase margin shrinks. The torque constant also drops at peak current. Two practical answers: schedule the proportional gain with the estimated inductance, or tune conservatively for the worst case.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Parameters depend on the operating point.</li><li>Current-loop crossover rises when L_inc drops: check margins at peak current.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Where do we get L_inc(i)? <b>A:</b> From the motor manufacturer, from FEM data or from a current-step identification at several bias currents.</li></ul></div>
-      <p class="trans">Transition: How do we handle smooth nonlinearities systematically? By Taylor linearisation.</p>
+      <h3><span class="num">Slide 6</span>Linearisation: zoom in until the curve looks straight<span class="time">~5 min</span></h3>
+      <p class="say">This is the one idea of the session. Zoom into any smooth curve and it looks like a straight line: the tangent. That is the first-order Taylor series from calculus. Walk through the example: f = x squared at x0 = 3 has slope 6. At 3.1 the tangent gives 9.6, the truth is 9.61. At 4 the error is already 6 percent. So the linear model is local. We describe small deviations delta x from the operating point. For several variables the slopes become matrices; that is Going further.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Linear model = tangent at the operating point.</li><li>Misconception: a linearised model works everywhere. It is only valid nearby.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> How small is 'small'? <b>A:</b> No fixed number; compare linear and true answers, as in the example.</li></ul></div>
+      <p class="trans">Transition: Let us apply this to a pendulum.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 7</span>Taylor linearisation about an operating point<span class="time">~4 min</span></h3>
-      <p class="say">We write the nonlinear model as x dot equals f of x and u. An operating point, or equilibrium, satisfies f of x0, u0 equal zero. For small deviations we keep only the first-order term of the Taylor series and obtain a linear state-space model whose matrices A, B, C, D are Jacobians evaluated at the operating point. Lyapunov&#x27;s indirect method tells us what this model is worth: if all eigenvalues of A are in the open left half plane, the equilibrium is locally asymptotically stable; one eigenvalue in the right half plane means unstable; eigenvalues on the imaginary axis give no conclusion. The result is local only, and not applicable at non-smooth points like Coulomb friction.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>A_ij = partial f_i / partial x_j at (x0,u0).</li><li>Linearisation is local; at non-smooth points it is not defined.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> How small is &#x27;small&#x27;? <b>A:</b> There is no general bound; check by simulation or compare the linear and nonlinear responses, as on the next slide.</li></ul></div>
-      <p class="trans">Transition: Let us apply this to two examples, starting with the pendulum.</p>
+      <h3><span class="num">Slide 7</span>Example 1: pendulum / unbalanced arm<span class="time">~5 min</span></h3>
+      <p class="say">An arm on a motor shaft is a pendulum. Only sin theta is nonlinear; its slope is cos theta. Hanging down, cos is plus one and gravity acts like a spring: a stable swing at 5.7 rad/s for a 30 cm arm. Turned upside down, cos is minus one: a negative spring, and it falls over. Same equation, opposite behaviour, only because the operating point changed. The plot shows the tangent lines at 0 and 180 degrees; sin theta is within 5 percent of theta up to about 30 degrees.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Stability can depend on the operating point.</li><li>Misconception: one model of a machine is valid for all positions.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Which real axes behave like this? <b>A:</b> Robot arms and anything moving against gravity.</li></ul></div>
+      <p class="trans">Transition: A second example with a magnet.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 8</span>Example 1: pendulum / unbalanced arm<span class="time">~4 min</span></h3>
-      <p class="say">An unbalanced arm on a motor shaft behaves like a pendulum: J theta double dot equals torque minus m g l sine theta minus damping. The only nonlinear term is sine theta; its derivative is cosine theta. Hanging down, cosine is plus one, the gravity term acts like a spring and we get a stable oscillator with natural frequency square root of g over l, 5.7 rad per second for a 30 centimetre arm. Inverted, cosine is minus one, the spring becomes negative and one pole moves into the right half plane. Same physics, same equation, opposite stability. The plot shows that the linear approximation is within 5 percent up to about 30 degrees.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Stability can depend on the operating point.</li><li>sin(theta) ≈ theta: 1 % error at 14°, 5 % at 31°.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Which robot axes behave like this? <b>A:</b> Any axis that moves against gravity: vertical arm joints, swivel heads. Gravity compensation by feedforward removes most of the nonlinearity.</li></ul></div>
-      <p class="trans">Transition: A second example with a magnetic force.</p>
+      <h3><span class="num">Slide 8</span>Example 2: electromagnet<span class="time">~4 min</span></h3>
+      <p class="say">Use the broom-balancing picture: the closer the iron gets to the magnet, the stronger the pull, so any small error grows. Go through the four steps: weight equals magnet force at the operating point; the two slopes give K_z = 392 N/m and K_i = 1.96 N/A; the poles are plus and minus 62.6 per second, one of them in the right half-plane, so it is unstable on its own; and the slopes change with the gap, so the model is local. Poles are explained properly in the next session.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Negative stiffness means instability without feedback.</li><li>Misconception: unstable systems cannot be controlled. Feedback can stabilise them.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Where is this used? <b>A:</b> Maglev, magnetic bearings, solenoid valves.</li></ul></div>
+      <p class="trans">Transition: Time to check your understanding.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 9</span>Example 2: electromagnet<span class="time">~4 min</span></h3>
-      <p class="say">The force of an electromagnet on an iron object grows with current squared and falls with gap squared. At equilibrium the magnetic force balances weight. Linearising gives two gains: the current gain K_i and the position stiffness K_z. The stiffness is negative: if the object moves closer, the force increases and pulls it further. With 100 gram, 5 millimetre gap and 1 ampere, K_z is 392 newton per metre, K_i is 1.96 newton per ampere, and the open-loop poles are at plus and minus 62.6 rad per second. The system is unstable and must be stabilised by feedback, and the gains change with the operating point.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Negative stiffness gives a right-half-plane pole.</li><li>K_z ∝ 1/z0 and K_i ∝ 1/i0: model valid only near the operating point.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Is this relevant beyond maglev trains? <b>A:</b> Yes: active magnetic bearings, solenoid valves, reluctance actuators and even PM-motor cogging use the same linearisation.</li></ul></div>
-      <p class="trans">Transition: Let us summarise the first session.</p>
+      <h3><span class="num">Slide 9</span>Session 2.1 – Check your understanding<span class="time">~2 min</span></h3>
+      <p class="say">Let students discuss in pairs for two minutes, then collect answers. Answers: 1) Coulomb friction jumps at v = 0; there is no unique slope, so no tangent exists. 2) The term mgl cos theta0 changes sign: hanging it acts like a spring that pulls back, inverted like a spring that pushes away. 3) Not directly: K_z = 2mg/z0 halves and the needed current changes, so we must re-linearise at 10 mm.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Answers given orally, not on the slide.</li><li>Watch for students who think linearisation removes nonlinearity everywhere.</li></ul></div>
+      <p class="trans">Transition: Let us summarise.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 10</span>Session 2.1 – Summary<span class="time">~2 min</span></h3>
-      <p class="say">To summarise: real axes contain saturation, dead-zone, backlash, friction and magnetic saturation. Smooth nonlinearities are linearised with Jacobians around an operating point, and the result is valid only locally; stability itself can change with the operating point. Non-smooth effects need other tools: describing functions, compensation by feedforward, or simulation. From now on we assume we have a linear model and look at how to describe it.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Linear models are local approximations.</li><li>Non-smooth effects require compensation, not linearisation.</li></ul></div>
-      <p class="trans">Transition: Now to transfer functions and state space.</p>
+      <h3><span class="num">Slide 10</span>Session 2.1 – Summary and key terms<span class="time">~2 min</span></h3>
+      <p class="say">Recap the four take-aways and read the key terms. Stress that from now on we assume a linear model around an operating point, and that jumps such as friction need compensation rather than linearisation. Ask one student to explain 'operating point' in their own words.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Linear models are local approximations.</li><li>Misconception: 'deviation' means error; here it means distance from the operating point.</li></ul></div>
+      <p class="trans">Transition: Next: how to write linear models compactly.</p>
     </div>
   </section>
 
   <section id="s2">
     <h2 class="session">Session 2.2 · Transfer functions and state space <small>Curriculum code 2.2 · 60 min</small></h2>
     <div class="slide">
-      <h3><span class="num">Slide 12</span>Laplace transform, transfer function, poles and zeros<span class="time">~7 min</span></h3>
-      <p class="say">The Laplace transform converts differentiation into multiplication by s, integration into division by s and a time delay into the factor e to the minus s T_d. A linear ODE thus becomes an algebraic equation. With zero initial conditions the ratio of output to input transforms is the transfer function G of s, a ratio of polynomials. The roots of the denominator are the poles, the roots of the numerator the zeros. The order is the number of poles, which equals the number of independent energy stores. Poles determine the natural modes and therefore stability and speed; zeros determine how strongly each mode appears. Right-half-plane zeros cause initial undershoot and limit achievable bandwidth. Physical plants are strictly proper: more poles than zeros.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Poles = modes (stability, speed); zeros = weighting.</li><li>Order n = number of energy stores; delay is not rational.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why zero initial conditions? <b>A:</b> The transfer function describes the input-output map; initial conditions add a separate free response.</li></ul></div>
-      <p class="trans">Transition: The simplest case is the first-order system.</p>
+      <h3><span class="num">Slide 12</span>Refresher: complex numbers and the complex plane<span class="time">~5 min</span></h3>
+      <p class="say">Students know complex numbers, but refresh the polar view because Bode plots depend on it. Draw 3+4j: magnitude 5, angle 53 degrees. Key rule: when multiplying, magnitudes multiply and angles add; when dividing, they divide and subtract. Work 1/(1+j) on the board: 0.707 at minus 45 degrees. Finally e to the st with s = sigma + j omega: sigma decides growth or decay, omega the oscillation. This is why poles are plotted in a complex plane.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Polar form: magnitude and angle.</li><li>Misconception: j is 'imaginary' so it has no physical meaning; here it encodes phase.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why j instead of i? <b>A:</b> Electrical engineers use i for current.</li></ul></div>
+      <p class="trans">Transition: With this, the Laplace transform becomes a simple tool.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 13</span>First-order system<span class="time">~4 min</span></h3>
-      <p class="say">A first-order system K over tau s plus one has one real pole at minus one over tau. Its step response rises exponentially, reaches 63 percent at one time constant, 95 percent at three and about 98 percent at four. It never overshoots. The bandwidth is one over tau. In servo systems we meet first-order behaviour everywhere: the winding with L over R, an inertia with viscous friction, and a well-tuned closed current loop seen from the speed loop.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>63 % at t = tau, 95 % at 3 tau; t_r = 2.2 tau.</li><li>Closed current loop ≈ first-order lag for the speed loop.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> How do I read tau from a measurement? <b>A:</b> Read the time where 63 % of the final change is reached, or use the initial tangent.</li></ul></div>
-      <p class="trans">Transition: With two energy stores we get the second-order system.</p>
+      <h3><span class="num">Slide 13</span>Refresher: the Laplace transform as a tool<span class="time">~7 min</span></h3>
+      <p class="say">Present Laplace as a translator, like logarithms turning multiplication into addition: it turns derivatives into multiplication by s. We will only use the table, not the integral. Work the RC circuit step by step: ODE, replace v-dot by sV, collect terms, divide. The result 1/(RCs+1) is the transfer function. For a step input multiply by 1/s and use the table to get back the familiar charging curve. Students have seen this curve before, so they can check the tool gives the known answer.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Derivative becomes multiplication by s.</li><li>Misconception: s is a frequency in Hz. It is a complex variable.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why zero initial conditions? <b>A:</b> The transfer function describes input-output only; initial conditions add a separate free response.</li></ul></div>
+      <p class="trans">Transition: The ratio we just found has a name: the transfer function.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 14</span>Second-order standard form and pole geometry<span class="time">~5 min</span></h3>
-      <p class="say">The standard form uses two parameters: the natural frequency omega_n and the damping ratio zeta. For zeta below one the poles are complex, minus zeta omega_n plus or minus j omega_d. The geometry is very useful: the distance of the pole from the origin is omega_n, and the cosine of the angle to the negative real axis is zeta. So lines through the origin are lines of constant damping, circles are lines of constant natural frequency, and the real part gives the decay rate. For a mass-spring-damper, omega_n is root k over m and zeta is c over two root k m.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>|p| = omega_n, cos(phi) = zeta.</li><li>Real part -zeta·omega_n sets the decay rate.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> What zeta does a typical servo resonance have? <b>A:</b> Mechanical resonances are often lightly damped, zeta about 0.01 to 0.1.</li></ul></div>
-      <p class="trans">Transition: Let us see what zeta does in the time domain.</p>
+      <h3><span class="num">Slide 14</span>Transfer function, poles and zeros<span class="time">~5 min</span></h3>
+      <p class="say">The transfer function is the system's recipe: output over input. Poles are the roots of the denominator, zeros the roots of the numerator. Poles decide stability and speed, which is the most important fact of today. The order equals the number of energy stores. The DC gain G(0) is what you get after everything settles. Do the example: zero at minus 2, poles at minus 1 and minus 3, DC gain 2/3. Point to the plane: left half is the stable side.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Poles = roots of the denominator; left half-plane = stable.</li><li>Misconception: zeros decide stability. They do not.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> What does a pole 'look like' physically? <b>A:</b> A natural motion e^(pt) of the system.</li></ul></div>
+      <p class="trans">Transition: The simplest case has one pole.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 15</span>Step responses for different zeta<span class="time">~5 min</span></h3>
-      <p class="say">These responses are computed for omega_n equal one. With zeta 0.1 the response rings for a long time with almost 73 percent overshoot. At 0.7 we have a fast rise with less than 5 percent overshoot, the classic compromise. At zeta equal one we have the fastest response without overshoot, and at zeta two the response is slow because one pole moves close to the origin. For position control, where overshoot means a tool cutting into the workpiece, we often aim for zero overshoot in the position loop and accept a slightly slower response.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>zeta ≈ 0.7: fast with ≈ 5 % overshoot.</li><li>Too much damping is also slow.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why is zeta = 2 slower than zeta = 1? <b>A:</b> One of the two real poles moves to -0.27 omega_n and dominates.</li></ul></div>
-      <p class="trans">Transition: More generally, the position of each pole tells us its mode.</p>
+      <h3><span class="num">Slide 15</span>First-order system: one energy store<span class="time">~4 min</span></h3>
+      <p class="say">A cup of coffee cooling or an RC circuit charging: one energy store, one pole. After one time constant we are at 63 percent, after four at about 98 percent, and it never overshoots. Show the initial slope line reaching the final value at t = tau. Motor winding examples: 2 mH and 1 ohm give 2 ms. A flywheel with friction has tau = J/B.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>63 % at t = tau; no overshoot ever.</li><li>Misconception: the system is 'done' after one tau. It needs about 4 tau.</li></ul></div>
+      <p class="trans">Transition: With two energy stores the response can oscillate.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 16</span>Pole location versus response<span class="time">~5 min</span></h3>
-      <p class="say">This map summarises the s-plane. Poles on the negative real axis give pure exponential decay; farther left means faster. Complex poles give oscillations whose frequency is the imaginary part. Poles on the imaginary axis give sustained oscillation, and in the right half plane the modes grow. The slowest poles, those closest to the imaginary axis, dominate the response; poles five times farther left can usually be neglected. Be careful with near pole-zero cancellations: a slow pole that is almost cancelled still produces a long, small tail, typical for PI controllers with lambda tuning.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Left = faster; imaginary part = oscillation frequency.</li><li>Dominant poles are the ones nearest the jω-axis.</li></ul></div>
-      <p class="trans">Transition: Transfer functions describe input and output. State space describes the inside.</p>
+      <h3><span class="num">Slide 16</span>Second-order system: the car suspension<span class="time">~6 min</span></h3>
+      <p class="say">Use the car suspension: a mass on a spring with a shock absorber. Natural frequency says how fast it bounces, damping ratio says how quickly the bouncing dies out. Worn shock absorbers mean small zeta and a bouncy ride. Zeta around 0.7 is fast with about 5 percent overshoot. Do the quarter-car numbers: omega_n = sqrt(16000/250) = 8 rad/s, zeta = 2000/(2*2000) = 0.5. Point to the curves for each zeta.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>omega_n = speed, zeta = bounciness.</li><li>Misconception: more damping is always better. zeta &gt; 1 is slow.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why 0.7? <b>A:</b> Good compromise between speed and overshoot.</li></ul></div>
+      <p class="trans">Transition: These behaviours can be read directly from the pole positions.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 17</span>State-space representation<span class="time">~6 min</span></h3>
-      <p class="say">A state-space model consists of two equations: x dot equals A x plus B u, and y equals C x plus D u. The state is the minimal memory of the system: knowing it now and the future input fully determines the future. Physically we choose energy variables such as currents, voltages, positions and velocities. The block diagram shows that each state is the output of an integrator. State space handles multi-input multi-output systems naturally, includes initial conditions, and is the basis for observers, state feedback and Kalman filters that come on Day 3.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>One integrator per state.</li><li>A n×n, B n×m, C p×n, D p×m.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Is D usually zero? <b>A:</b> For physical plants yes; D is non-zero for controllers or filters with direct feed-through.</li></ul></div>
-      <p class="trans">Transition: How are the two descriptions connected?</p>
+      <h3><span class="num">Slide 17</span>Where the poles are tells you how the system moves<span class="time">~4 min</span></h3>
+      <p class="say">Walk through the map: the further left, the faster the motion dies out; the higher up, the faster it wiggles; on the right side it grows. The imaginary axis is the border: sustained oscillation. The slowest poles dominate: with poles at minus 2 and minus 20 the response settles in about 4/2 = 2 s. This picture is the most useful mental model of the whole day.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Real part = decay rate, imaginary part = oscillation.</li><li>Misconception: a pole far from the origin on the imaginary axis is stable. It oscillates forever.</li></ul></div>
+      <p class="trans">Transition: State space uses matrices, so a quick refresher.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 18</span>Conversions between TF and SS<span class="time">~6 min</span></h3>
-      <p class="say">From state space to transfer function the formula is unique: C times s I minus A inverse times B plus D. The denominator is the characteristic polynomial of A, so the eigenvalues of A are the poles, unless some modes are uncontrollable or unobservable and cancel. The other direction is not unique: any change of coordinates gives another realisation with the same transfer function. A standard choice is the controllable canonical form, where the last row of A contains the negative denominator coefficients and C contains the numerator coefficients. For the second-order standard form we get the matrix with zeros, one, minus omega_n squared and minus two zeta omega_n.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>G = C(sI-A)^-1 B + D.</li><li>Realisations are not unique; minimal ones have eigenvalues = poles.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Which realisation is used in a drive? <b>A:</b> Usually physical coordinates; canonical forms are numerically poor for high order.</li></ul></div>
-      <p class="trans">Transition: Let us do this for the DC motor.</p>
+      <h3><span class="num">Slide 18</span>Refresher: matrices for state space<span class="time">~5 min</span></h3>
+      <p class="say">Do the matrix-vector multiplication slowly: row times column. Then show why we need it: two coupled ODEs fit into one line x-dot = A x. Eigenvalues are found from det(lambda I - A) = 0; for this 2x2 the steps give lambda squared + 2 lambda + 4 and the roots minus 1 plus/minus j1.73. Stress the link: eigenvalues of A are exactly the poles. The matrix is a mass-spring-damper with m=1, k=4, c=2.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Eigenvalues of A = poles.</li><li>Misconception: matrices are a different theory. Same system, compact notation.</li></ul></div>
+      <p class="trans">Transition: Now the general state-space form.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 19</span>The DC motor in both representations<span class="time">~7 min</span></h3>
-      <p class="say">The DC motor has two energy stores: the armature inductance and the rotor inertia. The electrical equation includes the back EMF k_e omega, the mechanical equation the torque k_t i minus friction and load. With state current and speed we read off A and B directly. Applying the conversion formula gives the transfer function from voltage to speed: k_t over the product of the electrical and mechanical factors plus k_t k_e. That last term is the back-EMF feedback: the motor is internally a feedback loop. Neglecting inductance gives a first-order model with mechanical time constant R J over k squared. In SI units k_t in newton metre per ampere equals k_e in volt second per radian.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Back-EMF is an inherent feedback loop.</li><li>k_t = k_e in SI units.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> What about a PMSM? <b>A:</b> In the dq frame the q-axis behaves exactly like this DC motor; Day 4 covers it.</li></ul></div>
-      <p class="trans">Transition: Let us put numbers in.</p>
+      <h3><span class="num">Slide 19</span>State-space representation<span class="time">~5 min</span></h3>
+      <p class="say">The state is what the system 'remembers': positions, speeds, currents, capacitor voltages. Show how the mass-spring-damper becomes A, B, C, D: x1-dot = x2 and x2-dot from Newton. In the block diagram each integrator stores one state. State space handles several inputs and outputs and is the basis for observers on Day 3. The formula linking it to G(s) is Going further.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>One state per energy store / integrator.</li><li>Misconception: there is only one correct state choice. Many choices give the same G(s).</li></ul></div>
+      <p class="trans">Transition: Let us write the DC motor both ways.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 20</span>DC motor: worked numerical example<span class="time">~5 min</span></h3>
-      <p class="say">With these small servo values the characteristic polynomial is s squared plus 500 s plus about 20,900. The poles are minus 45.9 and minus 454 per second, both real. The simple estimates, one over the mechanical time constant 41.7 and one over the electrical time constant 500, are close because the two time constants are well separated. The DC gain is about 10 rad per second per volt, so a 24-volt step gives 240 rad per second. The current plot shows the inrush of nearly 20 ampere, which is why drives always limit current.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Poles at -45.9 and -454 s^-1.</li><li>Inrush current ≈ V/R: current limitation is essential.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why is the approximation not perfect at the start? <b>A:</b> The inductance delays the current rise for a few milliseconds.</li></ul></div>
-      <p class="trans">Transition: Models are often built from blocks; we need block-diagram algebra.</p>
+      <h3><span class="num">Slide 20</span>The DC motor in both representations<span class="time">~5 min</span></h3>
+      <p class="say">Two equations from things students know: KVL for the winding and Newton for the rotor. Two energy stores, current in the inductance and speed of the inertia, so two states. Laplace-transform both, eliminate the current, and you get the transfer function. The k_t k_e term is back-EMF: when the motor speeds up it generates a voltage that reduces the current. That is a built-in feedback loop. Load torque is a second input, a disturbance.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Back-EMF is natural feedback.</li><li>Misconception: the motor speed is simply proportional to voltage at all times; only in steady state.</li></ul></div>
+      <p class="trans">Transition: Now with real numbers.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 21</span>Block-diagram algebra<span class="time">~6 min</span></h3>
-      <p class="say">Three rules cover most cases. Blocks in series multiply. Blocks in parallel add. A negative feedback loop gives G1 over one plus G1 G2, the most important formula of the day. Summing points can be moved across blocks if we compensate with the same block in the side path. For large diagrams Mason&#x27;s gain rule gives the result directly. One warning: if algebra cancels an unstable pole with a zero, the overall transfer function looks fine but an internal signal grows without bound. Always check internal stability.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Feedback: G1/(1+G1G2).</li><li>Never cancel unstable poles.</li></ul></div>
-      <p class="trans">Transition: Summary of session 2.2.</p>
+      <h3><span class="num">Slide 21</span>DC motor: worked numerical example<span class="time">~4 min</span></h3>
+      <p class="say">Go through the four numbered steps. Characteristic polynomial s^2 + 500 s + 20 860 gives poles at minus 46 and minus 454: a slow mechanical and a fast electrical pole. DC gain about 10 rad/s per volt, so 24 V gives about 240 rad/s, settling in about 4/46 = 87 ms. Point to the current plot: 20 A at the start, limited only by resistance. This is why drives need current limits.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Electrical pole much faster than mechanical.</li><li>Misconception: starting current equals rated current.</li></ul></div>
+      <p class="trans">Transition: Systems are built from blocks; here are the rules.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 22</span>Session 2.2 – Summary<span class="time">~4 min</span></h3>
-      <p class="say">The Laplace transform turns dynamics into algebra. Poles decide stability and speed, zeros shape the response. First- and second-order standard forms cover most servo sub-loops. State space is the internal, multivariable description and converts uniquely to a transfer function. The DC motor contains an internal back-EMF loop with well-separated electrical and mechanical poles. Block-diagram algebra lets us combine sub-models.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Poles, zeros, zeta and omega_n are the vocabulary for the rest of the course.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Quick check: what is the order of a two-mass system driven by a DC motor? <b>A:</b> Four mechanical states plus the current: order five.</li></ul></div>
-      <p class="trans">Transition: Next we ask where the parameters come from: identification.</p>
+      <h3><span class="num">Slide 22</span>Block-diagram algebra<span class="time">~4 min</span></h3>
+      <p class="say">Series blocks multiply, parallel blocks add, a negative feedback loop gives G1/(1+G1G2). Do the key-box numbers: with G1 = 10 the loop gain is 0.91, doubling G1 changes it only to 0.95. This is the main reason feedback is used: the result depends little on the uncertain plant. Mason's rule is Going further.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Feedback formula G1/(1+G1G2).</li><li>Misconception: feedback reduces gain, so it is wasteful. It buys insensitivity.</li></ul></div>
+      <p class="trans">Transition: Check your understanding.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 23</span>Session 2.2 – Check your understanding<span class="time">~3 min</span></h3>
+      <p class="say">Pairs, two minutes. Answers: 1) Stable, both poles in the left half-plane; the pole at minus 2 dominates; settling about 4/2 = 2 s. 2) Same oscillation frequency but slower decay: more overshoot and longer ringing. 3) Two independent energy stores: magnetic energy in the inductance (current) and kinetic energy in the inertia (speed).</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Link every answer to the pole map.</li><li>Misconception: the faster pole dominates.</li></ul></div>
+      <p class="trans">Transition: Summary.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 24</span>Session 2.2 – Summary and key terms<span class="time">~3 min</span></h3>
+      <p class="say">Recap: Laplace turns ODEs into algebra, poles decide stability and speed, first and second order cover most sub-systems, eigenvalues of A are the poles, and feedback makes the result insensitive to the plant. Read the key terms and ask a student to define time constant.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Poles are the thread connecting every slide.</li><li>Misconception: transfer function and state space are different systems.</li></ul></div>
+      <p class="trans">Transition: After the break: getting models from measurements.</p>
     </div>
   </section>
 
   <section id="s3">
     <h2 class="session">Session 2.3 · System identification and frequency response <small>Curriculum code 2.3 · 60 min</small></h2>
     <div class="slide">
-      <h3><span class="num">Slide 24</span>Physics versus measurement<span class="time">~5 min</span></h3>
-      <p class="say">Models can come from first principles, from data, or from a mix. White-box models use physics and data-sheet values, give insight and are valid widely if assumptions hold. Black-box models are fitted to data without assuming structure, such as a measured frequency response. Grey-box models take the structure from physics and estimate parameters from data; this is the default in servo engineering, for example inertia and friction from a run-up test. Whatever method, the workflow ends with validation on fresh data. A model needs to be accurate mainly around the intended crossover frequency.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Grey box is the practical default.</li><li>Validate on data not used for fitting.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Is the data-sheet inertia enough? <b>A:</b> For the motor yes; the load inertia is usually unknown and must be identified.</li></ul></div>
-      <p class="trans">Transition: The simplest experiment is a step test.</p>
+      <h3><span class="num">Slide 26</span>Where do models come from?<span class="time">~4 min</span></h3>
+      <p class="say">Three ways: physics (white box), physics plus measured parameters (grey box) and pure curve fitting (black box). In industry grey box is the default: we know the motor equations but measure inertia and friction. Go through the five workflow steps and stress the last one: check the model on new data. Ljung's quote: a model is never true, only useful. Modern servo drives have the signal analyser built in.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Grey box = physics + measurement.</li><li>Misconception: a model that fits the data used to build it is validated.</li></ul></div>
+      <p class="trans">Transition: The quickest test is a step.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 25</span>Step-response identification: FOPDT<span class="time">~7 min</span></h3>
-      <p class="say">For slow, non-oscillating processes the first order plus dead time model is very popular. We apply a step, read the final change to get K, and use the two-point method: the times at 28.3 and 63.2 percent. Then tau is 1.5 times their difference and theta is t63 minus tau. In the example, a third-order plant with gain 2 gives tau 1.29 seconds and theta 0.57 seconds. The dead time represents the higher-order lags. The fit is good in shape, and it is the input to the tuning rules of session 2.4. For resonant servo mechanics, however, this model is too coarse.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>tau = 1.5 (t63 - t28), theta = t63 - tau.</li><li>Dead time absorbs higher-order lags.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> What step size should I use? <b>A:</b> Large enough to overcome noise and friction, small enough to stay linear and safe; typically 5-10 % of range.</li></ul></div>
-      <p class="trans">Transition: For oscillating responses we use a second-order model.</p>
+      <h3><span class="num">Slide 27</span>Step test: first order plus dead time<span class="time">~6 min</span></h3>
+      <p class="say">Use the shower analogy for dead time: turn the tap and nothing changes for a few seconds. Then the four steps: K from the final change, read the 28 and 63 percent times, tau = 1.5 times the difference = 1.29 s, theta = 1.86 - 1.29 = 0.57 s. Note that the dead time also hides the extra small lags of the real plant. Good for thermal and process loops, too coarse for springy mechanics.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Four reading steps, units at every step.</li><li>Misconception: dead time is a measuring error. It is real delay.</li></ul></div>
+      <p class="trans">Transition: If the response overshoots, we fit a second-order model.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 26</span>Step-response identification: underdamped second order<span class="time">~6 min</span></h3>
-      <p class="say">If the step response overshoots, read the peak overshoot and peak time. The overshoot gives zeta through the logarithm formula, and the peak time gives the damped frequency pi over t_p. In the example, 25 percent overshoot at 40 milliseconds gives zeta 0.40 and omega_n 85.9 rad per second, about 13.7 hertz. For lightly damped ringing it is better to use the logarithmic decrement of successive peaks, which averages over many cycles.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>zeta from M_p; omega_d from t_p.</li><li>Log decrement for lightly damped modes.</li></ul></div>
-      <p class="trans">Transition: Step tests are limited; the frequency response gives a richer picture.</p>
+      <h3><span class="num">Slide 28</span>Step test: underdamped second-order system<span class="time">~5 min</span></h3>
+      <p class="say">Read overshoot and peak time from the plot. The formula gives zeta from the overshoot alone: 25 percent gives 0.40. Peak time gives the ringing frequency pi/t_p = 78.5 rad/s, and dividing by sqrt(1 - zeta^2) gives omega_n = 86 rad/s. Remind students to use overshoot as a fraction, not a percentage, in the logarithm.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Overshoot gives zeta; peak time gives omega_n.</li><li>Misconception: using 25 instead of 0.25 in ln.</li></ul></div>
+      <p class="trans">Transition: Next we test with sines instead of steps; first a refresher.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 27</span>Frequency response and the Bode diagram<span class="time">~8 min</span></h3>
-      <p class="say">For a stable linear system a sine input produces, in steady state, a sine output of the same frequency, scaled by the magnitude of G of j omega and shifted by its phase. The Bode diagram plots magnitude in decibels and phase against logarithmic frequency. Because logarithms turn products into sums, we can sketch it from asymptotes: each real pole bends the magnitude down by 20 decibels per decade and adds minus 90 degrees, spread over two decades; each zero does the opposite; an integrator gives minus 20 decibels per decade everywhere. In the example, low frequencies look like 10 over s, the zero at 1 flattens the curve and the pole at 10 bends it down again. The dashed asymptotes are within 3 decibels of the exact curve.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>±20 dB/dec per real pole/zero; phase change over [0.1,10]× corner.</li><li>Exact curve is within 3 dB of asymptotes at a corner.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why logarithmic scales? <b>A:</b> Products become sums and wide frequency ranges fit one plot.</li></ul></div>
-      <p class="trans">Transition: Resonant poles behave differently.</p>
+      <h3><span class="num">Slide 29</span>Refresher: sinusoidal frequency response<span class="time">~7 min</span></h3>
+      <p class="say">Let a student shake a ruler slowly and quickly: slow, the tip follows; fast, it moves less and lags. A linear system driven by a sine always answers with a sine of the same frequency, only scaled and shifted. The scaling is |G(j omega)|, the shift is the angle. Recipe: replace s by j omega and use the complex-number rules from 2.2. Do both examples for 1/(s+1): 0.707 at minus 45 degrees at 1 rad/s, 0.0995 at minus 84 degrees at 10 rad/s.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Same frequency out, different amplitude and phase.</li><li>Misconception: the output frequency changes. Not for linear systems.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> What if the output has other frequencies? <b>A:</b> Then the system is nonlinear or noisy; coherence will show it.</li></ul></div>
+      <p class="trans">Transition: Gains span many orders of magnitude, so we use decibels.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 28</span>Second-order frequency response: resonance<span class="time">~6 min</span></h3>
-      <p class="say">A complex pole pair bends the magnitude down by 40 decibels per decade and the phase by 180 degrees. Around omega_n the low damping creates a peak: M_r is one over two zeta root one minus zeta squared. With zeta 0.05 the peak is ten, or plus 20 decibels. This is exactly what a coupling or belt resonance looks like in a measured servo frequency response. The width of the peak at half power is about two zeta omega_n, which lets us estimate damping from a measurement. The phase drops steeply near a lightly damped resonance.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Peak ≈ 1/(2 zeta) for small zeta.</li><li>Mechanical resonances: zeta 0.01-0.1, peaks of 15-30 dB.</li></ul></div>
-      <p class="trans">Transition: How do we measure such curves?</p>
+      <h3><span class="num">Slide 30</span>Refresher: decibels and logarithmic scales<span class="time">~5 min</span></h3>
+      <p class="say">Gains go from 0.001 to 1000; a log scale shows both. Decibel = 20 log10 of the gain. Learn a few anchors: 10 is 20 dB, 2 is 6 dB, 0.707 is minus 3 dB, 0.1 is minus 20 dB. Gains in series multiply, so dB add. On the log frequency axis each decade, a factor 10, takes the same space. Example: 0.05 is minus 26 dB.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Anchor values: x10 = 20 dB, x2 = 6 dB.</li><li>Misconception: 0 dB means zero output. It means gain 1.</li></ul></div>
+      <p class="trans">Transition: Now we can read a Bode plot.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 29</span>Excitation signals<span class="time">~6 min</span></h3>
-      <p class="say">Three families of excitation are common. A stepped sine measures one frequency at a time with the best signal-to-noise ratio, but is slow. A chirp sweeps frequency continuously, fast and with low crest factor. A pseudo-random binary sequence has a flat spectrum up to about 0.44 times its bit rate and is periodic, which avoids leakage, but its binary amplitude may excite backlash and friction strongly. Multisines allow a designed spectrum. In all cases choose the amplitude carefully, use periodic signals with an integer number of periods, and average.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Periodic excitation + averaging.</li><li>Amplitude: above friction, below saturation.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Which one does my drive use? <b>A:</b> Most drives offer PRBS or sine sweep; both work if the amplitude is chosen well.</li></ul></div>
-      <p class="trans">Transition: Now the measurement inside a servo drive.</p>
+      <h3><span class="num">Slide 31</span>How to read a Bode plot<span class="time">~8 min</span></h3>
+      <p class="say">A Bode plot is the frequency response for all frequencies: magnitude in dB on top, phase below, both against log frequency. Do the reading exercise at 0.1 rad/s: 40 dB means gain 100, phase about minus 85 degrees. Then the straight-line rules: each pole bends the magnitude down by 20 dB per decade and costs 90 degrees; each zero does the opposite; an integrator is minus 20 dB per decade everywhere. Show how the example follows: integrator, zero at 1 flattens, pole at 10 bends down.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Read magnitude, convert dB, read phase.</li><li>Misconception: the phase plot is optional. Stability depends on it.</li></ul></div>
+      <p class="trans">Transition: Mechanical systems often show a resonance peak.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 30</span>FRF measurement in servo drives<span class="time">~7 min</span></h3>
-      <p class="say">Servo axes are measured in closed loop because they must hold position against gravity and for safety. The excitation w is injected at the controller output. If we simply divide the spectra of y and u, the result is biased because u is correlated with noise through the feedback. The robust method uses cross-spectra with the injected signal: S_wy over S_wu gives the plant, S_wy over S_ww gives the process sensitivity. The HP signal analyser in the photo was the classic instrument; today the analyser is built into the drive firmware and records at the loop sample rate.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Inject a known signal; use cross-spectra with it.</li><li>H1 = S_uy/S_uu is biased in closed loop.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Can I measure open loop on a vertical axis? <b>A:</b> No; measure in closed loop with low bandwidth and compute G from the cross-spectra.</li></ul></div>
-      <p class="trans">Transition: A typical result is the two-mass FRF.</p>
+      <h3><span class="num">Slide 32</span>Resonance: pushing a swing<span class="time">~5 min</span></h3>
+      <p class="say">Pushing a swing at its own rhythm gives large motion with small pushes: resonance. Below omega_n the output follows; at omega_n the peak is 1/(2 zeta) and the phase is minus 90; above it falls 40 dB per decade. With zeta = 0.05 the peak is a factor 10, plus 20 dB, typical of belts and couplings. Exact peak formulas are Going further.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Peak height 1/(2 zeta).</li><li>Misconception: resonance only matters in bridges. Every servo axis has some.</li></ul></div>
+      <p class="trans">Transition: How do we measure such a plot on a machine?</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 31</span>Measured FRF of a two-mass axis and coherence<span class="time">~6 min</span></h3>
-      <p class="say">Here is the frequency response from motor torque to motor speed for a motor coupled to a load through an elastic shaft. At low frequency it looks like a rigid inertia, falling with 20 decibels per decade. At 130 hertz we see the anti-resonance, where the load oscillates against the shaft and the motor barely moves, and at 260 hertz the resonance. The ratio of the two frequencies is root of one plus the inertia ratio. Coherence tells us how much of the output is linearly explained by the input. It drops at the anti-resonance, because the output is tiny there, and at high frequency. Trust the FRF only where coherence is above about 0.8.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Anti-resonance then resonance; ratio sqrt(1+J_l/J_m).</li><li>Coherence &lt; 0.8 means: do not trust that frequency band.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why does the motor barely move at the anti-resonance? <b>A:</b> The load acts as a dynamic vibration absorber at sqrt(k/J_l).</li></ul></div>
-      <p class="trans">Transition: How large is the error if we use the rigid model?</p>
+      <h3><span class="num">Slide 33</span>Measuring a frequency response on a servo axis<span class="time">~7 min</span></h3>
+      <p class="say">The drive adds a test signal while the axis is held in closed loop, which is safe and handles gravity. Show the three signal types: chirp sweeps frequency, PRBS looks random and covers all frequencies at once, stepped sine is slow but clean. The amplitude must overcome friction but stay below current limits. Averaging several runs reduces noise. Cross-spectra are Going further.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Test in closed loop, choose the amplitude carefully.</li><li>Misconception: bigger excitation is always better; it can saturate.</li></ul></div>
+      <p class="trans">Transition: Here is a typical measured result.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 32</span>Model uncertainty<span class="time">~6 min</span></h3>
-      <p class="say">Every model has errors. We describe them as a multiplicative perturbation: the true plant equals the nominal plant times one plus Delta. Here the nominal model is the rigid inertia and the truth is the two-mass system. The relative error is small at low frequency but exceeds 100 percent near the resonances. The small-gain theorem says the loop remains stable if the magnitude of T times the uncertainty bound is below one at all frequencies. So the complementary sensitivity must stay below the grey curve. A 30 hertz design is safe; a 150 hertz design violates the bound. This is why bandwidth must stay below the first resonance unless we model and filter it.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Robust stability: |T|·|W| &lt; 1 for all omega.</li><li>Bandwidth is limited by unmodelled resonances.</li></ul></div>
-      <p class="trans">Transition: Summary of identification.</p>
+      <h3><span class="num">Slide 34</span>Two-mass axis: coherence and model error<span class="time">~7 min</span></h3>
+      <p class="say">Motor and load connected by a springy shaft. Up to about 50 Hz the rigid model fits; near the anti-resonance at 130 Hz and resonance at 260 Hz it is completely wrong. Coherence near 1 means the measurement is trustworthy; trust it only above about 0.8. Conclusion: keep control bandwidth below the first resonance, or add notch filters on Day 3.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Simple models fail near resonances.</li><li>Misconception: a low-coherence dip is a real feature of the plant.</li></ul></div>
+      <p class="trans">Transition: Check your understanding.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 33</span>Session 2.3 – Summary<span class="time">~3 min</span></h3>
-      <p class="say">We combine physics for the structure with measurements for the parameters. Step tests quickly give FOPDT or second-order models. Bode diagrams are built from asymptotes. Frequency responses are measured with periodic excitation and cross-spectra in closed loop, checked by coherence. And the model error, quantified over frequency, limits the achievable bandwidth.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Coherence and uncertainty are part of every measurement.</li></ul></div>
-      <p class="trans">Transition: Break, then PID control.</p>
+      <h3><span class="num">Slide 35</span>Session 2.3 – Check your understanding<span class="time">~3 min</span></h3>
+      <p class="say">Answers: 1) 0.1 is minus 20 dB, 1000 is plus 60 dB. 2) Gain 2 is plus 6 dB; a quarter period lag is minus 90 degrees. 3) Near the resonance the real plant has much more gain and different phase than the model, so a loop designed there can become unstable.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Use the dB anchor table.</li><li>Misconception: lag of a quarter period equals minus 25 degrees.</li></ul></div>
+      <p class="trans">Transition: Summary.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 36</span>Session 2.3 – Summary and key terms<span class="time">~3 min</span></h3>
+      <p class="say">Recap the five take-aways and the key terms. Emphasise that a Bode plot is just the sine test repeated at many frequencies, plotted in dB and degrees.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Bode = repeated sine tests.</li><li>Misconception: Bode plots only apply to electronics.</li></ul></div>
+      <p class="trans">Transition: After the break: feedback and PID.</p>
     </div>
   </section>
 
   <section id="s4">
     <h2 class="session">Session 2.4 · PID and basic control structures <small>Curriculum code 2.4 · 90 min</small></h2>
     <div class="slide">
-      <h3><span class="num">Slide 35</span>The standard feedback loop<span class="time">~7 min</span></h3>
-      <p class="say">This diagram defines the signals we use from now on: reference r, error e, controller output u, load disturbance d at the plant input, output disturbance d_o, and measurement noise n. The output is T times the reference plus G S times the load disturbance plus S times the output disturbance minus T times the noise. With high loop gain, S is small and disturbances are rejected, but T approaches one and noise passes through. Since S plus T equals one, we cannot reject both at the same frequency. All four transfer functions of the gang of four must be stable. The governor in the picture was the first analysed feedback controller, Maxwell 1868.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>S + T = 1.</li><li>Check all gang-of-four transfer functions.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why does noise appear with a minus sign? <b>A:</b> It enters through the feedback path; the loop tries to &#x27;correct&#x27; the noise.</li></ul></div>
-      <p class="trans">Transition: What do the three PID actions do?</p>
+      <h3><span class="num">Slide 38</span>Feedback: the cruise-control story<span class="time">~9 min</span></h3>
+      <p class="say">Tell the story. Open loop: fixed throttle, a hill comes, the car slows and nobody reacts. Closed loop: the speedometer measures, the ECU compares with the set speed and corrects the throttle. Name the parts: set point, error, controller, actuator, plant, sensor, disturbance. Then the P-only example: plant gain 2, controller 4.5, loop gain 9, speed 9/10 of 100 = 90 km/h. A 10 km/h offset remains because P needs an error to produce throttle.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Measure, compare, correct.</li><li>Misconception: a P controller reaches the set point exactly. It leaves an offset.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why not use a huge K_p? <b>A:</b> Offset shrinks but noise and oscillation grow, as we will see.</li></ul></div>
+      <p class="trans">Transition: Now the same loop in general notation.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 36</span>Effects of P, I and D actions<span class="time">~8 min</span></h3>
-      <p class="say">Left, pure proportional control of a third-order plant. Larger gain is faster but more oscillatory, and there is always an offset of one over one plus K_p. At K_p equal 8 the loop oscillates. Right, the four classic controllers. Integral action removes the offset but adds phase lag. Derivative action adds phase lead, damping the response, but amplifies noise. PID combines both and gives the best response here. The table is the qualitative summary you should remember.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>P: speed and offset; I: zero offset; D: damping and noise.</li><li>I action costs phase; D action buys phase.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why does PD alone have an offset? <b>A:</b> There is no integrator; the steady-state error is the same as for P.</li></ul></div>
-      <p class="trans">Transition: PID exists in several mathematical forms.</p>
+      <h3><span class="num">Slide 39</span>The standard feedback loop<span class="time">~7 min</span></h3>
+      <p class="say">Replace the car by G(s) and the ECU by C(s). The loop gain L = CG is what you get by going once around. S = 1/(1+L) is the part of a disturbance that survives; T = L/(1+L) is how well y follows r. For the cruise control L = 9 gives S = 0.1, T = 0.9, and S + T = 1 always. Show Watt's governor as the first P controller.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>L, S, T will be used until the end of the day.</li><li>Misconception: high loop gain has no cost; noise passes through.</li></ul></div>
+      <p class="trans">Transition: What do P, I and D each contribute?</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 37</span>PID forms<span class="time">~6 min</span></h3>
-      <p class="say">The parallel form has three independent gains. The ideal or ISA form uses one gain and two time constants, so changing K_p scales all three actions. The series form is the product of a PI and a PD; it always has real zeros and is common in older equipment. The conversion formulas are on the slide. The most common commissioning mistake is to copy gains between products without checking form and units: seconds versus minutes, proportional band versus gain, radians versus revolutions.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Know the form and the units before entering numbers.</li><li>Ki = Kp/Ti, Kd = Kp·Td.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Which form do servo drives use? <b>A:</b> Mostly parallel or ideal; check the manual for the exact definition and units.</li></ul></div>
-      <p class="trans">Transition: How do we choose the numbers? Classically with Ziegler and Nichols.</p>
+      <h3><span class="num">Slide 40</span>P, I and D: present, past and future<span class="time">~9 min</span></h3>
+      <p class="say">P reacts to the error now, I to the accumulated past, D to the trend, a guess of the future. Left plot: more P gives faster response but a remaining offset and more overshoot. Right plot: adding I removes the offset; adding D damps the overshoot. Use the table as the summary. Link back to the cruise control: I keeps adding throttle until the offset is zero.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>I removes the steady-state error.</li><li>Misconception: D makes the loop faster. It mainly adds damping.</li></ul></div>
+      <p class="trans">Transition: Different vendors write PID differently.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 38</span>Ziegler–Nichols tuning<span class="time">~7 min</span></h3>
-      <p class="say">Ziegler and Nichols proposed two methods in 1942. In the ultimate-sensitivity method we increase a P gain until the loop oscillates and record the ultimate gain and period. For one over s plus one cubed, K_u is 8 and T_u is 3.63 seconds, giving a PID with K_p 4.8. The step method uses the FOPDT parameters. Both are aimed at quarter-amplitude decay, which corresponds to zeta of about 0.2: too aggressive, with M_s often above three. Use them as a starting point only, and never drive a real machine to its stability limit without precautions.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>ZN gives quarter-amplitude decay: too aggressive.</li><li>Ultimate test is risky on real machines.</li></ul></div>
-      <p class="trans">Transition: Modern rules are model based and more robust.</p>
+      <h3><span class="num">Slide 41</span>PID forms<span class="time">~5 min</span></h3>
+      <p class="say">Same controller, different parameters: parallel with K_p, K_i, K_d, or ideal with K_p, T_i, T_d. Do the conversion example: K_p = 2, T_i = 4 s gives K_i = 0.5 per second; T_d = 0.5 s gives K_d = 1 s. Warn about copying gains between devices with different forms or units.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Check form and units before entering gains.</li><li>Misconception: T_i and K_i are the same thing.</li></ul></div>
+      <p class="trans">Transition: How do we choose the numbers? The classic recipe.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 39</span>Model-based tuning: lambda, SIMC, Cohen–Coon<span class="time">~8 min</span></h3>
-      <p class="say">Model-based rules start from the FOPDT model. Lambda or IMC tuning chooses the closed-loop time constant lambda and sets T_i equal to tau, cancelling the plant pole. SIMC by Skogestad uses tau_c, typically equal to theta, and limits the integral time for better disturbance rejection. Cohen-Coon is an older, aggressive rule. For our identified model the gains range from 0.35 to 1.06, a factor of three. These rules do not give &#x27;the&#x27; answer; they encode different robustness targets. In servo drives we use rules based on inertia and bandwidth instead, which we see on the cascade slide.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>One knob: lambda or tau_c.</li><li>SIMC with tau_c = theta: M_s ≈ 1.6-1.7.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Which rule should I use? <b>A:</b> SIMC is a robust default for process-type loops.</li></ul></div>
-      <p class="trans">Transition: A frequency-domain view of tuning is loop shaping.</p>
+      <h3><span class="num">Slide 42</span>Ziegler–Nichols<span class="time">~8 min</span></h3>
+      <p class="say">Recipe: P only, raise the gain until the loop keeps oscillating; note K_u and T_u; use the table. Work the example step by step: three poles lag 180 degrees at sqrt(3) rad/s, gain there is 1/8, so K_u = 8, T_u = 3.63 s, PID 4.8, 1.81 s, 0.45 s. Warn that the result is aggressive and that pushing a real machine into oscillation can be dangerous.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>ZN is a starting point only.</li><li>Misconception: ZN gives the 'optimal' tuning.</li></ul></div>
+      <p class="trans">Transition: A safer way uses a model.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 40</span>Loop shaping<span class="time">~7 min</span></h3>
-      <p class="say">Instead of tuning parameters, we can shape the loop gain directly. At low frequency we want large loop gain for tracking and disturbance rejection, because then S is about one over L. At high frequency we want small loop gain so that noise and unmodelled dynamics are not amplified, because then T is about L. Around crossover the slope should be about minus 20 decibels per decade over roughly a decade, which by Bode&#x27;s gain-phase relation gives a healthy phase margin. The PID terms map onto this picture: I raises low-frequency gain, D adds lead near crossover, filters add roll-off.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>High |L| at low frequency, low |L| at high frequency.</li><li>-20 dB/dec through crossover.</li></ul></div>
-      <p class="trans">Transition: Derivative action needs special care.</p>
+      <h3><span class="num">Slide 43</span>Model-based tuning<span class="time">~7 min</span></h3>
+      <p class="say">With the FOPDT model from 2.3 choose how fast you want the closed loop, tau_c, and compute K_p. Do the steps: SIMC gives 0.57, lambda gives 0.35, both with T_i = 1.29 s; ZN would give 1.02. The 3:1 spread shows that rules aim at different robustness. Cohen–Coon is Going further.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>One knob: desired closed-loop time constant.</li><li>Misconception: there is one correct tuning.</li></ul></div>
+      <p class="trans">Transition: A closer look at the D-term.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 41</span>Derivative filtering and placement<span class="time">~6 min</span></h3>
-      <p class="say">An ideal differentiator has gain growing without bound with frequency, so measurement noise and encoder quantisation are amplified. We therefore add a first-order filter with time constant T_d over N, which limits the high-frequency gain to K_p times N; N is usually between 5 and 20. Second, we apply derivative only to the measurement, not the error, to avoid a large spike when the set-point jumps. In servo drives the derivative of position is velocity, so the inner velocity loop is effectively the D action. Note how coarse velocity from a 20-bit encoder at 8 kilohertz is: one count is 0.048 rad per second.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Always filter D; N = 5-20.</li><li>Derivative on measurement avoids the derivative kick.</li></ul></div>
-      <p class="trans">Transition: The set-point can also be treated separately.</p>
+      <h3><span class="num">Slide 44</span>Derivative action: always filter it<span class="time">~6 min</span></h3>
+      <p class="say">A pure derivative amplifies fast wiggles without limit, so sensor noise becomes huge: see the red line rising forever. The filter caps it at K_p N. Taking the derivative of the measurement instead of the error avoids a kick when the set point jumps. In servos the D-part on position is simply velocity feedback. Encoder example: one count gives a speed jump of 0.048 rad/s.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Always filter D.</li><li>Misconception: more D is always more damping. Noise limits it.</li></ul></div>
+      <p class="trans">Transition: Another practical trick: set-point weighting.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 42</span>Set-point weighting<span class="time">~6 min</span></h3>
-      <p class="say">Set-point weighting gives a second degree of freedom. The proportional term uses b times r minus y, the derivative term c times r minus y, while the integral term must use the true error. With b equal one we get 33 percent overshoot, with 0.5 only 3.4 percent and with zero practically none. The feedback loop, its margins and its disturbance response are unchanged. The recipe: tune the feedback for disturbances and robustness first, then adjust b for the set-point response.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>b and c only change the set-point response.</li><li>Integral term always uses r - y.</li></ul></div>
-      <p class="trans">Transition: A key practical issue is saturation.</p>
+      <h3><span class="num">Slide 45</span>Set-point weighting<span class="time">~5 min</span></h3>
+      <p class="say">Use only part of the set point in the P-term; the I-term keeps the true error, so the final value is still exact. Overshoot drops from 33 to 0.3 percent while the disturbance response is unchanged. Recipe: tune for disturbances first, then pick b. In servos the same idea is a smooth trajectory plus feedforward.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Changes command response, not stability.</li><li>Misconception: b changes the loop gain.</li></ul></div>
+      <p class="trans">Transition: What happens when the actuator hits its limit?</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 43</span>Actuator saturation and integrator windup<span class="time">~7 min</span></h3>
-      <p class="say">Here a PI controller drives a first-order plant with an actuator limit of 1.2. Without anti-windup, the integrator keeps integrating while the output is saturated; the light blue line shows the unsaturated controller output rising far above the limit. The integrator must then be unwound by an error of opposite sign, giving 18 percent overshoot and a slow reaction to the set-point change. Both anti-windup methods remove the overshoot. In servo drives saturation occurs at the current limit, the voltage limit and the speed limit.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Saturation opens the loop; the integrator winds up.</li><li>Every saturating integrator needs anti-windup.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Is windup only a large-step problem? <b>A:</b> Mostly, but also during long disturbances or when a limit is set low, e.g. in torque-limited homing.</li></ul></div>
-      <p class="trans">Transition: Two standard anti-windup structures.</p>
+      <h3><span class="num">Slide 46</span>Windup and anti-windup<span class="time">~9 min</span></h3>
+      <p class="say">Back to the car: going uphill with full throttle, still too slow. The integrator keeps adding error although the throttle cannot open further. At the hill top it must unwind first: 18 percent overshoot and slow settling, red curve. Two cures: clamping stops integrating while saturated; back-calculation bleeds the integrator so it follows the limit. Both curves recover quickly.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Every saturating integrator needs anti-windup.</li><li>Misconception: windup is a bug in the plant. It is in the controller.</li></ul></div>
+      <p class="trans">Transition: Feedback reacts; feedforward anticipates.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 44</span>Anti-windup schemes<span class="time">~7 min</span></h3>
-      <p class="say">Back-calculation feeds the difference between the saturated and unsaturated outputs back to the integrator through a gain one over T_t, so the controller state tracks the actuator. A recommended choice is T_t equal to the square root of T_i T_d, or about T_i over two for a PI. Conditional integration, or clamping, simply stops integrating when the output is saturated and the error would push it further. It has no extra parameter and is standard in drive firmware. In cascades, the saturation of the inner loop must be passed back to the outer controller.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Back-calculation: T_t ≈ sqrt(Ti·Td).</li><li>Clamping: stop integration when saturated in the same direction.</li></ul></div>
-      <p class="trans">Transition: Feedforward is the second big practical tool.</p>
+      <h3><span class="num">Slide 47</span>Feedforward<span class="time">~8 min</span></h3>
+      <p class="say">A driver who sees the hill presses the pedal before the car slows: feedforward. For a servo, the needed torque is inertia times acceleration plus friction, computed from the planned trajectory. Error drops from 8.8 to 0.86 mrad even with a 10 percent wrong inertia. Feedforward sits outside the loop, so it does not affect stability. It needs a smooth reference.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>FF handles the known part, feedback the unknown.</li><li>Misconception: feedforward can replace feedback.</li></ul></div>
+      <p class="trans">Transition: Real drives nest several loops.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 45</span>Feedforward<span class="time">~7 min</span></h3>
-      <p class="say">Feedback reacts to errors after they occur. Feedforward computes the torque needed for the planned motion: inertia times acceleration plus friction. With a perfect model the error is zero regardless of the controller. In the simulation, a one-radian move in 300 milliseconds gives 8.8 milliradian error with feedback only and 0.86 with feedforward based on an inertia 10 percent too small. Feedforward lies outside the loop, so it does not change stability. It needs smooth references with bounded jerk.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>FF = J·a + B·v from the trajectory.</li><li>FF does not affect stability.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> What if inertia changes with the load? <b>A:</b> Feedback absorbs the error; or estimate J online.</li></ul></div>
-      <p class="trans">Transition: Finally the structure used in every servo drive: cascade control.</p>
+      <h3><span class="num">Slide 48</span>Cascade control<span class="time">~9 min</span></h3>
+      <p class="say">Use the company analogy: the fast inner loop does what the outer loop asks. Current loop inside speed loop inside position loop, each 4 to 10 times slower. Walk through the table with the motor from 2.2: current PI 15.1 V/A and 2 ms; speed PI 1.26 and 6.4 ms; position P 126 per second. Tune from the inside out. Details on Day 4.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Tune inside-out with bandwidth separation.</li><li>Misconception: all loops can be tuned at once.</li></ul></div>
+      <p class="trans">Transition: Check your understanding.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 46</span>Cascade control<span class="time">~9 min</span></h3>
-      <p class="say">A servo drive nests three loops. The current loop is innermost and fastest, about one to three kilohertz bandwidth. Around it the speed loop, around 100 to 300 hertz, and outermost the position loop, 10 to 50 hertz. Each inner loop makes the plant for the next loop simpler and faster, and its limits act as natural clamps. Tune from inside out with a bandwidth separation of four to ten. For our DC motor: a current PI with K_p equal L_a times omega and T_i equal L_a over R cancels the electrical pole, giving 15.1 volt per ampere and 2 milliseconds for 1 kilohertz. The speed PI uses J omega over k_t, 1.26, and the position gain is 126 per second. Day 4 covers this in depth.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Current → speed → position, tuned inside-out.</li><li>Bandwidth separation 4-10×.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why not one big PID on position? <b>A:</b> The cascade handles limits, nonlinearities and disturbances better and is easier to commission.</li></ul></div>
-      <p class="trans">Transition: Summary of PID.</p>
+      <h3><span class="num">Slide 49</span>Session 2.4 – Check your understanding<span class="time">~4 min</span></h3>
+      <p class="say">Answers: 1) With P only, extra throttle needs an error, so a small speed shortfall remains; the I-term removes it. 2) An unfiltered derivative amplifies high-frequency noise without limit. 3) The integrator winds up to a huge value; at the top the car overshoots the set speed until it unwinds. Anti-windup prevents this.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Tie every answer to the cruise control.</li><li>Misconception: offset means the controller is broken.</li></ul></div>
+      <p class="trans">Transition: Summary.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 47</span>Session 2.4 – Summary<span class="time">~5 min</span></h3>
-      <p class="say">P sets speed, I removes steady-state error, D adds phase lead and must be filtered. Know the controller form. Ziegler-Nichols is aggressive; model-based rules give one robustness knob. Set-point weighting and feedforward improve tracking without changing robustness. Every saturating integrator needs anti-windup. Servo drives use cascades tuned inside-out.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Anti-windup and feedforward are not optional in servos.</li></ul></div>
-      <p class="trans">Transition: Break, then how we judge stability and performance.</p>
+      <h3><span class="num">Slide 50</span>Session 2.4 – Summary and key terms<span class="time">~4 min</span></h3>
+      <p class="say">Read the six take-aways and the key terms. Ask one student to explain loop gain and sensitivity using the cruise-control numbers.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>PID plus filter, anti-windup and feedforward.</li><li>Misconception: PID tuning is just guessing.</li></ul></div>
+      <p class="trans">Transition: Last session: is the loop stable, and how robust?</p>
     </div>
   </section>
 
   <section id="s5">
     <h2 class="session">Session 2.5 · Stability and performance analysis (+ wrap-up) <small>Curriculum code 2.5 · 60 min</small></h2>
     <div class="slide">
-      <h3><span class="num">Slide 49</span>Time-domain specifications<span class="time">~5 min</span></h3>
-      <p class="say">Performance is usually specified on the step response. Rise time is 10 to 90 percent, peak time is the first maximum, overshoot the relative excess above the final value, settling time the last entry into a 2 percent band, and steady-state error what remains. For zeta 0.4 the numbers are on the slide: 25 percent overshoot and settling after 8.4 normalised time units, slightly better than the rough estimate four over zeta. In servo applications we also specify following error at constant velocity and the time to reach the in-position window.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Transient = poles; steady state = type and DC gain.</li></ul></div>
-      <p class="trans">Transition: These quantities are linked to zeta and to the phase margin.</p>
+      <h3><span class="num">Slide 52</span>What does “stable” mean?<span class="time">~6 min</span></h3>
+      <p class="say">Ball in a bowl returns, ball on a hill runs away, ball on a flat table stays where pushed. Then the shower: hot water arrives late; if you over-react, the temperature swings more and more. Feedback can create instability. Closed-loop poles are the roots of 1 + L = 0; stable means all in the left half-plane. Example: K = 20 stable, K = 100 unstable.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Stability is decided by closed-loop poles.</li><li>Misconception: feedback always stabilises.</li></ul></div>
+      <p class="trans">Transition: How do we describe a good response?</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 50</span>Specifications versus damping ratio<span class="time">~5 min</span></h3>
-      <p class="say">For a second-order closed loop the overshoot depends only on zeta. For the standard loop with an integrator and a pole, the phase margin is also a function of zeta, and the rule of thumb is phase margin about 100 times zeta, in degrees, up to about 0.7. So 45 degrees of phase margin corresponds to about 25 percent overshoot and 65 degrees to about 5 percent. This gives a bridge between frequency-domain margins and time-domain behaviour.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>PM ≈ 100·zeta degrees.</li><li>PM 45° ≈ 25 % overshoot; PM 65° ≈ 5 %.</li></ul></div>
-      <p class="trans">Transition: Next, steady-state accuracy.</p>
+      <h3><span class="num">Slide 53</span>Time-domain specifications<span class="time">~7 min</span></h3>
+      <p class="say">Define rise time, overshoot, settling time and steady-state error on the plot. For a second-order loop zeta alone fixes the overshoot; read the table: 0.4 gives 25 percent, 0.7 gives under 5. Rule of thumb: phase margin in degrees is about 100 times zeta, which links to the Bode plot later.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>zeta fixes overshoot; PM approx 100 zeta.</li><li>Misconception: settling time and rise time are the same.</li></ul></div>
+      <p class="trans">Transition: What remains at the end: steady-state error.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 51</span>Steady-state error and system type<span class="time">~6 min</span></h3>
-      <p class="say">The final value theorem gives the steady-state error from the limit of s E of s as s goes to zero, but only if the closed loop is stable. The system type is the number of integrators in the loop. Type zero gives a finite step error, type one zero step error and finite ramp error one over K_v, type two zero ramp error. A position loop with proportional gain around a velocity loop is type one: at 0.2 metres per second on a 10 millimetre ball screw the following error is one radian, 1.6 millimetre. Velocity feedforward removes it without adding phase lag.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>e_ramp = 1/K_v for type 1.</li><li>Following error = speed / K_v.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Is 1.6 mm following error a problem? <b>A:</b> Not for point-to-point moves, but in multi-axis contouring it distorts the path; use velocity feedforward.</li></ul></div>
-      <p class="trans">Transition: Now the classical stability tests, starting with Routh-Hurwitz.</p>
+      <h3><span class="num">Slide 54</span>Steady-state error and system type<span class="time">~7 min</span></h3>
+      <p class="say">Final value theorem from the Laplace table, only for stable loops. Count integrators in L: type 0 leaves a step offset (cruise control with P), type 1 none for steps but a constant lag for ramps. Do the servo steps: K_v = 126, motor at 126 rad/s, lag 1 rad = 1.6 mm. Velocity feedforward removes it.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Integrators in L decide the steady error.</li><li>Misconception: FVT works for unstable loops.</li></ul></div>
+      <p class="trans">Transition: How do poles move as we raise the gain?</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 52</span>Routh–Hurwitz criterion<span class="time">~6 min</span></h3>
-      <p class="say">Routh&#x27;s array decides stability from the coefficients without computing roots. All coefficients must have the same sign, and the number of sign changes in the first column equals the number of right-half-plane roots. For our example loop K over s times s plus 2 times s plus 5, the array shows the closed loop is stable for K between zero and 70. At K equal 70 the auxiliary polynomial gives the oscillation frequency root ten, 3.16 rad per second. For K equal 20 the gain margin is 3.5. Routh gives only a yes or no answer and does not handle delays.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Stable for 0 &lt; K &lt; 70.</li><li>Oscillation at sqrt(10) rad/s at the limit.</li></ul></div>
-      <p class="trans">Transition: The root locus shows how the poles move with K.</p>
+      <h3><span class="num">Slide 55</span>Root locus<span class="time">~7 min</span></h3>
+      <p class="say">The curves show where the three closed-loop poles go as K increases. Start at the open-loop poles, two meet and split into an oscillating pair, at K = 20 we get 37 percent overshoot, at K = 70 they hit the imaginary axis: the limit. Sketching rules are Going further.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>More gain moves poles to the right.</li><li>Misconception: more gain always means better control.</li></ul></div>
+      <p class="trans">Transition: Two classic tests, only as concepts.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 53</span>Root locus<span class="time">~6 min</span></h3>
-      <p class="say">The root locus plots the closed-loop poles as K goes from zero to infinity. It starts at the open-loop poles, here 0, minus 2 and minus 5. Two branches meet at minus 0.88 and break away into the complex plane, following asymptotes at plus and minus 60 degrees from minus 2.33. They cross the imaginary axis at 3.16 rad per second for K equal 70, exactly as Routh predicted. At K equal 20 the dominant poles have zeta 0.3: already quite oscillatory. The root locus shows why more gain always destabilises a loop of third order or higher.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Starts at poles, ends at zeros or infinity.</li><li>K = 20: zeta ≈ 0.3.</li></ul></div>
-      <p class="trans">Transition: The Nyquist criterion works directly with frequency responses.</p>
+      <h3><span class="num">Slide 56</span>Going further: Routh–Hurwitz and Nyquist<span class="time">~4 min</span></h3>
+      <p class="say">Keep this short. Routh decides stability from the coefficients without solving: here 0 &lt; K &lt; 70, the same as the root locus. Nyquist plots L(j omega) in the complex plane; the loop is stable if the curve does not encircle minus 1. The distance from minus 1 measures robustness, and margins are a simple reading of it.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Optional; concepts only.</li><li>Misconception: these are needed to design a PID. Margins suffice.</li></ul></div>
+      <p class="trans">Transition: Margins on the Bode plot.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 54</span>Nyquist criterion<span class="time">~7 min</span></h3>
-      <p class="say">The Nyquist plot shows L of j omega in the complex plane. The criterion Z equals N plus P counts encirclements of the critical point minus one. For a stable open loop the closed loop is stable if the curve does not encircle minus one. Our curve crosses the negative real axis at minus 0.286, so the gain may grow by 3.5 before instability. The most meaningful robustness measure is the shortest distance to minus one, which equals one over M_s; the orange circle shows it. Nyquist works with delays and with measured frequency responses, so we can assess a real drive without a parametric model.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Z = N + P.</li><li>Distance to -1 = 1/M_s.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why measured FRFs? <b>A:</b> The criterion needs only L(jω), which the drive&#x27;s analyser can provide.</li></ul></div>
-      <p class="trans">Transition: The same information on the Bode diagram.</p>
+      <h3><span class="num">Slide 57</span>Gain and phase margins<span class="time">~8 min</span></h3>
+      <p class="say">The loop oscillates if a signal returns with gain 1 and minus 180 degrees. Margins are the safety distance, like distance to a cliff edge. Do the three steps on the plot: crossover at 1.52, phase minus 144, PM 36 degrees; phase minus 180 at 3.16, gain minus 10.9 dB, GM 10.9 dB. Targets 45 to 60 degrees and at least 6 dB. A delay of 0.41 s would use up all the phase margin.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Read PM at |L| = 0 dB, GM at phase -180.</li><li>Misconception: a stable loop with PM 5 degrees is fine; it rings badly.</li></ul></div>
+      <p class="trans">Transition: One more robustness measure: sensitivity.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 55</span>Gain and phase margins on the Bode diagram<span class="time">~6 min</span></h3>
-      <p class="say">Crossover is where the loop gain magnitude equals one; the phase margin is 180 degrees plus the phase there. The gain margin is the inverse of the magnitude where the phase is minus 180 degrees. For K equal 20, crossover is 1.52 rad per second, phase margin 36 degrees and gain margin 10.9 decibels. Phase margin also gives the delay margin: 36 degrees divided by the crossover frequency is 0.41 seconds of tolerable extra delay. Typical targets are 45 to 60 degrees and 6 to 10 decibels or more.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>PM 45-60°, GM ≥ 6-10 dB.</li><li>Delay margin = PM/omega_c.</li></ul></div>
-      <p class="trans">Transition: A single number that combines both margins is M_s.</p>
+      <h3><span class="num">Slide 58</span>Sensitivity, robustness and loop shaping<span class="time">~7 min</span></h3>
+      <p class="say">|S| shows how much of a disturbance survives at each frequency. At low frequency it is small; near crossover it rises above 1, so feedback amplifies disturbances there. The peak M_s should be 1.2 to 2. K = 20 has M_s 2.1 and rings; K = 10 is calmer. Loop shaping: big |L| at low frequency, small at high frequency. Formulas and waterbed effect are Going further.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Aim for M_s below 2.</li><li>Misconception: feedback reduces disturbances at all frequencies.</li></ul></div>
+      <p class="trans">Transition: Check your understanding.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 56</span>Sensitivity functions, M_s and bandwidth<span class="time">~7 min</span></h3>
-      <p class="say">S describes how disturbances and errors are attenuated, T how references and noise pass through. The bandwidth is where T falls to minus 3 decibels, here 2.6 rad per second. The peak of S, M_s, is 2.12 for K equal 20, meaning disturbances near 2 rad per second are amplified by a factor of two. M_s bounds both margins: M_s of 2 guarantees 6 decibels and 29 degrees. The step responses show K 10, 20 and 50: higher gain is faster but rings. And the waterbed effect: the integral of log S over frequency is zero, so pushing S down at low frequency raises it elsewhere.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>M_s = 1.2-2.0 recommended.</li><li>Waterbed: sensitivity reduction must be paid elsewhere.</li></ul></div>
-      <p class="trans">Transition: Let us collect the design targets.</p>
+      <h3><span class="num">Slide 59</span>Session 2.5 – Check your understanding<span class="time">~4 min</span></h3>
+      <p class="say">Answers: 1) Stable, real part minus 1; zeta = 1/sqrt(10) = 0.32, so large overshoot of about 35 percent. 2) Strong overshoot and long ringing, close to instability. 3) Following error = 50/100 = 0.5 rad.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Use the pole map and the type table.</li><li>Misconception: complex poles mean instability.</li></ul></div>
+      <p class="trans">Transition: Summary.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 57</span>Session 2.5 – Summary and design targets<span class="time">~3 min</span></h3>
-      <p class="say">Specifications follow from zeta and omega_n. System type determines steady-state error. Routh and root locus show gain limits; Nyquist and Bode give margins; M_s summarises robustness. The table lists typical targets. Our example with K equal 20 is too aggressive; K of about 10 would meet them.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Use the target table as a commissioning checklist.</li></ul></div>
+      <h3><span class="num">Slide 60</span>Session 2.5 – Summary and design targets<span class="time">~4 min</span></h3>
+      <p class="say">Recap the take-aways and the target table. Our example with K = 20 is too aggressive; K about 10 meets the targets. Read the key terms.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Targets: PM 45-60, GM &gt;= 6 dB, M_s &lt;= 2.</li><li>Misconception: one margin is enough; check both.</li></ul></div>
       <p class="trans">Transition: Let us wrap up the day.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 59</span>Day summary<span class="time">~4 min</span></h3>
-      <p class="say">The modelling chain runs from nonlinear physics through Jacobians to state space, to transfer functions and to frequency responses; in the lab the same chain is closed by step tests and FRF measurements with uncertainty. The control chain is PID with the right form, filters and set-point weights, plus anti-windup, feedforward and cascades. The ten numbers on the right are worth memorising.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Ten numbers to remember.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Which single number would you check first on a new axis? <b>A:</b> The phase margin or M_s of the speed loop, measured with the drive&#x27;s FRF tool.</li></ul></div>
-      <p class="trans">Transition: What comes tomorrow?</p>
+      <h3><span class="num">Slide 62</span>Day summary and preview of Day 3<span class="time">~4 min</span></h3>
+      <p class="say">Show the two chains: modelling from physics to Bode plot, and control from feedback to cascade. Repeat the numbers to remember. Tomorrow: filters, observers built on today's matrices, discrete-time control and power electronics.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Today's poles, margins and state space are tomorrow's prerequisites.</li><li>Misconception: Day 3 is unrelated; it builds directly on today.</li></ul></div>
+      <p class="trans">Transition: Credits and references.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 60</span>Preview of Day 3<span class="time">~2 min</span></h3>
-      <p class="say">Tomorrow we continue with control: filters in the loop and lead-lag compensation, state feedback and observers, adaptive and robust control, and discrete-time implementation with sampling and delay. At the end we begin the servo-system block with architecture and power electronics.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Today&#x27;s PM, M_s and state space are the prerequisites.</li></ul></div>
-      <p class="trans">Transition: Credits and references follow.</p>
-    </div>
-    <div class="slide">
-      <h3><span class="num">Slide 61</span>Figure credits<span class="time">~1 min</span></h3>
-      <p class="say">All downloaded images are from Wikimedia Commons under free licences, listed here. All plots are our own computations.</p>
+      <h3><span class="num">Slide 63</span>Figure credits<span class="time">~1 min</span></h3>
+      <p class="say">All downloaded images are from Wikimedia Commons under free licences; all plots are our own.</p>
       <div class="key"><span class="label">Emphasise</span><ul><li>Licences: CC BY, CC BY-SA, public domain.</li></ul></div>
-      <p class="trans">Transition: Finally the references.</p>
+      <p class="trans">Transition: References.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 62</span>References<span class="time">~2 min</span></h3>
-      <p class="say">For further reading I recommend Åström and Murray, free online, Åström and Hägglund for PID practice, Franklin, Powell and Emami-Naeini or Ogata for the classical theory, Ellis for servo practice and Ljung or Pintelon and Schoukens for identification.</p>
+      <h3><span class="num">Slide 64</span>References<span class="time">~1 min</span></h3>
+      <p class="say">Recommend Åström and Murray, free online, and Franklin, Powell and Emami-Naeini or Ogata as textbooks; Åström and Hägglund for PID practice.</p>
       <div class="key"><span class="label">Emphasise</span><ul><li>Åström &amp; Murray is freely available.</li></ul></div>
       <p class="trans">Transition: Thank you; see you tomorrow.</p>
     </div>
   </section>
 </main>
-<footer>Figures and references are listed on the final slides of the deck (pages 61–62).</footer>
+<footer>Figures and references are listed on the final slides of the deck (pages 63–64).</footer>
 </body>
 </html>

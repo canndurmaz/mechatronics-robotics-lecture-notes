@@ -47,439 +47,407 @@
 <header><div class="wrap">
   <div class="day">DAY 3 / 5 · SPEAKER NOTES</div>
   <h1>Advanced Control and Introduction to Servo Systems</h1>
-  <p>Mechatronics: Electrical Machines, Control, Servo Systems and Sensing · 5 h net teaching time</p>
+  <p>Mechatronics: Electrical Machines, Control, Servo Systems and Sensing · 5 h net · sophomore edition</p>
 </div></header>
 <nav class="toc"><a href="#plan">Plan</a><a href="#s1">2.6</a><a href="#s2">2.7</a><a href="#s3">2.8</a><a href="#s4">2.9</a><a href="#s5">3.1</a><a href="#s6">3.2 (part 1)</a></nav>
 <main>
   <section id="plan">
     <h2 class="session">Day plan &amp; timing</h2>
     <table class="plan"><tr><th>Block</th><th>Topic</th><th>Slides (PDF pages)</th><th>Duration</th></tr>
-      <tr><td>Opening + 2.6</td><td>Filters and compensation</td><td>1–13</td><td>60 min</td></tr>
+      <tr><td>Opening + 2.6</td><td>Recap, filters and compensation</td><td>1–16</td><td>60 min</td></tr>
       <tr><td>Break</td><td>—</td><td></td><td>10 min</td></tr>
-      <tr><td>2.7</td><td>Modern control (state space)</td><td>14–24</td><td>60 min</td></tr>
+      <tr><td>2.7</td><td>Modern control (state space)</td><td>17–27</td><td>60 min</td></tr>
       <tr><td>Break</td><td>—</td><td></td><td>10 min</td></tr>
-      <tr><td>2.8</td><td>Adaptive and robust control</td><td>25–34</td><td>60 min</td></tr>
+      <tr><td>2.8</td><td>Adaptive and robust control</td><td>28–36</td><td>60 min</td></tr>
       <tr><td>Break</td><td>—</td><td></td><td>10 min</td></tr>
-      <tr><td>2.9</td><td>Discrete-time control</td><td>35–45</td><td>60 min</td></tr>
+      <tr><td>2.9</td><td>Discrete-time control</td><td>37–47</td><td>60 min</td></tr>
       <tr><td>Break</td><td>—</td><td></td><td>10 min</td></tr>
-      <tr><td>3.1</td><td>Servo system architecture</td><td>46–50</td><td>30 min</td></tr>
-      <tr><td>3.2a + closing</td><td>Power electronics I: rectifier, DC bus, inverter; day wrap-up</td><td>51–62</td><td>30 min</td></tr>
+      <tr><td>3.1</td><td>Servo system architecture</td><td>48–52</td><td>30 min</td></tr>
+      <tr><td>3.2a + closing</td><td>Rectifier, DC bus, inverter; wrap-up</td><td>53–65</td><td>30 min</td></tr>
     </table>
-    <p>Net teaching time 300 min; the four suggested 10-min breaks are extra. Section divider pages (3, 14, 25, 35, 46, 51) need no notes.</p>
+    <p>Net teaching time 300 min; breaks are extra. Section divider pages (4, 17, 28, 37, 48, 53) need no notes. Pages marked “Going further” are conceptual only: show the picture, give the idea, skip the algebra.</p>
   </section>
-
   <section id="s1">
-    <h2 class="session">Session 2.6 · Filters and compensation in control systems <small>Curriculum code 2.6 · 60 min (incl. 4 min opening) · slide times sum to 60 min</small></h2>
+    <h2 class="session">Session 2.6 · Filters and compensation <small>Curriculum code 2.6 · 60 min (incl. 7 min opening/recap) · slide times sum to 60 min</small></h2>
     <div class="slide">
       <h3><span class="num">Slide 1</span>Title<span class="time">~1 min</span></h3>
-      <p class="say">Welcome everyone to Day 3. Yesterday we built the classical toolbox: transfer functions, Bode plots, PID and stability margins. Today we push further in two directions. First, advanced control: filters and compensators, state-space methods, adaptive and robust ideas, and the discrete-time reality of every modern drive. Second, we open the servo drive itself: the architecture of a servo system and the power stage from the mains to the motor terminals.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Today connects control theory to the hardware that executes it.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li>Ask: “Which number on this slide would you check first on your own machine?”</li></ul></div>
-      <p class="trans">Transition: Let us look at the agenda.</p>
+      <p class="say">Welcome to Day 3. Yesterday you learned feedback, Bode plots, PID and stability margins. Today we use those tools in two directions: better controllers (filters, state space, adaptive and robust ideas, digital control) and the real hardware of a servo drive, from the mains plug to the motor.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Today links control theory to real drive hardware.</li><li>Misconception to watch: &#x27;control is just software&#x27; — the hardware sets the limits.</li></ul></div>
+      <p class="trans">Transition: Let us see the plan for the day.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 2</span>Agenda and learning objectives<span class="time">~3 min</span></h3>
-      <p class="say">The day has six blocks: four one-hour control sessions and two half-hour servo sessions. Point at the objectives box. By the end of today participants should be able to put a number on the phase that a filter costs, design a lead compensator, place poles with state feedback, explain how adaptive and robust controllers deal with uncertainty, discretise a controller correctly, and sketch the power path of a drive. The notation box repeats the conventions we fixed on Day 2: L equals C times G, crossover omega c, PM and GM, sensitivity S and complementary sensitivity T. We will use these symbols all day.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Notation is the same as on Days 1-2.</li><li>Breaks come after each hour and are not part of the net 5 h.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Will there be exercises? <b>A:</b> No lab work. The worked examples on the slides are what we calculate together.</li></ul></div>
-      <p class="trans">Transition: We begin with filters, because every real servo loop contains several of them.</p>
+      <h3><span class="num">Slide 2</span>Agenda and learning objectives<span class="time">~2 min</span></h3>
+      <p class="say">Six blocks: four one-hour control sessions and two half-hour hardware sessions. Read the objectives aloud; they are what students should be able to do tonight. Stress the verbs: explain, calculate, sketch, draw. Each session ends with a summary, key terms and a short check-your-understanding slide done in pairs.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Breaks are extra to the 5 h.</li><li>Every session ends with pair discussion questions.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li>Q: Do we need to memorise formulas? A: No, the boxed equations and what each symbol means.</li></ul></div>
+      <p class="trans">Transition: First a quick recap of Day 2.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 4</span>Why filters in a servo loop — and where they sit<span class="time">~6 min</span></h3>
-      <p class="say">Real loops contain more than C and G. We filter encoder quantisation noise, current-sensor noise, mechanical resonances and sensor offsets, and we shape reference steps. The block diagram shows four places a filter can sit: reference, error, controller output and feedback. The key point is the dashed box. Anything inside the loop multiplies L(s), so its phase at crossover is subtracted directly from the phase margin. A reference prefilter sits outside the loop. It changes the response to commands but has no effect on stability or disturbance rejection. A feedback filter has an extra drawback: the controller no longer sees the true output. It regulates the filtered value.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>In-loop filter means it belongs to L(s).</li><li>The reference filter is free in terms of stability.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Is a notch on the torque command in the loop? <b>A:</b> Yes, it is F_u and it adds phase lag below its centre frequency.</li></ul></div>
-      <p class="trans">Transition: Let us start with the most common filter, the low-pass filter.</p>
+      <h3><span class="num">Slide 3</span>What we learned so far (Day 2 in one slide)<span class="time">~4 min</span></h3>
+      <p class="say">Recap with the cruise-control analogy: the car measures its speed, compares it to the set speed and opens the throttle more or less. PID: P reacts to the error now, I to the error accumulated, D to how fast the error changes. The Bode plot shows loop gain and phase versus frequency; crossover is where the loop gain is one; the phase margin is how far we are from -180 degrees there. Today&#x27;s thread: everything either costs phase or buys it back.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Phase margin = safety distance from instability.</li><li>Misconception: &#x27;more gain is always better&#x27; — more gain raises crossover and eats margin.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li>Ask: &#x27;What happens to a loop with zero phase margin?&#x27; (It oscillates forever.)</li></ul></div>
+      <p class="trans">Transition: Let us start with filters.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 5</span>Low-pass filter: cut-off, order, roll-off, phase<span class="time">~6 min</span></h3>
-      <p class="say">Here are the parameters you find in every drive&#x27;s filter menu. The cut-off frequency is the minus 3 dB point. The order sets the roll-off, minus 20 dB per decade per order. The phase at cut-off is minus 45 degrees per order and tends to minus 90 degrees per order. Butterworth damping of 0.707 gives the flattest passband. With lower damping the filter peaks and actually amplifies near its cut-off, which you never want in a loop. The plot compares first, second and fourth order. Higher order gives much better attenuation but also much more phase lag. Group delay is a good mental model: a first-order filter behaves roughly like a delay of 1 over omega f.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Every order adds -45 degrees at cut-off.</li><li>Low damping causes peaking.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why not always use 4th order? <b>A:</b> Its phase lag near crossover is about three times larger, see the next slide.</li></ul></div>
-      <p class="trans">Transition: How much phase does this cost at crossover?</p>
+      <h3><span class="num">Slide 5</span>Refresher: what does a filter do?<span class="time">~5 min</span></h3>
+      <p class="say">Use the music equaliser. Turning down the treble is a low-pass filter; turning down the bass is a high-pass; removing a 50 Hz hum is a notch. The simplest low-pass is the RC circuit students know: cut-off 1 over 2 pi RC. With 1 kilo-ohm and 1 microfarad that is 159 Hz; ten times higher only a tenth of the amplitude passes. The key point for control: a filter also delays the signal, and delay costs phase.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>A filter = frequency-selective gain.</li><li>Misconception: &#x27;a filter only removes noise and has no side effects&#x27; — it always adds delay.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li>Q: Is the RC circuit first or second order? A: First order: one energy store.</li></ul></div>
+      <p class="trans">Transition: Why would a servo loop need filters at all?</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 6</span>The price of filtering: phase and noise–bandwidth trade-off<span class="time">~7 min</span></h3>
-      <p class="say">The plot shows the phase lost at crossover against the ratio of filter frequency to crossover frequency. For a first-order filter the loss is arctan of omega c over omega f. Worked example: the velocity loop crosses at 150 Hz and we allow 10 degrees. Then f f must be at least 150 over tan 10 degrees, which is about 850 Hz. A second-order Butterworth filter needs roughly 1.2 kHz. The other side of the trade-off is noise. Measurement noise reaches the torque command through C times S, which above crossover is roughly C itself. High proportional or derivative gain therefore sends noise into the current loop. You hear it and the motor heats up. So bandwidth, noise and filter phase form a triangle, and you can only choose two of them.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Rule: omega f = 5 to 10 times omega c.</li><li>Noise goes into torque through C(s).</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why does the motor whine at high gains? <b>A:</b> Encoder noise times Kp shows up as torque ripple in the audible band.</li></ul></div>
-      <p class="trans">Transition: Next, the high-pass filter, which does the opposite job.</p>
+      <h3><span class="num">Slide 6</span>Why filters in a servo loop — and where they sit<span class="time">~4 min</span></h3>
+      <p class="say">We filter sensor noise, resonances, offsets and sudden command steps. The diagram shows four places a filter can sit. The red dotted box marks the loop: anything inside multiplies L(s) and its phase is subtracted from the phase margin. A filter on the reference sits outside: it shapes the response but cannot make the loop unstable.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Inside the loop = part of L(s).</li><li>Misconception: &#x27;filtering the feedback is harmless&#x27; — it is inside the loop.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li>Q: Is a filter on the torque command inside? A: Yes.</li></ul></div>
+      <p class="trans">Transition: The most common filter: the low-pass.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 7</span>High-pass filter: DC and offset rejection<span class="time">~5 min</span></h3>
-      <p class="say">A high-pass filter blocks DC. We use it to remove offsets and slow drift from analogue sensors, for example Hall current sensors, accelerometers and strain gauges. We also use it as a washout, so that a signal passes only its changes. Typical cases are acceleration or vibration feedback that must not fight a constant load. Below the corner frequency it gives phase lead of up to 90 degrees. Its step response decays with time constant 1 over omega h. The pitfall is in the note box: never put a high-pass filter into the main position or velocity feedback. The loop then loses DC information and cannot hold position against gravity or a constant load, and an integrator cannot help because it never sees the steady error.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>HPF is for auxiliary paths, never for the main feedback.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Where do drives use HPFs internally? <b>A:</b> Offset tracking of current sensors at standstill, and in vibration-suppression or acceleration feedback paths.</li></ul></div>
-      <p class="trans">Transition: Now the most important special filter in servo practice: the notch.</p>
+      <h3><span class="num">Slide 7</span>Low-pass filter: cut-off, order and phase<span class="time">~4 min</span></h3>
+      <p class="say">Cut-off is the -3 dB point. Order sets the slope: minus 20 dB per decade per order. Each order also adds minus 45 degrees of phase at cut-off. The plot compares first, second and fourth order: the higher order cleans better above cut-off but lags far more. Second-order filters with low damping peak, which means they amplify near cut-off.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>-45° per order at cut-off.</li><li>Misconception: &#x27;higher order is always better&#x27;.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li>Q: Why not always 4th order? A: Three times more phase lag near crossover.</li></ul></div>
+      <p class="trans">Transition: How much does that phase cost the loop?</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 8</span>Notch filter: centre, width, Q and depth<span class="time">~6 min</span></h3>
-      <p class="say">The notch has two complex zero pairs and two complex pole pairs at the same frequency omega n. Depth at the centre is zeta z over zeta p, and the minus 3 dB width is about 2 zeta p omega n, which gives Q equals 1 over 2 zeta p. Walk through the three curves: depths of minus 40, minus 20 and minus 10.5 dB, all with zeta p equal to 0.5. Far from omega n the notch is transparent. Below the centre it lags and above it leads. This lag below the centre is what eats phase margin if the notch sits close to crossover. The design trade-off: a wide notch tolerates a resonance that drifts with load or position but costs more phase, and a narrow, deep notch is cheap but useless if the resonance moves.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Depth = zeta_z/zeta_p, width ≈ 2 zeta_p omega_n.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> How do drives find omega_n? <b>A:</b> From a frequency-response measurement or an FFT of the current during oscillation, often automatically.</li></ul></div>
-      <p class="trans">Transition: Let us see a notch in action on a realistic axis.</p>
+      <h3><span class="num">Slide 8</span>The price of filtering: phase lost at crossover<span class="time">~5 min</span></h3>
+      <p class="say">Walk through the worked example step by step. Crossover 150 Hz, we allow 10 degrees. tan 10 degrees is 0.176, so the filter must be at least 150 divided by 0.176, about 850 Hz. Check: arctan of 150 over 850 is 10 degrees. On the plot, find the ratio 5.7 on the first-order curve. Rule of thumb: put the filter 5 to 10 times above crossover. A lower filter makes a quieter motor but less margin.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>omega_f ≈ 5–10 × omega_c.</li><li>Misconception: students confuse cut-off of the filter with crossover of the loop.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li>Q: What if we need a 2nd-order filter? A: It must sit higher, about 1.2 kHz.</li></ul></div>
+      <p class="trans">Transition: Now the opposite filter: the high-pass.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 9</span>Notch in practice: suppressing a 1 kHz resonance<span class="time">~7 min</span></h3>
-      <p class="say">This example was computed for this course. Motor and load have equal inertia, a compliant shaft gives a 1 kHz resonance with 2 percent damping, and the antiresonance is at about 707 Hz. The velocity PI crosses at 100 Hz. We include 1.5 samples of delay at 8 kHz and a 2 kHz current loop. Without a notch, the resonance lifts the loop gain above 0 dB around 1 kHz. There are three crossovers, and the third one has minus 4 degrees of phase margin, so the closed loop is unstable. A pole check confirms a right-half-plane pole. With a notch at 1 kHz, 25 dB deep, there is only one crossover, the phase margin is 61 degrees and the gain margin about 28 dB. The notch costs only about 4 degrees at the main crossover.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Resonances become unstable when delay and current-loop lag rotate the phase near -180°.</li><li>A notch costs a few degrees at omega_c.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why not just reduce gain? <b>A:</b> You would need a factor of ~3 less gain and lose bandwidth; the notch keeps 100 Hz.</li></ul></div>
-      <p class="trans">Transition: Filters remove problems. Compensators actively add phase. Next, the lead compensator.</p>
+      <h3><span class="num">Slide 9</span>High-pass filter: removing offsets<span class="time">~4 min</span></h3>
+      <p class="say">A high-pass blocks DC: it removes sensor offsets and drift, like an accelerometer that reads a small constant even at rest. It passes only changes, which is called washout. Below its corner it adds phase lead. The pitfall: never put it in the main position or velocity feedback, because the loop would stop seeing a constant error and could not hold a load against gravity.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>HPF only for auxiliary signals.</li><li>Misconception: &#x27;removing DC removes the offset problem everywhere&#x27; — it also removes the real steady error.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li>Q: Example of washout? A: Vibration feedback that must ignore a constant load.</li></ul></div>
+      <p class="trans">Transition: Next, the most important special filter in servo practice.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 10</span>Phase-lead compensator<span class="time">~6 min</span></h3>
-      <p class="say">The lead has a zero below a pole, with ratio alpha greater than 1. Its maximum phase occurs at the geometric mean of zero and pole, omega m equals 1 over T root alpha. The maximum is arcsine of alpha minus 1 over alpha plus 1. Invert that to get alpha from the required phase. Remember three anchor values: alpha 3 gives 30 degrees, 7.5 gives 50 degrees and 20 gives about 65 degrees. The price is high-frequency gain of K times alpha, which amplifies noise. So beyond about 60 degrees use two stages. A lead is simply a band-limited PD controller, so you have already met it.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Centre omega_m on the desired crossover.</li><li>Noise gain grows with alpha.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Lead vs. D-term? <b>A:</b> Same thing; the pole of the lead is the derivative filter.</li></ul></div>
-      <p class="trans">Transition: Let us design one.</p>
+      <h3><span class="num">Slide 10</span>Notch filter: cutting out one frequency<span class="time">~5 min</span></h3>
+      <p class="say">Use the playground swing: pushed at its natural frequency it swings higher and higher. A machine axis has such a frequency too. The notch removes the controller&#x27;s push only there. Three knobs: centre at the resonance, depth set by the ratio of the two dampings, width set by zeta p. Wide notches tolerate a drifting resonance but cost more phase below the centre.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Centre, depth, width.</li><li>Misconception: &#x27;a deeper notch is always better&#x27; — width matters more when the resonance drifts.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li>Q: How does a drive find the resonance? A: Frequency sweep or FFT of the current.</li></ul></div>
+      <p class="trans">Transition: Let us see one in action.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 11</span>Lead design — worked example<span class="time">~7 min</span></h3>
-      <p class="say">The plant is a pure inertia driven by an ideal torque loop, 1 over J s squared, with J equal to 2 times 10 to the minus 4. With a pure gain the phase is always minus 180 degrees and the margin is zero. The specification is 50 Hz crossover with 50 degrees PM. Go through the steps on the slide: alpha is 7.55, T is 1.16 ms, the zero is at 18 Hz and the pole at 137 Hz. The gain then follows from unit loop gain at crossover: K equals J omega c squared over root alpha, which is 7.18 newton-metres per radian. The computed check gives exactly 50 degrees at 49.5 Hz. The step response overshoots 28 percent, more than the second-order estimate, because of the zero. A reference prefilter can remove that overshoot without touching stability.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Three formulas give the whole design.</li><li>Zero-induced overshoot is fixed with F_r.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Units of K? <b>A:</b> N·m/rad: torque per radian of position error.</li></ul></div>
-      <p class="trans">Transition: The mirror image of lead is the lag compensator.</p>
+      <h3><span class="num">Slide 11</span>Notch in practice: taming a 1 kHz resonance<span class="time">~5 min</span></h3>
+      <p class="say">A motor and load connected by a flexible shaft resonate at 1 kHz. The velocity loop crosses at 100 Hz. Without the notch, the resonance peak pushes loop gain above 0 dB near 1 kHz where there is no phase left, so the loop is unstable: you would hear a loud whistle. With a 25 dB notch, only one crossing remains and the main crossover loses about 4 degrees.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>The notch keeps the bandwidth; lowering the gain would lose it.</li><li>Misconception: &#x27;the resonance is outside the bandwidth, so it cannot matter&#x27;.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li>Q: Why not just reduce gain? A: You would lose a factor ~3 in gain and bandwidth.</li></ul></div>
+      <p class="trans">Transition: Filters remove problems; compensators actively add phase.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 12</span>Phase-lag compensator and lead–lag<span class="time">~4 min</span></h3>
-      <p class="say">The lag boosts low-frequency gain by beta and leaves high-frequency gain unchanged. Crossover and noise therefore stay the same, while steady-state error drops by beta and the axis becomes stiffer against load torque. Place its zero a decade below crossover. For beta equal to 10, the phase cost at crossover is then only 5.1 degrees. Combining lead and lag gives the lead-lag compensator. Note the box: a PID is a lead-lag. PI is a lag with its pole moved to zero, and the filtered D-term is a lead.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Lag = stiffness, lead = margin.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li>Ask: “Which number on this slide would you check first on your own machine?”</li></ul></div>
-      <p class="trans">Transition: Let us summarise the session.</p>
+      <h3><span class="num">Slide 12</span>Phase-lead compensator: buying phase back<span class="time">~5 min</span></h3>
+      <p class="say">A lead places a zero before a pole, so the phase rises between them. The maximum is at the geometric mean of zero and pole; we put that point at crossover. Remember the anchors: alpha 3 gives 30 degrees, 7.5 gives 50, 20 gives 65. The price is more high-frequency gain, so more noise. A lead is just a PD controller with a filtered D.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Centre the maximum on crossover.</li><li>Misconception: &#x27;more alpha is free&#x27; — noise gain grows with alpha.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li>Q: Lead vs D-term? A: Same idea; the pole is the D filter.</li></ul></div>
+      <p class="trans">Transition: Let us design one together.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 13</span>Session 2.6 summary: scope list<span class="time">~2 min</span></h3>
-      <p class="say">This table is the scope list for filters and compensators. It gives the parameters of each element, its typical servo use and its cost. Ask participants to remember three numbers: filter at 5 to 10 times crossover, a notch costs a few degrees, and a lag zero goes a decade below crossover.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Every in-loop element costs phase at omega_c.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li>Ask: “Which number on this slide would you check first on your own machine?”</li></ul></div>
-      <p class="trans">Transition: After the break we change viewpoint, from transfer functions to states.</p>
-    </div>
-  </section>
-
-  <section id="s2">
-    <h2 class="session">Session 2.7 · Introduction to modern control <small>Curriculum code 2.7 · 60 min · slide times sum to 60 min</small></h2>
-    <div class="slide">
-      <h3><span class="num">Slide 15</span>State-space model of a servo axis<span class="time">~6 min</span></h3>
-      <p class="say">A state-space model writes the dynamics as first-order equations in a state vector. The state is the memory of the system, one variable per energy store. For an axis with an ideal torque loop the states are angle and speed. Show the A, B and C matrices and that C times sI minus A inverse times B gives back 1 over s times Js plus B. The numbers we use all session are J equal to 10 to the minus 3, viscous friction 2 times 10 to the minus 3, so a is 2 and b is 1000. On the right, the electrical state current adds a third row with R, L and k e. Key advantage: the state model does not hide modes that a transfer function would cancel.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>State = energy stores.</li><li>Same plant, two descriptions.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Is state space only for MIMO? <b>A:</b> No; it is also the natural route to observers and LQR for SISO servos.</li></ul></div>
-      <p class="trans">Transition: If we can measure all states, we can feed them all back.</p>
+      <h3><span class="num">Slide 13</span>Lead design — worked example<span class="time">~5 min</span></h3>
+      <p class="say">A pure inertia has -180 degrees everywhere, so a plain gain gives zero margin. Go through the four steps: we need 50 degrees so alpha is 7.55; centre it with T equal to 1.16 ms; choose K so the loop gain is one at crossover, 7.2 newton-metres per radian; the computed check gives 50 degrees at 49.5 Hz. The 28 percent overshoot comes from the zero; a reference filter removes it.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Four steps, units at each step.</li><li>Misconception: PM 50° does not guarantee a fixed overshoot when zeros are present.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li>Q: Units of K? A: N·m per rad of position error.</li></ul></div>
+      <p class="trans">Transition: The opposite compensator: lag.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 16</span>State feedback and pole placement<span class="time">~6 min</span></h3>
-      <p class="say">With u equal to minus K x plus N r, the closed-loop matrix is A minus B K. If the system is controllable, every eigenvalue can be placed anywhere. N scales the reference so that the steady state is correct for the nominal model. In the diagram the plant is the dashed box and K feeds back the full state vector. Choosing poles is engineering, not mathematics: a dominant pair from overshoot and settling requirements, other poles three to five times faster. Pushing poles further out is limited by actuator saturation, noise, sampling and unmodelled resonances, which are the same limits as in classical design.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Arbitrary placement requires controllability.</li><li>Fast poles = high gains = noise and saturation.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li>Ask: “Which number on this slide would you check first on your own machine?”</li></ul></div>
-      <p class="trans">Transition: When can we place the poles? Controllability.</p>
-    </div>
-    <div class="slide">
-      <h3><span class="num">Slide 17</span>Controllability and Ackermann&#x27;s formula<span class="time">~6 min</span></h3>
-      <p class="say">Controllability is a rank test on B, AB and so on up to A to the n minus 1 times B. If the rank is full, any state can be reached. If not, some mode keeps its eigenvalue whatever K we choose. A physical example: a load vibration mode whose node sits at the motor cannot be influenced by motor torque. Ackermann&#x27;s formula gives K directly for single-input systems from the inverse controllability matrix and the desired polynomial evaluated at A. For our axis the determinant of the controllability matrix is minus b squared, which is not zero, so the axis is controllable.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Rank test first, then Ackermann.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li>Ask: “Which number on this slide would you check first on your own machine?”</li></ul></div>
-      <p class="trans">Transition: Now let us actually compute K.</p>
-    </div>
-    <div class="slide">
-      <h3><span class="num">Slide 18</span>Worked example: placing the poles<span class="time">~7 min</span></h3>
-      <p class="say">We want omega n equal to 100 radians per second and zeta 0.7, so the desired polynomial is s squared plus 140 s plus 10 to the 4. Go through the matrix steps: A squared, phi d of A, the last row of the inverse controllability matrix, and K equals 10 and 0.138. Then check by coefficient matching: a plus b k2 equals 140 and b k1 equals 10 to the 4. The physical interpretation matters: k1 is a stiffness in newton-metres per radian and k2 is a damping. For this plant state feedback is exactly a PD position controller with velocity feedback. The s-plane sketch also shows the observer poles we will use, five times faster.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>State feedback = PD here; units make it intuitive.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why N = k1? <b>A:</b> In steady state ω=0 and u=0 (no load), so k1·θ = N·r gives θ = r.</li></ul></div>
-      <p class="trans">Transition: We assumed the speed is measured. Often it is not, so we estimate it.</p>
-    </div>
-    <div class="slide">
-      <h3><span class="num">Slide 19</span>Observability and the Luenberger observer<span class="time">~7 min</span></h3>
-      <p class="say">Observability is the dual rank test using C, CA and so on. With an encoder measuring theta, both states are observable. With a tachometer only, the rank is 1 and position is unobservable: a speed signal cannot tell you where you are. The observer is a simulation of the plant that is driven by the same input u and corrected by the output error through gain L. The estimation error obeys e dot equals A minus L C times e, so we place those eigenvalues 2 to 6 times faster than the controller poles. L is found with Ackermann on the transposed system.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Observer = model + correction.</li><li>Error dynamics A-LC.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li>Ask: “Which number on this slide would you check first on your own machine?”</li></ul></div>
-      <p class="trans">Transition: Here is an observer working on a quantised encoder.</p>
-    </div>
-    <div class="slide">
-      <h3><span class="num">Slide 20</span>Observer example: velocity from a 16-bit encoder<span class="time">~6 min</span></h3>
-      <p class="say">Observer poles at 500 radians per second with damping 0.7 give l1 equal to 698 and l2 about 2.5 times 10 to the 5. The plot compares three signals. Finite differencing at 4 kHz produces a staircase, because one encoder count corresponds to 0.38 radians per second. The observer estimate is smooth, and its initial error of 0.5 radians per second dies out in about 10 milliseconds. The observer also uses the torque command, so it reacts before the position has moved. That is why it has less phase lag than differentiation followed by a low-pass filter.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Observers beat d/dt + LPF on phase lag.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Does inertia error matter? <b>A:</b> Yes: wrong J biases ω̂ during acceleration; the correction term limits it.</li></ul></div>
-      <p class="trans">Transition: How does the observer interact with the controller?</p>
-    </div>
-    <div class="slide">
-      <h3><span class="num">Slide 21</span>The separation principle<span class="time">~6 min</span></h3>
-      <p class="say">If we feed back x hat instead of x, the closed loop in coordinates x and e is block triangular. Its eigenvalues are therefore the controller poles together with the observer poles, and we can design K and L separately. Together they form an ordinary dynamic compensator. Now the caveats. Separation holds only for a perfect model. Doyle showed in 1978 that LQG designs have no guaranteed margins. Unmodelled load torque biases the estimate unless you add it as a state. And the observer has to be discretised properly, which is Session 2.9.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Separation is exact only nominally; always check PM/GM.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li>Ask: “Which number on this slide would you check first on your own machine?”</li></ul></div>
-      <p class="trans">Transition: State feedback with N gives no integral action. Let us add it.</p>
-    </div>
-    <div class="slide">
-      <h3><span class="num">Slide 22</span>Integral action in state feedback<span class="time">~7 min</span></h3>
-      <p class="say">Augment the state with z, the integral of r minus y. The characteristic polynomial becomes third order. We match it to s plus 50 times our previous second-order polynomial and get k1 17, k2 0.188 and k I 500. The simulation applies a 1 radian step and then a 0.5 newton-metre load at 150 ms. Without the integral state the axis settles with 0.05 radians of error, which is T L over k1. With it, the error returns to zero. This is the state-space version of making the loop type 1. In implementation it needs anti-windup.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Constant loads require an integrator.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li>Ask: “Which number on this slide would you check first on your own machine?”</li></ul></div>
-      <p class="trans">Transition: Instead of choosing poles we can choose a cost: LQR.</p>
-    </div>
-    <div class="slide">
-      <h3><span class="num">Slide 23</span>Optimal state feedback: LQR<span class="time">~5 min</span></h3>
-      <p class="say">LQR minimises a quadratic cost on states and input. The gain comes from the algebraic Riccati equation, which software solves for you. Bryson&#x27;s rule sets the weights in physical units, as 1 over the maximum acceptable value squared. For SISO full-state feedback LQR guarantees at least 60 degrees of phase margin and a gain margin from one half to infinity. Its dual is the Kalman filter, and the two together make LQG, which does not keep these margins. In drives, LQR appears in multi-mass axes and anti-sway control.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>LQR = tuning by weights, margins guaranteed (full state).</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li>Ask: “Which number on this slide would you check first on your own machine?”</li></ul></div>
+      <h3><span class="num">Slide 14</span>Phase-lag compensator and lead–lag<span class="time">~4 min</span></h3>
+      <p class="say">A lag boosts gain only at low frequencies, by beta. That makes the axis stiffer against load and reduces steady error, while high frequencies and noise are unchanged. Put its zero a decade below crossover and it costs only about 5 degrees. Lead plus lag together: lead buys margin, lag buys stiffness. PID is exactly that combination.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Lag = low-frequency stiffness.</li><li>Misconception: students think lag &#x27;adds lag to the response&#x27; — it hardly touches crossover.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li>Q: Relation to PI? A: PI is a lag with its pole at zero frequency.</li></ul></div>
       <p class="trans">Transition: Summary.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 24</span>Session 2.7 summary<span class="time">~4 min</span></h3>
-      <p class="say">Review the take-aways and the formula table. Ask the audience to name the test for controllability and the formula for observer error dynamics. Point out that these tools are standard parts of drive firmware even when the manual does not use the word state space. Velocity observers and load-torque observers are good examples.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Controllable → place poles; observable → estimate states.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li>Ask: “Which number on this slide would you check first on your own machine?”</li></ul></div>
-      <p class="trans">Transition: After the break: what if the parameters themselves change?</p>
+      <h3><span class="num">Slide 15</span>Session 2.6 summary and key terms<span class="time">~3 min</span></h3>
+      <p class="say">Read the three take-aways, then the key terms. Ask students to explain one term to their neighbour in one sentence.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Filters cost phase, compensators buy it.</li></ul></div>
+      <p class="trans">Transition: Quick check.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 16</span>Check your understanding — filters<span class="time">~4 min</span></h3>
+      <p class="say">Give two minutes in pairs. Answers: (1) a 4th-order filter at only 2× crossover loses well over 45° of phase — the loop becomes badly damped or unstable. (2) F_r is outside the loop and does not change L(s); F_y is inside and its phase adds to L. (3) A notch filter centred at 800 Hz, the whistle frequency, ideally after measuring the resonance.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Accept qualitative answers; the point is inside vs outside the loop.</li></ul></div>
+      <p class="trans">Transition: Break, then state space.</p>
     </div>
   </section>
-
+  <section id="s2">
+    <h2 class="session">Session 2.7 · Introduction to modern control <small>Curriculum code 2.7 · 60 min · slide times sum to 60 min</small></h2>
+    <div class="slide">
+      <h3><span class="num">Slide 18</span>Refresher: matrices and eigenvalues<span class="time">~7 min</span></h3>
+      <p class="say">Analogy: a guitar string has natural notes; a system has natural rates, the eigenvalues. Work the example on the board: the determinant gives lambda squared plus 3 lambda plus 2, roots -1 and -2. So the free response contains e to the minus t and e to the minus 2t, both decaying. Eigenvalues in the left half-plane mean stable. Link: eigenvalues of A are the poles from Day 2.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Eigenvalues of A = poles.</li><li>Misconception: &#x27;eigenvectors matter for stability&#x27; — only the eigenvalues decide.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li>Q: What if an eigenvalue is +1? A: e^t grows, unstable.</li></ul></div>
+      <p class="trans">Transition: Now build a state model of the servo axis.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 19</span>State-space model of a servo axis<span class="time">~6 min</span></h3>
+      <p class="say">The state is the memory: where the axis is and how fast it moves. Row one says the derivative of angle is speed; row two is Newton&#x27;s law for rotation. With our numbers, a is 2 per second and b is 1000. Adding motor current gives a third state: same idea, one more row. Each energy store gives one state.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>One state per energy store.</li><li>Misconception: the state is not the output; the output is chosen by C.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li>Q: Why two states? A: Speed (kinetic energy in the inertia) and angle (the integral of speed).</li></ul></div>
+      <p class="trans">Transition: Use the state for feedback.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 20</span>State feedback and pole placement<span class="time">~6 min</span></h3>
+      <p class="say">Instead of feeding back only the error, we feed back every state with a gain each. Analogy: a driver watching both distance and speed. The closed loop has system matrix A minus BK, so choosing K chooses the poles. The limit: faster poles need more torque and amplify noise.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Choose K = choose the poles.</li><li>Misconception: &#x27;we can make poles arbitrarily fast&#x27; — actuators saturate.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li>Q: What if we cannot measure speed? A: Estimate it: observer.</li></ul></div>
+      <p class="trans">Transition: Let us place two poles by hand.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 21</span>Worked example: placing the poles<span class="time">~8 min</span></h3>
+      <p class="say">Four steps on the board. Desired polynomial from omega n 100 and zeta 0.7: s² + 140 s + 10 000. The closed loop gives s² + (2 + 1000 k2) s + 1000 k1. Match the constant terms: k1 = 10. Match the s terms: k2 = 0.138. So k1 acts as a spring and k2 as a damper: this is PD control in disguise.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Coefficient matching is enough for 2nd order.</li><li>Misconception: students mix up which gain sets damping.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li>Q: What do the observer poles in blue mean? A: Next slide.</li></ul></div>
+      <p class="trans">Transition: Estimating states we cannot measure.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 22</span>The observer<span class="time">~7 min</span></h3>
+      <p class="say">Analogy: a navigator without GPS uses speed times time, and corrects when a lighthouse appears. The observer runs a copy of the model and corrects it with the measurement error, weighted by L. The estimation error decays with the poles of A minus LC, which we make 2 to 6 times faster than the controller. Separation principle: design K and L independently.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Model + correction.</li><li>Misconception: &#x27;the observer is a filter&#x27; — it uses the model and the input, not just the measurement.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li>Q: Can we observe angle from speed only? A: No, the starting angle is unknown.</li></ul></div>
+      <p class="trans">Transition: An example with a real encoder.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 23</span>Observer example: velocity from an encoder<span class="time">~7 min</span></h3>
+      <p class="say">Only the angle is measured. Differencing gives a staircase because one encoder count per sample equals 0.38 rad/s. The observer gives a smooth estimate that converges in about 10 ms and lags less than differentiate-and-filter because it also uses the torque command.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Observer gives smooth speed with little lag.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li>Q: What if J is wrong? A: The estimate is biased; check margins.</li></ul></div>
+      <p class="trans">Transition: What about load torque?</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 24</span>Integral action in state feedback<span class="time">~7 min</span></h3>
+      <p class="say">Add the accumulated error as an extra state, just like the I in PI. With state feedback only, a load of 0.5 N·m against a spring of 10 N·m/rad leaves 0.05 rad error. With the integral state the error returns to zero.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Integral state = I action.</li><li>Misconception: &#x27;state feedback removes all steady error&#x27;.</li></ul></div>
+      <p class="trans">Transition: Some advanced ideas, conceptually.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 25</span>Going further: controllability, Ackermann, LQR<span class="time">~5 min</span></h3>
+      <p class="say">Conceptual only. Controllable means the input can move every state. Ackermann&#x27;s formula is what software uses to compute K for bigger systems; for ours it gives the same answer. LQR lets you specify what is expensive, errors or torque, and software returns the best K. No algebra needed.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Not examinable; the idea is enough.</li></ul></div>
+      <p class="trans">Transition: Summary.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 26</span>Session 2.7 summary and key terms<span class="time">~3 min</span></h3>
+      <p class="say">Read the take-aways; ask a student to define &#x27;observer&#x27; in their own words.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Poles = eigenvalues; K moves them.</li></ul></div>
+      <p class="trans">Transition: Check.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 27</span>Check your understanding — state space<span class="time">~4 min</span></h3>
+      <p class="say">Answers: (1) unstable — the eigenvalue +1 gives a growing e^t. (2) k1 (the spring) for speed via omega n; k2 (the damper) for damping. (3) The estimate must converge before the controller needs it; but too fast amplifies encoder noise and hits sampling limits.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Watch for &#x27;more negative = unstable&#x27; confusion.</li></ul></div>
+      <p class="trans">Transition: Break, then adaptive and robust control.</p>
+    </div>
+  </section>
   <section id="s3">
-    <h2 class="session">Session 2.8 · Introduction to adaptive and robust control <small>Curriculum code 2.8 · 60 min · slide times sum to 60 min</small></h2>
+    <h2 class="session">Session 2.8 · Adaptive and robust control <small>Curriculum code 2.8 · 60 min · slide times sum to 60 min</small></h2>
     <div class="slide">
-      <h3><span class="num">Slide 26</span>Why fixed gains are not enough<span class="time">~6 min</span></h3>
-      <p class="say">The table lists parameter variations that are normal in servos: inertia over a robot&#x27;s workspace or a winding roll, friction with temperature, torque constant with magnet temperature and saturation, resonance frequency with position, and delay. The simulation keeps a PI tuned for J0 at 100 Hz. With five times the inertia, crossover falls to about 27 Hz, where the PI zero costs about 43 degrees, and the overshoot rises to 34 percent. With a fifth of the inertia, the bandwidth grows five-fold and delay starts to dominate. There are two philosophies: adapt to the actual plant, or design one controller that is robust for the whole set.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>omega_c ∝ 1/J for a fixed PI.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Typical inertia ratio of a robot axis? <b>A:</b> Easily 1:3 to 1:10 between folded and extended poses with payload.</li></ul></div>
-      <p class="trans">Transition: First we need a language to describe uncertainty.</p>
+      <h3><span class="num">Slide 29</span>Why fixed gains are not enough<span class="time">~8 min</span></h3>
+      <p class="say">Crane analogy: a driver treats an empty hook and a full load differently. Parameters such as inertia change by 10× in a robot. The plot: a PI tuned for J0 gives 34 % overshoot at 5 J0 and is sluggish at 0.2 J0. Two answers: adapt, or be robust.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Crossover ≈ Kp/J moves with J.</li><li>Misconception: &#x27;tune once and forget&#x27;.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li>Q: Example from your life? A: Car with/without a trailer.</li></ul></div>
+      <p class="trans">Transition: First answer: robust control.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 27</span>Describing model uncertainty<span class="time">~8 min</span></h3>
-      <p class="say">Additive and multiplicative uncertainty both bound the model error with a weight W and a normalised Delta whose H-infinity norm is at most 1. Parametric uncertainty is structured, like an inertia interval. Unstructured uncertainty covers unmodelled resonances and delays, so W grows with frequency. The Nyquist picture: at each frequency the true L lies in a disc of radius W L0 around the nominal point. Stability for every member requires that no disc covers minus 1. The distance from minus 1 is the magnitude of 1 plus L0. Dividing gives the robust stability condition: the magnitude of W times T0 must be below 1 at all frequencies.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>|W T0| &lt; 1 is the robust stability test.</li><li>Uncertainty is large at high frequency → keep T small there.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li>Ask: “Which number on this slide would you check first on your own machine?”</li></ul></div>
-      <p class="trans">Transition: The same result follows from a very general theorem.</p>
+      <h3><span class="num">Slide 30</span>Robust control<span class="time">~9 min</span></h3>
+      <p class="say">Suspension analogy: one design safe for empty and full car. Uncertainty grows with frequency because we never model all resonances and delays. The plot: closed-loop gain must stay below the grey limit; without the notch it crosses near 1 kHz. Going further, in small text: this is the small-gain test |WT| &lt; 1; H-infinity automates it. Do not derive.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Robust = cautious but safe.</li><li>Misconception: &#x27;robust means optimal&#x27; — it trades bandwidth for safety.</li></ul></div>
+      <p class="trans">Transition: Second answer: change gains with a rule.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 28</span>Small-gain theorem, H∞ and a robust-stability test<span class="time">~8 min</span></h3>
-      <p class="say">Any uncertain loop can be redrawn as M in feedback with Delta. The small-gain theorem says that if both are stable and the product of their peak gains is less than one, the loop is stable. The H-infinity norm is simply the peak of the Bode magnitude. In the multiplicative case M equals W T0. H-infinity design then shapes S at low frequency for performance and T at high frequency for robustness, under the constraint S plus T equals 1. The plot applies this to our 1 kHz resonance. Without the notch, W T peaks at 2.7 and the test fails. With the notch it peaks at 0.14, so the loop is robustly stable. The notch from Session 2.6 is really a robustness tool.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Peak gain matters, not phase.</li><li>Robust tests are conservative but safe.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Is |WT|&gt;1 instability? <b>A:</b> Not necessarily – it means some plant in the set is unstable; here the real plant was too.</li></ul></div>
-      <p class="trans">Transition: A pragmatic alternative to robust design is gain scheduling.</p>
+      <h3><span class="num">Slide 31</span>Gain scheduling<span class="time">~8 min</span></h3>
+      <p class="say">Gear-change analogy. Tune at a few points, measure a scheduling variable such as robot angle, interpolate. Keep Kp proportional to the estimated inertia so crossover stays fixed. Simple and certifiable, but needs a model and slow variation.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>No learning: a look-up table.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li>Q: Why must rho change slowly? A: Fast changes break the &#x27;frozen&#x27; assumption.</li></ul></div>
+      <p class="trans">Transition: Third answer: let the controller learn.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 29</span>Gain scheduling<span class="time">~6 min</span></h3>
-      <p class="say">Design controllers at several operating points and switch or interpolate between them according to a measured scheduling variable. That could be joint angle, payload, roll diameter, speed or DC-bus voltage. For a servo the simplest law is K p equal to the estimated J at the current operating point times omega c, which keeps the bandwidth constant. The plot is an illustrative inertia profile of a two-link arm over the elbow angle. Gain scheduling is open-loop adaptation. It is fast and transparent but needs a model of J over the scheduling variable, the variable must change slowly, and gain changes must be bumpless.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Scheduling needs a model; adaptation learns one.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li>Ask: “Which number on this slide would you check first on your own machine?”</li></ul></div>
-      <p class="trans">Transition: When the model is unknown we need true adaptation: MRAC.</p>
+      <h3><span class="num">Slide 32</span>MRAC<span class="time">~10 min</span></h3>
+      <p class="say">Learner-driver analogy: copy the instructor; every mismatch nudges the technique. The reference model says how we want to respond. The MIT rule changes the gain theta in proportion to error times the model output. The plot: theta converges to 2; larger gamma learns faster, but too large can go unstable.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>gamma = learning rate.</li><li>Misconception: &#x27;adaptive always converges to the true parameters&#x27; — needs rich excitation.</li></ul></div>
+      <p class="trans">Transition: Can we prove it is stable?</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 30</span>MRAC: structure<span class="time">~6 min</span></h3>
-      <p class="say">The reference model expresses the behaviour we want. The inner loop is an ordinary controller with adjustable parameters. The outer loop is the adaptation law, which uses the error between plant and model outputs to adjust the parameters slowly. Direct MRAC adapts controller gains. Indirect or self-tuning control estimates the plant parameters, for example J and friction, and recomputes the gains. Point out persistent excitation: without rich enough signals the tracking error still converges, but the parameters need not.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Two loops: fast control, slow adaptation.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li>Ask: “Which number on this slide would you check first on your own machine?”</li></ul></div>
-      <p class="trans">Transition: How should the parameters be adjusted? The first answer was the MIT rule.</p>
+      <h3><span class="num">Slide 33</span>Going further: Lyapunov<span class="time">~6 min</span></h3>
+      <p class="say">Conceptual. Marble in a bowl: if an energy-like quantity is always positive and always decreasing, the system settles. Lyapunov-based adaptation chooses the learning law so this is guaranteed. No derivation.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Stability without solving the ODE.</li></ul></div>
+      <p class="trans">Transition: A practical robust trick.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 31</span>The MIT rule<span class="time">~8 min</span></h3>
-      <p class="say">The MIT rule is gradient descent on half the squared error. The parameter derivative is minus gamma times e times the sensitivity derivative. For an unknown plant gain with a feed-forward parameter the sensitivity is proportional to y m, which gives d theta dt equal to minus gamma prime times e times y m. The simulation uses a first-order plant with k equal to 1 and a model with k0 equal to 2, so theta should reach 2. Larger gamma converges faster. The MIT rule has no stability guarantee, though. With large gamma or large command amplitude it can diverge, and that motivated Lyapunov-based design.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>MIT = gradient, intuitive but not guaranteed stable.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li>Ask: “Which number on this slide would you check first on your own machine?”</li></ul></div>
-      <p class="trans">Transition: Lyapunov gives us the guarantee.</p>
+      <h3><span class="num">Slide 34</span>Disturbance observer<span class="time">~9 min</span></h3>
+      <p class="say">Compare the torque that should have produced the motion with the torque we commanded; the difference is the disturbance; subtract it. The plot: with P control alone a 0.5 N·m load leaves −0.8 rad/s error; with DOB it returns to zero. Q is a low-pass limited by noise and delay.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Common in industrial drives.</li><li>Misconception: &#x27;DOB needs a perfect model&#x27; — only near the Q bandwidth.</li></ul></div>
+      <p class="trans">Transition: Summary.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 32</span>Lyapunov stability and adaptation<span class="time">~8 min</span></h3>
-      <p class="say">Lyapunov&#x27;s idea: find an energy-like function V that is positive everywhere except at the equilibrium and that decreases along trajectories. The phase-plane plot shows a damped oscillator spiralling down through the circles of constant V. We never had to solve the differential equation. For adaptation we choose V as half e squared plus the parameter errors squared, weighted by b over 2 gamma. Choosing theta 1 dot equal to minus gamma e r and theta 2 dot equal to gamma e y cancels the cross terms. V dot is then minus a m e squared, which is never positive. The result is stable for any positive gamma, provided the sign of b is known. Barbalat&#x27;s lemma then shows that e goes to zero.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Choose the law that makes V̇ ≤ 0.</li><li>Requires known sign of b.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li>Ask: “Which number on this slide would you check first on your own machine?”</li></ul></div>
-      <p class="trans">Transition: A very practical relative: the disturbance observer.</p>
+      <h3><span class="num">Slide 35</span>Session 2.8 summary and key terms<span class="time">~4 min</span></h3>
+      <p class="say">Walk the table row by row; ask which approach students would use for a robot arm.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Industry: scheduling + DOB, rarely full MRAC.</li></ul></div>
+      <p class="trans">Transition: Check.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 33</span>Disturbance observer (DOB)<span class="time">~6 min</span></h3>
-      <p class="say">The DOB compares the input actually applied with the input that the nominal inverse model says would produce the measured output. The difference, low-pass filtered by Q, is the lumped disturbance. It includes load torque, friction and inertia mismatch, and it is subtracted from the command. In the simulation, a proportional speed loop loses 0.8 radians per second under a 0.5 newton-metre load step. With a 200 Hz Q filter the error returns to zero. Inside the Q bandwidth the plant behaves like the nominal model. Q bandwidth is limited by noise, delay and resonances.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>DOB = robustness by cancelling the lumped disturbance.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Is DOB the same as integral action? <b>A:</b> For constant loads similar in effect, but DOB is faster and independent of the outer controller tuning.</li></ul></div>
-      <p class="trans">Transition: Let us compare the approaches.</p>
-    </div>
-    <div class="slide">
-      <h3><span class="num">Slide 34</span>Session 2.8 summary<span class="time">~4 min</span></h3>
-      <p class="say">Read through the comparison table. Robust control is guaranteed and simple to run but conservative. Gain scheduling is transparent but model-based. MRAC copes with unknown parameters but has transients and needs excitation. The DOB rejects loads strongly but is bandwidth-limited. In industrial drives, auto-tuning, gain scheduling and observers dominate. Full MRAC is rare.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Uncertainty is decided at and above omega_c.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li>Ask: “Which number on this slide would you check first on your own machine?”</li></ul></div>
-      <p class="trans">Transition: After the break: the discrete-time reality.</p>
+      <h3><span class="num">Slide 36</span>Check your understanding — adaptive and robust<span class="time">~6 min</span></h3>
+      <p class="say">Answers: (1) crossover drops by about 3 (ωc ≈ Kp/J): slower, less margin from the PI zero, more overshoot. (2) MRAC learns; scheduling is easier to certify because it is a fixed table. (3) Because unmodelled resonances, delays and current-loop dynamics all live at high frequency.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Reward reasoning over formulas.</li></ul></div>
+      <p class="trans">Transition: Break, then digital control.</p>
     </div>
   </section>
-
   <section id="s4">
     <h2 class="session">Session 2.9 · Discrete-time control <small>Curriculum code 2.9 · 60 min · slide times sum to 60 min</small></h2>
     <div class="slide">
-      <h3><span class="num">Slide 36</span>Anatomy of a digital servo loop<span class="time">~5 min</span></h3>
-      <p class="say">Every modern drive is digital. The controller runs on a CPU or FPGA at period T. The PWM update acts as a zero-order hold, and position and current are sampled by encoder interfaces and ADCs. Three new effects appear: values exist only at sampling instants, quantisation, and computation time, because u k is normally applied in the next period. The table gives typical sample rates and bandwidths per loop. The current loop runs at 8 to 32 kHz, the velocity loop at 4 to 16 kHz and the position loop at 1 to 8 kHz.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Inner loops sample fastest.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li>Ask: “Which number on this slide would you check first on your own machine?”</li></ul></div>
-      <p class="trans">Transition: First effect: the hold.</p>
+      <h3><span class="num">Slide 38</span>Refresher: sampling a signal<span class="time">~7 min</span></h3>
+      <p class="say">Film-camera analogy: motion shown as snapshots. Sample rate fs = 1/T; at 8 kHz, T is 125 µs and a 100 Hz sine has 80 samples per period. Between samples the output is held: a staircase. On average the staircase follows the signal half a sample late.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Holding costs T/2 delay.</li><li>Misconception: &#x27;samples are exact, so there is no delay&#x27;.</li></ul></div>
+      <p class="trans">Transition: Where sampling sits in a drive.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 37</span>Sampling and the zero-order hold<span class="time">~6 min</span></h3>
-      <p class="say">The orange staircase is the held signal. On average it follows the original signal delayed by half a sample, which is the dashed curve. Mathematically the ZOH frequency response is a sinc times e to the minus j omega T over 2: a pure half-sample delay plus slight amplitude droop. This delay is invisible if you look only at the sampled numbers, but the loop feels it as phase lag that grows linearly with frequency.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>ZOH ≈ T/2 delay.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li>Ask: “Which number on this slide would you check first on your own machine?”</li></ul></div>
-      <p class="trans">Transition: Add all delays together.</p>
+      <h3><span class="num">Slide 39</span>Anatomy of a digital servo loop<span class="time">~5 min</span></h3>
+      <p class="say">The CPU sees the measurement only at sample instants, computes, and the PWM holds the result. Computing takes time, so the output usually applies one sample later. Table: inner loops sample faster.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Typical rates: 8–32 kHz current loop.</li></ul></div>
+      <p class="trans">Transition: What does the delay cost?</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 38</span>Delay budget and phase loss<span class="time">~6 min</span></h3>
-      <p class="say">The total effective delay is half a sample for the hold, about one sample for computation, plus filters and sensor delays. The phase loss at crossover is 360 times f c times T d degrees. Worked example: 4 kHz sampling with 1.5 samples of delay gives 375 microseconds. At a 200 Hz crossover that costs 27 degrees. Doubling the rate halves it. A 1 kHz first-order LPF adds another 11 degrees. Delay is the main thief of phase in digital drives.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Δφ = 360°·f_c·T_d.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Can we avoid the one-sample calculation delay? <b>A:</b> Partly: sample late in the PWM period, compute fast, update immediately – but never fully.</li></ul></div>
-      <p class="trans">Transition: How do we analyse stability in discrete time?</p>
+      <h3><span class="num">Slide 40</span>Delay budget and phase loss<span class="time">~8 min</span></h3>
+      <p class="say">Shower analogy: long pipe, late response, overcorrection. Walk the four steps: T = 250 µs, Td = 375 µs, phase loss 360 × 200 × 0.000375 = 27 degrees. Doubling fs halves it.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Δφ = 360° fc Td.</li><li>Misconception: forgetting the computation delay.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li>Q: At 16 kHz? A: 6.8°.</li></ul></div>
+      <p class="trans">Transition: Stability in discrete time.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 39</span>From the s-plane to the z-plane<span class="time">~7 min</span></h3>
-      <p class="say">The mapping z equals e to the s T sends the left half-plane into the unit circle. Stability means all poles strictly inside it. The imaginary axis maps to the unit circle, s equals zero to z equals 1, and the Nyquist frequency to minus 1. The plot shows contours of constant damping and of constant omega n T. Example: our state-feedback poles at 1 ms sampling land at 0.930 plus or minus j 0.067, very close to 1. Fast sampling crowds poles near z equals 1, which demands numerical precision. Poles near minus 1 ring at half the sampling frequency.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>|z|&lt;1 ⇔ stable.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li>Ask: “Which number on this slide would you check first on your own machine?”</li></ul></div>
+      <h3><span class="num">Slide 41</span>From the s-plane to the z-plane<span class="time">~7 min</span></h3>
+      <p class="say">A discrete pole multiplies the signal every sample. If its magnitude is below one, the signal shrinks: stable. The unit circle replaces the imaginary axis. Our example pole maps to 0.93: inside, stable, but close to 1 because sampling is fast.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>|z| &lt; 1 stable.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li>Q: z = −0.9? A: Stable but alternates sign: ringing at fs/2.</li></ul></div>
       <p class="trans">Transition: How do we turn C(s) into code?</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 40</span>Discretisation methods<span class="time">~8 min</span></h3>
-      <p class="say">Five methods. Forward Euler is the simplest but can turn a stable fast pole into an unstable one. Backward Euler always keeps stability but distorts. Tustin maps the stable half-plane exactly onto the unit disc and is the standard for PI, PID and filters, with pre-warping where needed. The ZOH equivalent is exact for plant models driven by a staircase. Pole-zero matching keeps pole locations. The mini-maps show where each method sends the stable half-plane. The numeric example uses a 500 Hz LPF pole at 4 kHz. The exact pole is 0.456, Tustin gives 0.436, backward Euler 0.560 and forward Euler 0.215. For a 1.5 kHz filter, forward Euler is unstable.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Use Tustin or ZOH; avoid forward Euler for fast poles.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li>Ask: “Which number on this slide would you check first on your own machine?”</li></ul></div>
-      <p class="trans">Transition: Tustin has one trap: frequency warping.</p>
+      <h3><span class="num">Slide 42</span>Going further: discretisation and pre-warping<span class="time">~5 min</span></h3>
+      <p class="say">Conceptual. Different ways to replace s by z; Tustin is the standard. Near half the sample rate it squeezes frequencies, so an 800 Hz notch lands at 714 Hz unless pre-warped. Show the plot, skip algebra.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Drives use Tustin with pre-warping.</li></ul></div>
+      <p class="trans">Transition: The real code.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 41</span>Tustin frequency warping<span class="time">~6 min</span></h3>
-      <p class="say">Tustin compresses the whole frequency axis into the range 0 to f s over 2. At low frequency this hardly matters, but close to Nyquist it does. An 800 Hz notch at 4 kHz sampling lands at 714 Hz without pre-warping, 11 percent low, and misses the resonance completely. Pre-warping designs the analogue prototype at the warped frequency so that the digital notch sits exactly at 800 Hz. Drive firmware does this internally, but home-made filters often do not.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Always pre-warp notches and high-frequency filters.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li>Ask: “Which number on this slide would you check first on your own machine?”</li></ul></div>
-      <p class="trans">Transition: Now the most common discrete controller, the PID.</p>
+      <h3><span class="num">Slide 43</span>Discrete PID implementation<span class="time">~8 min</span></h3>
+      <p class="say">Read the code line by line. Integrator: add error times T. D on the measurement to avoid kick. Saturation then anti-windup. Accelerator analogy for windup: keeping the foot down while the car is already at full power, then overshooting.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Anti-windup is mandatory.</li><li>Misconception: &#x27;saturation is rare&#x27; — it happens on every big step.</li></ul></div>
+      <p class="trans">Transition: A sampling trap.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 42</span>Discrete PID implementation<span class="time">~7 min</span></h3>
-      <p class="say">Walk through the equations. The integral uses backward Euler. The derivative is filtered and acts on the measurement only, to avoid derivative kick on reference steps. Its coefficients come from backward Euler applied to K d s over T f s plus 1. The output is saturated. The code shows a typical interrupt routine synchronised to the PWM, with back-calculation anti-windup: when the output saturates, the excess is removed from the integrator. Mention the incremental form for bumpless transfer. In fixed-point arithmetic K i times T is a very small number and needs careful scaling.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Anti-windup is mandatory with integral action.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why derivative on measurement? <b>A:</b> A step in r would otherwise create a huge D impulse.</li></ul></div>
-      <p class="trans">Transition: A short warning about what sampling can do to signals.</p>
+      <h3><span class="num">Slide 44</span>Aliasing<span class="time">~6 min</span></h3>
+      <p class="say">Wagon-wheel effect in films. Anything above fs/2 folds back. 4.6 kHz sampled at 4 kHz looks like 600 Hz. Once sampled you cannot separate it; filter before the sampler.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Filter before sampling.</li></ul></div>
+      <p class="trans">Transition: So how fast should we sample?</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 43</span>Aliasing: a teaser<span class="time">~5 min</span></h3>
-      <p class="say">The figure shows two sines, at 0.9 and 0.1 of the sampling frequency, with identical samples. Any component above half the sampling rate folds back to the absolute value of f minus k f s. Example: a 4.6 kHz component sampled at 4 kHz appears at 600 Hz, right in the range where the loop operates. Once sampled, it cannot be separated, so filter before the sampler. Remedies are analogue anti-alias filters, oversampling and sampling synchronised to the PWM centre. Day 5 continues the topic.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Alias frequency = |f − k f_s|.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li>Ask: “Which number on this slide would you check first on your own machine?”</li></ul></div>
-      <p class="trans">Transition: So how do we choose the sample rate?</p>
+      <h3><span class="num">Slide 45</span>Choosing the sample rate<span class="time">~6 min</span></h3>
+      <p class="say">Same PI, only fs changes. At 1 kHz the delay costs 54 degrees and overshoot is 95 %. Rules: 20–40× bandwidth and check the phase budget.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Sample rate is a phase decision.</li></ul></div>
+      <p class="trans">Transition: Summary.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 44</span>Choosing the sample rate<span class="time">~6 min</span></h3>
-      <p class="say">The same velocity PI with 100 Hz crossover is run at three sampling rates with one sample of calculation delay. At 20 kHz and 4 kHz the responses are similar, with 14 and 16 percent overshoot. At 1 kHz the delay of 1.5 ms costs 54 degrees and the overshoot reaches 95 percent, close to instability. Rules of thumb: sample 20 to 40 times faster than the closed-loop bandwidth, check the phase budget, sample inner loops faster, and keep sensor and PWM rates consistent with f s.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>f_s from bandwidth AND phase budget.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li>Ask: “Which number on this slide would you check first on your own machine?”</li></ul></div>
-      <p class="trans">Transition: Summary of the session.</p>
+      <h3><span class="num">Slide 46</span>Session 2.9 summary and key terms<span class="time">~4 min</span></h3>
+      <p class="say">Read the take-aways; have students compute the 8 kHz case mentally.</p>
+      <p class="trans">Transition: Check.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 45</span>Session 2.9 summary<span class="time">~4 min</span></h3>
-      <p class="say">Review the take-aways and the phase-loss table for a 200 Hz crossover. Ask the audience what changes if the calculation delay is removed. The answer is that T d drops from 1.5 to 0.5 samples, so the phase loss falls to a third. This closes the control part of the day.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>1.5T delay is the standard assumption.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li>Ask: “Which number on this slide would you check first on your own machine?”</li></ul></div>
-      <p class="trans">Transition: After the break we look at how these loops are packed into a servo system.</p>
+      <h3><span class="num">Slide 47</span>Check your understanding — discrete-time<span class="time">~4 min</span></h3>
+      <p class="say">Answers: (1) Td = 1.5/16000 = 94 µs; 360 × 2000 × 94e-6 ≈ 34 degrees — large, that is why current loops run so fast. (2) |z| &gt; 1: the signal grows 5 % every sample: unstable. (3) The output is capped but the error persists, so the integrator keeps growing; when the error reverses it must first unwind, causing overshoot.</p>
+      <p class="trans">Transition: Break, then the servo system.</p>
     </div>
   </section>
-
   <section id="s5">
     <h2 class="session">Session 3.1 · Servo system architecture <small>Curriculum code 3.1 · 30 min · slide times sum to 30 min</small></h2>
     <div class="slide">
-      <h3><span class="num">Slide 47</span>Servo system architecture: from mains to load<span class="time">~8 min</span></h3>
-      <p class="say">Follow the power path: mains, power supply or rectifier, the servo drive with its DC bus, inverter and control loops, the motor, the transmission (gearbox, ball screw or belt) and the load. The feedback device, usually an encoder on the motor shaft, closes the loops inside the drive. The motion controller, a PLC or CNC, sends set-points over a fieldbus such as EtherCAT every 0.25 to 4 ms. The photos show compact drives on a daisy-chained bus and an incremental encoder.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Drive = power stage + loops + protection.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Where is the position loop closed? <b>A:</b> Usually in the drive (CSP mode), sometimes in the CNC.</li></ul></div>
-      <p class="trans">Transition: Which loops the drive closes defines its mode.</p>
+      <h3><span class="num">Slide 49</span>Servo system architecture<span class="time">~8 min</span></h3>
+      <p class="say">Trace the path: mains, supply, drive (power plus control), motor, transmission, load; encoder feedback; motion controller over fieldbus. Show the photos of real drives and an encoder.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Drive = power + loops + protection.</li></ul></div>
+      <p class="trans">Transition: What can we ask the drive to do?</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 48</span>Torque, velocity and position control modes<span class="time">~8 min</span></h3>
-      <p class="say">Explain the three modes from the table. In torque mode the drive closes only the current loop, which suits winders and force control. In velocity mode it closes velocity and current loops, which suits spindles and conveyors, or CNCs that close position themselves. In position mode it closes all three loops, for robots and point-to-point moves. In CiA 402 terms these are cyclic synchronous position, velocity and torque, plus profile modes in which the drive generates the trajectory itself. The selection rule: close each loop where its sensor and its update rate are.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Mode = which loops are inside the drive.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li>Ask: “Which number on this slide would you check first on your own machine?”</li></ul></div>
-      <p class="trans">Transition: Inside the drive, the loops are cascaded.</p>
+      <h3><span class="num">Slide 50</span>Control modes<span class="time">~7 min</span></h3>
+      <p class="say">Driver analogy: press the pedal this much, drive at 50 km/h, stop at that line. Each mode closes more loops inside the drive.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Mode = loops closed in the drive.</li><li>Misconception: &#x27;position mode has the fastest response&#x27; — it is the slowest loop.</li></ul></div>
+      <p class="trans">Transition: How the loops are nested.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 49</span>Cascade control structure<span class="time">~9 min</span></h3>
-      <p class="say">Trace the cascade from left to right: a position P controller, a velocity PI and a current PI, then the PWM inverter, the winding, the torque constant, the inertia and the integrator to position. Each inner loop simplifies the plant for the next loop out. The current loop turns the motor into a torque source, and the velocity loop makes the axis look like an integrator. Bandwidths are separated by a factor of 3 to 10. Feed-forwards of velocity and of torque (estimated J times acceleration) give tracking without high feedback gains. Tune from the inside out.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Inside-out tuning; separation 3–10×; feed-forward for tracking.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why P only in the position loop? <b>A:</b> The velocity PI already provides integral action against load; a position I-term adds overshoot.</li></ul></div>
-      <p class="trans">Transition: Summary with the bandwidth picture.</p>
+      <h3><span class="num">Slide 51</span>Cascade control structure<span class="time">~9 min</span></h3>
+      <p class="say">Russian dolls: current inside velocity inside position. Each inner loop makes the next plant simple and must be 3–10× faster. Tune from the inside out. Feed-forward acts on the plan before an error appears.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Tune inside-out.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li>Q: Why not one big loop? A: Each loop limits current/speed safely and is easier to tune.</li></ul></div>
+      <p class="trans">Transition: Summary.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 50</span>Session 3.1 summary: bandwidth hierarchy<span class="time">~5 min</span></h3>
-      <p class="say">The plot shows typical closed-loop magnitudes: current about 2 kHz, velocity about 250 Hz and position about 40 Hz. Repeat the key points: the components of the system, the three modes, the cascade, and feed-forward versus feedback.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Current ≫ velocity ≫ position bandwidth.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li>Ask: “Which number on this slide would you check first on your own machine?”</li></ul></div>
-      <p class="trans">Transition: Finally we open the power stage.</p>
+      <h3><span class="num">Slide 52</span>Session 3.1 summary<span class="time">~6 min</span></h3>
+      <p class="say">The plot shows three bandwidths separated by about a factor of 6–8. Read key terms.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Bandwidth hierarchy.</li></ul></div>
+      <p class="trans">Transition: Now the power hardware.</p>
     </div>
   </section>
-
   <section id="s6">
-    <h2 class="session">Session 3.2 (part 1) · Power electronics: inverter and DC bus <small>Curriculum code 3.2a · 30 min (incl. day closing) · slide times sum to 30 min</small></h2>
+    <h2 class="session">Session 3.2 (part 1) · Rectifier, DC bus, inverter <small>Curriculum code 3.2a · 30 min (incl. day closing) · slide times sum to 30 min</small></h2>
     <div class="slide">
-      <h3><span class="num">Slide 52</span>Power stage overview<span class="time">~4 min</span></h3>
-      <p class="say">Walk along the circuit. The diode rectifier turns three-phase AC into DC. A pre-charge resistor with a bypass relay limits inrush into the empty capacitor. The DC-link capacitor stores energy. The brake chopper, a resistor plus an IGBT, burns regenerated energy. Finally, the three-phase inverter of six IGBTs with freewheeling diodes feeds U, V and W. The Yaskawa drive photo shows the same functions as terminals: L1 and L2 for mains, L1C and L2C for control power, B1 and B2 for the brake resistor, plus and minus for the DC bus, and U, V, W.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>AC → DC → AC.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li>Ask: “Which number on this slide would you check first on your own machine?”</li></ul></div>
-      <p class="trans">Transition: Start with the rectifier.</p>
+      <h3><span class="num">Slide 54</span>Refresher: diode, capacitor, transistor switch<span class="time">~5 min</span></h3>
+      <p class="say">Diode: one-way valve. Capacitor: tank, E = ½CV². Transistor: tap opened by a gate. The numbers show why a switch is used only fully on or off: 15 W on, 0 W off, 2.8 kW half-way.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>On/off only.</li><li>Misconception: &#x27;a transistor is an adjustable resistor here&#x27; — that is a linear amplifier and would burn.</li></ul></div>
+      <p class="trans">Transition: The whole power stage.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 53</span>Rectifier and DC link<span class="time">~4 min</span></h3>
-      <p class="say">The six-pulse rectifier output is the envelope of the six line-to-line voltages, with a 300 Hz ripple. Its average is 1.35 times V LL, or 540 V at 400 V mains. At light load the capacitor charges to the peak of 566 V. The capacitor handles ripple current, buffers energy and keeps the commutation loop low-inductance. A diode front end cannot return energy to the grid. Photos: a three-phase diode module and electrolytic capacitors.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>V_dc ≈ 1.35 V_LL.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li>Ask: “Which number on this slide would you check first on your own machine?”</li></ul></div>
-      <p class="trans">Transition: What happens when the motor brakes?</p>
+      <h3><span class="num">Slide 55</span>Power stage overview<span class="time">~3 min</span></h3>
+      <p class="say">AC to DC to AC: diodes, pre-charge, capacitor, brake chopper, six-switch inverter.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Follow the energy left to right.</li></ul></div>
+      <p class="trans">Transition: The rectifier.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 54</span>Regeneration and the brake chopper<span class="time">~4 min</span></h3>
-      <p class="say">Worked example: 0.05 kg m squared at 3000 rpm stores 2467 J. Braking to zero in half a second needs 31.4 newton-metres, and the peak power is 9.87 kW. A 1 mF capacitor going from 565 to 780 V absorbs only 145 J, about 6 percent. The rest must go to the resistor. To absorb the peak power at the switch-on voltage, R must be at most V on squared over P, which is 61.6 ohms, so we choose 56 ohms. The plot shows the hysteresis chopper holding the bus between 760 and 780 V while the regenerated power ramps down. Alternatives are a common DC bus or an active front end.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Size R_b from V_on²/P_peak; check energy rating too.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> What if R_b is too large? <b>A:</b> Over-voltage trip during braking.</li></ul></div>
-      <p class="trans">Transition: Now the heart of the drive: the inverter.</p>
+      <h3><span class="num">Slide 56</span>Rectifier and DC link<span class="time">~3 min</span></h3>
+      <p class="say">The diodes pick the highest line voltage; 1.35 × 400 = 540 V; capacitor charges to about 566 V. Pre-charge limits inrush. Diodes cannot return energy.</p>
+      <p class="trans">Transition: So where does braking energy go?</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 55</span>Three-phase two-level inverter<span class="time">~3 min</span></h3>
-      <p class="say">Each leg connects its phase to plus or minus half of V dc, which is why it is called two-level. The upper and lower switches are complementary and are never on together. Three legs give 8 states: 6 active and 2 zero. The average leg voltage is set by the duty cycle. The freewheeling diodes carry current during dead time and during regeneration. The photo shows a dual IGBT module containing one leg.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>8 switching states.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li>Ask: “Which number on this slide would you check first on your own machine?”</li></ul></div>
-      <p class="trans">Transition: Which switch technology?</p>
+      <h3><span class="num">Slide 57</span>Regeneration and brake chopper<span class="time">~4 min</span></h3>
+      <p class="say">Walk the four steps: 2.47 kJ to dissipate; capacitor holds only 145 J; peak 9.9 kW; resistor 62 Ω max, choose 56 Ω.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Capacitor stores only ~6 %.</li></ul></div>
+      <p class="trans">Transition: Back to the output side.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 56</span>Power switches: IGBT, MOSFET, SiC<span class="time">~3 min</span></h3>
-      <p class="say">IGBTs dominate 400 V industrial drives with 1200 V parts at 4 to 16 kHz. Silicon MOSFETs dominate low-voltage drives of 24 to 72 V. SiC MOSFETs allow higher switching frequency at high voltage. Faster switching means less ripple and a faster current loop, but higher dv/dt, which stresses motor insulation and causes bearing currents and EMI. The opened module shows paralleled dies and bond wires.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Higher f_sw helps control but costs EMI/dv/dt.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li>Ask: “Which number on this slide would you check first on your own machine?”</li></ul></div>
-      <p class="trans">Transition: Switches need gate drivers, and gate drivers need dead time.</p>
+      <h3><span class="num">Slide 58</span>Three-phase inverter<span class="time">~3 min</span></h3>
+      <p class="say">Each leg ties its output to plus or minus; never both on. Duty 0.75 gives 140 V average.</p>
+      <p class="trans">Transition: Which switches are used?</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 57</span>Gate drivers and dead time (preview)<span class="time">~4 min</span></h3>
-      <p class="say">The gate driver isolates and level-shifts the high-side signal, delivers amperes of gate current, applies typically plus 15 and minus 8 volts to IGBTs, and detects desaturation to switch off a short circuit within about 10 microseconds. Dead time delays every turn-on so that both switches of a leg are never on together. During the dead time the diode conducts, so the output voltage depends on the current sign. The average voltage error is t d over T sw times V dc. With 2 microseconds, 10 kHz and 560 V that is 11.2 V, which is significant at low speed. Compensation comes on Day 4.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Dead time error ∝ t_d·f_sw·V_dc·sign(i).</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li>Ask: “Which number on this slide would you check first on your own machine?”</li></ul></div>
-      <p class="trans">Transition: Summary of the power section.</p>
+      <h3><span class="num">Slide 59</span>Power switches<span class="time">~2 min</span></h3>
+      <p class="say">IGBT for 400 V drives, MOSFET for low voltage, SiC for compact fast drives. Faster switching helps control but stresses insulation.</p>
+      <p class="trans">Transition: How do we drive them safely?</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 58</span>Session 3.2 (part 1) summary<span class="time">~2 min</span></h3>
-      <p class="say">Repeat the power path and the typical numbers in the table: bus voltage, chopper threshold, trip level, IGBT class, switching frequency and dead time. Remind participants that these are typical values and that the datasheet of the specific drive always wins.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Know your drive&#x27;s bus voltage thresholds.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li>Ask: “Which number on this slide would you check first on your own machine?”</li></ul></div>
-      <p class="trans">Transition: Let us close the day.</p>
+      <h3><span class="num">Slide 60</span>Gate drivers and dead time<span class="time">~3 min</span></h3>
+      <p class="say">Gate driver = muscle with isolation and protection. Dead time prevents shoot-through, costing 11.2 V in the example; Day 4 compensates it.</p>
+      <p class="trans">Transition: Summary and check.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 59</span>Day 3 summary<span class="time">~3 min</span></h3>
-      <p class="say">Summarise both halves of the day. On the control side: filters cost phase, compensators buy it back, state space gives pole placement and observers, robust and adaptive methods handle uncertainty, and digital implementation adds delay. On the hardware side: the servo structure and the power stage. The one-sentence take-away is that achievable bandwidth is governed by phase.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Phase is the currency of servo bandwidth.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li>Ask: “Which number on this slide would you check first on your own machine?”</li></ul></div>
-      <p class="trans">Transition: What comes tomorrow?</p>
+      <h3><span class="num">Slide 61</span>Session 3.2 summary, key terms and check<span class="time">~3 min</span></h3>
+      <p class="say">Answers: (1) half-on means large V and I at once: kilowatts of heat. (2) Brake resistor/chopper missing or too small (or deceleration too fast). (3) Current loop first: it is the inner plant of the velocity loop.</p>
+      <p class="trans">Transition: Day summary.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 60</span>Preview of Day 4<span class="time">~2 min</span></h3>
-      <p class="say">Day 4 goes deeper into the drive: PWM and space-vector modulation, dead-time compensation, field-oriented control with Clarke and Park transforms, and the practical tuning of current, velocity and position loops. Ask participants to keep today&#x27;s delay formula and the cascade picture in mind.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Tomorrow: PWM, FOC, loop tuning.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li>Ask: “Which number on this slide would you check first on your own machine?”</li></ul></div>
-      <p class="trans">Transition: Credits and references follow for reference.</p>
+      <h3><span class="num">Slide 62</span>Day 3 summary and glossary<span class="time">~2 min</span></h3>
+      <p class="say">Read the one-sentence summary; ask students to name one &#x27;phase cost&#x27; and one &#x27;phase gain&#x27;.</p>
+      <p class="trans">Transition: Tomorrow.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 61</span>Figure credits<span class="time">~0.5 min</span></h3>
-      <p class="say">All plots and schematics were drawn for this course. Photographs come from Wikimedia Commons under the licences listed. Mention this only briefly.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Licences listed per figure.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li>Ask: “Which number on this slide would you check first on your own machine?”</li></ul></div>
+      <h3><span class="num">Slide 63</span>Preview of Day 4<span class="time">~1 min</span></h3>
+      <p class="say">Day 4 goes inside the drive: PWM, field-oriented control and tuning.</p>
+      <p class="trans">Transition: Credits and references.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 64</span>Figure credits<span class="time">~0.5 min</span></h3>
+      <p class="say">Photos from Wikimedia Commons; licences listed.</p>
       <p class="trans">Transition: References.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 62</span>References<span class="time">~0.5 min</span></h3>
-      <p class="say">The reference list covers the classical textbooks used today. For self-study: Franklin, Powell and Workman for digital control, Åström and Wittenmark for adaptive control, Skogestad and Postlethwaite for robustness, and Mohan for power electronics.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Recommended self-study texts.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li>Ask: “Which number on this slide would you check first on your own machine?”</li></ul></div>
+      <h3><span class="num">Slide 65</span>References<span class="time">~0.5 min</span></h3>
+      <p class="say">Recommended reading: Franklin–Powell–Workman, Mohan.</p>
       <p class="trans">Transition: End of Day 3.</p>
     </div>
   </section>

@@ -49,430 +49,421 @@
   <h1>Resonance, Sensors, Measurement and System Integration</h1>
   <p>Mechatronics: Electrical Machines, Control, Servo Systems and Sensing · 5 h net teaching time</p>
 </div></header>
-<nav class="toc"><a href="#plan">Plan</a><a href="#s1">1 · Resonance, vibration and filter use</a><a href="#s2">2 · Sensors and measurement principles</a><a href="#s3">3 · Encoder and resolver</a><a href="#s4">4 · Sampling and digitisation</a><a href="#s5">5 · Signal processing and filters</a><a href="#s6">6 · Communication and system integration</a><a href="#ref">Credits</a></nav>
+<nav class="toc"><a href="#plan">Plan</a><a href="#s1">1 · Resonance, vibration and filter use</a><a href="#s2">2 · Sensors and measurement principles</a><a href="#s3">3 · Encoder and resolver</a><a href="#s4">4 · Sampling and digitisation</a><a href="#s5">5 · Signal processing and filters</a><a href="#s6">6 · Communication and integration + course wrap-up</a><a href="#ref">Credits</a></nav>
 <main>
   <section id="plan">
     <h2 class="session">Day plan &amp; timing</h2>
     <table class="plan"><tr><th>Block</th><th>Topic</th><th>Slides</th><th>Duration</th></tr>
-      <tr><td>1</td><td>3.7 Resonance, vibration and filter use</td><td>2–15</td><td>60 min</td></tr>
+      <tr><td>1</td><td>Resonance, vibration and filter use</td><td>2–15</td><td>60 min</td></tr>
       <tr><td>—</td><td><i>Break (extra to net time)</i></td><td></td><td>10 min</td></tr>
-      <tr><td>2</td><td>4.1 Sensors and measurement principles</td><td>17–21</td><td>30 min</td></tr>
-      <tr><td>3</td><td>4.2 Encoder and resolver</td><td>23–31</td><td>45 min</td></tr>
+      <tr><td>2</td><td>Sensors and measurement principles</td><td>17–22</td><td>30 min</td></tr>
+      <tr><td>3</td><td>Encoder and resolver</td><td>24–32</td><td>45 min</td></tr>
       <tr><td>—</td><td><i>Break (extra to net time)</i></td><td></td><td>10 min</td></tr>
-      <tr><td>4</td><td>4.3 Sampling and digitisation</td><td>33–37</td><td>30 min</td></tr>
+      <tr><td>4</td><td>Sampling and digitisation</td><td>34–40</td><td>30 min</td></tr>
       <tr><td>—</td><td><i>Break (extra to net time)</i></td><td></td><td>10 min</td></tr>
-      <tr><td>5</td><td>4.4 Signal processing and filters</td><td>39–48</td><td>90 min</td></tr>
+      <tr><td>5</td><td>Signal processing and filters</td><td>42–50</td><td>90 min</td></tr>
       <tr><td>—</td><td><i>Break (extra to net time)</i></td><td></td><td>10 min</td></tr>
-      <tr><td>6</td><td>4.5 Communication and system integration + course wrap-up</td><td>50–62</td><td>45 min</td></tr>
+      <tr><td>6</td><td>Communication and integration + course wrap-up</td><td>52–64</td><td>45 min</td></tr>
       <tr><td></td><td><b>Total net teaching time</b></td><td></td><td><b>300 min</b></td></tr>
     </table>
   </section>
 
   <section id="s1">
-    <h2 class="session">Session 3.7 · Resonance, vibration and filter use <small>Curriculum code 3.7 · 60 min</small></h2>
+    <h2 class="session">Session 3.7 · Resonance, vibration and filter use <small>Curriculum code 3.7 · 60 min (sum 60 min)</small></h2>
     <div class="slide">
-      <h3><span class="num">Slide 2</span>Agenda and learning objectives<span class="time">~4 min</span></h3>
-      <p class="say">Welcome to the final day. Over the previous four days we built a servo axis from the inside out: the machine, its model, the control theory, and the drive with its cascaded loops. Today we close the loop with the real world. We start with one hour on mechanical resonance and the filters that tame it, which is the last piece of servo tuning. Then four hours on sensing: what we measure, how encoders and resolvers work, how signals are sampled and digitised, how we filter them, and how drives communicate and synchronise on a fieldbus. We finish with a wrap-up of the whole course. Point at the objectives box: by the end of the day each participant should be able to estimate resonance frequencies, size a notch, estimate velocity quantisation noise and budget latency on a bus.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Today connects mechanics and measurement to the control theory of Days 2 to 4.</li><li>Breaks are extra to the 5 h net time.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Will there be exercises? <b>A:</b> No lab, but several worked numerical examples we compute together.</li></ul></div>
-      <p class="trans">Transition: Let us begin with the reason why real axes never behave like a pure inertia.</p>
+      <h3><span class="num">Slide 2</span>Agenda and learning objectives<span class="time">~3 min</span></h3>
+      <p class="say">Welcome to the last day. Today we leave the ideal world of Days 2 to 4: real shafts bend and real sensors are imperfect. Walk through the six sessions and the timing, then read the outcomes in the orange box. Stress that every outcome is something they can explain or calculate with school maths: square roots, logarithms, Ohm&#x27;s law and simple averages. There is no new heavy theory today; most of it is physical intuition.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Today is about the real hardware around the controller.</li><li>Misconception: &quot;a better controller fixes everything&quot;. The hardware sets the limits.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Will we need Laplace transforms today? <b>A:</b> Hardly. Frequency response pictures are enough.</li></ul></div>
+      <p class="trans">Transition: First, a quick look back.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 4</span>Why mechanical resonance limits servo bandwidth<span class="time">~3 min</span></h3>
-      <p class="say">Until now we assumed the load is rigidly attached to the motor, so the plant is one over J total times s. In reality every coupling, shaft, belt and ball screw is a spring. A spring between two inertias forms a lightly damped mode, typically with damping ratios of one to ten percent. The velocity loop sees this mode through the motor encoder as a gain peak at the resonance frequency and a dip at the anti-resonance. When we raise the gain to make the axis stiffer, the peak eventually crosses zero dB and the axis rings or becomes unstable. Note the typical frequency ranges in the box: belts are the softest, couplings the stiffest. Because the encoder sits on the motor, the feedback is collocated, and that is why a notch filter is usually effective.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Resonance, not the controller, is the usual bandwidth limit in industrial axes.</li><li>Collocated feedback keeps the phase well behaved.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why does the machine whistle when I increase gain? <b>A:</b> The loop gain at a mechanical resonance has exceeded unity; the oscillation frequency is the resonance.</li></ul></div>
-      <p class="trans">Transition: To quantify this we need a model: the two-mass system.</p>
+      <h3><span class="num">Slide 3</span>What we learned so far: Days 1–4<span class="time">~4 min</span></h3>
+      <p class="say">Recap the four days in one minute each: the motor as a torque source, models and PID, sampled control and filters, and the drive with its cascade of current, velocity and position loops. Then explain the three ideas we reuse today in plain words. Frequency response: shake the system with a sine and see how much bigger and how much later the output is. Bandwidth: how fast a command can change and still be followed. Phase margin: how far we are from oscillation. Today both assumptions, rigid load and perfect sensors, fall away.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Gain and phase of a sine are the language of today.</li><li>Misconception: delay only makes things slower. In a loop it reduces stability.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> What is bandwidth again? <b>A:</b> Roughly the highest frequency the loop still follows well.</li></ul></div>
+      <p class="trans">Transition: We start with a swing.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 5</span>Two-mass model: equations of motion<span class="time">~5 min</span></h3>
-      <p class="say">Here is the classical two-mass model. The motor inertia J_M and the load inertia J_L are connected by a torsional spring k and a damper c. The shaft torque T_S is the spring torque plus the damping torque. Writing Newton&#x27;s law for both inertias and taking the Laplace transform with zero load torque gives the two transfer functions on the right. Both share the denominator Delta of s. The motor-side transfer function G_M has a pair of zeros, the anti-resonance, and a pair of poles, the resonance. The load-side transfer function G_L has only the poles, so its phase drops to minus 270 degrees: that is the non-collocated case, much harder to control. Note the asymptotes: at low frequency the system is one rigid body, at high frequency only the motor moves. With a gearbox, reflect J_L and k through the square of the ratio.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>G_M: zeros then poles. G_L: poles only.</li><li>Gear ratio reflects inertia and stiffness by 1/i squared.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why not measure on the load? <b>A:</b> Load-side feedback is non-collocated; it gives better accuracy but limits bandwidth. Dual-loop schemes combine both.</li></ul></div>
-      <p class="trans">Transition: From these equations we can read the two characteristic frequencies directly.</p>
+      <h3><span class="num">Slide 5</span>Refresher: natural frequency of a mass on a spring<span class="time">~5 min</span></h3>
+      <p class="say">Ask who has pushed a child on a swing. Push at the right rhythm and the swing goes higher and higher; push at the wrong rhythm and nothing happens. That rhythm is the natural frequency. A mass on a spring behaves the same way, and omega n is the square root of k over m. Work the example: one kilogram on a 100 newton per metre spring gives 10 radians per second, about 1.6 hertz. For rotation, replace mass by inertia J. Resonance means a small push at the natural frequency gives a large motion when damping is low.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Stiffer means faster, heavier means slower.</li><li>Misconception: omega n in rad/s equals f in Hz. Divide by 2 pi.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why does a swing need small pushes only? <b>A:</b> Little damping: energy adds up each cycle.</li></ul></div>
+      <p class="trans">Transition: Now put that spring between a motor and its load.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 6</span>Resonance and anti-resonance frequencies<span class="time">~6 min</span></h3>
-      <p class="say">The numerator of G_M vanishes at omega AR equal to root of k over J_L: the load oscillates against a motor that appears clamped. The denominator gives omega R equal to root of k times the sum of inertias over their product: motor and load swing in anti-phase. The ratio of the two is root of one plus R, where R is the inertia ratio. Let us compute the example together: J_M is 1.2 times ten to the minus four, J_L five times larger, k is 600 newton metres per radian. Omega AR is 1000 radians per second, 159 hertz. Omega R is 1000 times root six, 2449 radians per second, 390 hertz. The gain step between the asymptotes is 20 log six, 15.6 dB. So above 390 hertz the plant looks six times lighter than the controller expects.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>omega_AR = sqrt(k/J_L); omega_R = omega_AR sqrt(1+R).</li><li>Gain step 20 log(1+R) dB.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Which frequency is visible in a velocity-loop oscillation? <b>A:</b> Usually the resonance f_R, where the motor-side gain peaks.</li></ul></div>
-      <p class="trans">Transition: Let us see what that looks like in a Bode plot.</p>
+      <h3><span class="num">Slide 6</span>Why mechanical resonance limits servo bandwidth<span class="time">~4 min</span></h3>
+      <p class="say">Until now the load was glued rigidly to the motor. In reality couplings, belts and ball screws twist and stretch, so they are springs. Motor inertia, spring and load inertia form a mass spring system with very little damping. The encoder sits on the motor, so the controller only sees the motor side. When we turn the gain up, the controller starts to push the system at its resonance and the axis whistles or rings. Use the car suspension analogy on the slide. Point at the typical frequency ranges: belts are the softest.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Resonance, not the controller, usually limits industrial axes.</li><li>Misconception: steel parts are rigid. At hundreds of hertz they are springs.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why does my machine whistle when I raise the gain? <b>A:</b> The loop is exciting a mechanical resonance.</li></ul></div>
+      <p class="trans">Transition: Let us calculate where these resonances lie.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 7</span>Frequency response of the two-mass system<span class="time">~5 min</span></h3>
-      <p class="say">This is G_M computed with the numbers from the previous slide. The dashed line is the rigid model one over J total s. The thin dotted line is the motor-alone asymptote, 15.6 dB higher. The real curve follows the rigid line at low frequency, dips sharply at 159 hertz where the load absorbs the motor torque, then peaks at 390 hertz and finally follows the motor-only line. The height of the peak and the depth of the dip depend on damping. In metal drive trains damping is only a few percent, so the peak can be twenty dB or more above the asymptote. Remember this picture: you will see it whenever you measure a plant FRF on a real machine.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Dip first (AR), then peak (R) on the motor side.</li><li>Peak height set by damping.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Can the dip be above the peak? <b>A:</b> No, for G_M the anti-resonance is always below the resonance.</li></ul></div>
-      <p class="trans">Transition: How does the picture change with the inertia ratio?</p>
+      <h3><span class="num">Slide 7</span>The two-mass model and its two special frequencies<span class="time">~7 min</span></h3>
+      <p class="say">Two inertias joined by one spring have two special frequencies. At the anti-resonance the load swings while the motor stands still, so the motor-side sensor sees almost nothing: it depends only on k and J L. At the resonance motor and load swing against each other and the frequency is higher by the square root of one plus R, where R is the inertia ratio. Do the four steps on the board: 1000 rad/s, 159 hertz; R equals 5; 2449 rad/s, 390 hertz. The grey Going further line is optional.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Two frequencies: AR from the load alone, R higher by root(1+R).</li><li>Misconception: there is only one resonance frequency.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> What happens to f_AR if the spring is four times stiffer? <b>A:</b> It doubles.</li></ul></div>
+      <p class="trans">Transition: To read the plots that follow we need decibels.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 8</span>Effect of the inertia ratio R = J_L/J_M<span class="time">~5 min</span></h3>
-      <p class="say">Here J_M and k are fixed and we vary the load. With R equal to one the two frequencies are close and the step between asymptotes is only six dB. With R equal to ten the anti-resonance moves down, the gap widens by root eleven and the step is 21 dB. The rigid-body gain falls with one over one plus R, but the high-frequency gain does not change, so a controller tuned for the total inertia has far too much gain above the resonance. That is the practical reason for inertia-ratio rules of thumb: below three to five for very stiff, high-bandwidth axes, below ten for general servo work. A gearbox reduces the reflected ratio by the square of the gear ratio; the inertia-matching ratio root of J_L over J_M maximises load acceleration.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Large R = wide separation and large gain step.</li><li>Gear ratio is the strongest lever on R.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Is inertia matching always optimal? <b>A:</b> It maximises acceleration for a given motor; stiffness, speed limits and cost often lead to other choices.</li></ul></div>
-      <p class="trans">Transition: Now let us put this plant into the velocity loop.</p>
+      <h3><span class="num">Slide 8</span>Refresher: decibels (dB)<span class="time">~4 min</span></h3>
+      <p class="say">Gains in a servo span from thousands to thousandths, so we use a log scale. Decibels are twenty times the log of the gain. Learn the table by heart: times ten is plus 20, times two is about plus 6, one is zero, half is minus 6. The nice property: multiplying gains means adding decibels, so a chain of blocks just adds up on a Bode plot. Example: a 12 dB peak is two times two, so four times larger.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>0 dB means unchanged, negative means smaller.</li><li>Misconception: negative dB means a negative gain. It means a gain below one.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> What is -40 dB? <b>A:</b> A gain of 0.01.</li></ul></div>
+      <p class="trans">Transition: Now we can read the two-mass Bode plot.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 9</span>Effect on the velocity-loop open-loop FRF<span class="time">~7 min</span></h3>
-      <p class="say">This is the open loop of a PI velocity controller tuned for 50 hertz crossover on the rigid model, including a two kilohertz current loop and 125 microseconds of delay. The dashed rigid curve crosses zero dB once, with 75 degrees phase margin. With the two-mass plant, shown in red, the resonance lifts the loop gain to plus 12.6 dB at 390 hertz, creating additional zero-dB crossings: the axis will ring or go unstable. The blue curve adds a notch at 390 hertz with zeta z 0.02 and zeta p 0.6. The peak is now minus 17 dB, the gain margin is about 9 dB, and the price is about 8.6 degrees of phase at crossover, phase margin drops from 75 to 66.5 degrees. This is the typical trade-off.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Resonance creates extra 0 dB crossings.</li><li>Notch restores gain margin at a small phase cost.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why not just reduce the gain? <b>A:</b> We could, but crossover would have to drop well below f_AR, sacrificing stiffness.</li></ul></div>
-      <p class="trans">Transition: Let us look at the notch filter itself.</p>
+      <h3><span class="num">Slide 9</span>Frequency response of the two-mass system<span class="time">~6 min</span></h3>
+      <p class="say">The dashed line is the rigid load: a straight line falling with frequency. The blue curve is the real flexible system. At low frequency they agree. At 159 hertz we see the dip, at 390 hertz a sharp peak, and above that only the motor moves so the gain is six times higher. A larger inertia ratio makes this jump larger and tuning harder. Use the bicycle gear analogy: a gearbox makes the load feel lighter to the motor, by the gear ratio squared.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Peak at f_R, dip at f_AR, step of 1+R above.</li><li>Misconception: the dip is harmless. The load still moves there.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> How does a gear help? <b>A:</b> It divides the reflected load inertia by i squared.</li></ul></div>
+      <p class="trans">Transition: What does the velocity loop make of this?</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 10</span>The biquad notch filter<span class="time">~6 min</span></h3>
-      <p class="say">The notch is a biquad with identical natural frequency in numerator and denominator but different damping. Three parameters: the centre frequency omega n, which we place on the measured resonance; the depth, which is the ratio zeta z over zeta p at omega n; and the width, which for a deep notch is approximately two zeta p omega n, the minus three dB band. The filter has unity gain far below and far above, phase lag below the centre and phase lead above. The approximate lag at crossover is shown at the bottom. On the right is the digital implementation using the Tustin transform with pre-warping, so that the notch lands exactly at omega n despite frequency warping. These formulas are exactly what drive firmware uses.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Depth = zeta_z/zeta_p; width approx 2 zeta_p omega_n.</li><li>Pre-warp when discretising.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> What happens without pre-warping? <b>A:</b> The notch shifts to a lower frequency, noticeably when f_n approaches a tenth of f_s or more.</li></ul></div>
-      <p class="trans">Transition: The Bode plot makes the role of each parameter visible.</p>
+      <h3><span class="num">Slide 10</span>What the velocity loop sees<span class="time">~6 min</span></h3>
+      <p class="say">This is the loop gain of a velocity loop tuned for 50 hertz. The dashed curve is the rigid case and crosses 0 dB once. The red curve, with the real mechanics, comes back above 0 dB around 390 hertz: the loop would amplify vibrations there and the axis rings. The blue curve has a notch filter added at 390 hertz: the peak is pushed down to minus 17 dB. The cost is about 9 degrees of phase at the crossover, which is acceptable.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Above 0 dB at a resonance means ringing.</li><li>Misconception: a filter is free. It always costs some phase.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why not just lower the gain? <b>A:</b> Possible, but then the whole axis becomes slower.</li></ul></div>
+      <p class="trans">Transition: So what exactly is a notch filter?</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 11</span>Notch filter: width and depth in the Bode plot<span class="time">~4 min</span></h3>
-      <p class="say">Four variants centred at 400 hertz. With zeta z zero the notch is infinitely deep and the phase jumps by 180 degrees. Increasing zeta z to 0.03 or 0.1 limits the depth to minus 20 or minus 9.5 dB. Reducing zeta p to 0.1 makes the notch narrow: little phase cost at low frequency, but it must hit the resonance precisely, and resonances drift with payload, position and temperature. A wide notch is robust against that drift but costs more phase at crossover. In practice, choose only as deep as necessary and as wide as the uncertainty of the resonance frequency demands.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Deep and wide costs phase; narrow requires accuracy.</li><li>Size depth to the peak, width to the drift.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Should depth always be infinite? <b>A:</b> No; extra depth adds phase change without benefit once the peak is below the target line.</li></ul></div>
-      <p class="trans">Transition: Here is a procedure to set these parameters on a real axis.</p>
+      <h3><span class="num">Slide 11</span>The notch filter: cutting out one frequency<span class="time">~5 min</span></h3>
+      <p class="say">A notch filter is like a graphic equaliser where you pull down one single slider. It passes everything at 0 dB except a narrow band around its centre frequency, which we place on the resonance. Depth says how much it cuts, width how many hertz it covers. Compare the two curves: the wide notch tolerates a drifting resonance but bends the phase further away from the centre. The biquad formula in grey is for interested students only.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Centre on f_R, choose depth and width.</li><li>Misconception: deeper and wider is always better. It costs phase.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Can I use several notches? <b>A:</b> Yes, one per dominant resonance.</li></ul></div>
+      <p class="trans">Transition: How do we set one up in practice?</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 12</span>Selecting notch parameters: a practical procedure<span class="time">~5 min</span></h3>
-      <p class="say">First measure the FRF at low gain, using the identification methods of Day 2. Read the resonance and check how much it moves over the stroke and payload range. Set the centre on the resonance, the depth to the peak height plus six to ten dB of margin, and the width according to the drift. Re-measure and verify phase margin at crossover and gain margin at the resonance. Then increase the velocity gain until the next limit appears. The box computes the phase cost for our example: about minus 8.6 degrees, matching the plot two slides back. The rule of thumb: keep the notch at least three to five times above crossover. If it is closer, the mechanics need to be stiffer.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Measure, place, verify, repeat.</li><li>f_n at least 3 to 5 times f_c.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> How many notches can be used? <b>A:</b> Drives typically offer two to four; each one costs phase, so fix the mechanics first.</li></ul></div>
-      <p class="trans">Transition: Notches handle narrow peaks; for broad high-frequency content we use low-pass filters.</p>
+      <h3><span class="num">Slide 12</span>Setting up a notch: a practical recipe<span class="time">~4 min</span></h3>
+      <p class="say">Go through the five steps: measure at low gain, read the peak, set the notch, adjust width, raise the gain and recheck. The rule of thumb is that the notch should be at least three to five times above the loop bandwidth; our example has a ratio of almost eight and costs only 9 degrees. If the resonance is close to the bandwidth, no filter helps: stiffen the mechanics. Mention adaptive notches briefly: they follow a resonance that moves with the payload.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Measure first, then filter.</li><li>Misconception: filters can replace stiff mechanics.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> What if f_R moves with the load? <b>A:</b> Use a wider or an adaptive notch.</li></ul></div>
+      <p class="trans">Transition: The second tool is the low-pass filter.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 13</span>Low-pass torque (current-reference) filters<span class="time">~4 min</span></h3>
-      <p class="say">The torque reference filter is usually a first- or second-order low pass. It suppresses broad-band high-frequency content: many small modes above five times crossover, encoder quantisation noise amplified by the velocity gain, and current ripple. Its cost is phase lag everywhere below its corner. With crossover at 100 hertz and a 1 kilohertz corner, the first-order filter costs 5.7 degrees, the second-order 8.1 degrees. But look at the attenuation at our 390 hertz resonance: only 0.6 dB. A low pass simply cannot remove a resonance close to crossover; a notch can. Typical corner: five to ten times crossover.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>LPF for broad high-frequency content, notch for narrow peaks.</li><li>Phase lag at crossover is the cost.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> First or second order? <b>A:</b> Second order attenuates noise more strongly above the corner for similar lag at crossover.</li></ul></div>
-      <p class="trans">Transition: What if the resonance frequency moves during operation?</p>
+      <h3><span class="num">Slide 13</span>Low-pass torque filters<span class="time">~4 min</span></h3>
+      <p class="say">A low-pass filter is the digital version of the RC circuit they know: slow signals pass, fast ones are damped. It is the right tool against broad noise, such as encoder steps and current ripple. But look at 390 hertz: a 1 kilohertz low-pass barely reduces it, only 0.6 dB. To cut 390 hertz with a low-pass we would have to put its corner so low that it would ruin the phase at 50 hertz. That is why the notch is the tool for a single resonance.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Low-pass for broad noise, notch for one peak.</li><li>Misconception: a low-pass removes everything above its corner. It only rolls off gradually.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Second order or first order? <b>A:</b> Second order cuts faster but costs more phase.</li></ul></div>
+      <p class="trans">Transition: Time to check understanding.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 14</span>Adaptive notch: tracking a moving resonance<span class="time">~4 min</span></h3>
-      <p class="say">When the resonance changes with payload, axis position on a long screw, or belt tension, a fixed notch must be very wide. An adaptive notch estimates the dominant frequency online, from the torque reference or the velocity error, using an FFT peak search, an adaptive IIR filter or a gradient update of the notch frequency, and moves the notch accordingly. Adaptation must be supervised: freeze it when the signal is small, bound the frequency range, and beware of adapting to a forced disturbance such as a cutting frequency, which is not a resonance at all. Many commercial drives offer such a function; understand its limits before enabling it.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Adaptation needs bounds and supervision.</li><li>Distinguish resonance from forced vibration.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Can it make things worse? <b>A:</b> Yes, if it locks onto a forced frequency or interacts with another notch.</li></ul></div>
-      <p class="trans">Transition: Let me summarise the resonance session.</p>
+      <h3><span class="num">Slide 14</span>Check your understanding: resonance<span class="time">~4 min</span></h3>
+      <p class="say">Give two minutes in pairs, then take answers. Answer 1: f AR equals the square root of k over J L, so doubling J L lowers it by a factor square root of two, about 1.41. Answer 2: a low-pass that damps 390 hertz noticeably would need a corner near or below it and would cost a lot of phase at 50 hertz; the notch cuts only the narrow band. Answer 3: plus 20 dB is a factor of ten.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Let students explain in words, not formulas.</li><li>Misconception: f_AR goes down by a factor of two. It is root two.</li></ul></div>
+      <p class="trans">Transition: Let us summarise.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 15</span>Summary: resonance and filter use<span class="time">~2 min</span></h3>
-      <p class="say">Compliance turns the simple inertia into the two-mass transfer function with an anti-resonance and a resonance root one plus R higher. High inertia ratios make tuning harder. Notches remove narrow peaks cheaply if they are well above crossover; low-pass filters handle broad high-frequency content. And the design order on the right: stiffen mechanics and reduce R first, measure, filter, retune, verify over the whole operating envelope.</p>
+      <h3><span class="num">Slide 15</span>Summary and key terms: resonance and filters<span class="time">~4 min</span></h3>
+      <p class="say">Read the summary points and the key terms. The core message: a flexible drive train is a mass spring system, it shows a resonance peak, and the peak can make the loop unstable. Notch for a narrow peak, low-pass for broad noise, but mechanics first. Ask one student to explain the inertia ratio in their own words.</p>
       <div class="key"><span class="label">Emphasise</span><ul><li>Mechanics first, filters second.</li></ul></div>
-      <p class="trans">Transition: After a short break we turn to sensors and measurement principles.</p>
+      <p class="trans">Transition: After the break: sensors.</p>
     </div>
   </section>
 
   <section id="s2">
-    <h2 class="session">Session 4.1 · Sensors and measurement principles <small>Curriculum code 4.1 · 30 min</small></h2>
+    <h2 class="session">Session 4.1 · Sensors and measurement principles <small>Curriculum code 4.1 · 30 min (sum 30 min)</small></h2>
     <div class="slide">
-      <h3><span class="num">Slide 17</span>Metrology vocabulary<span class="time">~7 min</span></h3>
-      <p class="say">Before discussing specific sensors, we need precise vocabulary. The four targets illustrate accuracy versus precision: accuracy is closeness to the true value and contains systematic and random error; precision is the spread of repeated readings. Repeatability is precision under identical short-term conditions. Resolution is the smallest detectable change, for example one count or one LSB. Range is the span. Linearity is the maximum deviation from a best-fit line in percent of full scale. The key warning in the note: resolution is not accuracy. A 23-bit encoder resolves 0.15 arc seconds, but its absolute error may be twenty arc seconds due to disk eccentricity and mounting.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Resolution is not accuracy.</li><li>Datasheets use these terms differently: read the definitions.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Which matters for a velocity loop? <b>A:</b> Resolution and noise; absolute accuracy matters for positioning.</li></ul></div>
-      <p class="trans">Transition: Let us apply this vocabulary to current sensors.</p>
+      <h3><span class="num">Slide 17</span>Refresher: accuracy versus precision<span class="time">~7 min</span></h3>
+      <p class="say">Use the dartboard. Top left: darts close together and on the bull&#x27;s-eye, accurate and precise. Top right: tight group but off-centre, precise but not accurate; this is a constant offset that calibration can remove. Bottom left: scattered around the centre, accurate on average but not precise; averaging helps. Then define resolution and range. Use the ruler example: fine marks do not help if the ruler is printed in the wrong place.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Offset errors hurt accuracy, noise hurts precision.</li><li>Misconception: more digits on the display means more accurate.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Which error can calibration remove? <b>A:</b> The constant offset, i.e. systematic error.</li></ul></div>
+      <p class="trans">Transition: First sensor: current.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 18</span>Current measurement: shunt, Hall and fluxgate<span class="time">~8 min</span></h3>
-      <p class="say">The shunt is a small resistor in the phase or leg; its voltage is R times i. It is cheap, accurate and fast, but not isolated, so it needs an isolated amplifier or an isolated sigma-delta modulator. The example: 2 milliohm at 20 amps gives 40 millivolts and 0.2 watts at 10 amps RMS. Hall sensors measure the flux in a slotted core; open-loop versions drift, closed-loop versions null the flux with a compensation winding and reach about half a percent. Fluxgates detect zero flux with a periodically saturated core and have extremely low offset. Point out the last bullet: offset in the phase currents produces torque ripple at the electrical frequency, gain mismatch at twice the electrical frequency.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Shunt: accurate but needs isolation.</li><li>Offset gives 1x ripple, gain mismatch 2x ripple.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why are shunts popular in servo drives? <b>A:</b> Low cost, high bandwidth and excellent linearity once isolated sigma-delta modulators are available.</li></ul></div>
-      <p class="trans">Transition: Next, force sensing with strain gauges.</p>
+      <h3><span class="num">Slide 18</span>Current measurement: shunt, Hall and fluxgate<span class="time">~7 min</span></h3>
+      <p class="say">The shunt is pure Ohm&#x27;s law: a tiny resistor in the current path, and the voltage across it is proportional to the current. Do the example: 2 milliohm times 20 ampere is 40 millivolt, so we need an amplifier, and the shunt dissipates 0.2 watt at 10 ampere. A Hall sensor measures the magnetic field around the conductor instead, so it is electrically isolated from the high voltage. Fluxgate sensors are the precision variant. Isolation means no electrical connection.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Shunt: cheap and accurate but not isolated.</li><li>Misconception: a bigger shunt resistor is better. It wastes power as heat.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why isolation? <b>A:</b> The motor side is at hundreds of volts; the microcontroller must be protected.</li></ul></div>
+      <p class="trans">Transition: Next: force.</p>
     </div>
     <div class="slide">
       <h3><span class="num">Slide 19</span>Force: strain gauges and load cells<span class="time">~6 min</span></h3>
-      <p class="say">A strain gauge is a foil resistor whose resistance changes with strain; the gauge factor is about two. Strains are in the micro-strain range, so the resistance change is tiny and we use a Wheatstone bridge. With four active arms, the full bridge, sensitivity is four times that of a single gauge, temperature effects cancel and bending can be rejected. Example: one thousand micro-strain, gauge factor two, five volts excitation gives ten millivolts. Load cells are specified in millivolts per volt, typically two at nominal load, so the signal chain needs a low-noise instrumentation amplifier or a 24-bit sigma-delta ADC. The photos show a bare foil gauge and an industrial compression load cell.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Bridge output is millivolts: noise and drift dominate.</li><li>Full bridge for sensitivity and compensation.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> What is ratiometric measurement? <b>A:</b> Using the excitation as ADC reference so that excitation drift cancels.</li></ul></div>
-      <p class="trans">Transition: Temperature sensors protect the motor and the inverter.</p>
+      <p class="say">A strain gauge is a zig-zag foil resistor glued on metal; when the metal stretches the foil gets longer and thinner, so resistance rises. The relative change is about twice the strain, which is tiny. A Wheatstone bridge turns that tiny change into a voltage; with four active gauges we get four times the signal and temperature effects cancel. Example: strain one per mille and 5 volt excitation give 10 millivolt. A load cell is just a metal block with such a bridge.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Bridge = sensitivity plus temperature compensation.</li><li>Misconception: the gauge measures force directly. It measures strain.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why mV/V? <b>A:</b> The output scales with the excitation voltage.</li></ul></div>
+      <p class="trans">Transition: Now temperature.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 20</span>Temperature: NTC, PT100/PT1000, thermocouple, KTY<span class="time">~7 min</span></h3>
-      <p class="say">The plot shows a PT1000 and a 10 kilo-ohm NTC on a log scale. Platinum sensors follow the Callendar-Van Dusen equation and are nearly linear and accurate; class A tolerance is 0.15 plus 0.002 times temperature. NTCs are very sensitive but strongly non-linear; they sit in IGBT modules and on heatsinks. Thermocouples generate a Seebeck voltage of about 41 microvolts per kelvin for type K and need cold-junction compensation; they are used at high temperature. KTY silicon sensors, about one kilo-ohm at 100 degrees, are common in motor windings and feed thermal models, while PTC thermistor triplets are only used for a trip signal.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>PT accurate, NTC sensitive, thermocouple hot, KTY in motors.</li><li>Winding sensors lag the copper: thermal models fill the gap.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why 3- or 4-wire PT connections? <b>A:</b> To cancel the lead resistance, which would otherwise appear as a temperature offset.</li></ul></div>
-      <p class="trans">Transition: A quick summary before encoders.</p>
+      <h3><span class="num">Slide 20</span>Temperature: PT100/PT1000, NTC, thermocouple, KTY<span class="time">~5 min</span></h3>
+      <p class="say">The plot shows resistance on a log scale. Platinum sensors rise almost linearly, about 0.39 percent per kelvin: a PT100 goes from 100 ohm at 0 degrees to about 139 ohm at 100 degrees. NTC thermistors drop steeply and non-linearly: very sensitive but need a table. Thermocouples produce a small voltage from two different metals and suit high temperatures. KTY sensors sit in motor windings to protect against overheating.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>PT accurate, NTC sensitive, thermocouple hot.</li><li>Misconception: an NTC is linear. It is strongly non-linear.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Where in a drive is an NTC? <b>A:</b> Usually in the power module and heatsink.</li></ul></div>
+      <p class="trans">Transition: Let us check understanding.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 21</span>Summary: sensors and measurement principles<span class="time">~2 min</span></h3>
-      <p class="say">Specify sensors with the full vocabulary. For currents choose between shunt, Hall and fluxgate based on isolation, accuracy and cost. Force sensing delivers millivolts per volt, so the amplifier matters. Temperature sensors are chosen by accuracy, sensitivity and range. The checklist on the right applies to every sensor you select.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Ask which error matters: offset, gain, noise or drift.</li></ul></div>
-      <p class="trans">Transition: Now the most important sensor of a servo: the position sensor.</p>
+      <h3><span class="num">Slide 21</span>Check your understanding: sensors<span class="time">~3 min</span></h3>
+      <p class="say">Answers. 1: the readings are tightly grouped, so precise, but about 0.2 kilogram high, so not accurate: an offset that calibration removes. 2: u equals R times i, 1 milliohm times 30 ampere is 30 millivolt; power is R times i squared, 0.001 times 900, which is 0.9 watt. 3: the bridge turns a tiny resistance change into a voltage, four active gauges give four times the signal, and temperature effects cancel.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Use units at every step.</li></ul></div>
+      <p class="trans">Transition: Summary.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 22</span>Summary and key terms: sensors<span class="time">~2 min</span></h3>
+      <p class="say">Recap the four bullets and the key terms. Ask a student to state the difference between accuracy and resolution in one sentence. Every sensor is specified with this vocabulary.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Vocabulary first, then sensor choice.</li></ul></div>
+      <p class="trans">Transition: Next session: how a drive measures angle.</p>
     </div>
   </section>
 
   <section id="s3">
-    <h2 class="session">Session 4.2 · Encoder and resolver <small>Curriculum code 4.2 · 45 min</small></h2>
+    <h2 class="session">Session 4.2 · Encoder and resolver <small>Curriculum code 4.2 · 45 min (sum 45 min)</small></h2>
     <div class="slide">
-      <h3><span class="num">Slide 23</span>Optical incremental encoders<span class="time">~4 min</span></h3>
-      <p class="say">The photo shows a slotted code disk and an optical fork. Light passes through the disk lines and phase-shifted gratings onto photodiodes, producing two signals A and B shifted by 90 degrees plus an index Z once per revolution, usually as RS-422 differential lines. Counting edges gives position relative to power-up, so an incremental axis must be homed. Note the frequency: 2500 lines at 6000 rpm is 250 kilohertz per channel and one million edges per second after decoding. Magnetic and inductive encoders work on the same principle with lower resolution but higher robustness.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Incremental means homing.</li><li>Check maximum output frequency at top speed.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Is Z needed? <b>A:</b> It gives a repeatable reference for homing and for checking lost counts.</li></ul></div>
-      <p class="trans">Transition: How do we get direction and four times the resolution?</p>
+      <h3><span class="num">Slide 24</span>Refresher: binary numbers and Gray code<span class="time">~6 min</span></h3>
+      <p class="say">Write 101 on the board and decode it: four plus zero plus one equals five. N bits give two to the N values. Now count from 3 to 4 in binary: 011 to 100, all three bits change. On a spinning disk the three tracks never switch at exactly the same instant, so for a moment the reader could see 111 or 000: a wild jump. Gray code reorders the values so only one bit changes per step. Show it on the disk.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Gray code: one bit per step.</li><li>Misconception: Gray code gives more resolution. It only avoids false readings.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> How many positions does 12 bit give? <b>A:</b> 4096.</li></ul></div>
+      <p class="trans">Transition: First encoder type: incremental.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 24</span>Quadrature signals and x4 decoding<span class="time">~6 min</span></h3>
-      <p class="say">Here are A, B and Z. One line corresponds to one full period of A. Every edge of A and of B is counted, so we get four counts per line: x4 decoding. The table is the state machine: the sequence 00, 10, 11, 01 counts up, the reverse counts down. If both bits change at once, we missed an edge, which is an error. Direction is given by which channel leads. In hardware, a glitch filter rejects short pulses, but it also limits the maximum edge rate, so filter settings and maximum speed must be consistent.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>4N counts per revolution.</li><li>Both bits changing = lost count.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Can x4 decoding cause errors? <b>A:</b> Only if signals have poor 90-degree phasing; then counts are unevenly spaced.</li></ul></div>
-      <p class="trans">Transition: Absolute encoders avoid homing altogether.</p>
+      <h3><span class="num">Slide 25</span>Optical incremental encoders<span class="time">~5 min</span></h3>
+      <p class="say">An LED shines through a disk with slits onto photodiodes, giving square waves A and B, shifted by a quarter period, plus one index pulse Z per revolution. The drive counts pulses, so it only knows how far it moved since switch-on: after power-up it must do a homing run. Example: 2500 lines at 100 revolutions per second gives 250 kilohertz, which the counter hardware must handle.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Incremental = relative position.</li><li>Misconception: the encoder knows where it is after power-up.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> What is Z for? <b>A:</b> A reference mark once per revolution, used for homing.</li></ul></div>
+      <p class="trans">Transition: How do we get direction and four times resolution?</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 25</span>Absolute encoders, Gray code and serial protocols<span class="time">~6 min</span></h3>
-      <p class="say">An absolute encoder delivers a unique code for every angle. Single-turn resolutions of 23 bits, over eight million positions, are common. Multi-turn versions add a revolution counter with gears, battery backup or Wiegand energy harvesting. Internally, Gray code is used: only one bit changes per step, so a reading at a transition is never wildly wrong. The small disk shows a three-bit Gray code, the photo a real 13-track encoder. Positions are transmitted serially: SSI is simple and unidirectional, BiSS-C is open and bidirectional with CRC, EnDat 2.2 adds diagnostics and electronic ID, and one-cable solutions put the link into the motor power cable.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Gray code avoids false codes.</li><li>Serial protocols carry CRC and diagnostics.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why not plain binary on the disk? <b>A:</b> Multiple bits would change at once and misaligned tracks would give huge errors.</li></ul></div>
-      <p class="trans">Transition: High resolution often comes from interpolating analogue signals.</p>
+      <h3><span class="num">Slide 26</span>Quadrature signals and ×4 counting<span class="time">~5 min</span></h3>
+      <p class="say">Point at the edges numbered 1 to 11. Each line produces two edges on A and two on B, so counting every edge gives four counts per line. The order of edges tells direction: A before B is forward. Example: 2500 lines times four is 10000 counts, 0.036 degrees each. If both signals change at once a count was missed, which is flagged as an error.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>4N counts per revolution.</li><li>Misconception: N lines give N counts. With x4 decoding it is 4N.</li></ul></div>
+      <p class="trans">Transition: Absolute encoders avoid homing.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 26</span>Sin/cos encoders and interpolation<span class="time">~6 min</span></h3>
-      <p class="say">Sin/cos encoders deliver analogue sine and cosine signals, typically one volt peak-to-peak, with a few hundred to a few thousand periods per revolution. The coarse position counts periods; the fine position inside a period is atan2 of the two signals. With 2048 periods and 12-bit interpolation we reach 23 bits. The Lissajous plot shows the ideal circle and a distorted ellipse. Offset moves the centre and causes an error once per signal period; amplitude mismatch and phase error distort the ellipse and cause twice-per-period errors. Drives correct this by online calibration. Ultimately signal quality and ADC noise limit interpolation, not arithmetic.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>atan2 interpolation.</li><li>Offset -&gt; 1st harmonic, gain/phase -&gt; 2nd harmonic.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Will these errors show in the velocity loop? <b>A:</b> Yes, as velocity ripple at a frequency proportional to speed.</li></ul></div>
-      <p class="trans">Transition: The resolver uses the same sine and cosine idea, but with a transformer.</p>
+      <h3><span class="num">Slide 27</span>Absolute encoders and serial protocols<span class="time">~5 min</span></h3>
+      <p class="say">The photo shows a Gray-code disk with many tracks: each angle has its own unique code, so the position is known immediately at switch-on. Multi-turn encoders also count whole revolutions. Modern absolute encoders send the position as a digital message with a checksum. Mention the protocol names only as names: SSI, BiSS, EnDat.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Absolute: no homing.</li><li>Misconception: absolute encoders never need a reference. They need it once at commissioning.</li></ul></div>
+      <p class="trans">Transition: A clever trick for high resolution: sin/cos.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 27</span>Resolver: principle and signals<span class="time">~5 min</span></h3>
-      <p class="say">A resolver is a rotary transformer. The rotor winding is excited with a carrier of five to twenty kilohertz; two stator windings ninety degrees apart pick up the carrier modulated by the sine and cosine of the angle. The plots show it: the excitation, then the two output signals whose envelopes, dashed, carry the angle. For illustration the carrier is slowed down. Because there are no electronics in the motor, resolvers tolerate high temperatures, shock and vibration, which is why they dominate in automotive and harsh environments. Accuracy is typically five to ten arc minutes, lower than optical encoders.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Angle is in the envelopes.</li><li>Robust but less accurate.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> What is a multi-speed resolver? <b>A:</b> A resolver with several pole pairs; more electrical cycles per revolution improve resolution but lose single-turn absoluteness.</li></ul></div>
-      <p class="trans">Transition: How do we extract the angle from these signals?</p>
+      <h3><span class="num">Slide 28</span>Sin/cos encoders and interpolation<span class="time">~5 min</span></h3>
+      <p class="say">Here the tracks give a sine and a cosine instead of square waves. Plot one against the other and you get a circle; the angle of the arrow is the position within one line, found with atan2. Counting whole periods gives the coarse part. 2048 periods times 4096 steps gives 2 to the 23 counts. If offsets or amplitudes are wrong, the circle becomes an off-centre ellipse and the angle is wrong.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Coarse count plus fine angle.</li><li>Misconception: resolution equals accuracy. Signal errors limit accuracy.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why atan2 and not atan? <b>A:</b> atan2 uses both signs to get the full 360 degrees.</li></ul></div>
+      <p class="trans">Transition: The robust alternative: the resolver.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 28</span>Resolver-to-digital conversion: the tracking loop<span class="time">~5 min</span></h3>
-      <p class="say">The standard method is a tracking loop. Multiply the sine signal by cosine of the estimated angle and the cosine signal by sine of the estimate, subtract, and demodulate synchronously with the carrier. The trigonometric identity gives sine of the angle error, which for small errors is the error itself. A PI controller and an integrator form a type-II loop that drives the error to zero; the integrator output is the angle estimate, and its input is a clean velocity estimate as a bonus. Zero steady-state error at constant speed; under acceleration there is a lag proportional to acceleration. The loop bandwidth trades noise against lag.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>RDC is a type-II PLL.</li><li>Velocity comes for free from the loop.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Hardware or software RDC? <b>A:</b> Both are common; software RDC in the drive MCU saves cost and allows tuning.</li></ul></div>
-      <p class="trans">Transition: From position to velocity: the next challenge.</p>
+      <h3><span class="num">Slide 29</span>Resolver: a rotating transformer<span class="time">~5 min</span></h3>
+      <p class="say">A resolver is a transformer whose coupling depends on angle. The rotor is fed with a sine carrier of several kilohertz; two stator coils at 90 degrees pick up the carrier multiplied by sine and cosine of the angle. The angle sits in the envelopes, the dashed curves. There are no electronics in the motor, so resolvers survive heat and shock. The converter that extracts the angle is in the Going further note.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Angle in the envelopes.</li><li>Misconception: a resolver outputs a digital value. It is purely analogue.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Where are resolvers used? <b>A:</b> Electric vehicles, aerospace, hot environments.</li></ul></div>
+      <p class="trans">Transition: How do we get speed from all these sensors?</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 29</span>Velocity from position: M-, T- and M/T-method<span class="time">~5 min</span></h3>
-      <p class="say">Three classical methods. The M-method counts the edges in a fixed sample period: good at high speed, but at low speed few counts mean coarse resolution. The T-method measures the time between two edges with a fast clock: excellent at low speed, but at high speed only few clock cycles are counted, and if no edge arrives there is no update. The M/T method counts edges and clock cycles over a window that starts and ends on an edge, giving good accuracy over the whole range. Modern drives use edge time-stamping combined with high-resolution absolute position, which is essentially the M/T idea in hardware.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>M at high speed, T at low speed, M/T everywhere.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why not always use T? <b>A:</b> At high speed the clock count between edges becomes small and the update stalls at standstill.</li></ul></div>
-      <p class="trans">Transition: Let us quantify the low-speed problem.</p>
+      <h3><span class="num">Slide 30</span>Speed from an encoder and the low-speed problem<span class="time">~7 min</span></h3>
+      <p class="say">Speed is change of position over time. Method M counts pulses in a fixed time; method T times one pulse. Work the example step by step: one count in 125 microseconds with 10000 counts per revolution is 0.8 revolutions per second, 48 rpm. So the speed reading moves in 48 rpm steps! At 60 rpm it jumps between 48 and 96. That is why high-resolution encoders and filtering matter.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Speed resolution = one count per sample.</li><li>Misconception: a speed reading is as smooth as the motion.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> How to improve? <b>A:</b> More counts per revolution, longer window, or filtering.</li></ul></div>
+      <p class="trans">Transition: Check understanding.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 30</span>Low-speed limits and quantisation noise<span class="time">~6 min</span></h3>
-      <p class="say">The plot shows the relative quantisation error of the three methods for 2500 lines, 125 microseconds and a 100 megahertz clock. Compute the M-method resolution with the audience: 60 divided by 4 N T_s is 48 rpm. At 60 rpm the raw estimate jumps between 48 and 96! Treating position quantisation as uniform noise, the difference gives a velocity noise standard deviation of root two times q over root twelve over T_s, about 20 rpm. With a 23-bit absolute encoder the step drops to 0.057 rpm. This is why high-resolution encoders matter for smooth low-speed motion.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Delta n = 60/(4 N T_s) = 48 rpm here.</li><li>Resolution, not tuning, limits low-speed smoothness.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Can we sample slower to improve resolution? <b>A:</b> Yes, but that adds delay to the velocity loop; observers are the better compromise.</li></ul></div>
-      <p class="trans">Transition: Summary of the encoder session.</p>
+      <h3><span class="num">Slide 31</span>Check your understanding: encoders<span class="time">~4 min</span></h3>
+      <p class="say">Answers. 1: 1000 lines times four is 4000 counts, 360 over 4000 is 0.09 degree per count. 2: in plain binary several bits can change at once; if they do not switch at exactly the same moment the reader sees a wrong value; Gray code changes only one bit. 3: the incremental encoder, because it only counts changes since switch-on; the absolute one reads a unique code.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Ask for the reasoning, not just the number.</li></ul></div>
+      <p class="trans">Transition: Summary.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 31</span>Summary: encoder and resolver<span class="time">~2 min</span></h3>
-      <p class="say">Incremental encoders are simple and fast but need homing. Absolute encoders use Gray code and serial protocols with CRC. Sin/cos encoders interpolate with atan2 and suffer harmonic errors from offset and gain. Resolvers are robust and use a tracking loop. Velocity estimation at low speed is a quantisation problem. The table compares the three families.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Choose the sensor by resolution, robustness and diagnostics.</li></ul></div>
-      <p class="trans">Transition: Next we look at how analogue signals become numbers.</p>
+      <h3><span class="num">Slide 32</span>Summary and key terms: encoder and resolver<span class="time">~3 min</span></h3>
+      <p class="say">Recap and point at the key terms. Ask: which sensor would you choose for a hot, vibrating environment? Answer: resolver. And for the highest resolution? A sin/cos or high-bit absolute encoder.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Match the sensor to the environment.</li></ul></div>
+      <p class="trans">Transition: After the break: sampling.</p>
     </div>
   </section>
 
   <section id="s4">
-    <h2 class="session">Session 4.3 · Sampling and digitisation <small>Curriculum code 4.3 · 30 min</small></h2>
+    <h2 class="session">Session 4.3 · Sampling and digitisation <small>Curriculum code 4.3 · 30 min (sum 30 min)</small></h2>
     <div class="slide">
-      <h3><span class="num">Slide 33</span>ADC architectures for drives: SAR and sigma-delta<span class="time">~7 min</span></h3>
-      <p class="say">Two converter families dominate. The SAR converter samples and holds, then performs a binary search with a comparator and an internal DAC, needing N steps. It has a sharp sampling instant and low latency, which is ideal for phase currents; most MCU ADCs are SAR. The sigma-delta converter oversamples with a one-bit modulator and noise shaping, followed by a digital sinc decimation filter. It achieves 16 to 24 bits, but the filter introduces group delay and the sample represents an average over a window. Isolated sigma-delta modulators placed next to the shunt, with the sinc filter in the MCU or FPGA, are now standard for high-performance current measurement.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>SAR: low latency. Sigma-delta: resolution and isolation.</li><li>Decimation filter delay belongs in the loop model.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why is the sinc filter order often three? <b>A:</b> A sinc-cubed filter matches a second-order modulator and suppresses its shaped noise sufficiently.</li></ul></div>
-      <p class="trans">Transition: What resolution do we actually get?</p>
+      <h3><span class="num">Slide 34</span>Refresher: sampling and the wagon-wheel effect<span class="time">~6 min</span></h3>
+      <p class="say">Ask if anyone has seen wheels turn backwards in a film. The camera takes snapshots; if the wheel turns 40 degrees per frame and spokes repeat every 45 degrees, the eye matches each spoke to the one 5 degrees behind, so the wheel seems to turn backwards slowly. A computer sampling a signal has the same problem. Nyquist rule: the signal frequency must be below half the sampling frequency.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Sample faster than twice the highest frequency.</li><li>Misconception: too-fast signals simply disappear. They reappear as slow fake ones.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Is the strobe light the same? <b>A:</b> Yes, a strobe is sampling with light flashes.</li></ul></div>
+      <p class="trans">Transition: Here is the same effect on a signal.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 34</span>Quantisation and SNR = 6.02N + 1.76 dB<span class="time">~7 min</span></h3>
-      <p class="say">The plot shows a sine quantised with three bits and the quantisation error, which looks like a sawtooth bounded by half an LSB. Modelling it as uniform noise gives power q squared over twelve. A full-scale sine has power two to the 2N times q squared over eight. The ratio is 1.5 times two to the 2N, which is 6.02 N plus 1.76 dB. Twelve bits give 74 dB, sixteen bits 98 dB. Real converters fall short; the effective number of bits, ENOB, is computed from the measured SINAD. Example: plus minus 50 amps with 12 bits gives an LSB of 24.4 milliamps. Oversampling and averaging gain 10 log M dB if the noise is white.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>SNR = 6.02N + 1.76 dB for a full-scale sine.</li><li>Use ENOB, not N, for design.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Does averaging always help? <b>A:</b> Only if the noise is uncorrelated and covers several LSBs; otherwise a dither is needed.</li></ul></div>
-      <p class="trans">Transition: Sampling also has a frequency-domain trap: aliasing.</p>
+      <h3><span class="num">Slide 35</span>Aliasing in a measured signal<span class="time">~5 min</span></h3>
+      <p class="say">The thin line is a 900 hertz signal, sampled at 1 kilohertz: the dots. Join the dots and you see a 100 hertz wave, the dashed line. The rule: alias equals the distance to the nearest multiple of the sampling frequency, here 1000 minus 900. Once sampled, nobody can tell this fake 100 hertz from a real one, so no digital filter can remove it.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Alias = |f - k fs|.</li><li>Misconception: a digital filter can clean up aliasing afterwards.</li></ul></div>
+      <p class="trans">Transition: Next: the amplitude axis, quantisation.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 35</span>Aliasing and the Nyquist criterion<span class="time">~7 min</span></h3>
-      <p class="say">A 900 hertz sine sampled at one kilohertz: the samples, the dots, lie exactly on a 100 hertz sine. After sampling, the two are indistinguishable. In general the alias appears at the absolute value of f minus k times f_s. The spectrum below shows the folding about half the sampling frequency. Nyquist says a signal is uniquely represented only if its highest frequency is below f_s over two. In drives, PWM ripple, encoder interpolation errors or a mechanical resonance can alias into the velocity loop and appear as a slow, mysterious oscillation. The crucial point: once aliased, no digital filter can remove it.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Alias = |f - k f_s|.</li><li>Prevent aliasing before the sampler.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Can a 1 kHz loop see a 1.05 kHz vibration? <b>A:</b> Yes, as a 50 Hz alias.</li></ul></div>
-      <p class="trans">Transition: Drives avoid PWM aliasing structurally by synchronous sampling.</p>
+      <h3><span class="num">Slide 36</span>Quantisation: turning a voltage into a number<span class="time">~5 min</span></h3>
+      <p class="say">Sampling chops time; quantisation chops the voltage into steps. An N-bit converter has 2 to the N steps. The staircase on the plot is a 3-bit ADC; the error below stays within plus/minus half a step. Example: a plus minus 50 ampere range with 12 bits gives 24.4 milliampere steps. The SNR rule: about 6 dB per bit, so 74 dB for 12 bits.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>6 dB per bit.</li><li>Misconception: an N-bit ADC really delivers N clean bits. Real ADCs lose 1–2 bits to noise.</li></ul></div>
+      <p class="trans">Transition: How does an ADC actually find the number?</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 36</span>Synchronous sampling with PWM, timestamps and latency<span class="time">~7 min</span></h3>
-      <p class="say">With centre-aligned PWM, the phase current ripple is symmetric around the carrier peak and valley. Sampling exactly there returns the average current, without ripple and far from switching edges, so no analogue filter is needed for the ripple. We can sample once or twice per PWM period. All measurements, current, encoder and bus data, should be time-stamped on a common time base. The bottom bar shows the timing: sample, convert, compute, and the new duty becomes active in the next period, giving an effective delay of about 1.5 sample periods. At 16 kilohertz that is 94 microseconds, which costs 34 degrees at one kilohertz. Remember also the rule: the phase loss is 360 times f_c times T_d, so f_s around ten to twenty times crossover.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Sample at carrier peak/valley.</li><li>Delay to phase: 360 f T_d degrees.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> How do we reduce the 1.5 T_s delay? <b>A:</b> Sample late, compute fast and update immediately, or use double update.</li></ul></div>
-      <p class="trans">Transition: Summary of sampling.</p>
+      <h3><span class="num">Slide 37</span>ADC types for drives: SAR and sigma-delta<span class="time">~5 min</span></h3>
+      <p class="say">The SAR converter plays &quot;guess the number&quot;: is the voltage above half? Then above three quarters? One bit per guess, so 12 guesses for 12 bits, fast and with short delay, ideal for phase currents. The sigma-delta converter uses a very fast 1-bit converter and averages, giving many bits but more delay, ideal for load cells and isolated current measurement. Its internal details are Going further.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>SAR fast, sigma-delta precise.</li><li>Misconception: more bits is always better. In a loop, delay matters too.</li></ul></div>
+      <p class="trans">Transition: When should we sample in a drive?</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 37</span>Summary: sampling and digitisation<span class="time">~2 min</span></h3>
-      <p class="say">SAR for latency, sigma-delta for resolution and isolation. Ideal SNR is 6.02 N plus 1.76 dB. Anything above half the sampling frequency folds back, so filter before sampling. Sample synchronously with PWM and time-stamp. And every sample of delay is phase lag. The key message on the right: the measurement chain sets the achievable bandwidth.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Measurement chain limits bandwidth.</li></ul></div>
-      <p class="trans">Transition: After a break we move to signal processing and filters, our longest session.</p>
+      <h3><span class="num">Slide 38</span>Sampling in step with the PWM, and delay<span class="time">~5 min</span></h3>
+      <p class="say">Recall from Day 4 that PWM switching makes the current ripple. If we sample exactly at the middle of the switching pattern, the valley or peak of the triangle carrier, we hit the average current without ripple. Then the key formula: a delay T d costs 360 times f times T d degrees. Example: 94 microseconds at 1 kilohertz costs 34 degrees, a big piece of the phase margin. Use the shower analogy: delay makes control nervous.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Delay costs phase proportional to frequency.</li><li>Misconception: microseconds do not matter. At kilohertz they do.</li></ul></div>
+      <p class="trans">Transition: Check understanding.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 39</span>Check your understanding: sampling<span class="time">~2 min</span></h3>
+      <p class="say">Answers. 1: 9 kilohertz is above 5 kilohertz, it appears at 10 minus 9 equals 1 kilohertz. 2: four extra bits, 6 dB each, about 24 dB, sixteen times better amplitude resolution. 3: after sampling the alias is indistinguishable from a real signal, so the fast content must be removed before the ADC.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Link back to the wagon wheel.</li></ul></div>
+      <p class="trans">Transition: Summary.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 40</span>Summary and key terms: sampling and digitisation<span class="time">~2 min</span></h3>
+      <p class="say">Recap the five bullets and key terms. Ask a student to explain aliasing with the wagon wheel in one sentence.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Nyquist, quantisation, delay.</li></ul></div>
+      <p class="trans">Transition: After the break: digital filters.</p>
     </div>
   </section>
 
   <section id="s5">
-    <h2 class="session">Session 4.4 · Signal processing and filters <small>Curriculum code 4.4 · 90 min</small></h2>
+    <h2 class="session">Session 4.4 · Signal processing and filters <small>Curriculum code 4.4 · 90 min (sum 90 min)</small></h2>
     <div class="slide">
-      <h3><span class="num">Slide 39</span>Filter types at a glance<span class="time">~8 min</span></h3>
-      <p class="say">Four basic filter types, plotted as real curves. Low-pass and high-pass are shown in first and second order; band-pass with quality factor two; band-stop as a notch. The table gives the second-order prototypes and typical drive uses: low-pass for noise and anti-aliasing, high-pass to remove offsets or as wash-out in feed-forward, band-pass to extract a known frequency, for example in vibration monitoring or resolver demodulation, and band-stop for resonances and ripple. Remind the audience of Day 3, where these filters were introduced in continuous time; today we implement them digitally.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Same denominator, different numerators.</li><li>Every type has a drive application.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> What is the difference between band-stop and notch? <b>A:</b> A notch is a narrow band-stop, usually of second order.</li></ul></div>
-      <p class="trans">Transition: We start with the simplest digital filter.</p>
+      <h3><span class="num">Slide 42</span>Filter types at a glance<span class="time">~9 min</span></h3>
+      <p class="say">Four basic shapes. Low-pass keeps slow signals, high-pass keeps fast ones, band-pass keeps one band, band-stop removes one band, which is our notch. The dashed curves are first order, the solid ones second order: higher order means a steeper edge. Go through the table and ask the audience to name an everyday example: bass and treble knobs on a stereo are low-pass and high-pass filters.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Name the filter by what it passes.</li><li>Misconception: a filter cuts sharply at the corner. It rolls off gradually.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Which one removes a sensor offset? <b>A:</b> High-pass.</li></ul></div>
+      <p class="trans">Transition: Let us build the simplest filter in software.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 40</span>First-order low-pass: from H(s) to a difference equation<span class="time">~9 min</span></h3>
-      <p class="say">The first-order low-pass discretised exactly gives the well-known exponential smoothing: y of k equals y of k minus one plus alpha times the difference between input and previous output, with alpha equal to one minus e to the minus omega f T_s. Tustin gives a slightly different form that matches the frequency response better near half the sampling rate. The complementary high-pass is simply input minus low-pass output. Work the example: 500 hertz corner at 16 kilohertz gives omega f T_s 0.196 and alpha 0.178. The low-frequency delay is one over omega f, 318 microseconds, about five samples. Emphasise the note: every low-pass in a loop is a delay and must appear in the loop model.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>alpha = 1 - exp(-omega_f T_s).</li><li>LPF = delay of about 1/omega_f.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Is alpha = omega_f T_s good enough? <b>A:</b> Only for small omega_f T_s; at 0.2 the error is about 10 percent.</li></ul></div>
-      <p class="trans">Transition: The moving average is the simplest FIR filter.</p>
+      <h3><span class="num">Slide 43</span>From an RC low-pass to one line of code<span class="time">~12 min</span></h3>
+      <p class="say">Draw the RC circuit: the capacitor voltage follows the input with time constant RC. In software we do the same thing sample by sample: move the output a fraction alpha towards the input. Work the four steps: corner 500 hertz gives tau 318 microseconds; sampling at 16 kilohertz gives 62.5 microseconds; alpha is about 0.18; one line of C code. Stress that the filter delays the signal by about tau, which costs phase inside a loop.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>A low-pass is a delay too.</li><li>Misconception: alpha is a frequency. It is a dimensionless fraction.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> What happens with alpha equals 1? <b>A:</b> No filtering: y follows x immediately.</li></ul></div>
+      <p class="trans">Transition: Another simple filter: averaging.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 41</span>Moving average: a simple FIR filter<span class="time">~9 min</span></h3>
-      <p class="say">The moving average sums the last N samples and divides by N. Its magnitude is the sinc-like function on the slide, with zeros at multiples of f_s over N. That is its main strength: if N T_s equals the period of a known disturbance, for example a ripple or mains frequency, the disturbance and its harmonics are removed exactly. The phase is linear with a delay of N minus one over two samples. Its weakness is the stop band: the first side lobe is only 13 dB down. It can be computed recursively with one addition and one subtraction per sample, independent of N.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Exact zeros at k f_s/N.</li><li>Delay (N-1)/2 samples.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why is the recursive form risky in floating point? <b>A:</b> Rounding errors accumulate; use integers or periodic re-summation.</li></ul></div>
-      <p class="trans">Transition: The moving average is FIR; let us compare FIR and IIR in general.</p>
+      <h3><span class="num">Slide 44</span>Moving average: the simplest digital filter<span class="time">~10 min</span></h3>
+      <p class="say">Average the last N samples, like averaging your last eight quiz scores. The plot shows the gain: it falls and has exact zeros at multiples of fs over N. A disturbance whose period fits the window exactly is cancelled perfectly. Example: 16 samples at 16 kilohertz cancel 1 kilohertz and its harmonics. The price is a delay of half the window and weak damping between the zeros.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Exact cancellation of periodic disturbances.</li><li>Misconception: averaging removes all noise equally.</li></ul></div>
+      <p class="trans">Transition: These two examples belong to two families: FIR and IIR.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 42</span>FIR versus IIR filters<span class="time">~10 min</span></h3>
-      <p class="say">The top structure is FIR: a tapped delay line with coefficients, no feedback. The bottom is IIR: the output is fed back. The table summarises the differences. FIR filters are always stable and can have exactly linear phase if the coefficients are symmetric, but need many taps for sharp selectivity and have long delay. IIR filters achieve the same selectivity with very few coefficients and low delay, but their phase is non-linear, they can become unstable, and coefficient quantisation matters, so we implement them as cascaded biquads. In feedback loops IIR filters win because delay is the enemy; FIR is used for linear phase, monitoring and offline analysis.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Loops: IIR. Linear phase: FIR.</li><li>IIR as biquad cascades.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Can an FIR be unstable? <b>A:</b> No, it has no feedback; all poles are at the origin.</li></ul></div>
-      <p class="trans">Transition: Among IIR designs, two classical families matter most.</p>
+      <h3><span class="num">Slide 45</span>FIR versus IIR filters<span class="time">~10 min</span></h3>
+      <p class="say">The moving average only uses past inputs: that is FIR, finite impulse response. The RC-style filter also reuses its previous output: that is IIR, infinite impulse response, because one impulse echoes forever, fading. Read the table: FIR is always stable but needs many terms and adds delay; IIR needs few terms and little delay, but must be designed carefully. In control loops IIR usually wins. The biquad structure is Going further.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>FIR: inputs only. IIR: feedback of outputs.</li><li>Misconception: IIR is unstable. Only if badly designed.</li></ul></div>
+      <p class="trans">Transition: Two classic IIR designs.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 43</span>Butterworth vs. Bessel: magnitude, group delay, step response<span class="time">~10 min</span></h3>
-      <p class="say">Both filters here are fourth order with the same minus three dB frequency of one kilohertz. Butterworth has a maximally flat magnitude and a steeper roll-off: minus 38 dB at three times the corner versus minus 25 for Bessel. But its group delay peaks near the corner, so different frequencies arrive at different times, and the step response overshoots by 10.8 percent with ringing. Bessel has maximally flat group delay, near-linear phase and only 0.8 percent overshoot. Rule: Butterworth when attenuation matters, as in anti-aliasing and noise suppression; Bessel when waveform fidelity matters, as in capturing current steps or test signals.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Butterworth: flat magnitude. Bessel: flat delay.</li><li>Overshoot 10.8 % vs 0.8 %.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Where are Chebyshev filters used? <b>A:</b> Where steepness matters more than ripple, rarely inside servo loops.</li></ul></div>
-      <p class="trans">Transition: Now a filter that amplifies noise instead of removing it: the derivative.</p>
+      <h3><span class="num">Slide 46</span>Butterworth vs. Bessel: sharp or clean?<span class="time">~9 min</span></h3>
+      <p class="say">Both are fourth-order low-passes with the same corner. Butterworth cuts more sharply, 38 dB at three times the corner, but its step response overshoots by 11 percent and rings. Bessel cuts less, 25 dB, but the step is clean. Rule: Butterworth when you want to kill noise, Bessel when the waveform shape matters, for example capturing a transient.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Sharpness versus waveform fidelity.</li><li>Misconception: the steepest filter is always best.</li></ul></div>
+      <p class="trans">Transition: A common source of noise: differentiation.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 44</span>Filtered derivative: position to velocity to acceleration<span class="time">~10 min</span></h3>
-      <p class="say">Differentiation multiplies by omega, plus 20 dB per decade, and quantisation noise is broad-band, so derivatives amplify noise. The practical derivative s over one plus s T_f limits the high-frequency gain to one over T_f; a second filter pole makes it roll off. The formulas give the noise standard deviation of backward differences: root two times the position noise over T_s for velocity, root six over T_s squared for acceleration. With 10,000 counts per revolution at 8 kilohertz, acceleration noise is 28,000 radians per second squared: useless without filtering. The better approach is a model-based observer, as discussed on Day 3.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Noise grows by 1/T_s per derivative.</li><li>Use observers for acceleration.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why sqrt(6)? <b>A:</b> The second difference has coefficients 1, -2, 1 whose squares sum to 6.</li></ul></div>
-      <p class="trans">Transition: Let us see the velocity case in the time domain.</p>
+      <h3><span class="num">Slide 47</span>Speed from position: differentiating amplifies noise<span class="time">~12 min</span></h3>
+      <p class="say">Recall the 48 rpm steps from Session 4.2. The thin line is the raw difference: it jumps between 0, 48 and 96. Differentiation amplifies fast changes, plus 20 dB per decade, and quantisation steps are very fast changes. The orange line is the low-passed signal: smooth, but lagging by about 1.5 milliseconds. The real cure is better resolution or an observer from Day 3.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Derivatives amplify noise.</li><li>Misconception: filtering fixes resolution problems for free.</li></ul></div>
+      <p class="trans">Transition: And how do we keep aliasing out?</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 45</span>Velocity from a quantised encoder: raw vs. filtered<span class="time">~8 min</span></h3>
-      <p class="say">This simulation uses our 2500-line encoder at 8 kilohertz with a true speed of 60 plus minus 30 rpm. The raw difference, light blue, only takes values that are multiples of 48 rpm. The second-order low-pass at 150 hertz recovers the trend, but it lags the true speed by about 1.5 milliseconds and leaves ripple. In a velocity loop this noise is multiplied by the proportional gain and appears in the torque command, causing audible noise and heating. The root cause is resolution; filtering is a compromise between noise and phase lag.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Filtering trades noise for lag.</li><li>Resolution is the real fix.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> What would a 23-bit encoder show? <b>A:</b> A nearly smooth raw estimate, with steps under 0.1 rpm.</li></ul></div>
-      <p class="trans">Transition: Back to aliasing: where should the filter sit?</p>
+      <h3><span class="num">Slide 48</span>Anti-aliasing: analogue before the ADC, digital after<span class="time">~10 min</span></h3>
+      <p class="say">Back to the wagon wheel: the fix must happen before the camera. An analogue RC filter in front of the ADC damps the noise above fs over 2 so it cannot fold back. If we sample much faster than needed, a simple RC is enough and the sharp filtering is done digitally afterwards. Remember that this analogue filter also adds delay, so keep its corner well above the loop bandwidth.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Only analogue filters prevent aliasing.</li><li>Misconception: oversampling makes the analogue filter unnecessary. It only makes it simpler.</li></ul></div>
+      <p class="trans">Transition: Check understanding.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 46</span>Anti-aliasing: analogue before the ADC, digital after<span class="time">~9 min</span></h3>
-      <p class="say">Only an analogue filter in front of the sampler can prevent aliasing: once noise has folded into the signal band, as the red arrow shows, it is indistinguishable. The modern approach is oversampling: sample much faster than needed, use a simple RC as anti-aliasing filter, then filter sharply in the digital domain and decimate. Sigma-delta converters are the extreme case. In a control loop the analogue filter also adds delay, so keep its corner well above crossover and include it in the model. And recall that synchronous PWM sampling is itself a structural anti-aliasing measure.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Anti-aliasing must be analogue.</li><li>Oversample, then filter digitally and decimate.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Is the RC on the ADC input enough? <b>A:</b> With sufficient oversampling and a digital filter, often yes.</li></ul></div>
-      <p class="trans">Transition: How do we implement these filters in firmware?</p>
+      <h3><span class="num">Slide 49</span>Check your understanding: filters<span class="time">~10 min</span></h3>
+      <p class="say">Give time and discuss. Answers. 1: zeros at fs over N equals 1 kilohertz and its multiples, 2, 3 kilohertz and so on. 2: speed is a difference of two rounded counts divided by a tiny sample time, so one count step becomes a large speed jump; differentiation amplifies fast changes. 3: IIR, because it needs few terms and adds little delay, and delay costs phase margin.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Discuss why delay matters in loops.</li></ul></div>
+      <p class="trans">Transition: Summary.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 47</span>Implementing filters: difference equations and biquads<span class="time">~12 min</span></h3>
-      <p class="say">The general IIR difference equation is shown on top. We implement it as second-order sections in direct form two transposed, which needs only two state variables per biquad and has good numerical behaviour in floating point. The C sketch is the complete per-sample code. Practical pitfalls: for very low corner frequencies relative to the sampling rate, the poles crowd near z equals one and single-precision coefficients are not accurate enough, so use double precision or error feedback. In fixed point scale carefully to avoid overflow and watch for limit cycles. Initialise the states to the steady-state value to avoid start-up transients, and reset them on mode changes.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Cascade of biquads, DF-II transposed.</li><li>Low f_c/f_s needs precision.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why not one high-order polynomial? <b>A:</b> Pole positions become extremely sensitive to coefficient rounding.</li></ul></div>
-      <p class="trans">Transition: Summary of signal processing.</p>
-    </div>
-    <div class="slide">
-      <h3><span class="num">Slide 48</span>Summary: signal processing and filters<span class="time">~5 min</span></h3>
-      <p class="say">Every filter has a frequency response and a delay, and in a loop both matter. Moving averages give exact zeros. FIR filters are stable with linear phase; IIR filters are cheap with low delay. Butterworth for attenuation, Bessel for waveform fidelity. Derivatives amplify noise. Aliasing must be prevented before the ADC. Walk through the filter-selection table on the right and invite questions about filters participants use in their own drives.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Pick the filter by the problem, not by habit.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Which filter would you use for current ripple? <b>A:</b> Usually none: synchronous sampling.</li></ul></div>
-      <p class="trans">Transition: After a short break: communication and system integration.</p>
+      <h3><span class="num">Slide 50</span>Summary and key terms: signal processing and filters<span class="time">~8 min</span></h3>
+      <p class="say">Go through the summary and the &quot;which filter&quot; table; ask students to cover the right column and guess. Read the key terms at the bottom. Every filter has two faces: what it removes and how much it delays.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Gain and delay, always both.</li></ul></div>
+      <p class="trans">Transition: After the break: communication.</p>
     </div>
   </section>
 
   <section id="s6">
-    <h2 class="session">Session 4.5 · Communication and system integration + course wrap-up <small>Curriculum code 4.5 · 45 min</small></h2>
+    <h2 class="session">Session 4.5 · Communication and integration + course wrap-up <small>Curriculum code 4.5 · 45 min (sum 45 min)</small></h2>
     <div class="slide">
-      <h3><span class="num">Slide 50</span>Communication architecture of a multi-axis machine<span class="time">~4 min</span></h3>
-      <p class="say">A modern machine has three communication levels. Inside the drive, currents and angle are exchanged every few tens of microseconds over SPI, sigma-delta bit streams and encoder protocols. Between motion controller and drives, set-points and actual values are exchanged every 0.125 to 4 milliseconds over a real-time fieldbus such as EtherCAT, PROFINET IRT or CANopen. Above that, HMI and plant IT use standard Ethernet. The diagram shows the line topology typical of EtherCAT and the separate encoder links.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Three levels, three time scales.</li></ul></div>
-      <p class="trans">Transition: Let us start with the classic: CAN.</p>
+      <h3><span class="num">Slide 52</span>Refresher: what is a network packet?<span class="time">~4 min</span></h3>
+      <p class="say">Use the letter analogy: an envelope with sender and receiver addresses, the letter itself, and a seal that shows if someone opened it. A packet has a header with addresses, the payload with the actual values, and a CRC to detect damage. Then define bit rate, cycle time, latency and fieldbus. Stress that for machines timing guarantees matter more than raw speed.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Header, data, check.</li><li>Misconception: a faster bit rate always means lower latency.</li></ul></div>
+      <p class="trans">Transition: Where are packets used in a machine?</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 51</span>CAN and CANopen<span class="time">~5 min</span></h3>
-      <p class="say">CAN, standardised in ISO 11898, is a differential two-wire bus with bitwise arbitration: the dominant zero wins, so the lowest identifier has the highest priority and no frame is lost in a collision. Classical CAN carries up to eight bytes; CAN FD up to 64. Error detection includes a 15-bit CRC and error counters. CANopen adds an object dictionary, PDOs for real-time data and SDOs for configuration. The bandwidth estimate in the box shows the limit: nine eight-byte frames per cycle at one megabit take about 1.1 milliseconds. CANopen is excellent for robust, low-cost systems with millisecond cycles and few axes.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Arbitration by identifier priority.</li><li>About 1 ms cycles for a few axes.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> What limits CAN bit rate? <b>A:</b> Bit time must exceed the round-trip propagation delay on the bus; hence about 40 m at 1 Mbit/s.</li></ul></div>
-      <p class="trans">Transition: The drive behaviour itself is standardised in CiA 402.</p>
+      <h3><span class="num">Slide 53</span>Communication architecture of a multi-axis machine<span class="time">~4 min</span></h3>
+      <p class="say">Walk through the picture: the motion controller plans the trajectory and sends set-points over EtherCAT to the drives; each drive talks to its own encoder; the factory IT sits above. The table shows three layers with very different cycle times, from tens of microseconds inside the drive to seconds for factory data.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Fast inside the drive, slower outside.</li></ul></div>
+      <p class="trans">Transition: The classic fieldbus: CAN.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 52</span>CiA 402 drive profile<span class="time">~5 min</span></h3>
-      <p class="say">CiA 402 standardises the drive state machine, the object dictionary and the operating modes, independently of the bus. The state machine on the left goes from switch-on disabled through ready to switch on and switched on to operation enabled, driven by the controlword; the statusword reports the state. Faults lead through fault reaction to fault and need a reset. The table lists the most important objects. Modes include profile position, velocity and torque, homing, and the cyclic synchronous modes CSP, CSV and CST, where the controller interpolates and sends a new set-point every cycle. The same profile is used over CANopen and over EtherCAT as CoE.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Controlword 6040h, statusword 6041h.</li><li>CSP / CSV / CST for coordinated motion.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why does my drive not enable? <b>A:</b> Usually the controlword sequence was skipped; it must pass through each state.</li></ul></div>
-      <p class="trans">Transition: EtherCAT is the dominant bus for these cyclic modes.</p>
+      <h3><span class="num">Slide 54</span>CAN and CANopen<span class="time">~4 min</span></h3>
+      <p class="say">CAN is two twisted wires shared by all nodes. If two nodes start at once, the message with the lower identifier wins without collision, like a polite queue by priority. Work the example: about 120 microseconds per frame, nine frames per cycle, 1.1 milliseconds. So CAN is fine for slow or few axes, not for fast multi-axis motion.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Priority arbitration, ≥1 ms cycles.</li><li>Misconception: messages collide and are lost on CAN. Arbitration prevents it.</li></ul></div>
+      <p class="trans">Transition: How do drives understand each other?</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 53</span>EtherCAT: processing on the fly<span class="time">~5 min</span></h3>
-      <p class="say">EtherCAT uses standard Ethernet frames with EtherType 88A4, but one frame serves all slaves. Each slave has an EtherCAT slave controller chip, which reads its output data and inserts its input data while the frame passes, with a delay well below a microsecond. The last slave returns the frame, so the line is a logical ring. Each datagram carries a working counter that each addressed slave increments, so the master detects missing slaves. The example: 32 axes with 12 bytes each way fit in one datagram, about 35 microseconds on the wire plus node delays, comfortably inside a 100 microsecond cycle.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>One frame, many slaves, hardware processing.</li><li>WKC detects missing or failed slaves.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Does EtherCAT need switches? <b>A:</b> No, slaves forward the frame themselves; standard switches would break the timing.</li></ul></div>
-      <p class="trans">Transition: Fast cycles are only useful if all drives act at the same instant.</p>
+      <h3><span class="num">Slide 55</span>CiA 402: a common language for drives<span class="time">~4 min</span></h3>
+      <p class="say">CiA 402 is a drive profile: every vendor&#x27;s drive accepts the same commands. Use the car analogy for the state machine: unlocked, ignition, engine on, driving; a fault drops you back. The controller writes a control word and reads a status word. In cyclic synchronous modes the controller sends a new set-point each cycle. Object numbers and the full state machine are Going further.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>One language, many vendors.</li></ul></div>
+      <p class="trans">Transition: The fast bus: EtherCAT.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 54</span>Distributed clocks, synchronisation and jitter<span class="time">~4 min</span></h3>
-      <p class="say">With distributed clocks, the first DC-capable slave is the reference. The master measures propagation delays and continuously compensates offset and drift of every local clock. All drives then latch inputs and apply set-points on the same SYNC0 event, independent of when the frame arrives. Without DC, actions would follow frame arrival with its jitter, shown in red. Synchronisation is well below a microsecond. Explain the difference between latency and jitter: constant latency costs phase, variable jitter causes position error proportional to speed, for example one micrometre at one metre per second and one microsecond.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Latency costs phase, jitter costs accuracy.</li><li>SYNC0 decouples action from frame arrival.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Is jitter visible in contouring? <b>A:</b> Yes, as position error proportional to velocity and as sub-harmonic disturbances.</li></ul></div>
-      <p class="trans">Transition: Let us compare the interfaces we have met.</p>
+      <h3><span class="num">Slide 56</span>EtherCAT: processing on the fly<span class="time">~5 min</span></h3>
+      <p class="say">Use the train analogy: one frame travels through all drives; each drive unloads its set-points and loads its measurements as the train passes without stopping. The working counter tells the master everybody answered. Example: 32 axes fit in about 65 microseconds, so a 100 microsecond cycle is possible. Distributed clocks mean all drives act at the same instant.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>One frame for all drives.</li></ul></div>
+      <p class="trans">Transition: How do the buses compare?</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 55</span>Serial interfaces and fieldbus comparison<span class="time">~3 min</span></h3>
-      <p class="say">The table compares on-board SPI, RS-485, encoder protocols, CAN, EtherCAT and PROFINET IRT. SPI has no built-in error check, so add a CRC. RS-485 is the physical layer under Modbus RTU and many encoder links. Encoder protocols run every control cycle with CRC. The choice of fieldbus should be driven by required cycle time, synchronisation accuracy, number of axes and the supported drive profile, not by the raw bit rate. The photo shows a typical EtherCAT slave controller chip.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Choose by cycle time and sync, not bit rate.</li></ul></div>
-      <p class="trans">Transition: Now we put numbers on the total latency.</p>
+      <h3><span class="num">Slide 57</span>Comparing interfaces and fieldbuses<span class="time">~3 min</span></h3>
+      <p class="say">Read the table row by row and connect it to what they now know: SPI on the board, RS-485 for encoders, CAN for slow robust tasks, EtherCAT and PROFINET for fast motion. Choose by cycle time and synchronisation, not bit rate alone.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Cycle time and sync decide.</li></ul></div>
+      <p class="trans">Transition: Why does cycle time matter so much?</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 56</span>Latency budget of a distributed position loop<span class="time">~4 min</span></h3>
-      <p class="say">Follow the bar from left to right: encoder sampling and transmission, waiting for the sync event, the bus to the controller, computation, the bus back, applying the set-point at the next sync, and finally the inner loops. Altogether the dead time is two to three bus cycles plus inner-loop lag. The worked example: 250 microsecond cycle, 625 microseconds dead time. For a 30 hertz position loop that costs 6.8 degrees, acceptable. For a 200 hertz velocity loop over the bus it costs 45 degrees, not acceptable. Hence close fast loops in the drive, send position or velocity set-points, add feed-forward in the PDO, and interpolate inside the drive.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Fast loops belong in the drive.</li><li>Feed-forward recovers dynamics.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why not run the velocity loop in the PLC? <b>A:</b> The bus dead time would consume most of the phase margin.</li></ul></div>
-      <p class="trans">Transition: Finally, how do we know data are valid?</p>
+      <h3><span class="num">Slide 58</span>Latency budget: which loops may run over the bus?<span class="time">~5 min</span></h3>
+      <p class="say">The data takes two to three bus cycles to go round. Use the same formula as before: 625 microseconds at 30 hertz costs 7 degrees, fine; at 200 hertz it costs 45 degrees, not acceptable. So fast loops stay inside the drive and only position set-points travel over the bus. Shower analogy: a long pipe makes temperature control slow.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Fast loops local.</li><li>Misconception: the bus is fast enough for everything.</li></ul></div>
+      <p class="trans">Transition: Last point: can we trust the data?</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 57</span>Data validity: CRC, watchdogs, timestamps<span class="time">~4 min</span></h3>
-      <p class="say">A CRC detects corrupted bits, but a perfectly valid CRC can protect an old value. So we also need freshness checks: working counters and sequence counters detect lost or frozen telegrams; watchdogs such as the EtherCAT SyncManager watchdog or CANopen heartbeat detect silence; timestamps give the age of each value. Plausibility checks add range, rate and cross-checks, for example that three phase currents sum to zero. The flow chart shows the decision: if any check fails, hold or ramp down and raise an alarm. Safety functions use separate black-channel safety protocols on the same bus.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Valid = uncorrupted AND fresh AND plausible.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Is the fieldbus CRC enough for safety? <b>A:</b> No, safety requires a black-channel protocol per IEC 61784-3.</li></ul></div>
-      <p class="trans">Transition: Summary of the integration session.</p>
+      <h3><span class="num">Slide 59</span>Is the data valid? CRC, counters, watchdogs, timestamps<span class="time">~4 min</span></h3>
+      <p class="say">A correct CRC only proves the bits were not damaged; the value might still be stale. Counters reveal lost or frozen packets, watchdogs trip when nothing new arrives, timestamps give the age, and plausibility checks catch impossible values. Follow the flowchart: any failed check leads to a safe stop.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Correct is not the same as fresh.</li></ul></div>
+      <p class="trans">Transition: Check understanding.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 58</span>Summary: communication and system integration<span class="time">~2 min</span></h3>
-      <p class="say">CAN and CANopen are robust for millisecond cycles. CiA 402 standardises drive behaviour. EtherCAT with distributed clocks enables 100 microsecond cycles with sub-microsecond synchronisation. Latency costs phase and jitter costs accuracy. Data validity needs CRC and freshness. The checklist on the right is useful for any commissioning.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Use the integration checklist at commissioning.</li></ul></div>
-      <p class="trans">Transition: Let us now look back at the whole day and the whole course.</p>
+      <h3><span class="num">Slide 60</span>Check your understanding: communication<span class="time">~3 min</span></h3>
+      <p class="say">Answers. 1: header with addresses, payload with the values, CRC to detect damage. 2: 360 times 100 times 0.001 equals 36 degrees, too much; close that loop in the drive. 3: a sequence counter, a timestamp or a watchdog; the CRC cannot detect old data.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Reuse the phase formula.</li></ul></div>
+      <p class="trans">Transition: Summary.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 60</span>Day summary<span class="time">~3 min</span></h3>
-      <p class="say">Walk through the five boxes: resonance formulas and filters, sensors and position sensing, sampling, filters, and integration. Then read the key sentence: achievable servo performance is set by mechanics and by the measurement chain, and the controller can only use what they allow.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Mechanics and measurement bound performance.</li></ul></div>
-      <p class="trans">Transition: Finally, the course wrap-up.</p>
+      <h3><span class="num">Slide 61</span>Summary and key terms: communication and integration<span class="time">~3 min</span></h3>
+      <p class="say">Recap bullets and key terms briefly. Ask: why do we not close the velocity loop over the bus? Answer: the delay would eat the phase margin.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Latency costs phase.</li></ul></div>
+      <p class="trans">Transition: Now let us look back at the whole course.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 61</span>Course wrap-up: five days, one servo axis<span class="time">~3 min</span></h3>
-      <p class="say">On the left are the five days, on the right the servo axis we built. Day 1 gave us the motor and actuator models. Day 2 gave us dynamics, identification, PID and stability. Day 3 gave us filters, modern, adaptive and discrete control. Day 4 gave us the drive, FOC, cascaded loops, tuning and compensation. Day 5 added resonance, sensors, sampling, filters and the fieldbus. The orange tags show where each day lives in the block diagram. Every block in a real axis touches several days.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Every block of the axis maps to the course.</li></ul></div>
-      <p class="trans">Transition: Let us condense this into ten principles.</p>
+      <h3><span class="num">Slide 63</span>Course wrap-up: five days, one servo axis<span class="time">~3 min</span></h3>
+      <p class="say">Point to each block of the servo diagram and name the day where we learned it: position and velocity controller Days 2 and 4, current loop Days 1 and 4, mechanics and sensors Day 5, fieldbus today. Read the one-sentence summary of today.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>One axis, five days.</li></ul></div>
+      <p class="trans">Transition: Ten principles to take home.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 62</span>Course wrap-up: ten principles to take home<span class="time">~3 min</span></h3>
-      <p class="say">Read the ten principles and invite participants to name the one that will change their daily work. Know the plant including the mechanics; model and identify; shape the loop with clear margins; remember that every filter and sample is phase lag; cascade bandwidths by three to ten; use field orientation to obtain a torque source; let feed-forward do the work; fix resonances mechanically first; respect sensor limits; and synchronise, time-stamp and validate everything. Close with thanks and open the floor for questions about participants&#x27; own applications.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Ten principles, one coherent picture.</li></ul></div>
-      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Where to continue? <b>A:</b> Ellis for practical servo tuning, Franklin-Powell for theory, Oppenheim-Schafer for DSP.</li></ul></div>
-      <p class="trans">Transition: Thank you, and good luck with your next axis.</p>
+      <h3><span class="num">Slide 64</span>Course wrap-up: ten principles to take home<span class="time">~3 min</span></h3>
+      <p class="say">Read the ten principles and ask each student to name the one they found most surprising. Thank them, invite questions and encourage them to look for resonances, sensors and buses in any machine they meet, for example in a 3D printer or a lift.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Ten principles, one picture.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Where to read further? <b>A:</b> Ellis for servo practice, Franklin–Powell for control, Oppenheim–Schafer for DSP.</li></ul></div>
+      <p class="trans">Transition: Thank you.</p>
     </div>
   </section>
 
   <section id="ref">
     <h2 class="session">Closing reference slides <small>not timed</small></h2>
     <div class="slide">
-      <h3><span class="num">Slide 63</span>Figure credits<span class="time">reference</span></h3>
-      <p class="say">Reference slide: lists the Wikimedia Commons figures with authors and licences. All other figures are original. No need to present; leave visible during questions if useful.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Licences are honoured on each slide.</li></ul></div>
+      <h3><span class="num">Slide 65</span>Figure credits<span class="time">reference</span></h3>
+      <p class="say">Reference slide listing the Wikimedia Commons figures with authors and licences. No need to present it.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Licences are also given on each slide.</li></ul></div>
       <p class="trans">Transition: References follow.</p>
     </div>
     <div class="slide">
-      <h3><span class="num">Slide 64</span>References<span class="time">reference</span></h3>
-      <p class="say">Reference slide with textbooks and standards. Point participants to Ellis and Franklin-Powell for further reading, and to the standards for CAN, CANopen, EtherCAT and IEC 60751.</p>
-      <div class="key"><span class="label">Emphasise</span><ul><li>Recommend one book per topic.</li></ul></div>
+      <h3><span class="num">Slide 66</span>References<span class="time">reference</span></h3>
+      <p class="say">Textbooks and standards for further reading. Recommend one book per topic to interested students.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Ellis, Franklin–Powell, Oppenheim–Schafer, Fraden.</li></ul></div>
       <p class="trans">Transition: End of the course.</p>
     </div>
   </section>

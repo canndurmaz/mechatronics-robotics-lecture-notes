@@ -18,6 +18,8 @@
   lab/.style={font=\tiny,text=mkNavy},
 }
 \newcommand{\src}[1]{\par\vfill\hfill{\color{mkGray}\fontsize{6}{7}\selectfont #1}}
+% "Going further" note: optional, advanced material in small text
+\newcommand{\gofurther}[1]{\par\vspace{1mm}{\scriptsize\color{mkGray}\textbf{\color{mkMid}Going further:} #1\par}}
 \pgfplotsset{every axis/.append style={label style={font=\scriptsize}}}
 
 \begin{document}
@@ -27,15 +29,15 @@
 % =====================================================================
 \begin{frame}[t]{Agenda and learning objectives}
 \begin{columns}[T,onlytextwidth]
-\column{.54\textwidth}
+\column{.52\textwidth}
 \footnotesize
 \begin{tabularx}{\linewidth}{@{}l X r@{}}
 \toprule
 \textbf{Code} & \textbf{Session} & \textbf{Net time}\\
 \midrule
-3.2 & (cont.) PWM, modulation range, dead time, limits & 0.5 h\\
-3.3 & Field-oriented control of the PMSM & 1.5 h\\
-3.4 & Current, velocity and position loops; trajectories & 1.5 h\\
+3.2 & (cont.) PWM, dead time, voltage and current limits & 0.5 h\\
+3.3 & Field-oriented control (FOC) of the PM motor & 1.5 h\\
+3.4 & Current, velocity and position loops & 1.5 h\\
 3.5 & Loop tuning and bandwidth & 1.0 h\\
 3.6 & Disturbances and compensation & 0.5 h\\
 \midrule
@@ -43,22 +45,79 @@
 \bottomrule
 \end{tabularx}\\[2mm]
 \begin{notebox}
-\textbf{Reference motor used all day} (surface-mounted PMSM servo):
-$p=4$, $R=\SI{0.5}{\ohm}$, $L_d=L_q=\SI{3}{mH}$, $\psi_\text{PM}=\SI{0.12}{Vs}$,
-$k_t=\tfrac32 p\psi_\text{PM}=\SI{0.72}{Nm/A}$, $J_m=\SI{3e-4}{kg\,m^2}$, load inertia ratio 3,
-$V_\text{dc}=\SI{325}{V}$, $\hat I_\text{max}=\SI{20}{A}$, $f_\text{PWM}=f_s=\SI{16}{kHz}$.
+\textbf{One reference motor all day} (permanent-magnet servo motor):
+$p=4$ pole pairs, $R=\SI{0.5}{\ohm}$, $L=\SI{3}{mH}$, magnet flux $\psi_\text{PM}=\SI{0.12}{Vs}$,
+$k_t=\SI{0.72}{Nm/A}$, $J_m=\SI{3e-4}{kg\,m^2}$ (load $3\times$ that),
+$V_\text{dc}=\SI{325}{V}$, $\hat I_\text{max}=\SI{20}{A}$, PWM at \SI{16}{kHz}.
 \end{notebox}
-\column{.43\textwidth}
-\begin{keybox}[By the end of the day you can \ldots]
-\scriptsize
-\checkitem\ compute SVPWM dwell times and the limit $V_\text{dc}/\sqrt3$\\
-\checkitem\ transform $abc \to \alpha\beta \to dq$; write the PMSM $dq$ model\\
-\checkitem\ explain the FOC structure, MTPA and field weakening\\
-\checkitem\ design PI current/velocity loops (TO / SO)\\
-\checkitem\ size bandwidths; quantify the phase cost of delays\\
-\checkitem\ generate motion profiles; cancel following error by feedforward\\
-\checkitem\ explain disturbance observers and cogging compensation
+\column{.45\textwidth}
+\begin{keybox}[By the end of today you can \ldots]
+\small
+\checkitem\ explain how PWM makes an average voltage\\
+\checkitem\ explain why dead time and limits exist\\
+\checkitem\ sketch the $abc\to\alpha\beta\to dq$ transforms and explain FOC\\
+\checkitem\ calculate PI gains for current and velocity loops\\
+\checkitem\ explain bandwidth and the phase cost of delays\\
+\checkitem\ describe feedforward and disturbance compensation
 \end{keybox}
+\end{columns}
+\end{frame}
+
+% =====================================================================
+\begin{frame}[t]{What we learned so far (1/2): motors and feedback}
+\begin{columns}[T,onlytextwidth]
+\column{.5\textwidth}
+\begin{defbox}[Day 1 -- the motor]
+\begin{itemize}\small
+\item Current makes torque: $T=k_t\,i$ (\si{Nm} = \si{Nm/A}$\cdot$\si{A}).
+\item Spinning makes a voltage (back-EMF): $E=k_e\,\omega$.
+\item Each winding is an $R$--$L$ circuit.
+\item Newton for rotation: $J\,\dot\omega=T-T_L$.
+\end{itemize}
+\end{defbox}
+\column{.48\textwidth}
+\begin{defbox}[Day 2 -- feedback control]
+\begin{itemize}\small
+\item Measure, compare, correct (cruise control).
+\item PID: react to the error now (P), its history (I), its trend (D).
+\item Bode plot: gain and phase vs.\ frequency; phase margin = safety distance from oscillation.
+\end{itemize}
+\end{defbox}
+\centering
+\begin{tikzpicture}[x=1cm,y=1cm]
+  \node[sumn] (s) at (0,0) {};
+  \node[blk] (c) at (1.3,0) {PID};
+  \node[blk] (g) at (2.9,0) {motor};
+  \draw[sig] (-.9,0) node[left,lab]{set-point} -- (s); \draw[sig] (s) -- (c); \draw[sig] (c) -- (g);
+  \draw[sig] (g) -- (4.2,0) node[right,lab]{output};
+  \draw[fb] (3.8,0) -- (3.8,-.7) -| node[pos=.75,left,lab]{measure} (s.south);
+  \node[font=\tiny,mkGray] at (-.2,-.35) {$-$};
+\end{tikzpicture}
+\end{columns}
+\end{frame}
+
+% ---------------------------------------------------------------------
+\begin{frame}[t]{What we learned so far (2/2): the inverter, and today's chain}
+\begin{columns}[T,onlytextwidth]
+\column{.5\textwidth}
+\begin{defbox}[Day 3 -- the inverter]
+\begin{itemize}\small
+\item A transistor is an electronic on/off switch.
+\item Two switches in series = one \term{leg} (half-bridge): output is either $+V_\text{dc}$ or $0$.
+\item Three legs feed the three motor phases from one DC voltage (\term{DC link}).
+\end{itemize}
+\end{defbox}
+\includegraphics[width=.8\linewidth,height=2.2cm,keepaspectratio]{../figures/d4_igbt_module.jpg}\\
+\credit{IGBT module with three legs' worth of switches. Pslawinski, CC BY-SA 3.0, via Wikimedia Commons}
+\column{.48\textwidth}
+\small\textbf{Today: from switch commands to precise motion}\\[2mm]
+\centering
+\begin{tikzpicture}[y=-.95cm]
+  \foreach \y/\t/\c/\s in {0/{switching (PWM)}/mkSky/3.2,1/{voltage $\to$ current (FOC)}/mkMid/3.3,2/{current $\to$ torque $\to$ speed $\to$ position}/mkBlue/3.4,3/{tuning the loops}/mkNavy/3.5,4/{fighting disturbances}/mkOrange/3.6}{
+    \node[draw=\c,fill=\c!15,rounded corners=2pt,minimum width=52mm,minimum height=7mm,font=\small,align=center] at (0,\y) {\t};
+    \node[font=\scriptsize\bfseries,mkOrange] at (-3.1,\y) {\s};}
+  \foreach \y in {0,1,2,3}{\draw[sig] (0,\y+.37) -- (0,\y+.63);}
+\end{tikzpicture}
 \end{columns}
 \end{frame}
 
@@ -66,9 +125,43 @@ $V_\text{dc}=\SI{325}{V}$, $\hat I_\text{max}=\SI{20}{A}$, $f_\text{PWM}=f_s=\SI
 \section{3.2 (cont.) Motor Driving: PWM, Voltage and Current Limits}
 % =====================================================================
 
-\begin{frame}[t]{The two-level voltage-source inverter and carrier-based sinusoidal PWM}
+\begin{frame}[t]{Refresher: duty cycle and average voltage}
 \begin{columns}[T,onlytextwidth]
-\column{.40\textwidth}
+\column{.52\textwidth}
+\centering
+\begin{tikzpicture}[x=.95cm,y=1.0cm]
+  \draw[-{Latex[length=2mm]},mkGray] (0,0) -- (6.3,0) node[right,font=\scriptsize]{$t$};
+  \draw[-{Latex[length=2mm]},mkGray] (0,0) -- (0,2.4) node[above,font=\scriptsize]{$v$};
+  \foreach \k in {0,1,2}{
+    \draw[mkBlue,line width=1pt] (2*\k,0) -- (2*\k,2) -- (2*\k+.8,2) -- (2*\k+.8,0) -- (2*\k+2,0);
+  }
+  \draw[mkOrange,line width=1.1pt,dashed] (0,.8) -- (6,.8) node[right,font=\scriptsize]{$\bar v=D\,V_\text{dc}$};
+  \node[font=\scriptsize,anchor=east] at (0,2) {$V_\text{dc}$};
+  \draw[|-|,mkMid] (0,2.25) -- node[above,font=\tiny]{$t_\text{on}$} (.8,2.25);
+  \draw[|-|,mkGray] (2,-.35) -- node[below,font=\tiny]{period $T$} (4,-.35);
+\end{tikzpicture}\\[2mm]
+\small Analogy: flick a light switch on and off very fast -- the room looks evenly \emph{dimmed}.
+The motor's inductance does the same for current: like a flywheel, it smooths the pulses.
+\column{.46\textwidth}
+\begin{itemize}\small
+\item \term{PWM} (pulse-width modulation): switch fully on/off at a fixed rate, vary the on-time.
+\item \term{Duty cycle} $D=t_\text{on}/T$ (0 \ldots 1).
+\end{itemize}
+\begin{eqbox}\centering
+$\bar v = D\cdot V_\text{dc}$
+\end{eqbox}
+\begin{defbox}[Example]
+\small $V_\text{dc}=\SI{325}{V}$, $T=\SI{62.5}{\micro s}$ (\SI{16}{kHz}), $t_\text{on}=\SI{25}{\micro s}$:\\
+$D=25/62.5=0.4$ $\Rightarrow$ $\bar v=0.4\cdot\SI{325}{V}=\SI{130}{V}$.
+\end{defbox}
+\small\hl{Take-away:} slowly changing $D$ gives a slowly changing average voltage -- e.g.\ a sine.
+\end{columns}
+\end{frame}
+
+% ---------------------------------------------------------------------
+\begin{frame}[t]{The three-phase inverter and sinusoidal PWM}
+\begin{columns}[T,onlytextwidth]
+\column{.38\textwidth}
 \centering
 \begin{circuitikz}[scale=.7,transform shape,line width=.5pt]
 \draw (0,0) -- (6,0);  \draw (0,4) -- (6,4);
@@ -80,72 +173,42 @@ $V_\text{dc}=\SI{325}{V}$, $\hat I_\text{max}=\SI{20}{A}$, $f_\text{PWM}=f_s=\SI
 }
 \node[font=\tiny,mkGray] at (1.0,3.0) {$S_a$};
 \node[font=\tiny,mkGray] at (1.0,1.0) {$\bar S_a$};
-\end{circuitikz}\\[1mm]
-\includegraphics[width=.95\linewidth,height=2.5cm,keepaspectratio]{../figures/d4_igbt_module.jpg}\\
-\credit{Pslawinski, CC BY-SA 3.0, via Wikimedia Commons}
-\column{.58\textwidth}
+\end{circuitikz}\\[2mm]
+\begin{itemize}\small
+\item Compare a sine with a fast triangle.
+\item Sine above triangle $\Rightarrow$ upper switch ON.
+\item Duty cycle follows the sine $\Rightarrow$ \hl{average voltage is a sine}.
+\end{itemize}
+\column{.60\textwidth}
 \begin{tikzpicture}
 \begin{groupplot}[group style={group size=1 by 3,vertical sep=2mm,xticklabels at=edge bottom},
-  mkplot,width=8.6cm,xmin=0,xmax=360,xtick={0,90,180,270,360},
+  mkplot,width=8.1cm,xmin=0,xmax=360,xtick={0,90,180,270,360},
   every axis plot/.append style={line width=.5pt},grid=none,yticklabel style={font=\tiny}]
-\nextgroupplot[height=2.9cm,ymin=-1.1,ymax=1.1,ylabel={$v^*$, carrier},ytick={-1,0,1}]
+\nextgroupplot[height=2.9cm,ymin=-1.1,ymax=1.1,ylabel={sine, triangle},ytick={-1,0,1}]
 \addplot[mkSky,line width=.3pt] table[x=th,y=car]{data/spwm.dat};
 \addplot[mkBlue,thick] table[x=th,y=va]{data/spwm.dat};
 \addplot[mkOrange,thick] table[x=th,y=vb]{data/spwm.dat};
 \nextgroupplot[height=2.1cm,ymin=-.2,ymax=2.4,ytick={0.5,1.8},yticklabels={$S_a$,$S_b$}]
 \addplot[mkBlue] table[x=th,y=Sa]{data/spwm.dat};
 \addplot[mkOrange] table[x=th,y expr=\thisrow{Sb}+1.3]{data/spwm.dat};
-\nextgroupplot[height=2.3cm,ymin=-1.3,ymax=1.3,ytick={-1,0,1},ylabel={$v_{ab}/V_\text{dc}$},xlabel style={yshift=1mm},xlabel={$\omega_1 t$ (deg)}]
+\nextgroupplot[height=2.3cm,ymin=-1.3,ymax=1.3,ytick={-1,0,1},ylabel={$v_{ab}/V_\text{dc}$},xlabel style={yshift=1mm},xlabel={angle of the sine (deg)}]
 \addplot[mkMid] table[x=th,y=vab]{data/spwm.dat};
 \addplot[mkOrange,thick,domain=0:360,samples=90] {0.8*0.866*sin(x+30)};
 \end{groupplot}
 \end{tikzpicture}\\[-1mm]
-\scriptsize Compare $v_a^*=m\sin\omega_1 t$ with a triangle carrier ($m=0.8$, $m_f=15$): leg $a$ ON when $v_a^*>$ carrier.
-Pole voltage average $\bar v_{aN}=\tfrac{V_\text{dc}}{2}(1+v_a^*)$ $\Rightarrow$ fundamental phase amplitude $\hat V_1=m\,V_\text{dc}/2$.
-\end{columns}
-\end{frame}
-
-% ---------------------------------------------------------------------
-\begin{frame}[t]{Zero-sequence injection: third harmonic and min--max (SVPWM-equivalent)}
-\begin{columns}[T,onlytextwidth]
-\column{.52\textwidth}
-\begin{tikzpicture}
-\begin{axis}[mkplot,width=7.8cm,height=5.0cm,xmin=0,xmax=360,ymin=-1.3,ymax=1.3,
-  xtick={0,60,...,360},xlabel={$\omega_1 t$ (deg)},ylabel={modulating signal (p.u. of $V_\text{dc}/2$)},
-  legend style={at={(0.5,1.02)},anchor=south},legend columns=4]
-\addplot[mkSky,thick,dashed] table[x=th,y=sine]{data/zeroseq.dat};
-\addplot[mkOrange,thick] table[x=th,y=thi]{data/zeroseq.dat};
-\addplot[mkBlue,thick] table[x=th,y=svpwm]{data/zeroseq.dat};
-\addplot[mkMid,dotted,thick] table[x=th,y=zs]{data/zeroseq.dat};
-\addplot[mkRed,thin,domain=0:360] {1};\addplot[mkRed,thin,domain=0:360] {-1};
-\legend{pure sine,3rd harm.\ $+\tfrac16$,min--max,$v_0$}
-\end{axis}
-\end{tikzpicture}\\
-\scriptsize All curves for $\hat V_1 = \tfrac{2}{\sqrt3}\tfrac{V_\text{dc}}{2}=V_\text{dc}/\sqrt3$: the pure sine saturates, the injected signals just fit.
-\column{.46\textwidth}
-\begin{itemize}\small
-\item A common-mode term $v_0$ added to all three references \hl{cancels in the line-to-line voltages} (isolated star point).
-\item Third-harmonic injection: $v_x^*= m[\sin\theta_x+\tfrac16\sin3\theta]$
-\item Min--max injection: $v_0=-\tfrac12[\max(v^*)+\min(v^*)]$ -- identical average voltages to centred SVPWM.
-\end{itemize}
 \begin{eqbox}\small\centering
-$\hat V_{1,\text{max}}$:\ \ $V_\text{dc}/2$ (SPWM) $\ \rightarrow\ V_\text{dc}/\sqrt3$ (THI, SVPWM)\\
-$= +15.5\,\%$ linear voltage range
+Peak phase voltage $\hat V_1=m\,\dfrac{V_\text{dc}}{2}$,\quad $m$ = \term{modulation index} (0\ldots1).\quad Ex.: $m=0.8\Rightarrow\SI{130}{V}$
 \end{eqbox}
-\begin{notebox}
-Beyond: \term{overmodulation} up to six-step ($\hat V_1=\tfrac{2}{\pi}V_\text{dc}$), with low-order harmonics and non-linear gain.
-\end{notebox}
 \end{columns}
 \end{frame}
 
 % ---------------------------------------------------------------------
-\begin{frame}[t]{Space vectors: the inverter hexagon}
+\begin{frame}[t]{Getting more voltage: space vectors and SVPWM}
 \begin{columns}[T,onlytextwidth]
 \column{.48\textwidth}
 \centering
-\begin{tikzpicture}[scale=1.55]
+\begin{tikzpicture}[scale=1.12]
   \def\r{1.333}
-  % sectors shading
   \fill[mkCream!70] (0,0) -- (0:\r) -- (60:\r) -- cycle;
   \draw[mkGray,->] (-1.65,0) -- (1.75,0) node[right,font=\scriptsize]{$\alpha$};
   \draw[mkGray,->] (0,-1.4) -- (0,1.45) node[above,font=\scriptsize]{$\beta$};
@@ -155,63 +218,21 @@ Beyond: \term{overmodulation} up to six-step ($\hat V_1=\tfrac{2}{\pi}V_\text{dc
     \draw[-{Latex[length=1.6mm]},mkBlue,line width=.8pt] (0,0) -- (\a:\r);
     \node[font=\tiny,fill=white,inner sep=.5pt] at (\a:{\r+.22}) {$\vec v_{\n}$\,[\s]};
   }
-  \foreach \a/\k in {30/I,90/II,150/III,210/IV,270/V,330/VI}{\node[font=\tiny\bfseries,mkMid] at (\a:.82) {\k};}
   \node[font=\tiny,fill=white,inner sep=.5pt] at (-.22,-.13) {$\vec v_0,\vec v_7$};
   \draw[-{Latex[length=1.8mm]},mkOrange,line width=1.1pt] (0,0) -- (22:1.0) node[above right,font=\scriptsize,inner sep=1pt]{$\vec v^*$};
-  \draw[mkOrange] (.35,0) arc (0:22:.35); \node[font=\tiny,mkOrange] at (11:.48) {$\theta$};
-  \node[font=\tiny,mkOrange,align=left,anchor=west] at (-1.85,-1.05) {inscribed circle\\$|\vec v|=V_\text{dc}/\sqrt3$};
-  \node[font=\tiny,mkBlue] at (1.25,-.45) {$\tfrac23 V_\text{dc}$};
+  \node[font=\tiny,mkOrange,align=left,anchor=west] at (-1.85,-1.05) {circle radius\\$V_\text{dc}/\sqrt3$};
 \end{tikzpicture}
 \column{.50\textwidth}
 \begin{itemize}\small
-\item Switching state $[S_aS_bS_c]$ gives the space vector\\[1mm]
-\scalebox{.95}{$\vec v=\tfrac23\left(v_{aN}+\underline a\,v_{bN}+\underline a^2 v_{cN}\right),\ \underline a=e^{j2\pi/3}$}
-\item 6 active vectors of length $\tfrac23V_\text{dc}$ and 2 zero vectors ($000$, $111$).
-\item 6 sectors of $60^\circ$; adjacent vectors differ in \hl{one leg only} -- one commutation per transition.
-\item Any $\vec v^*$ inside the hexagon is synthesised \emph{on average} over $T_s$ from the two adjacent active vectors plus zero vectors.
-\item Rotating $\vec v^*$ without distortion: stay inside the inscribed circle, radius $\tfrac23V_\text{dc}\cos30^\circ = V_\text{dc}/\sqrt3$.
+\item 3 legs, each up or down: $2^3=8$ switch states, e.g.\ [100] = leg $a$ up.
+\item Each state = one voltage \emph{arrow}: 6 active + 2 zero.
+\item Wanted arrow $\vec v^*$: \hl{mix the two neighbours in time} within one PWM period -- like mixing two paints.
 \end{itemize}
-\src{[van der Broeck, Skudelny \& Stanke, 1988]; [Holmes \& Lipo, 2003]}
-\end{columns}
-\end{frame}
-
-% ---------------------------------------------------------------------
-\begin{frame}[t]{SVPWM dwell times and the centred seven-segment sequence}
-\begin{columns}[T,onlytextwidth]
-\column{.47\textwidth}
-\begin{eqbox}\small
-Volt-second balance in sector I:\\[-1mm]
-\[\vec v^*T_s=\vec v_1T_1+\vec v_2T_2+\vec v_{0/7}T_0\]\\[-6mm]
-\begin{align*}
-T_1&=\sqrt3\,\tfrac{|\vec v^*|}{V_\text{dc}}\,T_s\sin(60^\circ-\theta)\\
-T_2&=\sqrt3\,\tfrac{|\vec v^*|}{V_\text{dc}}\,T_s\sin\theta\\
-T_0&=T_s-T_1-T_2\ge0
-\end{align*}
+\begin{eqbox}\small\centering
+$\hat V_{1,\max}$:\ $V_\text{dc}/2$ (sine PWM) $\rightarrow$ $V_\text{dc}/\sqrt3$ (\term{SVPWM})\ \ $=+15\,\%$
 \end{eqbox}
-\begin{defbox}[Worked example]
-\scriptsize $V_\text{dc}=\SI{325}{V}$, $|\vec v^*|=\SI{150}{V}$ ($m=|\vec v^*|\sqrt3/V_\text{dc}=0.80$), $\theta=20^\circ$, $T_s=\SI{62.5}{\micro s}$:\\
-$T_1=0.800\cdot0.643\,T_s=\SI{32.1}{\micro s}$,\ \ $T_2=0.800\cdot0.342\,T_s=\SI{17.1}{\micro s}$,\\
-$T_0=\SI{13.3}{\micro s}$ split equally between $000$ and $111$.
-\end{defbox}
-\column{.51\textwidth}
-\centering
-\begin{tikzpicture}[x=5.4cm,y=1cm]
-  % fractions: T0/4=.0532, T1/2=.2569, T2/2=.1367, T0/2=.1064
-  \foreach \y/\n/\a/\b in {2.1/a/.0532/.9468,1.2/b/.3101/.6899,.3/c/.4468/.5532}{
-    \node[font=\scriptsize,anchor=east] at (-.02,\y+.25) {$S_\n$};
-    \draw[mkBlue,line width=.9pt] (0,\y) -- (\a,\y) -- (\a,\y+.55) -- (\b,\y+.55) -- (\b,\y) -- (1,\y);
-  }
-  \foreach \x in {0,.0532,.3101,.4468,.5532,.6899,.9468,1}{\draw[mkGray!60,densely dotted] (\x,0) -- (\x,2.85);}
-  \foreach \xa/\xb/\l in {0/.0532/000,.0532/.3101/100,.3101/.4468/110,.4468/.5532/111,.5532/.6899/110,.6899/.9468/100,.9468/1/000}
-    {\node[font=\tiny,rotate=90,mkOrange] at ({(\xa+\xb)/2},-.32) {\l};}
-  \draw[|-|,mkGray] (0,-.8) -- node[below,font=\tiny]{$T_s$} (1,-.8);
-  \draw[|-|,mkMid] (.0532,2.95) -- node[above,font=\tiny]{$T_1/2$} (.3101,2.95);
-  \draw[|-|,mkMid] (.3101,2.95) -- node[above,font=\tiny]{$T_2/2$} (.4468,2.95);
-  \draw[|-|,mkMid] (.4468,2.95) -- node[above,font=\tiny]{$T_0/2$} (.5532,2.95);
-\end{tikzpicture}
-\\[1mm]
-\scriptsize Centred (symmetric) pattern, drawn to scale for the example: one switching per leg per half-period,
-samples taken in the middle of $000$/$111$ see the \hl{average} current (ripple-free sampling).
+\small Example: \SI{325}{V} DC link: \SI{163}{V} $\rightarrow$ \SI{188}{V} peak per phase.
+\gofurther{SVPWM dwell-time algebra (volt-second balance); third-harmonic or min--max injection gives the same gain; overmodulation [Holmes \& Lipo, 2003].}
 \end{columns}
 \end{frame}
 
@@ -235,7 +256,7 @@ samples taken in the middle of $000$/$111$ see the \hl{average} current (ripple-
 \end{tikzpicture}\\[1mm]
 \begin{tikzpicture}
 \begin{axis}[mkplot,width=6.2cm,height=3.0cm,xmin=-1,xmax=1,ymin=-1.4,ymax=1.4,xtick={0},ytick={-1,0,1},
-  yticklabels={$-\Delta V$,0,$+\Delta V$},xlabel={phase current $i_a$},ylabel={$\bar v_\text{err}$},xlabel style={yshift=2mm}]
+  yticklabels={$-\Delta V$,0,$+\Delta V$},xlabel={phase current $i_a$},ylabel={voltage error},xlabel style={yshift=2mm}]
 \addplot[mkRed,thick,domain=-1:-0.06,samples=2] {1};
 \addplot[mkRed,thick,domain=0.06:1,samples=2] {-1};
 \addplot[mkRed,thick] coordinates {(-0.06,1) (0.06,-1)};
@@ -243,93 +264,100 @@ samples taken in the middle of $000$/$111$ see the \hl{average} current (ripple-
 \end{tikzpicture}
 \column{.48\textwidth}
 \begin{itemize}\small
-\item Both switches of a leg must never conduct together $\Rightarrow$ the turn-on edge is delayed by $t_d$ ($\approx$\,0.5--3\,\si{\micro s} for IGBTs).
-\item During $t_d$ the diodes conduct: the pole voltage depends on the \hl{sign of the current}, not on the gate command.
+\item Both switches of a leg ON together = short circuit of the DC link (\term{shoot-through}).
+\item So each turn-on waits a short \term{dead time} $t_d$ (0.5--3\,\si{\micro s}).
+\item During $t_d$ a diode conducts: the voltage depends on the \hl{current direction}, not on the command.
 \end{itemize}
-\begin{eqbox}\small
-$\Delta \bar V\approx t_d\,f_\text{sw}\,V_\text{dc}\ \operatorname{sign}(i)$
+\begin{eqbox}\centering
+$\Delta \bar V\approx t_d\,f_\text{sw}\,V_\text{dc}$
 \end{eqbox}
 \begin{defbox}[Example]
-\scriptsize $t_d=\SI{1}{\micro s}$, $f_\text{sw}=\SI{16}{kHz}$, $V_\text{dc}=\SI{325}{V}$: $\Delta \bar V=\SI{5.2}{V}$.
-At \SI{100}{rpm} the motor needs only $\approx\SI{5}{V}$ back-EMF: the error is of the \emph{same order} as the command!
+\small $t_d=\SI{1}{\micro s}$, $f_\text{sw}=\SI{16}{kHz}$, $V_\text{dc}=\SI{325}{V}$:\\
+$\Delta \bar V=10^{-6}\cdot16000\cdot325=\SI{5.2}{V}$ -- as big as the whole back-EMF at \SI{100}{rpm}!
 \end{defbox}
-\begin{itemize}\scriptsize
-\item Symptoms: current clamping at zero crossings, 6th-harmonic ripple.
-\item Cure: dead-time compensation (add $\Delta V\operatorname{sign}(i^*)$, smoothed near zero) and the current loop itself.
-\end{itemize}
+\small Cure: dead-time compensation + the current loop.
 \end{columns}
 \end{frame}
 
 % ---------------------------------------------------------------------
-\begin{frame}[t]{Switching frequency trade-offs and current ripple}
+\begin{frame}[t]{Switching frequency: a trade-off}
 \begin{columns}[T,onlytextwidth]
 \column{.50\textwidth}
 \begin{tikzpicture}
-\begin{axis}[mkplot,width=7.2cm,height=4.4cm,xmin=0,xmax=1.15,ymin=0,ymax=.14,
-  xlabel={modulation $\hat V_1/(V_\text{dc}/2)$},ylabel={$\Delta i_{pp}\,L f_\text{sw}/V_\text{dc}$},
+\begin{axis}[mkplot,width=7.2cm,height=4.6cm,xmin=0,xmax=1.15,ymin=0,ymax=.14,
+  xlabel={modulation index $m$},ylabel={ripple $\Delta i_{pp}\,L f_\text{sw}/V_\text{dc}$},
   legend pos=north west,ylabel style={yshift=-1mm},yticklabel style={/pgf/number format/fixed,/pgf/number format/precision=2},scaled y ticks=false]
 \addplot[mkBlue,thick,mark=*,mark size=.8pt] table[x=m,y=svpwm]{data/ripple.dat};
 \addplot[mkOrange,thick,mark=square*,mark size=.8pt] table[x=m,y=spwm]{data/ripple.dat};
-\legend{centred SVPWM,sinusoidal PWM}
+\legend{SVPWM,sine PWM}
 \end{axis}
 \end{tikzpicture}\\
-\scriptsize Simulated worst-case peak-to-peak phase-current ripple over a fundamental period (ideal switching).
-Example: $L=\SI{3}{mH}$, $V_\text{dc}=\SI{325}{V}$, $f_\text{sw}=\SI{16}{kHz}$, ratio $0.083$ $\Rightarrow \Delta i_{pp}\approx\SI{0.56}{A}$.
+\small Current ripple $\Delta i_{pp}\propto \dfrac{V_\text{dc}}{L\,f_\text{sw}}$.\\
+Example: $L=\SI{3}{mH}$, \SI{325}{V}, \SI{16}{kHz}, ratio $0.083$:\\
+$\Delta i_{pp}=0.083\cdot325/(0.003\cdot16000)\approx\SI{0.56}{A}$.
 \column{.48\textwidth}
-\footnotesize
+\small
 \begin{tabularx}{\linewidth}{@{}l X X@{}}
 \toprule
  & \textbf{higher $f_\text{sw}$} & \textbf{lower $f_\text{sw}$}\\
 \midrule
-ripple $\propto 1/f_\text{sw}$ & \textcolor{mkGreen}{smaller} & \textcolor{mkRed}{larger}\\
-switching loss $\propto f_\text{sw}$ & \textcolor{mkRed}{higher} & \textcolor{mkGreen}{lower}\\
-loop delay $\propto 1/f_s$ & \textcolor{mkGreen}{shorter} & \textcolor{mkRed}{longer}\\
-current bandwidth & \textcolor{mkGreen}{higher} & \textcolor{mkRed}{lower}\\
-EMI, $dv/dt$ events & \textcolor{mkRed}{more} & \textcolor{mkGreen}{fewer}\\
-acoustic noise & \textcolor{mkGreen}{inaudible $>16$\,kHz} & \textcolor{mkRed}{audible}\\
+current ripple & \textcolor{mkGreen}{smaller} & \textcolor{mkRed}{larger}\\
+switching loss & \textcolor{mkRed}{higher} & \textcolor{mkGreen}{lower}\\
+control delay & \textcolor{mkGreen}{shorter} & \textcolor{mkRed}{longer}\\
+noise (EMI) & \textcolor{mkRed}{more} & \textcolor{mkGreen}{less}\\
+audible whine & \textcolor{mkGreen}{none $>16$\,kHz} & \textcolor{mkRed}{yes}\\
 \bottomrule
 \end{tabularx}\\[2mm]
-\begin{eqbox}\small
-$P_\text{sw}\approx 6\cdot\frac{1}{\pi}\,f_\text{sw}\,E_\text{sw,ref}\frac{V_\text{dc}}{V_\text{ref}}\frac{\hat I}{I_\text{ref}}$
-\end{eqbox}
-\scriptsize Typical servo drives: \textbf{8--16\,kHz} (IGBT, kW range); SiC/GaN allow 40--100\,kHz with low loss.
+Analogy: flicking the switch faster gives a smoother light, but every flick costs a little energy (heat in the transistor).\\[1mm]
+Typical servo drives: \hl{8--16\,kHz}.
 \src{[Mohan, Undeland \& Robbins, 2003]}
 \end{columns}
 \end{frame}
 
 % ---------------------------------------------------------------------
-\begin{frame}[t]{Voltage and current limits in the $dq$ plane}
+\begin{frame}[t]{Voltage and current limits: the torque--speed envelope}
 \begin{columns}[T,onlytextwidth]
-\column{.50\textwidth}
-\centering
+\column{.52\textwidth}
 \begin{tikzpicture}
-\begin{axis}[mkplot,width=7.2cm,height=6.1cm,axis equal image,xmin=-62,xmax=22,ymin=-30,ymax=30,
-  xlabel={$i_d$ (A)},ylabel={$i_q$ (A)},axis lines=box,xtick={-60,-40,-20,0,20},ytick={-20,0,20},
-  legend style={font=\tiny,at={(0.5,1.02)},anchor=south},legend columns=4,extra x ticks={0},extra x tick style={grid=major,grid style={mkGray}},
-  extra y ticks={0},extra y tick style={grid=major,grid style={mkGray}}]
-\addplot[mkOrange,line width=1.1pt,domain=0:360,samples=90] ({20*cos(x)},{20*sin(x)});
-\addplot[mkBlue,thick,domain=0:360,samples=120] ({-40+49.8*cos(x)},{49.8*sin(x)});
-\addplot[mkMid,thick,dashed,domain=0:360,samples=120] ({-40+29.9*cos(x)},{29.9*sin(x)});
-\addplot[mkSky,thick,dotted,domain=0:360,samples=120] ({-40+21.3*cos(x)},{21.3*sin(x)});
-\addplot[only marks,mark=x,mark size=2pt,mkRed] coordinates {(-40,0)};
-\legend{$|i|=\hat I_\text{max}$,\SI{3000}{rpm},\SI{5000}{rpm},\SI{7000}{rpm}}
+\begin{axis}[mkplot,width=7.4cm,height=5.2cm,xmin=0,xmax=8000,ymin=0,ymax=16,
+  xlabel={speed $n$ (rpm)},ylabel={max.\ torque (Nm)},
+  scaled x ticks=false,xticklabel style={/pgf/number format/fixed}]
+\addplot[mkBlue,line width=1.1pt] table[x=rpm,y=T]{data/fw.dat};
+\addplot[mkRed,thick,dashed] coordinates {(3240,0) (3240,16)};
+\node[font=\tiny,mkNavy,align=center] at (axis cs:1600,12.5) {current limit\\$k_t\hat I_\text{max}=\SI{14.4}{Nm}$};
+\node[font=\tiny,mkRed,anchor=west,align=left] at (axis cs:3350,14.5) {base speed};
+\node[font=\tiny,mkMid,align=center] at (axis cs:5800,9) {voltage limit\\(field weakening)};
 \end{axis}
-\end{tikzpicture}
-\column{.48\textwidth}
-\begin{eqbox}\small
-Current limit: $\ i_d^2+i_q^2\le \hat I_\text{max}^2$\\[.5mm]
-Voltage limit (steady state, $R\approx0$):\\[-1mm]
-\[(L_di_d+\psi_\text{PM})^2+(L_qi_q)^2\le\left(V_\text{max}/\omega_e\right)^2\]\\[-6mm]
-\hfill$V_\text{max}=V_\text{dc}/\sqrt3$
-\end{eqbox}
-\begin{itemize}\scriptsize
-\item SPM ($L_d=L_q$): voltage circles centred at $-\psi_\text{PM}/L_d=\SI{-40}{A}$ (red cross), radius shrinks $\propto 1/\omega_e$.
-\item Feasible operating points: \hl{intersection} of both regions.
-\item At \SI{3000}{rpm} the whole current circle is reachable; at \SI{5000}{rpm} $i_q$ is only possible with negative $i_d$ (field weakening); at \SI{7000}{rpm} almost nothing is left.
-\item Keep a voltage reserve of 5--10\,\% for the current controller transients.
+\end{tikzpicture}\\
+\scriptsize Computed for the reference motor: base speed $\approx$\,\SI{3240}{rpm}.
+\column{.46\textwidth}
+\begin{itemize}\small
+\item \term{Current limit}: transistors and windings get hot $\Rightarrow$ $|i|\le\hat I_\text{max}$ $\Rightarrow$ maximum torque.
+\item \term{Voltage limit}: the back-EMF grows with speed; the inverter can give at most $V_\text{max}=V_\text{dc}/\sqrt3$.
 \end{itemize}
-\src{[Morimoto et al., 1990]}
+\begin{eqbox}\centering
+$E=\omega_e\,\psi_\text{PM}\ \le\ V_\text{max}$
+\end{eqbox}
+\begin{defbox}[Example]
+\small $V_\text{max}=325/\sqrt3=\SI{188}{V}$ $\Rightarrow$ $\omega_e\le188/0.12=\SI{1563}{rad/s}$ (electrical) $\Rightarrow$ $\le\SI{3730}{rpm}$ at no load; the $R$, $L$ drops lower it to $\approx$\,\SI{3240}{rpm} at full torque.
+\end{defbox}
+\gofurther{voltage and current circles in the $dq$ plane; field weakening (Session 3.3) [Morimoto et al., 1990].}
 \end{columns}
+\end{frame}
+
+% ---------------------------------------------------------------------
+\begin{frame}[t]{Check your understanding -- 3.2}
+\vspace{4mm}
+\begin{keybox}[Check your understanding]
+\large
+\begin{enumerate}
+\item A \SI{400}{V} DC link is switched with duty cycle $D=0.25$. What is the average voltage?\\[3mm]
+\item Why can't the upper and lower switch of a leg turn on at exactly the same instant? What does the fix cost?\\[3mm]
+\item The motor stops accelerating at high speed even though the current is not at its limit. Which limit is it hitting?
+\end{enumerate}
+\end{keybox}
+\vfill
+\centering\small\color{mkGray} Discuss with your neighbour for 2 minutes.
 \end{frame}
 
 % ---------------------------------------------------------------------
@@ -339,20 +367,23 @@ Voltage limit (steady state, $R\approx0$):\\[-1mm]
 \begin{keybox}[Key take-aways]
 \small
 \begin{itemize}
-\item SPWM: $\hat V_1\le V_\text{dc}/2$; zero-sequence (THI, min--max, SVPWM): $\hat V_1\le V_\text{dc}/\sqrt3$.
-\item SVPWM = volt-second balance with two adjacent active vectors + zero vectors.
-\item Dead time creates a current-sign-dependent voltage error $t_df_\text{sw}V_\text{dc}$ -- dominant at low speed.
-\item $f_\text{sw}$: ripple and delay vs.\ switching loss and EMI.
-\item Every operating point must satisfy both the current circle and the speed-dependent voltage limit.
+\item PWM: average voltage $=D\cdot V_\text{dc}$; a sinusoidal duty cycle gives a sinusoidal voltage.
+\item Sine PWM reaches $V_\text{dc}/2$, SVPWM $V_\text{dc}/\sqrt3$ (+15\,\%).
+\item Dead time prevents shoot-through but adds a voltage error.
+\item Higher $f_\text{sw}$: less ripple and delay, more loss.
+\item Current limit $\to$ max.\ torque; voltage limit $\to$ max.\ speed.
 \end{itemize}
 \end{keybox}
 \column{.42\textwidth}
-\begin{notebox}
-\textbf{Self-check}\\
-1.\ $V_\text{dc}=\SI{560}{V}$: maximum linear phase amplitude?\ \ ($\SI{323}{V}$)\\[1mm]
-2.\ Why does the zero-sequence term not appear in the motor currents?\\[1mm]
-3.\ Which vectors are used in sector IV?\ \ ($\vec v_4,\vec v_5$)
-\end{notebox}
+\begin{defbox}[Key terms]
+\small
+\textbf{Duty cycle} -- fraction of time ON.\\
+\textbf{PWM} -- pulse-width modulation.\\
+\textbf{Modulation index $m$} -- sine amplitude / max.\\
+\textbf{SVPWM} -- space-vector PWM.\\
+\textbf{Dead time} -- both switches OFF briefly.\\
+\textbf{Base speed} -- where the voltage runs out.
+\end{defbox}
 \end{columns}
 \end{frame}
 
@@ -360,19 +391,18 @@ Voltage limit (steady state, $R\approx0$):\\[-1mm]
 \section{3.3 Field-Oriented Control (FOC)}
 % =====================================================================
 
-\begin{frame}[t]{Why field-oriented control? The DC-machine analogy}
+\begin{frame}[t]{Why field-oriented control? The DC-motor analogy}
 \begin{columns}[T,onlytextwidth]
 \column{.58\textwidth}
 \begin{itemize}\small
-\item Brushed DC motor: commutator keeps armature MMF \hl{orthogonal} to the field $\Rightarrow$ $T=k_t\,i_a$, linear, instantaneous.
-\item PMSM: the rotor flux rotates; the stator current is three AC quantities.
-\item FOC = \term{electronic commutator}: measure $\theta_e$, express the current in a frame fixed to the rotor flux, and control
-\begin{itemize}\footnotesize
-\item $i_d$ -- aligned with $\psi_\text{PM}$ (flux-producing),
-\item $i_q$ -- $90^\circ$ ahead (torque-producing).
+\item Brushed DC motor: the commutator keeps the current at $90^\circ$ to the magnet $\Rightarrow$ simply $T=k_t\,i$.
+\item PM synchronous motor (\term{PMSM}): the magnet is on the rotor and turns -- the current must turn with it.
+\item Analogy: to open a door with least effort, push \hl{perpendicular} to the door -- even while it swings.
+\item \term{FOC} = electronic commutator: measure the rotor angle $\theta_e$ and split the current into
+\begin{itemize}\small
+\item $i_d$ -- along the magnet (no torque),
+\item $i_q$ -- $90^\circ$ ahead (makes torque).
 \end{itemize}
-\item In the rotor frame all sinusoidal quantities become \hl{DC} in steady state $\Rightarrow$ PI controllers reach zero steady-state error at any speed.
-\item Requires: fast current sensing, accurate rotor angle, and a modulator (SVPWM).
 \end{itemize}
 \src{[Blaschke, 1972]; [Leonhard, 2001]; [Krishnan, 2010]}
 \column{.40\textwidth}
@@ -382,53 +412,118 @@ Voltage limit (steady state, $R\approx0$):\\[-1mm]
   \draw[fill=mkPale,draw=mkBlue] (0,0) circle (.62);
   \fill[mkRed!70] (-.62,0) arc (180:0:.62) -- cycle; \fill[mkMid!70] (-.62,0) arc (180:360:.62) -- cycle;
   \node[white,font=\tiny\bfseries] at (0,.3) {N}; \node[white,font=\tiny\bfseries] at (0,-.3) {S};
-  \draw[-{Latex[length=2mm]},mkBlue,line width=1pt] (0,0) -- (0,1.7) node[above,font=\scriptsize]{$d$: $\psi_\text{PM}$};
-  \draw[-{Latex[length=2mm]},mkOrange,line width=1.2pt] (0,0) -- (-1.7,0) node[left,font=\scriptsize,align=center]{$q$:\\$\vec i_s=i_q$};
+  \draw[-{Latex[length=2mm]},mkBlue,line width=1pt] (0,0) -- (0,1.7) node[above,font=\scriptsize]{$d$: magnet};
+  \draw[-{Latex[length=2mm]},mkOrange,line width=1.2pt] (0,0) -- (-1.7,0) node[left,font=\scriptsize,align=center]{$q$:\\$i_q$};
   \draw[mkGray] (0,.4) -- (-.4,.4) -- (-.4,0);
-  \node[font=\tiny,mkGray] at (.95,-1.45) {$90^\circ$ el.\ $\Rightarrow$ max.\ $T/A$};
+  \node[font=\tiny,mkGray] at (.95,-1.45) {$90^\circ$ $\Rightarrow$ max.\ torque per amp};
 \end{tikzpicture}\\[1mm]
 \includegraphics[width=.8\linewidth,height=2.3cm,keepaspectratio]{../figures/d4_servo_drives.png}\\
-\credit{Tero Kontkanen, CC BY-SA 3.0, via Wikimedia Commons}
+\credit{Servo drives. Tero Kontkanen, CC BY-SA 3.0, via Wikimedia Commons}
 \end{columns}
 \end{frame}
 
 % ---------------------------------------------------------------------
-\begin{frame}[t]{Clarke and Park transforms (amplitude-invariant form)}
+\begin{frame}[t]{Refresher: three-phase sinusoids, $120^\circ$ apart}
 \begin{columns}[T,onlytextwidth]
-\column{.52\textwidth}
-\begin{defbox}[Clarke: $abc\to\alpha\beta$ (stationary)]
+\column{.55\textwidth}
+\begin{tikzpicture}
+\begin{axis}[mkplot,width=8.2cm,height=4.6cm,xmin=0,xmax=360,ymin=-1.25,ymax=1.25,xtick={0,60,...,360},
+  xlabel={angle $\theta=\omega t$ (deg)},ylabel={current / $\hat I$},legend pos=south west,legend columns=3]
+\addplot[mkBlue,thick,domain=0:360,samples=91] {cos(x)};
+\addplot[mkOrange,thick,domain=0:360,samples=91] {cos(x-120)};
+\addplot[mkSky,thick,dashed,domain=0:360,samples=91] {cos(x+120)};
+\addplot[mkGray,thin,domain=0:360] {0};
+\draw[mkRed,densely dotted,thick] (axis cs:0,-1.2) -- (axis cs:0,1.2);
+\legend{$i_a$,$i_b$,$i_c$}
+\end{axis}
+\end{tikzpicture}\\
+\small At $\theta=0$: $i_a=1$, $i_b=i_c=-0.5$ $\Rightarrow$ sum $=0$. True at \emph{every} instant.
+\column{.43\textwidth}
+\begin{eqbox}\small
 \vspace{-2mm}
-\[\begin{bmatrix} i_\alpha\\ i_\beta\end{bmatrix}=\frac23\begin{bmatrix}1&-\tfrac12&-\tfrac12\\[1pt] 0&\tfrac{\sqrt3}{2}&-\tfrac{\sqrt3}{2}\end{bmatrix}\begin{bmatrix} i_a\\ i_b\\ i_c\end{bmatrix}\]
-With $i_a+i_b+i_c=0$: \ $i_\alpha=i_a$,\ \ $i_\beta=(i_a+2i_b)/\sqrt3$ -- only two sensors needed.
-\end{defbox}
-\begin{defbox}[Park: $\alpha\beta\to dq$ (rotating with $\theta_e$)]
-\vspace{-2mm}
-\[\begin{bmatrix} i_d\\ i_q\end{bmatrix}=\begin{bmatrix}\cos\theta_e&\sin\theta_e\\ -\sin\theta_e&\cos\theta_e\end{bmatrix}\begin{bmatrix} i_\alpha\\ i_\beta\end{bmatrix}\]
-\vspace{-3mm}
-\end{defbox}
-\column{.46\textwidth}
-\begin{itemize}\small
-\item Factor $\tfrac23$: \hl{amplitude-invariant} -- a balanced set of peak $\hat I$ gives $|\vec i|=\hat I$.
-\item Price: power is not invariant:
-\end{itemize}
-\begin{eqbox}\small\centering
-$p=\tfrac32\left(v_\alpha i_\alpha+v_\beta i_\beta\right)=\tfrac32\left(v_d i_d+v_q i_q\right)$
+\begin{align*}
+i_a&=\hat I\cos\theta\\
+i_b&=\hat I\cos(\theta-120^\circ)\\
+i_c&=\hat I\cos(\theta+120^\circ)
+\end{align*}
+\vspace{-5mm}
 \end{eqbox}
 \begin{itemize}\small
-\item Power-invariant variant uses $\sqrt{2/3}$ instead of $\tfrac23$ (no $\tfrac32$ in $p$ and $T$) -- check which one a drive manual uses!
-\item Inverse Park ($dq\to\alpha\beta$) uses the transposed rotation; inverse Clarke: $i_a=i_\alpha$, $i_{b,c}=-\tfrac12i_\alpha\pm\tfrac{\sqrt3}2i_\beta$.
-\item Zero-sequence $i_0=\tfrac13(i_a+i_b+i_c)=0$ for a star without neutral.
+\item Same amplitude, shifted by one third of a period.
+\item Sum is zero $\Rightarrow$ only \hl{two} are independent.
+\item Coils $120^\circ$ apart in space, fed $120^\circ$ apart in time $\Rightarrow$ one field arrow of constant length that \hl{rotates} at $\omega$.
 \end{itemize}
-\src{[Park, 1929]; [Clarke, 1943]}
+\small\hl{Take-away:} three wiggling numbers = one rotating arrow.
 \end{columns}
 \end{frame}
 
 % ---------------------------------------------------------------------
-\begin{frame}[t]{Reference frames: $abc$, $\alpha\beta$ and $dq$}
+\begin{frame}[t]{Refresher: rotating vectors and rotation matrices}
 \begin{columns}[T,onlytextwidth]
-\column{.48\textwidth}
+\column{.42\textwidth}
 \centering
-\begin{tikzpicture}[scale=1.9]
+\begin{tikzpicture}[scale=1.25]
+  \draw[-{Latex[length=2mm]},mkGray] (-.3,0) -- (2.4,0) node[right,font=\scriptsize]{$x$};
+  \draw[-{Latex[length=2mm]},mkGray] (0,-.3) -- (0,2.4) node[above,font=\scriptsize]{$y$};
+  \draw[-{Latex[length=2mm]},mkBlue,line width=1.1pt] (0,0) -- (15:2) node[right,font=\scriptsize]{$\vec u$};
+  \draw[-{Latex[length=2mm]},mkOrange,line width=1.1pt] (0,0) -- (65:2) node[above,font=\scriptsize]{$\vec u'=R(\theta)\,\vec u$};
+  \draw[mkOrange,-{Latex[length=1.5mm]}] (15:.9) arc (15:65:.9); \node[font=\scriptsize,mkOrange] at (40:1.1) {$\theta$};
+  \draw[mkGray,dashed] (0,0) circle (2);
+\end{tikzpicture}\\
+\small Length stays the same, only the direction changes.
+\column{.56\textwidth}
+\begin{itemize}\small
+\item A vector $(x,y)$ = the complex number $x+jy$. Multiplying by $e^{j\theta}$ \hl{rotates} it by $\theta$.
+\item The same in matrix form:
+\end{itemize}
+\begin{eqbox}\centering
+$R(\theta)=\begin{bmatrix}\cos\theta&-\sin\theta\\ \sin\theta&\cos\theta\end{bmatrix}$
+\end{eqbox}
+\begin{defbox}[Example]
+\small Rotate $(1,0)$ by $90^\circ$: $\begin{bmatrix}0&-1\\1&0\end{bmatrix}\!\begin{bmatrix}1\\0\end{bmatrix}=\begin{bmatrix}0\\1\end{bmatrix}$.\\[1mm]
+Turning the \emph{axes} by $+\theta$ instead = turning the vector by $-\theta$: $(3,4)$ seen from axes turned $90^\circ$ reads $(4,-3)$.
+\end{defbox}
+\small\hl{Take-away:} $R(-\theta)$ = ``what the vector looks like to a turned observer''.
+\end{columns}
+\end{frame}
+
+% ---------------------------------------------------------------------
+\begin{frame}[t]{Clarke transform: three phases $\to$ two axes ($\alpha\beta$)}
+\begin{columns}[T,onlytextwidth]
+\column{.52\textwidth}
+\begin{defbox}[Clarke: $abc\to\alpha\beta$ (fixed to the stator)]
+\vspace{-2mm}
+\[\begin{bmatrix} i_\alpha\\ i_\beta\end{bmatrix}=\frac23\begin{bmatrix}1&-\tfrac12&-\tfrac12\\[1pt] 0&\tfrac{\sqrt3}{2}&-\tfrac{\sqrt3}{2}\end{bmatrix}\begin{bmatrix} i_a\\ i_b\\ i_c\end{bmatrix}\]
+\end{defbox}
+\begin{itemize}\small
+\item Each phase current pushes along its own coil axis; add the three pushes as arrows, write the result in $x$--$y$ form.
+\item Because $i_a+i_b+i_c=0$: $i_\alpha=i_a$,\ $i_\beta=(i_a+2i_b)/\sqrt3$ -- two current sensors suffice.
+\item Factor $\tfrac23$: arrow length = peak phase current $\hat I$.
+\end{itemize}
+\column{.46\textwidth}
+\centering
+\begin{tikzpicture}[scale=1.25]
+  \foreach \a/\n in {0/a,120/b,240/c}{\draw[mkGray!70,dashed] (0,0) -- (\a:1.2); \node[font=\scriptsize,mkGray] at (\a:1.35) {$\n$};}
+  \draw[-{Latex[length=1.6mm]},mkBlue,line width=.9pt] (0,0) -- (1.333,0) node[midway,above,font=\tiny]{$\tfrac23 i_a$};
+  \draw[-{Latex[length=1.6mm]},mkOrange,line width=.9pt] (1.333,0) -- (1.667,-.577) node[midway,left,font=\tiny]{$\tfrac23 i_b$};
+  \draw[-{Latex[length=1.6mm]},mkSky,line width=.9pt] (1.667,-.577) -- (2,0) node[midway,right,font=\tiny]{$\tfrac23 i_c$};
+  \draw[-{Latex[length=2mm]},mkMid,line width=1.3pt] (0,-.9) -- (2,-.9) node[right,font=\scriptsize]{$\vec i$};
+  \node[font=\scriptsize,mkMid] at (1,-1.15) {$i_\alpha=8,\ i_\beta=0$};
+\end{tikzpicture}\\[2mm]
+\begin{defbox}[Example]
+\small $i_a=\SI{8}{A}$, $i_b=i_c=\SI{-4}{A}$:\\
+$i_\alpha=\tfrac23(8+2+2)=\SI{8}{A}$,\\ $i_\beta=(8-8)/\sqrt3=\SI{0}{A}$.
+\end{defbox}
+\small The arrow still \hl{rotates} at $\omega_e$: $i_\alpha$, $i_\beta$ are still sines [Clarke, 1943].
+\end{columns}
+\end{frame}
+
+% ---------------------------------------------------------------------
+\begin{frame}[t]{Park transform: looking at the rotor from a rotating camera}
+\begin{columns}[T,onlytextwidth]
+\column{.46\textwidth}
+\centering
+\begin{tikzpicture}[scale=1.8]
   \def\th{60}\def\ga{40}\def\I{1.15}
   \foreach \a/\n in {0/a,120/b,240/c}{\draw[mkGray!70,dashed] (0,0) -- (\a:1.3); \node[font=\scriptsize,mkGray] at (\a:1.42) {$\n$};}
   \draw[-{Latex[length=1.8mm]},mkMid,line width=.7pt] (0,0) -- (1.55,0) node[right,font=\scriptsize]{$\alpha$};
@@ -436,22 +531,23 @@ $p=\tfrac32\left(v_\alpha i_\alpha+v_\beta i_\beta\right)=\tfrac32\left(v_d i_d+
   \draw[-{Latex[length=1.8mm]},mkBlue,line width=1pt] (0,0) -- (\th:1.5) node[above right,font=\scriptsize,inner sep=1pt]{$d$};
   \draw[-{Latex[length=1.8mm]},mkBlue,line width=1pt] (0,0) -- (\th+90:1.45) node[left,font=\scriptsize,inner sep=2pt]{$q$};
   \draw[mkBlue] (.42,0) arc (0:\th:.42); \node[font=\scriptsize,mkBlue] at (28:.56) {$\theta_e$};
-  \draw[-{Latex[length=2mm]},mkOrange,line width=1.3pt] (0,0) -- (\th+\ga:\I) node[above,font=\scriptsize]{$\vec i_s$};
+  \draw[-{Latex[length=2mm]},mkOrange,line width=1.3pt] (0,0) -- (\th+\ga:\I) node[above,font=\scriptsize]{$\vec i$};
   \draw[mkOrange,densely dotted] (\th+\ga:\I) -- (\th:{\I*cos(\ga)}) node[right,font=\tiny]{$i_d$};
   \draw[mkOrange,densely dotted] (\th+\ga:\I) -- (\th+90:{\I*sin(\ga)}) node[below left,font=\tiny,inner sep=1pt]{$i_q$};
-  \draw[mkMid,densely dotted] (\th+\ga:\I) -- (0,{\I*sin(\th+\ga)}) node[left,font=\tiny]{$i_\beta$};
-  \draw[mkMid,densely dotted] (\th+\ga:\I) -- ({\I*cos(\th+\ga)},0) node[below,font=\tiny]{$i_\alpha$};
   \draw[mkGray,-{Latex[length=1.5mm]}] (20:1.2) arc (20:40:1.2); \node[font=\tiny,mkGray] at (30:1.33) {$\omega_e$};
-\end{tikzpicture}
-\column{.50\textwidth}
+\end{tikzpicture}\\
+\small $d$ axis glued to the magnet's north pole.
+\column{.52\textwidth}
 \begin{itemize}\small
-\item \term{$abc$}: physical phase axes, $120^\circ$ apart (windings).
-\item \term{$\alpha\beta$}: orthogonal, stationary; $\alpha\equiv a$. Quantities rotate at $\omega_e$.
-\item \term{$dq$}: orthogonal, rotates with the rotor, $d$ on the magnet north pole: $\theta_e=\int\omega_e\,dt$.
-\item The current \emph{vector} is the same physical object in all three frames -- only the coordinates change.
-\item Space-vector notation:
-\[\vec i_s^{\,dq}= \vec i_s^{\,\alpha\beta}\,e^{-j\theta_e},\qquad \vec i_s^{\,\alpha\beta}=\tfrac23\left(i_a+\underline a\,i_b+\underline a^2i_c\right)\]
+\item Imagine a \hl{camera bolted to the rotor}. In its picture the magnet stands still.
+\item The current arrow rotates at the same speed $\Rightarrow$ it \emph{also} looks still: two constant numbers $i_d$, $i_q$.
+\item Maths: rotate the axes by $\theta_e$ = rotate the vector by $-\theta_e$:
 \end{itemize}
+\begin{eqbox}\centering
+$\begin{bmatrix} i_d\\ i_q\end{bmatrix}=\begin{bmatrix}\cos\theta_e&\sin\theta_e\\ -\sin\theta_e&\cos\theta_e\end{bmatrix}\begin{bmatrix} i_\alpha\\ i_\beta\end{bmatrix}$
+\end{eqbox}
+\small\hl{Take-away:} same physical arrow, new coordinates -- AC becomes DC.
+\gofurther{the $\tfrac23$ (amplitude-invariant) scaling makes power $p=\tfrac32(v_di_d+v_qi_q)$; a power-invariant variant uses $\sqrt{2/3}$ -- check the drive manual. Inverse Park uses $R(+\theta_e)$ [Park, 1929].}
 \end{columns}
 \end{frame}
 
@@ -480,10 +576,11 @@ $p=\tfrac32\left(v_\alpha i_\alpha+v_\beta i_\beta\right)=\tfrac32\left(v_d i_d+
 \end{tikzpicture}
 \column{.36\textwidth}
 \begin{itemize}\small
-\item Balanced currents $i_a=\hat I\cos(\theta_e+90^\circ)$ etc.\ with a step $\hat I: 5\to\SI{10}{A}$ at $\theta_e=360^\circ$.
-\item $\alpha\beta$: still sinusoidal, frequency $\omega_e$.
-\item $dq$: \hl{DC}: $i_d=0$, $i_q=\hat I$ -- the step is a clean step.
-\item A PI controller in $dq$ therefore tracks a sinusoid without phase lag at any speed (it is an \emph{integrator at} $\omega_e$ in $\alpha\beta$).
+\item Torque command steps from \SI{5}{A} to \SI{10}{A} at $\theta_e=360^\circ$.
+\item $abc$: three sines.
+\item $\alpha\beta$: two sines, same frequency.
+\item $dq$: \hl{flat lines} -- $i_d=0$, $i_q$ makes a clean step.
+\item A PI controller (Day 2) handles constants perfectly $\Rightarrow$ no error at any speed.
 \end{itemize}
 \end{columns}
 \end{frame}
@@ -494,111 +591,81 @@ $p=\tfrac32\left(v_\alpha i_\alpha+v_\beta i_\beta\right)=\tfrac32\left(v_d i_d+
 \column{.55\textwidth}
 \begin{tikzpicture}
 \begin{axis}[mkplot,width=8.0cm,height=4.2cm,xmin=0,xmax=360,ymin=0,ymax=370,xtick={0,90,...,360},ytick={0,180,360},
-  xlabel={mechanical angle $\theta_m$ (deg)},ylabel={$\theta_e \bmod 360^\circ$},legend pos=north west]
+  xlabel={mechanical angle $\theta_m$ (deg)},ylabel={$\theta_e$ (deg)},legend pos=north west]
 \addplot[mkOrange,thick] coordinates {(0,0) (90,360) (90,0) (180,360) (180,0) (270,360) (270,0) (360,360)};
 \addplot[mkBlue,thick,dashed] coordinates {(0,0) (360,360)};
 \legend{$\theta_e$ ($p=4$),$\theta_m$}
 \end{axis}
 \end{tikzpicture}
-\begin{eqbox}\small\centering
-$\theta_e=p\,\theta_m,\quad \omega_e=p\,\omega_m,\quad f_e=\dfrac{p\,n}{60}$
+\begin{eqbox}\centering
+$\theta_e=p\,\theta_m,\qquad f_e=\dfrac{p\,n}{60}$
 \end{eqbox}
-\scriptsize Example: $p=4$, $n=\SI{3000}{rpm}$ $\Rightarrow$ $f_e=\SI{200}{Hz}$, $\omega_e=\SI{1257}{rad/s}$.
+\small Example: $p=4$, $n=\SI{3000}{rpm}$: $f_e=4\cdot3000/60=\SI{200}{Hz}$, $\omega_e=2\pi\cdot200=\SI{1257}{rad/s}$.
 \column{.43\textwidth}
 \centering
 \includegraphics[width=.5\linewidth]{../figures/d4_bldc_stator.jpg}\\
 \credit{12-slot stator. Medvedev, CC BY-SA 3.0, via Wikimedia Commons}
-\begin{itemize}\scriptsize
-\item $p$ = number of \emph{pole pairs} (an 8-pole motor has $p=4$).
-\item Encoder resolution in electrical degrees is $p$ times coarser.
-\item A mechanical alignment error $\Delta\theta_m$ becomes $p\,\Delta\theta_m$ in the Park transform.
+\begin{itemize}\small
+\item $p$ = number of \term{pole pairs} (8 magnet poles $\Rightarrow p=4$).
+\item One mechanical turn = $p$ electrical turns: the current must go through $p$ full sine periods.
+\item An angle error of $2^\circ$ mechanical = $8^\circ$ electrical.
 \end{itemize}
 \end{columns}
 \end{frame}
 
 % ---------------------------------------------------------------------
-\begin{frame}[t]{PMSM model in rotor ($dq$) coordinates}
-\begin{columns}[T,onlytextwidth]
-\column{.50\textwidth}
-\small Stator equation in stationary coordinates (space vectors):
-\[\vec v_s=R\,\vec i_s+\frac{d\vec\psi_s}{dt}\]
-Substitute $\vec x=\vec x^{\,dq}e^{j\theta_e}$:
-\[\vec v^{\,dq}=R\,\vec i^{\,dq}+\frac{d\vec\psi^{\,dq}}{dt}+j\omega_e\vec\psi^{\,dq}\]
-Flux linkages (rotor frame, no saturation):
-\[\psi_d=L_di_d+\psi_\text{PM},\qquad \psi_q=L_qi_q\]
-\column{.48\textwidth}
-\begin{eqbox}\small
-\vspace{-3mm}
-\begin{align*}
-v_d&=R\,i_d+L_d\frac{di_d}{dt}\underbrace{-\,\omega_eL_qi_q}_{\text{cross-coupling}}\\
-v_q&=R\,i_q+L_q\frac{di_q}{dt}\underbrace{+\,\omega_eL_di_d}_{\text{cross-coupling}}\underbrace{+\,\omega_e\psi_\text{PM}}_{\text{back-EMF}}
-\end{align*}
-\vspace{-4mm}
-\end{eqbox}
-\begin{itemize}\scriptsize
-\item Units: V, A, H, Vs; $\omega_e$ in rad/s (electrical). Motor sign convention (power into terminals positive).
-\item The rotational term $j\omega_e\vec\psi$ produces the \hl{speed-dependent coupling} between axes and the back-EMF on the $q$-axis only.
-\item SPM: $L_d\approx L_q=L$; IPM: $L_q>L_d$ (saliency).
-\item Mechanics: $J\dot\omega_m=T_e-B\omega_m-T_L$.
-\end{itemize}
-\end{columns}
-\end{frame}
-
-% ---------------------------------------------------------------------
-\begin{frame}[t]{Equivalent circuits of the $d$- and $q$-axis}
+\begin{frame}[t]{The motor seen by the rotating camera: two $R$--$L$ circuits}
 \centering
-\begin{circuitikz}[scale=.76,transform shape,line width=.5pt]
-  % d-axis
+\begin{circuitikz}[scale=.72,transform shape,line width=.5pt]
   \node[font=\small\bfseries,mkBlue] at (2.5,3.0) {$d$-axis};
-  \draw (0,0) to[short,o-] (0,2.2) to[R,l=$R$] (2.2,2.2) to[L,l=$L_d$,i>^=$i_d$] (4.6,2.2) -- (5.2,2.2)
-        to[cV,l=$\omega_eL_qi_q$] (5.2,0) -- (0,0) node[ocirc]{};
+  \draw (0,0) to[short,o-] (0,2.2) to[R,l=$R$] (2.2,2.2) to[L,l=$L$,i>^=$i_d$] (4.6,2.2) -- (5.2,2.2)
+        to[cV,l=$\omega_eLi_q$] (5.2,0) -- (0,0) node[ocirc]{};
   \draw[-{Latex[length=2mm]}] (-.5,.2) -- node[left]{$v_d$} (-.5,2.0);
   \node[font=\footnotesize,mkRed] at (4.75,1.65) {$-$}; \node[font=\footnotesize,mkRed] at (4.75,.55) {$+$};
-  % q-axis
   \begin{scope}[xshift=8.8cm]
   \node[font=\small\bfseries,mkOrange] at (3.5,3.0) {$q$-axis};
-  \draw (0,0) to[short,o-] (0,2.2) to[R,l=$R$] (2.2,2.2) to[L,l=$L_q$,i>^=$i_q$] (4.6,2.2)
-        to[cV,l=$\omega_eL_di_d$] (7.0,2.2) to[V,l=$\omega_e\psi_\text{PM}$] (7.0,0) -- (0,0) node[ocirc]{};
+  \draw (0,0) to[short,o-] (0,2.2) to[R,l=$R$] (2.2,2.2) to[L,l=$L$,i>^=$i_q$] (4.6,2.2)
+        to[cV,l=$\omega_eLi_d$] (7.0,2.2) to[V,l=$\omega_e\psi_\text{PM}$] (7.0,0) -- (0,0) node[ocirc]{};
   \draw[-{Latex[length=2mm]}] (-.5,.2) -- node[left]{$v_q$} (-.5,2.0);
   \node[font=\footnotesize,mkRed] at (5.05,1.75) {$+$}; \node[font=\footnotesize,mkRed] at (6.55,1.75) {$-$};
   \node[font=\footnotesize,mkRed] at (7.45,.45) {$-$}; \node[font=\footnotesize,mkRed] at (7.45,1.75) {$+$};
   \end{scope}
-\end{circuitikz}\\[-1mm]
-{\scriptsize\color{mkGray} red signs: polarity of each speed voltage as a voltage drop in the direction of the current}
-\vspace{1mm}
-\begin{columns}[T,onlytextwidth]
-\column{.48\textwidth}
-\begin{itemize}\small
-\item Each axis is an \term{$R$--$L$ circuit} with a speed-dependent voltage source.
-\item Electrical time constants $\tau_d=L_d/R$, $\tau_q=L_q/R$ (here \SI{6}{ms}).
-\end{itemize}
-\column{.50\textwidth}
-\begin{itemize}\small
-\item The sources are \hl{disturbances} for the current loops: known (measured $i$, $\omega_e$) $\Rightarrow$ can be fed forward (decoupling).
-\item $q$-axis carries the back-EMF; it sets the voltage requirement at speed.
-\end{itemize}
-\end{columns}
-\end{frame}
-
-% ---------------------------------------------------------------------
-\begin{frame}[t]{Torque: flux- and torque-producing currents, reluctance torque}
+\end{circuitikz}\\[1mm]
 \begin{columns}[T,onlytextwidth]
 \column{.48\textwidth}
 \begin{eqbox}\small
 \vspace{-3mm}
 \begin{align*}
-T_e&=\tfrac32\,p\,(\psi_d i_q-\psi_q i_d)\\
-&=\tfrac32\,p\,\big[\underbrace{\psi_\text{PM}\,i_q}_{\text{magnet}}+\underbrace{(L_d-L_q)\,i_d i_q}_{\text{reluctance}}\big]
+v_d&=R\,i_d+L\tfrac{di_d}{dt}-\omega_eL\,i_q\\
+v_q&=R\,i_q+L\tfrac{di_q}{dt}+\omega_eL\,i_d+\underbrace{\omega_e\psi_\text{PM}}_{\text{back-EMF}}
 \end{align*}
 \vspace{-4mm}
 \end{eqbox}
-\begin{itemize}\scriptsize
-\item SPM ($L_d=L_q$): $T_e=k_t i_q$, $k_t=\tfrac32p\psi_\text{PM}$ \\(\SI{0.72}{Nm/A} for the reference motor); $i_d^*=0$ minimises $|\vec i|$.
-\item IPM ($L_q>L_d$): \hl{negative $i_d$ adds torque}.
-\item With $i_d=-\hat I\sin\beta$, $i_q=\hat I\cos\beta$:\\
-$T_e=\tfrac32p\left[\psi_\text{PM}\hat I\cos\beta+\tfrac12(L_q-L_d)\hat I^2\sin2\beta\right]$
-\item Note: $k_t$ in Nm/A refers to the \emph{peak} (amplitude-invariant) current; datasheets often use rms: $k_{t,\text{rms}}=\sqrt2\,k_t$.
+\column{.50\textwidth}
+\begin{itemize}\small
+\item Each axis = the Day-1 winding ($R$, $L$) plus speed-dependent sources; time constant $L/R=\SI{6}{ms}$.
+\item Back-EMF appears only on $q$. The $\omega_eL\,i$ terms couple the axes.
 \end{itemize}
+\gofurther{derived from $\vec v=R\vec i+d\vec\psi/dt$ in rotating coordinates, which adds $j\omega_e\vec\psi$; IPM motors have $L_d\ne L_q$.}
+\end{columns}
+\end{frame}
+
+% ---------------------------------------------------------------------
+\begin{frame}[t]{Torque comes from $i_q$}
+\begin{columns}[T,onlytextwidth]
+\column{.48\textwidth}
+\begin{eqbox}\centering
+$T_e=\tfrac32\,p\,\psi_\text{PM}\,i_q=k_t\,i_q$
+\end{eqbox}
+\begin{defbox}[Example (reference motor)]
+\small $k_t=1.5\cdot4\cdot\SI{0.12}{Vs}=\SI{0.72}{Nm/A}$\\
+$i_q=\SI{10}{A}$ $\Rightarrow$ $T_e=0.72\cdot10=\SI{7.2}{Nm}$.
+\end{defbox}
+\begin{itemize}\small
+\item Set $i_d^*=0$: all the current makes torque.
+\item If the current arrow is tilted by $\beta$ away from $q$, only $\cos\beta$ of it is useful (blue curve).
+\end{itemize}
+\gofurther{in \term{IPM} motors ($L_q>L_d$) a negative $i_d$ adds \emph{reluctance torque} $\tfrac32p(L_d-L_q)i_di_q$; the best angle is \term{MTPA} (max.\ torque per amp, here $\beta=26.6^\circ$, +19\,\%). Above base speed, negative $i_d$ weakens the magnet flux (\term{field weakening}) to reach higher speed [Jahns et al., 1986].}
 \column{.50\textwidth}
 \begin{tikzpicture}
 \begin{axis}[mkplot,width=7.4cm,height=5.4cm,xmin=0,xmax=90,ymin=-.5,ymax=14,xtick={0,15,...,90},
@@ -607,121 +674,47 @@ $T_e=\tfrac32p\left[\psi_\text{PM}\hat I\cos\beta+\tfrac12(L_q-L_d)\hat I^2\sin2
 \addplot[mkSky,thick,dashed,domain=0:90,samples=91] {3.6*sin(2*x)};
 \addplot[mkOrange,line width=1.2pt,domain=0:90,samples=91] {9.6*cos(x)+3.6*sin(2*x)};
 \addplot[only marks,mark=*,mark size=1.5pt,mkRed] coordinates {(26.6,11.47)};
-\node[font=\tiny,mkRed,anchor=south west] at (axis cs:20,11.9) {MTPA: $\beta=26.6^\circ$, \SI{11.5}{Nm}};
-\legend{magnet,reluctance,total}
+\node[font=\tiny,mkRed,anchor=south west] at (axis cs:20,11.9) {MTPA (IPM only)};
+\legend{magnet torque,reluctance (IPM),total (IPM)}
 \end{axis}
 \end{tikzpicture}\\
-\scriptsize Illustrative IPM: $p=4$, $\psi_\text{PM}=\SI{0.08}{Vs}$, $L_d=\SI{2}{mH}$, $L_q=\SI{5}{mH}$, $\hat I=\SI{20}{A}$ (+19\,\% vs.\ $i_d=0$).
+\scriptsize Illustrative IPM motor, $\hat I=\SI{20}{A}$. For our surface-magnet motor only the blue curve exists: best at $\beta=0$.
 \end{columns}
 \end{frame}
 
 % ---------------------------------------------------------------------
-\begin{frame}[t]{Maximum torque per ampere (MTPA)}
+\begin{frame}[t]{Worked example: operating point at \SI{3000}{rpm}}
 \begin{columns}[T,onlytextwidth]
-\column{.50\textwidth}
-\centering
-\begin{tikzpicture}
-\begin{axis}[mkplot,width=7.0cm,height=5.8cm,axis equal image,xmin=-25,xmax=2,ymin=0,ymax=31,
-  xlabel={$i_d$ (A)},ylabel={$i_q$ (A)},legend pos=north west,legend style={font=\tiny}]
-\addplot[mkGray,densely dotted,domain=90:180,samples=40] ({10*cos(x)},{10*sin(x)});
-\addplot[mkGray,densely dotted,domain=90:180,samples=40,forget plot] ({20*cos(x)},{20*sin(x)});
-\addplot[mkSky,thick,domain=-25:0,samples=60] {4/(6*(0.08-0.003*x))};
-\addplot[mkMid,thick,domain=-25:0,samples=60] {8/(6*(0.08-0.003*x))};
-\addplot[mkBlue,thick,domain=-25:0,samples=60] {12/(6*(0.08-0.003*x))};
-\addplot[mkOrange,line width=1.3pt,domain=0:25,samples=60] ({6.667-sqrt(44.44+x^2/2)},{sqrt(max(x^2-(6.667-sqrt(44.44+x^2/2))^2,0))});
-\legend{{$\lvert\vec i\rvert=10$; $20$\,A},\SI{4}{Nm},\SI{8}{Nm},\SI{12}{Nm},MTPA}
-\end{axis}
-\end{tikzpicture}
-\column{.48\textwidth}
-\begin{itemize}\small
-\item Goal: minimum $|\vec i|$ (copper loss, inverter current) for a required torque.
-\item Condition: constant-torque curve \hl{tangent} to the current circle. Setting $\partial T_e/\partial\beta=0$:
-\end{itemize}
-\begin{eqbox}\small
-\[i_d^\text{MTPA}=\frac{\psi_\text{PM}}{4(L_q-L_d)}-\sqrt{\frac{\psi_\text{PM}^2}{16(L_q-L_d)^2}+\frac{\hat I^2}{2}}\]
-\vspace{-5mm}
-\end{eqbox}
-\begin{itemize}\scriptsize
-\item SPM: $L_q=L_d$ $\Rightarrow$ MTPA is simply $i_d=0$.
-\item Implementation: look-up table $i_d^*=f(i_q^*)$ or $(i_d^*,i_q^*)=f(T^*)$; tables measured on a dynamometer include saturation ($L_q$ drops with $i_q$).
-\end{itemize}
-\src{[Jahns, Kliman \& Neumann, 1986]}
-\end{columns}
-\end{frame}
-
-% ---------------------------------------------------------------------
-\begin{frame}[t]{Field weakening (brief) and the torque--speed envelope}
-\begin{columns}[T,onlytextwidth]
-\column{.52\textwidth}
-\begin{tikzpicture}
-\begin{axis}[mkplot,width=7.0cm,height=5.0cm,xmin=0,xmax=8000,ymin=0,ymax=16,
-  xlabel={speed $n$ (rpm)},ylabel={torque (Nm)},legend pos=north east,
-  scaled x ticks=false,xticklabel style={/pgf/number format/fixed},axis y line*=left]
-\addplot[mkBlue,line width=1.1pt] table[x=rpm,y=T]{data/fw.dat};
-\addplot[mkRed,thick,dashed] coordinates {(3240,0) (3240,16)};
-\legend{max.\ torque}
-\end{axis}
-\begin{axis}[mkplot,width=7.0cm,height=5.0cm,xmin=0,xmax=8000,ymin=-22,ymax=6,axis y line*=right,axis x line=none,
-  ylabel={$i_d$ (A), $P$ (kW)},legend pos=south west,grid=none]
-\addplot[mkOrange,thick] table[x=rpm,y=id]{data/fw.dat};
-\addplot[mkMid,thick,dotted] table[x=rpm,y=P]{data/fw.dat};
-\legend{$i_d$,$P$}
-\end{axis}
-\end{tikzpicture}\\
-\scriptsize Computed for the reference SPM ($V_\text{dc}=\SI{325}{V}$, $\hat I_\text{max}=\SI{20}{A}$): base speed $\approx$\,\SI{3240}{rpm}, limit $\approx$\,\SI{7440}{rpm}.
-\column{.46\textwidth}
-\begin{itemize}\small
-\item Above base speed the back-EMF $\omega_e\psi_\text{PM}$ approaches $V_\text{max}$.
-\item Negative $i_d$ \hl{reduces the $d$-axis flux} $L_di_d+\psi_\text{PM}$ $\Rightarrow$ more speed at the same voltage.
-\item The current budget used by $i_d$ is lost for $i_q$: torque falls, power roughly constant.
-\item Characteristic current $I_\text{ch}=\psi_\text{PM}/L_d$ (here \SI{40}{A} $>\hat I_\text{max}$ $\Rightarrow$ finite maximum speed).
-\item Practical: voltage-feedback FW loop ($|\vec v^*|>0.95V_\text{max}\Rightarrow$ integrate towards negative $i_d^*$).
-\item Servo motors seldom use deep FW; spindles and traction do.
-\end{itemize}
-\end{columns}
-\end{frame}
-
-% ---------------------------------------------------------------------
-\begin{frame}[t]{Worked example: steady-state operating point at \SI{3000}{rpm}}
-\begin{columns}[T,onlytextwidth]
-\column{.50\textwidth}
-\footnotesize
-Reference SPM, $i_d=0$, $i_q=\SI{10}{A}$, $n=\SI{3000}{rpm}$:
-\begin{align*}
-\omega_e&=p\,\tfrac{2\pi n}{60}=4\cdot314.2=\SI{1256.6}{rad/s}\\
-E&=\omega_e\psi_\text{PM}=\SI{150.8}{V}\\
-v_q&=R\,i_q+E=5.0+150.8=\SI{155.8}{V}\\
-v_d&=-\omega_eL\,i_q=\SI{-37.7}{V}\\
-|\vec v|&=\sqrt{v_d^2+v_q^2}=\SI{160.3}{V}\ (85\,\%\text{ of }V_\text{max}=\SI{187.6}{V})\\
-T_e&=k_ti_q=\SI{7.2}{Nm},\quad P_\text{mech}=T_e\omega_m=\SI{2.26}{kW}\\
-P_\text{el}&=\tfrac32(v_di_d+v_qi_q)=\SI{2.34}{kW}
-\end{align*}
-Check: $P_\text{el}-P_\text{mech}=\tfrac32R\,i_q^2=\SI{75}{W}$ \textcolor{mkGreen}{\checkmark}
-\column{.48\textwidth}
+\column{.54\textwidth}
+\small Reference motor, $i_d=0$, $i_q=\SI{10}{A}$, $n=\SI{3000}{rpm}$.
+\begin{enumerate}\small
+\item Electrical speed: $\omega_e=p\cdot\frac{2\pi n}{60}=4\cdot\SI{314.2}{rad/s}=\SI{1257}{rad/s}$.
+\item Back-EMF: $E=\omega_e\psi_\text{PM}=1257\cdot0.12=\SI{150.8}{V}$.
+\item Axis voltages: $v_q=R\,i_q+E=5.0+150.8=\SI{155.8}{V}$;\ $v_d=-\omega_eL\,i_q=-1257\cdot0.003\cdot10=\SI{-37.7}{V}$.
+\item Length: $|\vec v|=\sqrt{37.7^2+155.8^2}=\SI{160.3}{V}$ $<V_\text{max}=\SI{188}{V}$ \textcolor{mkGreen}{\checkmark} (85\,\% used).
+\end{enumerate}
+Torque $k_ti_q=\SI{7.2}{Nm}$; power $T\omega_m=7.2\cdot314=\SI{2.26}{kW}$.
+\column{.44\textwidth}
 \centering
 \begin{tikzpicture}[scale=1]
   \draw[-{Latex[length=2mm]},mkGray] (-1.3,0) -- (1.5,0) node[right,font=\scriptsize]{$d$};
   \draw[-{Latex[length=2mm]},mkGray] (0,-.2) -- (0,4.0) node[above,font=\scriptsize]{$q$};
-  % scale: 40 V per cm
   \draw[-{Latex[length=2mm]},mkOrange,line width=1.4pt] (0,0) -- (0,1.6) node[midway,right,font=\scriptsize]{$\vec i\,(i_q)$};
   \draw[-{Latex[length=2mm]},mkMid,line width=1pt] (0,0) -- (0,3.77) node[pos=.62,right,font=\scriptsize]{$E=\omega_e\psi_\text{PM}$};
   \draw[-{Latex[length=2mm]},mkSky,line width=1pt] (0,3.77) -- (0,3.895);
   \node[font=\tiny,mkSky,anchor=west] at (.05,3.95) {$Ri_q$};
   \draw[-{Latex[length=2mm]},mkRed,line width=1pt] (0,3.895) -- (-.943,3.895) node[midway,above,font=\scriptsize]{$-\omega_eLi_q$};
   \draw[-{Latex[length=2mm]},mkBlue,line width=1.4pt] (0,0) -- (-.943,3.895) node[left,font=\scriptsize,pos=.55]{$\vec v$};
-  \draw[mkBlue] (0,1.0) arc (90:103.6:1.0); \node[font=\tiny,mkBlue] at (-.32,1.25) {$\varphi$};
   \draw[-{Latex[length=2mm]},mkGray,line width=.8pt] (0,0) -- (1.2,0) node[below,font=\tiny]{$\psi_\text{PM}$};
 \end{tikzpicture}\\
-\scriptsize Vector diagram to scale (voltages \SI{40}{V/cm}); $\varphi=13.6^\circ$, $\cos\varphi=0.97$.
-The $\omega_eLi_q$ term grows with load and speed -- it consumes voltage reserve.
+\scriptsize Vector diagram to scale (\SI{40}{V/cm}). At higher speed or load the voltage arrow reaches the limit circle.
 \end{columns}
 \end{frame}
 
 % ---------------------------------------------------------------------
 \begin{frame}[t]{FOC: the basic structure}
 \centering
-\begin{tikzpicture}[x=.92cm,y=.85cm]
-  % forward path
+\begin{tikzpicture}[x=.92cm,y=.78cm]
   \node[sumn] (sw) at (0.5,2.4) {};
   \node[blk,minimum width=10mm] (pw) at (1.6,2.4) {PI $\omega$};
   \node[sumn] (sq) at (3.3,2.4) {};
@@ -731,19 +724,17 @@ The $\omega_eLi_q$ term grows with load and speed -- it consumes voltage reserve
   \node[blko,minimum height=22mm,minimum width=12mm] (dec) at (6.0,1.7) {decou-\\pling\\+ FF};
   \node[blk,minimum height=22mm,minimum width=12mm] (ipark) at (7.7,1.7) {inverse\\Park\\$dq\!\to\!\alpha\beta$};
   \node[blk,minimum height=22mm,minimum width=12mm] (svm) at (9.3,1.7) {SVPWM};
-  \node[blko,minimum height=22mm,minimum width=12mm] (inv) at (10.9,1.7) {VSI\\inverter};
+  \node[blko,minimum height=22mm,minimum width=12mm] (inv) at (10.9,1.7) {inverter};
   \node[draw=mkBlue,circle,minimum size=11mm,fill=mkPale,font=\scriptsize,line width=.6pt] (m) at (12.9,1.7) {PMSM};
   \node[blk,minimum width=8mm] (enc) at (14.3,1.7) {enc.};
   \draw[mkBlue,line width=1pt] (m.east) -- (enc.west);
-  % feedback blocks
   \node[blk,minimum width=14mm] (park) at (6.6,-0.55) {Clarke + Park};
   \node[blk,minimum width=12mm] (pp) at (11.0,-1.2) {$\times p,\ +\theta_\text{off}$};
   \node[blk,minimum width=12mm] (dd) at (12.9,-2.0) {$d/dt$ + filter};
-  % forward signals
   \draw[sig] (-.4,2.4) node[left,font=\scriptsize]{$\omega^*$} -- (sw);
   \draw[sig] (sw) -- (pw); \draw[sig] (pw) -- node[above,lab]{$i_q^*$} (sq);
   \draw[sig] (sq) -- (pq); \draw[sig] (sd) -- (pd);
-  \draw[sig] (1.7,1.0) node[left,font=\scriptsize,align=right]{$i_d^*$ (0/MTPA/FW)} -- (sd);
+  \draw[sig] (1.7,1.0) node[left,font=\scriptsize,align=right]{$i_d^*=0$} -- (sd);
   \draw[sig] (pq.east) -- (pq.east -| dec.west); \draw[sig] (pd.east) -- (pd.east -| dec.west);
   \draw[sig] (dec.east |- 0,2.4) -- node[above,lab]{$v_q^*$} (ipark.west |- 0,2.4);
   \draw[sig] (dec.east |- 0,1.0) -- node[below,lab]{$v_d^*$} (ipark.west |- 0,1.0);
@@ -753,13 +744,11 @@ The $\omega_eLi_q$ term grows with load and speed -- it consumes voltage reserve
   \node[lab,above] at (10.1,2.45) {gates};
   \foreach \y in {1.45,1.7,1.95}{\draw[mkNavy,line width=.8pt] (inv.east |- 0,\y) -- (m.west |- 0,\y);}
   \draw[mkGray,-{Latex[length=1.5mm]}] (10.9,3.25) node[above,font=\tiny]{$V_\text{dc}$} -- (inv.north);
-  % current feedback
   \fill[mkOrange] (11.85,1.45) circle (1.3pt); \fill[mkOrange] (12.05,1.7) circle (1.3pt);
   \draw[fb] (11.85,1.45) -- (11.85,-0.4) -- (park.east |- 0,-0.4);
   \draw[fb] (12.05,1.7) -- (12.05,-0.7) -- node[below,lab,pos=.7]{$i_a,\,i_b$} (park.east |- 0,-0.7);
   \draw[fb] (park.west |- 0,-0.4) -- node[above,lab,pos=.15]{$i_d$} (2.9,-0.4) -- (sd.south);
   \draw[fb] (park.west |- 0,-0.7) -- node[below,lab,pos=.15]{$i_q$} (3.3,-0.7) -- (sq.south);
-  % angle path
   \draw[fb] (enc.south) |- (pp.east);
   \draw[fb] (pp.west) -- node[above,lab,pos=.3]{$\theta_e$} (8.0,-1.2) -- (8.0,0.6);
   \draw[fb] (8.0,-1.2) -- (6.6,-1.2) -- (park.south);
@@ -771,102 +760,78 @@ The $\omega_eLi_q$ term grows with load and speed -- it consumes voltage reserve
 \vspace{1mm}
 \begin{columns}[T,onlytextwidth]
 \column{.5\textwidth}
-\scriptsize \textbf{Every PWM period:} sample $i_a,i_b$ and $\theta_m$ $\to$ Clarke/Park $\to$ two PIs $\to$ decoupling $\to$ inverse Park $\to$ SVPWM duty update.
+\small \textbf{Every PWM period (\SI{62.5}{\micro s}):} 1.\ measure $i_a,i_b$, angle; 2.\ Clarke + Park; 3.\ two PIs; 4.\ inverse Park; 5.\ new duty cycles.
 \column{.48\textwidth}
-\scriptsize Velocity loop: every 1--4 PWM periods. The outer position loop (Session 3.4) provides $\omega^*$. Typical current-loop execution: 5--20\,\si{\micro s} on a DSP/MCU.
-\end{columns}
-\end{frame}
-
-% ---------------------------------------------------------------------
-\begin{frame}[t]{Cross-coupling and decoupling}
-\begin{columns}[T,onlytextwidth]
-\column{.42\textwidth}
-\begin{itemize}\small
-\item Without compensation the $q$-loop must \emph{integrate up} the back-EMF and both PIs fight the coupling terms $\omega_eL\,i$.
-\item \term{Decoupling / feedforward}: add the model terms to the PI outputs:
-\end{itemize}
-\begin{eqbox}\small
-\vspace{-3mm}
-\begin{align*}
-v_d^*&=v_{d,\text{PI}}-\omega_e\hat L_q\,i_q\\
-v_q^*&=v_{q,\text{PI}}+\omega_e(\hat L_d\,i_d+\hat\psi_\text{PM})
-\end{align*}
-\vspace{-4mm}
-\end{eqbox}
-\begin{itemize}\scriptsize
-\item Ideal decoupling leaves two independent $1/(R+Ls)$ plants.
-\item Parameter errors and the loop delay leave a residual coupling (right: $i_d$ peak \SI{2.3}{A} $\to$ \SI{0.85}{A}).
-\item Use $i^*$ instead of $i$ to avoid feeding noise.
-\end{itemize}
-\column{.56\textwidth}
-\begin{tikzpicture}
-\begin{groupplot}[group style={group size=1 by 2,vertical sep=3mm,xticklabels at=edge bottom},
-  mkplot,width=8.2cm,height=3.3cm,xmin=0,xmax=1.5,legend pos=south east]
-\nextgroupplot[ylabel={$i_q$ (A)},ymin=-1,ymax=12]
-\addplot[mkSky,thick,dashed] table[x=t,y=iq_n]{data/decoup.dat};
-\addplot[mkBlue,thick] table[x=t,y=iq_d]{data/decoup.dat};
-\legend{PI only,PI + decoupling}
-\nextgroupplot[ylabel={$i_d$ (A)},xlabel={time (ms)},ymin=-.6,ymax=2.6]
-\addplot[mkOrange!80,thick,dashed] table[x=t,y=id_n]{data/decoup.dat};
-\addplot[mkOrange,thick] table[x=t,y=id_d]{data/decoup.dat};
-\end{groupplot}
-\end{tikzpicture}\\
-\scriptsize Simulated $i_q^*$ step $0\to\SI{10}{A}$ at \SI{3000}{rpm} (reference motor, discrete PI, \SI{16}{kHz}, 1.5\,$T_s$ delay; integrator pre-loaded with $\omega_e\psi_\text{PM}$ in both cases).
+\gofurther{\term{decoupling}: add the known terms $-\omega_eLi_q$ and $+\omega_e(Li_d+\psi_\text{PM})$ to the PI outputs, so each PI sees only its own $R$--$L$ circuit.}
 \end{columns}
 \end{frame}
 
 % ---------------------------------------------------------------------
 \begin{frame}[t]{Rotor angle alignment and offset errors}
 \begin{columns}[T,onlytextwidth]
-\column{.50\textwidth}
-\begin{itemize}\small
-\item The encoder zero is arbitrary; FOC needs $\theta_e=0$ on the magnet $d$-axis: $\theta_e=p(\theta_m-\theta_{m,0})$.
-\item \textbf{Methods}
-\begin{itemize}\scriptsize
-\item DC alignment: inject a current vector along $\alpha$, rotor locks to $\theta_e=0$, store $\theta_{m,0}$ (needs free shaft, light load).
-\item Back-EMF: spin the motor externally, compare phase-voltage zero crossings with encoder.
-\item Hall sensors for start-up, refined at the first Hall edge.
-\item Absolute encoder with factory-stored offset (typical for servo motors).
-\item Standstill methods with high-frequency injection (saliency / saturation).
-\end{itemize}
-\end{itemize}
 \column{.48\textwidth}
+\begin{itemize}\small
+\item The encoder's zero is wherever it was mounted; FOC needs $\theta_e=0$ exactly at the magnet's $d$-axis.
+\item Wrong offset = the camera is mounted crooked: we push at the wrong angle.
+\item Fixes: absolute encoder with factory offset (typical); DC alignment (push a current, rotor snaps to $\theta_e=0$); Hall sensors at start-up.
+\end{itemize}
+\begin{eqbox}\centering
+$T_e=k_t\,|\vec i|\cos\Delta\theta_e$
+\end{eqbox}
+\column{.50\textwidth}
 \begin{tikzpicture}
 \begin{axis}[mkplot,width=7.0cm,height=4.4cm,xmin=0,xmax=90,ymin=-.05,ymax=1.05,xtick={0,15,...,90},
   xlabel={electrical offset error $\Delta\theta_e$ (deg)},ylabel={per unit of $|\vec i|$},legend pos=south west]
 \addplot[mkBlue,thick,domain=0:90,samples=60] {cos(x)};
 \addplot[mkOrange,thick,dashed,domain=0:90,samples=60] {sin(x)};
-\legend{torque-producing $i_q$,unwanted $i_d$}
+\legend{useful $i_q$,wasted $i_d$}
 \end{axis}
 \end{tikzpicture}
-\begin{notebox}
-$T_e=k_t|\vec i|\cos\Delta\theta_e$. $\Delta\theta_m=2^\circ$ mech.\ with $p=4$ $\Rightarrow$ $8^\circ$ el.: $-1\,\%$ torque, but $14\,\%$ of the current in $d$ (heating, FW in one direction only). For $|\Delta\theta_e|>90^\circ$ torque reverses $\Rightarrow$ \hl{runaway}.
-\end{notebox}
+\begin{defbox}[Example]
+\small $2^\circ$ mech., $p=4$ $\Rightarrow$ $8^\circ$ el.: torque $-1\,\%$, but 14\,\% of the current wasted as heat. Beyond $90^\circ$ the torque reverses $\Rightarrow$ \hl{runaway}.
+\end{defbox}
 \end{columns}
+\end{frame}
+
+% ---------------------------------------------------------------------
+\begin{frame}[t]{Check your understanding -- 3.3}
+\vspace{4mm}
+\begin{keybox}[Check your understanding]
+\large
+\begin{enumerate}
+\item $i_a=\SI{8}{A}$, $i_b=\SI{-4}{A}$, $i_c=\SI{-4}{A}$. What are $i_\alpha$ and $i_\beta$?\\[3mm]
+\item In the ``rotating camera'' view, why do the motor currents look constant?\\[3mm]
+\item An 8-pole motor turns at \SI{1500}{rpm}. What is the electrical frequency of its currents?
+\end{enumerate}
+\end{keybox}
+\vfill
+\centering\small\color{mkGray} Discuss with your neighbour for 2 minutes.
 \end{frame}
 
 % ---------------------------------------------------------------------
 \begin{frame}{Summary 3.3 -- Field-oriented control}
 \begin{columns}[T,onlytextwidth]
-\column{.58\textwidth}
+\column{.56\textwidth}
 \begin{keybox}[Key take-aways]
 \small
 \begin{itemize}
-\item Clarke + Park map AC phase quantities into DC $dq$ quantities in the rotor frame; $\theta_e=p\,\theta_m$.
-\item PMSM $dq$ model: two $R$--$L$ circuits + cross-coupling $\omega_eL\,i$ + back-EMF $\omega_e\psi_\text{PM}$.
-\item $T_e=\tfrac32p[\psi_\text{PM}i_q+(L_d-L_q)i_di_q]$; SPM: $i_d^*=0$, IPM: MTPA with $i_d<0$.
-\item Field weakening trades current for voltage above base speed.
-\item FOC = angle + Park + 2 PI + decoupling + inverse Park + SVPWM, every PWM period.
-\item Angle offset errors cost torque and can cause runaway.
+\item Three phase currents = one rotating arrow.
+\item Clarke: $abc\to\alpha\beta$; Park: view from the rotor $\Rightarrow$ DC values $i_d$, $i_q$.
+\item Torque $T_e=k_ti_q$; keep $i_d=0$ (surface magnets).
+\item Each axis is an $R$--$L$ circuit; back-EMF on $q$.
+\item FOC: measure, transform, two PIs, transform back, PWM -- every period. Needs a correct angle.
 \end{itemize}
 \end{keybox}
-\column{.38\textwidth}
-\begin{notebox}
-\textbf{Self-check}\\
-1.\ $i_a=\SI{8}{A}$, $i_b=\SI{-4}{A}$: $i_\alpha$, $i_\beta$?\ ($8$; $0$)\\[1mm]
-2.\ Why does $i_q$ step cleanly while $i_a$ is sinusoidal?\\[1mm]
-3.\ Back-EMF of the reference motor at \SI{1500}{rpm}?\ (\SI{75.4}{V} peak phase)
-\end{notebox}
+\column{.42\textwidth}
+\begin{defbox}[Key terms]
+\small
+\textbf{PMSM} -- permanent-magnet synchronous motor.\\
+\textbf{$\alpha\beta$ frame} -- two fixed axes.\\
+\textbf{$dq$ frame} -- two axes turning with the rotor.\\
+\textbf{$i_d$ / $i_q$} -- flux / torque current.\\
+\textbf{Pole pairs $p$} -- $\theta_e=p\theta_m$.\\
+\textbf{MTPA, field weakening} -- see ``going further''.
+\end{defbox}
 \end{columns}
 \end{frame}
 
@@ -879,7 +844,7 @@ $T_e=k_t|\vec i|\cos\Delta\theta_e$. $\Delta\theta_m=2^\circ$ mech.\ with $p=4$ 
 \begin{tikzpicture}[x=.9cm,y=.9cm]
   \node[blko,minimum width=14mm] (tg) at (0,1.6) {trajectory\\generator};
   \node[sumn] (s1) at (1.6,1.6) {};
-  \node[blk] (cp) at (2.7,1.6) {position\\P / PI};
+  \node[blk] (cp) at (2.7,1.6) {position\\P};
   \node[sumn] (s2) at (4.1,1.6) {};
   \node[blk] (cv) at (5.2,1.6) {velocity\\PI};
   \node[sumn] (s3) at (6.6,1.6) {};
@@ -893,11 +858,9 @@ $T_e=k_t|\vec i|\cos\Delta\theta_e$. $\Delta\theta_m=2^\circ$ mech.\ with $p=4$ 
   \draw[sig] (ci) -- (pwm); \draw[sig] (pwm) -- (mot); \draw[sig] (mot) -- node[above,lab]{$T_e$} (mech);
   \draw[sig] (mech) -- node[above,lab]{$\omega$} (int); \draw[sig] (int) -- (14.8,1.6) node[right,font=\scriptsize]{$x$};
   \draw[sig] (12.5,2.6) node[above,font=\tiny]{$T_L$} -- (mech.north);
-  % feedbacks
   \draw[fb] (10.4,1.15) -- (10.4,.7) -| (s3.south); \node[lab] at (8.9,.55) {$i$ (\SI{16}{kHz})};
   \draw[fb] (13.3,1.6) -- (13.3,.1) -| (s2.south); \node[lab] at (8.9,-.05) {$\omega$ (\SI{8}{kHz})};
   \draw[fb] (14.6,1.6) -- (14.6,-.5) -| (s1.south); \node[lab] at (8.9,-.65) {$x$ (\SI{2}{kHz})};
-  % feedforward
   \draw[ff] (tg.north) |- (5.0,2.65) node[pos=.6,above,lab]{$\dot x^*$ velocity FF} -- (s2.north);
   \draw[ff] (tg.north) ++(.3,0) |- (6.6,3.1) node[pos=.75,above,lab]{$J\ddot x^*/k_t$ torque FF} -- (s3.north);
   \node[font=\tiny,mkGray] at (1.4,1.25) {$-$}; \node[font=\tiny,mkGray] at (3.9,1.25) {$-$}; \node[font=\tiny,mkGray] at (6.4,1.25) {$-$};
@@ -905,93 +868,42 @@ $T_e=k_t|\vec i|\cos\Delta\theta_e$. $\Delta\theta_m=2^\circ$ mech.\ with $p=4$ 
 \begin{columns}[T,onlytextwidth]
 \column{.5\textwidth}
 \begin{itemize}\small
-\item Each loop sees the closed inner loop as its ``actuator''.
-\item Inner loops are faster, sampled faster, and \hl{limit} the variables of the outer loop (current $\to$ torque, velocity).
+\item Analogy: navigator (position) $\to$ cruise control (speed) $\to$ engine management (torque).
+\item Each loop treats the closed inner loop as its ``actuator''.
 \end{itemize}
 \column{.48\textwidth}
 \begin{itemize}\small
-\item Tuned and commissioned \emph{inside out}.
-\item Feedforward paths (dashed) carry the known reference derivatives past the slow loops.
+\item Inner loops are \hl{faster}; they also enforce limits (current $\to$ torque).
+\item Dashed: \term{feedforward} -- known commands sent straight to the inner loops.
 \end{itemize}
 \end{columns}
-\src{[Ellis, 2012]; [Lorenz, Lipo \& Novotny, 1994]}
+\src{[Ellis, 2012]}
 \end{frame}
 
 % ---------------------------------------------------------------------
-\begin{frame}[t]{Interaction between loops: the bandwidth hierarchy}
+\begin{frame}[t]{Current-loop PI: a step-by-step recipe}
 \begin{columns}[T,onlytextwidth]
-\column{.55\textwidth}
-\begin{tikzpicture}[x=1.12cm,y=1cm]
-  \draw[-{Latex[length=2mm]},mkGray] (0,0) -- (5.2,0) node[right,font=\scriptsize]{$f$ (Hz)};
-  \foreach \e/\l in {0/1,1/10,2/100,3/1k,4/10k,5/100k}{\draw[mkGray] (\e,0) -- (\e,-.1) node[below,font=\tiny]{\l};}
-  \fill[mkSky!60] (1.0,2.9) rectangle (1.9,3.4); \node[font=\scriptsize,anchor=east] at (.95,3.15) {position 10--80\,Hz};
-  \fill[mkMid!70] (1.7,2.1) rectangle (2.6,2.6); \node[font=\scriptsize,anchor=east] at (1.65,2.35) {velocity 50--400\,Hz};
-  \fill[mkBlue!80] (2.7,1.3) rectangle (3.5,1.8); \node[font=\scriptsize,anchor=west] at (3.55,1.55) {current 0.5--3\,kHz};
-  \fill[mkOrange!80] (3.9,.5) rectangle (4.6,1.0); \node[font=\scriptsize,anchor=west] at (4.65,.75) {$f_\text{PWM}$, $f_s$ 8--32\,kHz};
-  \draw[mkRed,dashed] (2.78,0) -- (2.78,3.6) node[above,font=\tiny,mkRed]{mech.\ resonance?};
-\end{tikzpicture}
-\column{.43\textwidth}
+\column{.50\textwidth}
 \begin{itemize}\small
-\item Outer loop bandwidth must stay well below the inner one (factor 3--10) so the inner loop looks like a \hl{unity gain} at the outer crossover.
-\item Otherwise inner-loop phase lag erodes the outer phase margin.
-\item The current loop is bounded by sampling and PWM delays; the velocity loop by current loop, sensor filtering and \hl{mechanical resonances}.
-\item The position loop is bounded by the velocity loop and by permissible overshoot.
+\item Plant (one axis): the $R$--$L$ winding, $G_i(s)=\dfrac{1}{R+Ls}$, plus a small \hl{delay} $T_\sigma$ (compute + PWM).
+\item PI: $C_i(s)=K_p\dfrac{1+sT_i}{sT_i}$.
+\item Idea: let the PI's zero cancel the slow winding pole, then pick $K_p$ so the delay is still safe.
 \end{itemize}
-\end{columns}
-\end{frame}
-
-% ---------------------------------------------------------------------
-\begin{frame}[t]{Reference and feedback signals}
-\footnotesize
-\begin{tabularx}{\linewidth}{@{}l l l X l@{}}
-\toprule
-\textbf{Loop} & \textbf{Reference} & \textbf{Feedback} & \textbf{Sensor / processing} & \textbf{Typical rate}\\
-\midrule
-Current & $i_d^*$, $i_q^*$ (A) & $i_d$, $i_q$ & shunts / Hall / isolated $\Sigma\Delta$, sampled at PWM centre, Clarke+Park & 8--32\,kHz\\
-Velocity & $\omega^*$ (rad/s) & $\hat\omega$ & encoder position differences ($\Delta\theta/T_s$), low-pass or observer & 4--16\,kHz\\
-Position & $x^*$ (rad, mm) & $x$ & motor encoder (semi-closed) or linear scale (full-closed) & 1--8\,kHz\\
-Feedforward & $\dot x^*$, $\ddot x^*$ & -- & from trajectory generator (exact derivatives) & as position\\
-\bottomrule
-\end{tabularx}
-\vspace{2mm}
-\begin{columns}[T,onlytextwidth]
-\column{.5\textwidth}
-\begin{keybox}[Velocity quantisation]
-\scriptsize Encoder $N=2^{20}$ counts/rev, $T_s=\SI{125}{\micro s}$: one count $\Rightarrow$ $\Delta\omega=\frac{2\pi}{N T_s}=\SI{0.048}{rad/s}$.
-With a 2\,500-line (10\,000 counts) encoder: $\SI{5.0}{rad/s}$ -- velocity noise forces a filter, the filter adds delay.
-\end{keybox}
+\begin{eqbox}\centering
+$T_i=\dfrac{L}{R},\qquad K_p=\dfrac{L}{2\,T_\sigma}$
+\end{eqbox}
+\small This rule is called the \term{technical optimum} (TO).
+\gofurther{the closed loop becomes 2nd order with $\zeta=0.707$ (4.3\,\% overshoot); saturation lowers $L$ at high current, so check $K_p$ there.}
 \column{.48\textwidth}
-\begin{notebox}
-Full-closed loop (linear scale on the load) removes screw errors but puts the compliance \emph{inside} the loop $\Rightarrow$ lower achievable bandwidth. Common compromise: velocity from motor encoder, position from scale (dual-loop).
-\end{notebox}
-\end{columns}
-\end{frame}
-
-% ---------------------------------------------------------------------
-\begin{frame}[t]{PI current-loop design: pole--zero cancellation}
-\begin{columns}[T,onlytextwidth]
-\column{.52\textwidth}
-Plant (one axis, after decoupling) and PI controller:
-\[G_i(s)=\frac{1}{R+Ls}\,e^{-sT_\sigma},\qquad C_i(s)=K_p\,\frac{1+sT_i}{sT_i}\]
-Choose $T_i=L/R$ (zero cancels the electrical pole):
-\[L_i(s)=\frac{K_p}{Ls}\,e^{-sT_\sigma}\ \Rightarrow\ \omega_c\approx\frac{K_p}{L}\]
-\begin{itemize}\scriptsize
-\item $T_\sigma\approx1.5\,T_s$: one sample computation delay + ZOH ($T_s/2$); add filter delays.
-\item Technical optimum (TO): $K_p=\dfrac{L}{2T_\sigma}$ $\Rightarrow$ $\zeta=0.707$, overshoot $4.3\,\%$, PM $\approx 65^\circ$.
-\end{itemize}
-\column{.46\textwidth}
 \begin{defbox}[Worked example (reference motor)]
-\scriptsize
-$f_s=\SI{16}{kHz}$, $T_s=\SI{62.5}{\micro s}$, $T_\sigma=\SI{93.75}{\micro s}$\\[1mm]
-$T_i=L/R=\SI{3}{mH}/\SI{0.5}{\ohm}=\SI{6}{ms}$\\[1mm]
-$K_p=\dfrac{\SI{3}{mH}}{2\cdot\SI{93.75}{\micro s}}=\SI{16}{V/A}$,\quad $K_i=K_p/T_i=\SI{2667}{V/(A\,s)}$\\[1mm]
-$\omega_c\approx K_p/L=\SI{5333}{rad/s}$ $\to$ $f_c\approx\SI{850}{Hz}$\\[1mm]
-Phase cost of delay at $f_c$: $360^\circ f_cT_\sigma=28.7^\circ$ $\Rightarrow$ PM $\approx61^\circ$\\[1mm]
-Closed-loop $-\SI{3}{dB}$ bandwidth $\approx\SI{1.9}{kHz}$
+\small
+\begin{enumerate}
+\item $T_s=1/\SI{16}{kHz}=\SI{62.5}{\micro s}$; $T_\sigma=1.5\,T_s=\SI{93.75}{\micro s}$.
+\item $T_i=\SI{3}{mH}/\SI{0.5}{\ohm}=\SI{6}{ms}$.
+\item $K_p=\dfrac{\SI{3}{mH}}{2\cdot\SI{93.75}{\micro s}}=\SI{16}{V/A}$.
+\item Crossover $\omega_c\approx K_p/L=\SI{5333}{rad/s}$ ($f_c\approx\SI{850}{Hz}$); delay costs $360^\circ\cdot850\cdot93.75\,\si{\micro s}=29^\circ$ $\Rightarrow$ PM $\approx61^\circ$.
+\end{enumerate}
 \end{defbox}
-\begin{notebox}
-Discrete implementation: $K_i T_s$ per sample; scale by the inverter gain (V per duty count) and by $\hat L$ uncertainty (saturation lowers $L$ at high current!).
-\end{notebox}
 \end{columns}
 \end{frame}
 
@@ -1020,39 +932,38 @@ Discrete implementation: $K_i T_s$ per sample; scale by the inverter gain (V per
 \begin{axis}[mkplot,width=6.8cm,height=4.6cm,xmin=0,xmax=1.2,ymin=0,ymax=11.5,xlabel={time (ms)},ylabel={$i_q$ (A)},legend pos=south east]
 \addplot[mkSky,thick,dashed] table[x=t,y=ideal]{data/cur_step.dat};
 \addplot[mkBlue,thick] table[x=t,y=disc]{data/cur_step.dat};
-\legend{continuous PI (no delay),discrete PI @16\,kHz}
+\legend{ideal (no delay),real (\SI{16}{kHz} sampling)}
 \end{axis}
 \end{tikzpicture}\\
-\scriptsize Step $i_q^*:0\to\SI{10}{A}$ at \SI{0.1}{ms}. Without delay: first-order, $\tau=L/K_p=\SI{0.19}{ms}$. With sampling and 1.5\,$T_s$ delay: overshoot $3.9\,\%$ -- close to the TO prediction of $4.3\,\%$.
+\small Step $0\to\SI{10}{A}$: current follows in $\approx\SI{0.3}{ms}$, overshoot only 3.9\,\%.\\
+The delay bends the phase curve down at high frequency -- that is what limits $K_p$.
 \end{columns}
 \end{frame}
 
 % ---------------------------------------------------------------------
-\begin{frame}[t]{Velocity PI design: symmetric optimum}
+\begin{frame}[t]{Velocity-loop PI: a step-by-step recipe}
 \begin{columns}[T,onlytextwidth]
-\column{.52\textwidth}
-Plant seen by the velocity controller:
-\[G_\omega(s)=\frac{k_t}{Js}\cdot\frac{1}{1+sT_\text{eq}},\quad T_\text{eq}=2T_\sigma+T_f\]
-($2T_\sigma$: closed current loop; $T_f$: velocity filter). PI: $C_\omega=K_{p\omega}\frac{1+sT_{i\omega}}{sT_{i\omega}}$.
-\begin{eqbox}\small
-Symmetric optimum (parameter $a>1$):
-\[\omega_c=\frac{1}{aT_\text{eq}},\quad K_{p\omega}=\frac{J}{a\,k_t\,T_\text{eq}},\quad T_{i\omega}=a^2T_\text{eq}\]
-PM $=\arctan\frac{a^2-1}{2a}$:\ \ $a=2\to37^\circ$,\ $a=3\to53^\circ$
-\end{eqbox}
-\column{.46\textwidth}
-\begin{defbox}[Worked example]
-\scriptsize
-$T_\text{eq}=2\cdot\SI{93.75}{\micro s}+\SI{0.31}{ms}=\SI{0.5}{ms}$\\
-$J=J_m(1+3)=\SI{1.2e-3}{kg\,m^2}$, $k_t=\SI{0.72}{Nm/A}$\\[1mm]
-$a=2$: $K_{p\omega}=\dfrac{1.2\cdot10^{-3}}{2\cdot0.72\cdot5\cdot10^{-4}}=\SI{1.67}{A\,s/rad}$,\\
-\quad $T_{i\omega}=\SI{2}{ms}$, $\omega_c=\SI{1000}{rad/s}$ (\SI{159}{Hz})\\[1mm]
-$a=3$: $K_{p\omega}=\SI{1.11}{A\,s/rad}$, $T_{i\omega}=\SI{4.5}{ms}$, $f_c=\SI{106}{Hz}$
-\end{defbox}
-\begin{itemize}\scriptsize
-\item The PI zero lies \emph{below} $\omega_c$ by factor $a$, the lag $1/(1+sT_\text{eq})$ above by $a$ $\Rightarrow$ phase is symmetric around $\omega_c$.
-\item Large overshoot to steps (zero!) $\Rightarrow$ reference prefilter $1/(1+sT_{i\omega})$.
+\column{.50\textwidth}
+\begin{itemize}\small
+\item Plant: current $\to$ torque $\to$ speed. Newton: $J\dot\omega=k_ti_q$ $\Rightarrow$ an \hl{integrator} $\dfrac{k_t}{Js}$.
+\item Plus a small lag $T_\text{eq}$: closed current loop + speed filter.
+\item Choose a spacing factor $a$ (2\ldots4): crossover $a$ times below the lag, PI corner $a$ times below the crossover.
 \end{itemize}
-\src{[Kessler, 1958]; [Schröder, 2015]}
+\begin{eqbox}\centering
+$K_{p\omega}=\dfrac{J\,\omega_c}{k_t},\qquad \omega_c=\dfrac{1}{a\,T_\text{eq}}$
+\end{eqbox}
+\gofurther{this is the \term{symmetric optimum} [Kessler, 1958]: $T_{i\omega}=a^2T_\text{eq}$, PM $=\arctan\frac{a^2-1}{2a}$ (37$^\circ$ at $a=2$, 53$^\circ$ at $a=3$); a reference prefilter removes the large step overshoot.}
+\column{.48\textwidth}
+\begin{defbox}[Worked example: spacing factor 2]
+\small
+\begin{enumerate}
+\item $T_\text{eq}=2\cdot\SI{93.75}{\micro s}+\SI{0.31}{ms}\approx\SI{0.5}{ms}$.
+\item $\omega_c=1/(2\cdot\SI{0.5}{ms})=\SI{1000}{rad/s}$ (\SI{159}{Hz}).
+\item $J=J_m(1+3)=1.2\cdot10^{-3}$\,kg\,m$^2$; $K_{p\omega}=1.2\cdot10^{-3}\cdot1000/0.72=1.67$\,A\,s/rad.
+\item $T_{i\omega}=a^2T_\text{eq}=\SI{2}{ms}$.
+\end{enumerate}
+\end{defbox}
+\small Larger $a$ $\Rightarrow$ slower but calmer ($a=3$: $f_c=\SI{106}{Hz}$).
 \end{columns}
 \end{frame}
 
@@ -1084,49 +995,51 @@ $a=3$: $K_{p\omega}=\SI{1.11}{A\,s/rad}$, $T_{i\omega}=\SI{4.5}{ms}$, $f_c=\SI{1
 \legend{$a=2$,$a=2$ + prefilter,$a=3$,$a=3$ + prefilter}
 \end{axis}
 \end{tikzpicture}\\
-\scriptsize Computed: $a=2$: $f_c=\SI{164}{Hz}$, PM $35^\circ$, overshoot 46\,\% (7\,\% with prefilter). $a=3$: $f_c=\SI{107}{Hz}$, PM $53^\circ$, 25\,\% (0\,\% with prefilter). Small-signal only -- no current limit.
+\small $a=2$: \SI{164}{Hz}, PM $35^\circ$, 46\,\% overshoot (7\,\% with prefilter).\\
+$a=3$: \SI{107}{Hz}, PM $53^\circ$, 25\,\% (0\,\% with prefilter).\\
+\hl{More phase margin = less overshoot.}
 \end{columns}
 \end{frame}
 
 % ---------------------------------------------------------------------
-\begin{frame}[t]{Position loop: P (or PI) and the $k_v$ factor}
+\begin{frame}[t]{Position loop: a P controller and the following error}
 \begin{columns}[T,onlytextwidth]
 \column{.52\textwidth}
 \begin{itemize}\small
-\item With the closed velocity loop $\approx 1$, the position plant is an integrator $1/s$ $\Rightarrow$ a \hl{P controller} already gives zero steady-state error to steps (type-1 loop).
-\item $K_{pp}=k_v$ (1/s) is the position-loop crossover; rule: $k_v\approx\omega_{c\omega}/4\ldots/10$.
-\item Ramp ($\dot x^*=v$ const.) $\Rightarrow$ constant \term{following error}
+\item With a good velocity loop, speed $\approx$ command; position is the integral of speed.
+\item So a simple \hl{P controller} reaches any fixed target with zero error. Gain $k_v$ (1/s).
+\item Following a ramp (constant speed $v$) leaves a constant lag: the \term{following error}.
 \end{itemize}
-\begin{eqbox}\small\centering
-$e_\text{ss}=\dfrac{v}{k_v}$\qquad (P position loop, no feedforward)
+\begin{eqbox}\centering
+$e_\text{ss}=\dfrac{v}{k_v}$\qquad (P loop, no feedforward)
 \end{eqbox}
-\begin{itemize}\scriptsize
-\item PI position control removes the ramp error but adds overshoot; usually feedforward is preferred.
-\item No overshoot allowed in machining (would cut into the part) $\Rightarrow$ P + FF is the standard.
-\end{itemize}
+\small Analogy: a dog on a leash trotting behind its owner -- the faster the walk, the longer the leash.\\[1mm]
+Rule: $k_v\approx$ velocity crossover / 4\ldots10. No overshoot allowed in machining.
 \column{.46\textwidth}
 \begin{defbox}[Worked example]
-\scriptsize
-Machine tool axis, $k_v=\SI{3}{(m/min)/mm}=\SI{50}{s^{-1}}$, feed $v=\SI{10}{m/min}$:\\
-$e_\text{ss}=\dfrac{10}{3}=\SI{3.3}{mm}$ (!)\\[1mm]
-Reference servo, $k_v=\SI{100}{s^{-1}}$, $\omega=\SI{300}{rad/s}$:\\
-$e_\text{ss}=\SI{3}{rad}$ $\approx$ half a revolution.
+\small
+\begin{enumerate}
+\item Machine-tool axis: $k_v=\SI{50}{s^{-1}}$, feed $v=\SI{10}{m/min}=\SI{167}{mm/s}$.
+\item $e_\text{ss}=167/50=\SI{3.3}{mm}$ (!)
+\item Doubling $k_v$ halves it -- but stability limits $k_v$.
+\end{enumerate}
 \end{defbox}
 \begin{notebox}
-On a contour (two axes), different $k_v$ per axis $\Rightarrow$ path distortion. Interpolating axes must have \hl{identical} $k_v$, or the error must be cancelled by feedforward.
+Two axes cutting a contour need \hl{equal} $k_v$, otherwise the path is distorted -- or use feedforward (two slides on).
 \end{notebox}
 \end{columns}
 \end{frame}
 
 % ---------------------------------------------------------------------
-\begin{frame}[t]{Torque and velocity limits; integrator windup}
+\begin{frame}[t]{Torque and speed limits; integrator windup}
 \begin{columns}[T,onlytextwidth]
 \column{.45\textwidth}
 \begin{itemize}\small
-\item Limits: $|i_q^*|\le\hat I_\text{max}$ (torque), $|\omega^*|\le\omega_\text{max}$, and the voltage limit of the current loop.
-\item While saturated the loop is \hl{open}; a free-running integrator keeps integrating the error $\Rightarrow$ large overshoot (windup).
-\item Anti-windup: \textbf{clamping} (stop integrating when saturated and error drives further) or \textbf{back-calculation} ($\dot I\mathrel{+}=K_{aw}(u_\text{sat}-u)$).
-\item Applies to all PIs: current (voltage limit), velocity (current limit), position.
+\item Limits: $|i_q^*|\le\hat I_\text{max}$, $|\omega^*|\le\omega_\text{max}$, plus the voltage limit.
+\item While the output is limited, the loop is effectively \hl{open}; the integrator keeps adding up error.
+\item Result: \term{windup} -- huge overshoot when the limit releases.
+\item Analogy: holding the accelerator floored and still ``remembering'' to push harder.
+\item Cure (\term{anti-windup}): stop integrating while saturated (clamping).
 \end{itemize}
 \column{.53\textwidth}
 \begin{tikzpicture}
@@ -1142,17 +1055,17 @@ On a contour (two axes), different $k_v$ per axis $\Rightarrow$ path distortion.
 \addplot[mkBlue,thick] table[x=t,y=i_c]{data/windup.dat};
 \end{groupplot}
 \end{tikzpicture}\\
-\scriptsize Simulated \SI{300}{rad/s} step, reference motor, $\hat I_\text{max}=\SI{20}{A}$, SO $a=3$: overshoot \SI{553}{rad/s} vs.\ \SI{303}{rad/s}.
+\small \SI{300}{rad/s} step, current limit \SI{20}{A}: peak \SI{553}{rad/s} vs.\ \SI{303}{rad/s}.
 \end{columns}
 \end{frame}
 
 % ---------------------------------------------------------------------
 \begin{frame}[t]{Trajectory generation: trapezoidal vs.\ S-curve profiles}
 \begin{columns}[T,onlytextwidth]
-\column{.58\textwidth}
+\column{.56\textwidth}
 \begin{tikzpicture}
 \begin{groupplot}[group style={group size=1 by 3,vertical sep=2.5mm,xticklabels at=edge bottom},
-  mkplot,width=8.6cm,height=2.55cm,xmin=0,xmax=360,legend pos=north east]
+  mkplot,width=8.4cm,height=2.55cm,xmin=0,xmax=360,legend pos=north east]
 \nextgroupplot[ylabel={$\theta$ (rad)},ymin=0,ymax=70]
 \addplot[mkBlue,thick] table[x=t,y=xT]{data/traj.dat};
 \addplot[mkOrange,thick,dashed] table[x=t,y=xS]{data/traj.dat};
@@ -1165,14 +1078,13 @@ On a contour (two axes), different $k_v$ per axis $\Rightarrow$ path distortion.
 \addplot[mkOrange,thick,dashed] table[x=t,y=aS]{data/traj.dat};
 \end{groupplot}
 \end{tikzpicture}
-\column{.40\textwidth}
-\scriptsize Computed: move \SI{10}{rev} ($20\pi$ rad), $\omega_\text{max}=\SI{300}{rad/s}$, $\alpha_\text{max}=\SI{3000}{rad/s^2}$, S-curve jerk $j=\SI{1.5e5}{rad/s^3}$.
-\begin{itemize}\scriptsize
-\item \textbf{Trapezoidal}: $t_a=\omega_\text{max}/\alpha_\text{max}=\SI{0.1}{s}$, total \SI{309}{ms}. Acceleration jumps $\Rightarrow$ infinite jerk excites resonances.
-\item \textbf{S-curve} (7 segments): jerk-limited, $t_j=\alpha/j=\SI{20}{ms}$, total \SI{329}{ms} (+6\,\%) but much smoother.
-\item Peak torque $J\alpha_\text{max}=\SI{3.6}{Nm}$ ($i_q=\SI{5}{A}$) -- within limits.
-\item Triangular profile if the distance is too short to reach $\omega_\text{max}$.
-\item Generator outputs $x^*,\dot x^*,\ddot x^*$ at the position-loop rate.
+\column{.42\textwidth}
+\small Move 10 revolutions, max.\ \SI{300}{rad/s}, max.\ \SI{3000}{rad/s^2}.
+\begin{itemize}\small
+\item \textbf{Trapezoidal}: speed ramps; acceleration \emph{jumps} $\Rightarrow$ jolts that shake the machine. Total \SI{309}{ms}.
+\item \textbf{S-curve}: acceleration ramps too (limited \term{jerk}). Total \SI{329}{ms} (+6\,\%), much smoother.
+\item Analogy: a good lift driver -- you never feel the start.
+\item Peak torque $J\alpha=\SI{3.6}{Nm}$ ($i_q=\SI{5}{A}$) -- within limits.
 \end{itemize}
 \src{[Biagiotti \& Melchiorri, 2008]}
 \end{columns}
@@ -1191,40 +1103,58 @@ On a contour (two axes), different $k_v$ per axis $\Rightarrow$ path distortion.
 \legend{P only: \SI{3000}{mrad},+ velocity FF: \SI{2.6}{mrad},+ torque FF: \SI{0.19}{mrad}}
 \end{axis}
 \end{tikzpicture}\\
-\scriptsize Simulated cascade (current loop, SO velocity PI $a=2$, $k_v=\SI{100}{s^{-1}}$) on the S-curve move; legend: peak $|e|$. Log scale!
+\scriptsize Simulated cascade on the S-curve move; legend: peak $|e|$. \hl{Log scale}: each step is $\sim\!1000\times$.
 \column{.43\textwidth}
 \includegraphics[width=\linewidth,height=2.6cm,keepaspectratio]{../figures/d4_machining_center.jpg}\\
 \credit{5-axis machining centre. G.\ McKechnie, CC BY-SA 2.0, via Wikimedia Commons}
-\begin{itemize}\scriptsize
-\item Velocity FF $\omega^*\mathrel{+}=\dot x^*$: loop no longer has to create the speed from error.
-\item Torque/acceleration FF $i_q^*\mathrel{+}=\hat J\ddot x^*/k_t$: inertia no longer needs velocity error.
-\item FF does \emph{not} change stability -- it acts outside the loop; accuracy depends on $\hat J$ and on smooth (S-curve) references.
+\begin{itemize}\small
+\item Velocity FF: send the planned speed $\dot x^*$ directly.
+\item Torque FF: send the needed current $\hat J\ddot x^*/k_t$ directly.
+\item Feedback only fixes what is left. FF acts outside the loop: \hl{no stability change}.
 \end{itemize}
 \end{columns}
 \end{frame}
 
 % ---------------------------------------------------------------------
+\begin{frame}[t]{Check your understanding -- 3.4}
+\vspace{4mm}
+\begin{keybox}[Check your understanding]
+\large
+\begin{enumerate}
+\item $L=\SI{6}{mH}$, $T_\sigma=\SI{100}{\micro s}$. What current-loop gain $K_p$ does the recipe give?\\[3mm]
+\item An axis moves at $v=\SI{0.2}{m/s}$ with $k_v=\SI{40}{s^{-1}}$ and no feedforward. Following error?\\[3mm]
+\item Why must the loops be tuned from the inside out?
+\end{enumerate}
+\end{keybox}
+\vfill
+\centering\small\color{mkGray} Discuss with your neighbour for 2 minutes.
+\end{frame}
+
+% ---------------------------------------------------------------------
 \begin{frame}{Summary 3.4 -- Cascade loops}
 \begin{columns}[T,onlytextwidth]
-\column{.58\textwidth}
+\column{.56\textwidth}
 \begin{keybox}[Key take-aways]
 \small
 \begin{itemize}
-\item Cascade: position (P) $\to$ velocity (PI) $\to$ current (PI), bandwidths separated.
-\item Current PI: $T_i=L/R$, $K_p=L/(2T_\sigma)$ (TO) $\Rightarrow$ $\approx\SI{850}{Hz}$ crossover at \SI{16}{kHz}.
-\item Velocity PI: symmetric optimum $\omega_c=1/(aT_\text{eq})$, prefilter for steps.
+\item Cascade: position (P) $\to$ velocity (PI) $\to$ current (PI); inner = faster.
+\item Current PI: $T_i=L/R$, $K_p=L/(2T_\sigma)$ $\Rightarrow$ $\approx\SI{850}{Hz}$.
+\item Velocity PI: $K_p=J\omega_c/k_t$ with $\omega_c=1/(aT_\text{eq})$.
 \item P position loop: following error $v/k_v$.
-\item Limits require anti-windup; S-curves limit jerk.
-\item Velocity + torque feedforward reduce following error by orders of magnitude.
+\item Limits need anti-windup; S-curves limit jerk; feedforward removes most following error.
 \end{itemize}
 \end{keybox}
-\column{.38\textwidth}
-\begin{notebox}
-\textbf{Self-check}\\
-1.\ $L=\SI{6}{mH}$, $T_\sigma=\SI{100}{\micro s}$: TO gain?\ (\SI{30}{V/A})\\[1mm]
-2.\ Following error at $v=\SI{0.2}{m/s}$, $k_v=\SI{40}{s^{-1}}$?\ (\SI{5}{mm})\\[1mm]
-3.\ Why is a prefilter needed with SO tuning?
-\end{notebox}
+\column{.42\textwidth}
+\begin{defbox}[Key terms]
+\small
+\textbf{Cascade} -- loops nested inside each other.\\
+\textbf{Crossover $\omega_c$} -- where loop gain $=1$.\\
+\textbf{$k_v$} -- position-loop gain (1/s).\\
+\textbf{Following error} -- lag behind a moving target.\\
+\textbf{Windup} -- integrator overfills during a limit.\\
+\textbf{Jerk} -- rate of change of acceleration.\\
+\textbf{Feedforward} -- act on the known command.
+\end{defbox}
 \end{columns}
 \end{frame}
 
@@ -1232,15 +1162,71 @@ On a contour (two axes), different $k_v$ per axis $\Rightarrow$ path distortion.
 \section{3.5 Loop Tuning and Bandwidth}
 % =====================================================================
 
+\begin{frame}[t]{Refresher: what does ``bandwidth'' mean?}
+\begin{columns}[T,onlytextwidth]
+\column{.52\textwidth}
+\begin{tikzpicture}
+\begin{groupplot}[group style={group size=1 by 2,vertical sep=12mm},mkplot,width=7.4cm,legend pos=south west]
+\nextgroupplot[height=3.3cm,xmode=log,xmin=1,xmax=10000,ymin=-30,ymax=5,ylabel={$|y/r|$ (dB)},xlabel={sine frequency (Hz)},xlabel style={yshift=1mm}]
+\addplot[mkBlue,thick,domain=1:10000,samples=80] {-10*log10(1+(x/100)^2)};
+\addplot[mkOrange,thick,dashed,domain=1:10000,samples=80] {-10*log10(1+(x/400)^2)};
+\addplot[mkRed,thin,domain=1:10000] {-3};
+\legend{BW \SI{100}{Hz},BW \SI{400}{Hz}}
+\nextgroupplot[height=3.0cm,xmin=0,xmax=6,ymin=0,ymax=1.1,ylabel={step $y/r$},xlabel={time (ms)},legend pos=south east]
+\addplot[mkBlue,thick,domain=0:6,samples=80] {1-exp(-x/1.592)};
+\addplot[mkOrange,thick,dashed,domain=0:6,samples=80] {1-exp(-x/0.398)};
+\end{groupplot}
+\end{tikzpicture}
+\column{.46\textwidth}
+\begin{itemize}\small
+\item Feed the closed loop a sine command and watch the output.
+\item Slow sines: followed perfectly. Fast sines: output too small and late.
+\item \term{Bandwidth} = frequency where the output drops to $70\,\%$ ($-3$\,dB).
+\item Analogy: a dancer copying a leader -- slow moves are easy, fast ones get lost.
+\end{itemize}
+\begin{eqbox}\centering
+rise time $t_r\approx\dfrac{0.35}{f_\text{BW}}$
+\end{eqbox}
+\small Example: $f_\text{BW}=\SI{100}{Hz}$ $\Rightarrow$ $t_r\approx\SI{3.5}{ms}$; \SI{400}{Hz} $\Rightarrow$ \SI{0.9}{ms}.\\
+\hl{Take-away:} higher bandwidth = faster response.
+\end{columns}
+\end{frame}
+
+% ---------------------------------------------------------------------
+\begin{frame}[t]{The bandwidth hierarchy of a servo drive}
+\begin{columns}[T,onlytextwidth]
+\column{.58\textwidth}
+\begin{tikzpicture}[x=1.12cm,y=1cm]
+  \draw[-{Latex[length=2mm]},mkGray] (0,0) -- (5.2,0) node[right,font=\scriptsize]{$f$ (Hz)};
+  \foreach \e/\l in {0/1,1/10,2/100,3/1k,4/10k,5/100k}{\draw[mkGray] (\e,0) -- (\e,-.1) node[below,font=\tiny]{\l};}
+  \fill[mkSky!60] (1.0,2.9) rectangle (1.9,3.4); \node[font=\scriptsize,anchor=east] at (.95,3.15) {position 10--80\,Hz};
+  \fill[mkMid!70] (1.7,2.1) rectangle (2.6,2.6); \node[font=\scriptsize,anchor=east] at (1.65,2.35) {velocity 50--400\,Hz};
+  \fill[mkBlue!80] (2.7,1.3) rectangle (3.5,1.8); \node[font=\scriptsize,anchor=west] at (3.55,1.55) {current 0.5--3\,kHz};
+  \fill[mkOrange!80] (3.9,.5) rectangle (4.6,1.0); \node[font=\scriptsize,anchor=west] at (4.65,.75) {PWM 8--32\,kHz};
+  \draw[mkRed,dashed] (2.78,0) -- (2.78,3.6) node[above,font=\tiny,mkRed]{mech.\ resonance?};
+\end{tikzpicture}\\[2mm]
+\begin{itemize}\small
+\item Each loop is a few times slower than the one inside it.
+\item Current: limited by sampling and PWM delay. Velocity: by \hl{mechanical resonances} and filters. Position: by the velocity loop.
+\end{itemize}
+\column{.40\textwidth}
+\centering
+\includegraphics[width=\linewidth,height=3.6cm,keepaspectratio]{../figures/d4_kuka_robot.jpg}\\
+\credit{Industrial robot. Oleg Yunakov, CC BY-SA 4.0, via Wikimedia Commons}\\[1mm]
+\small Robots with elastic gears: velocity bandwidth only a few tens of Hz; stiff direct drives: several hundred Hz [Ellis, 2012].
+\end{columns}
+\end{frame}
+
+% ---------------------------------------------------------------------
 \begin{frame}[t]{Tuning procedure: from the inside out}
 \begin{columns}[T,onlytextwidth]
 \column{.42\textwidth}
 \centering
 \begin{tikzpicture}[node distance=2.5mm,every node/.style={font=\scriptsize}]
-  \node[blk,minimum width=46mm,text width=44mm] (a) {1.\ Parameters: $R$, $L_d$, $L_q$, $\psi_\text{PM}$, $p$, angle offset};
-  \node[blk,minimum width=46mm,text width=44mm,below=of a] (b) {2.\ Current loop: TO, check step \& FRF};
-  \node[blk,minimum width=46mm,text width=44mm,below=of b] (c) {3.\ Inertia identification ($\hat J$)};
-  \node[blk,minimum width=46mm,text width=44mm,below=of c] (d) {4.\ Velocity loop: SO / gain sweep; filters, notch};
+  \node[blk,minimum width=46mm,text width=44mm] (a) {1.\ Motor data: $R$, $L$, $\psi_\text{PM}$, $p$, angle offset};
+  \node[blk,minimum width=46mm,text width=44mm,below=of a] (b) {2.\ Current loop: recipe, check step};
+  \node[blk,minimum width=46mm,text width=44mm,below=of b] (c) {3.\ Measure inertia $\hat J$};
+  \node[blk,minimum width=46mm,text width=44mm,below=of c] (d) {4.\ Velocity loop; filters, notch};
   \node[blk,minimum width=46mm,text width=44mm,below=of d] (e) {5.\ Position loop: $k_v$, no overshoot};
   \node[blko,minimum width=46mm,text width=44mm,below=of e] (f) {6.\ Feedforward ($\dot x^*$, $\hat J\ddot x^*$, friction)};
   \foreach \u/\v in {a/b,b/c,c/d,d/e,e/f}{\draw[sig] (\u) -- (\v);}
@@ -1248,11 +1234,16 @@ On a contour (two axes), different $k_v$ per axis $\Rightarrow$ path distortion.
 \end{tikzpicture}
 \column{.56\textwidth}
 \begin{itemize}\small
-\item Each outer loop is designed on the \hl{closed} inner loop -- tune outer before inner and you tune against the wrong plant.
-\item Measure, do not guess: auto-tuning routines identify $R,L$ (voltage steps), $\hat J$ (acceleration test: $\hat J=k_t\,\Delta i_q/\Delta\dot\omega$) and FRFs.
-\item Increase gains until a margin limit is hit (PM $\ge45^\circ$, GM $\ge6$\,dB, $|S|_\text{max}\le 2$, i.e.\ 6\,dB), then back off.
-\item Check large-signal behaviour last (limits, anti-windup, saturation of $L$).
-\item Record final FRFs as a commissioning baseline.
+\item Each outer loop is designed on the \hl{closed} inner loop -- tune outer first and you tune against the wrong plant.
+\item Measure, don't guess: e.g.\ inertia from an acceleration test, $\hat J=k_t\,\Delta i_q/\Delta\dot\omega$.
+\end{itemize}
+\begin{defbox}[Example]
+\small $\Delta i_q=\SI{5}{A}$ gives $\Delta\dot\omega=\SI{3000}{rad/s^2}$:\\
+$\hat J=0.72\cdot5/3000=\SI{1.2e-3}{kg\,m^2}$.
+\end{defbox}
+\begin{itemize}\small
+\item Raise gains until a margin limit (PM $\ge45^\circ$, GM $\ge6$\,dB), then back off.
+\item Check large steps last (limits, anti-windup).
 \end{itemize}
 \src{[Ellis, 2012]; [Åström \& Hägglund, 2006]}
 \end{columns}
@@ -1268,28 +1259,30 @@ On a contour (two axes), different $k_v$ per axis $\Rightarrow$ path distortion.
 \addplot[mkOrange,thick] table[x=t,y=r3]{data/bwsep_step.dat};
 \addplot[mkMid,thick,dashed] table[x=t,y=r5]{data/bwsep_step.dat};
 \addplot[mkBlue,thick] table[x=t,y=r10]{data/bwsep_step.dat};
-\legend{$\omega_i/\omega_c=1.5$,$3$,$5$,$10$}
+\legend{inner/outer $=1.5$,$3$,$5$,$10$}
 \end{axis}
 \end{tikzpicture}\\
-\scriptsize Computed: velocity PI designed for $\omega_c=\SI{1000}{rad/s}$ \emph{assuming an ideal current loop} ($K_p=J\omega_c/k_t$, $T_i=4/\omega_c$, prefilter); the real inner loop is $1/(1+s/\omega_i)$.
+\scriptsize Computed: velocity PI designed for \SI{1000}{rad/s} \emph{assuming a perfect current loop}; the real current loop has bandwidth $\omega_i$.
 \column{.43\textwidth}
 \begin{itemize}\small
-\item A first-order inner loop with bandwidth $\omega_i$ costs $\arctan(\omega_c/\omega_i)$ phase at the outer crossover:
+\item A slow inner loop adds lag (phase loss) at the outer crossover:
 \end{itemize}
-\footnotesize
+\begin{eqbox}\centering
+$\Delta\varphi=\arctan(\omega_c/\omega_i)$
+\end{eqbox}
+\small
 \begin{tabular}{@{}cc@{}}
 \toprule
 $\omega_i/\omega_c$ & phase lost\\
 \midrule
 1.5 & $33.7^\circ$\\
 3 & $18.4^\circ$\\
-5 & $11.3^\circ$\\
 10 & $5.7^\circ$\\
 \bottomrule
 \end{tabular}
-\begin{itemize}\scriptsize
-\item Below 3$\times$: outer design must include the inner dynamics explicitly (as SO does via $T_\text{eq}$).
-\item Above 10$\times$: wasteful -- the outer loop could be faster.
+\begin{itemize}\small
+\item Below 3$\times$: ringing (red curve).
+\item Above 10$\times$: safe, but the outer loop could be faster.
 \end{itemize}
 \end{columns}
 \end{frame}
@@ -1307,13 +1300,12 @@ $\omega_i/\omega_c$ & phase lost\\
 \legend{$J_L/J_m=0$,$3$ (design),$10$,$30$}
 \end{axis}
 \end{tikzpicture}\\
-\scriptsize Gains fixed (SO, $a=2$, designed for ratio 3). Computed open-loop crossover / PM:
-0: \SI{439}{Hz}/$12^\circ$;\ 3: \SI{164}{Hz}/$35^\circ$;\ 10: \SI{80}{Hz}/$31^\circ$;\ 30: \SI{43}{Hz}/$21^\circ$.
+\scriptsize Same gains (designed for ratio 3). Crossover / PM: 0: \SI{439}{Hz}/$12^\circ$;\ 3: \SI{164}{Hz}/$35^\circ$;\ 10: \SI{80}{Hz}/$31^\circ$;\ 30: \SI{43}{Hz}/$21^\circ$.
 \column{.43\textwidth}
 \begin{itemize}\small
-\item Loop gain $\propto K_{p\omega}k_t/J$: the same gains give a \hl{lower crossover} with more load inertia and a higher one (towards the delays!) with less.
-\item Rule: retune with $\hat J$; adaptive gain scaling $K_{p\omega}\propto\hat J$.
-\item Typical recommendation: $J_L/J_m\le 3\ldots10$ for high dynamics -- otherwise gearbox or larger motor.
+\item Loop gain $\propto K_{p\omega}k_t/J$: more load inertia $\Rightarrow$ \hl{lower crossover}, sluggish; less $\Rightarrow$ higher, towards the delays, oscillating.
+\item Analogy: bicycle gears -- the gear (or screw) ratio changes how heavy the load feels at the motor.
+\item Rule: retune with $\hat J$; aim for $J_L/J_m\le3\ldots10$.
 \end{itemize}
 \includegraphics[width=.85\linewidth,height=1.3cm,keepaspectratio]{../figures/d4_ballscrew.jpg}\\
 \credit{Ball screws. Graibeard, CC BY-SA 3.0, via Wikimedia Commons}
@@ -1334,87 +1326,30 @@ $\omega_i/\omega_c$ & phase lost\\
 \legend{\SI{50}{\micro s},\SI{100}{\micro s},\SI{250}{\micro s},\SI{500}{\micro s}}
 \end{axis}
 \end{tikzpicture}\\
-\scriptsize Pure delay $e^{-sT_d}$: $\Delta\varphi=360^\circ\,f_c\,T_d$ -- linear in $f$, no magnitude change.
+\small Analogy: a shower with a long pipe -- you turn the tap, the temperature changes seconds later, so you overshoot.
 \column{.48\textwidth}
-\footnotesize
+\begin{eqbox}\centering
+$\Delta\varphi=360^\circ\cdot f_c\cdot T_d$
+\end{eqbox}
+\small
 \begin{tabularx}{\linewidth}{@{}X r@{}}
 \toprule
 \textbf{Delay source} & \textbf{typical}\\
 \midrule
 Computation (1 sample at \SI{16}{kHz}) & \SI{62.5}{\micro s}\\
-PWM / ZOH ($T_s/2$) & \SI{31}{\micro s}\\
-Current sensing, $\Sigma\Delta$ decimation & 5--20\,\si{\micro s}\\
-Encoder serial protocol & 10--30\,\si{\micro s}\\
-Velocity filter ($T_f$) & 0.1--1\,ms\\
-Field bus (set-point, 1 cycle) & 0.125--1\,ms\\
+PWM update ($T_s/2$) & \SI{31}{\micro s}\\
+Encoder data transfer & 10--30\,\si{\micro s}\\
+Velocity filter & 0.1--1\,ms\\
 \bottomrule
 \end{tabularx}\\[2mm]
-\begin{keybox}[Example]
-\scriptsize Velocity loop, $T_\text{eq}=\SI{0.5}{ms}$ at $f_c=\SI{160}{Hz}$: $28.8^\circ$ lost. Halving $T_f$ or doubling $f_s$ buys phase that can be traded for bandwidth.
-\end{keybox}
+\begin{defbox}[Example]
+\small $T_d=\SI{0.5}{ms}$, $f_c=\SI{160}{Hz}$: $360\cdot160\cdot0.0005=28.8^\circ$ of phase margin lost.
+\end{defbox}
 \end{columns}
 \end{frame}
 
 % ---------------------------------------------------------------------
-\begin{frame}[t]{Technical optimum vs.\ symmetric optimum}
-\footnotesize
-\begin{tabularx}{\linewidth}{@{}l X X@{}}
-\toprule
- & \textbf{Technical (magnitude) optimum, TO} & \textbf{Symmetric optimum, SO}\\
-\midrule
-Plant type & $\dfrac{K}{(1+sT_1)(1+sT_\sigma)}$,\ $T_1\gg T_\sigma$ & $\dfrac{K}{sT_I\,(1+sT_\sigma)}$ (integrating)\\[2mm]
-PI choice & $T_i=T_1$,\ $K_p=\dfrac{T_1}{2KT_\sigma}$ & $T_i=a^2T_\sigma$,\ $K_p=\dfrac{T_I}{aKT_\sigma}$\\[2mm]
-Closed loop & $\approx\dfrac{1}{1+2T_\sigma s+2T_\sigma^2s^2}$, $\zeta=0.707$ & zero at $1/T_i$, needs prefilter\\[1mm]
-Step response & 4.3\,\% overshoot, $t_r\approx4.7\,T_\sigma$ & 43\,\% ($a=2$), 8\,\% with prefilter\\
-Phase margin & $\approx65^\circ$ & $\arctan\frac{a^2-1}{2a}$ (37$^\circ$ at $a=2$)\\
-Disturbance rejection & slow for $T_1\gg T_\sigma$ (pole cancelled) & good: no cancellation\\
-Used for & \textbf{current loop} ($T_1=L/R$) & \textbf{velocity loop} (inertia $=$ integrator)\\
-\bottomrule
-\end{tabularx}
-\vspace{2mm}
-\begin{columns}[T,onlytextwidth]
-\column{.5\textwidth}
-\begin{notebox}
-Both are \emph{starting points} from German drive practice (Kessler, 1955/58). Industrial auto-tuners do similar things in the frequency domain with explicit PM/GM targets.
-\end{notebox}
-\column{.48\textwidth}
-\begin{notebox}
-For the velocity loop many practitioners use $a=2.5\ldots4$ (PM 45--60$^\circ$) for robustness to $J$ and resonances.
-\end{notebox}
-\end{columns}
-\end{frame}
-
-% ---------------------------------------------------------------------
-\begin{frame}[t]{Typical bandwidths of industrial servo drives}
-\begin{columns}[T,onlytextwidth]
-\column{.56\textwidth}
-\footnotesize
-\begin{tabularx}{\linewidth}{@{}X l l@{}}
-\toprule
-\textbf{Loop} & \textbf{closed-loop BW} & \textbf{limited by}\\
-\midrule
-Current & 1--3\,kHz & $f_s$, PWM delay\\
-Velocity & 100--500\,Hz (rigid) & filters, resonance\\
-& 20--100\,Hz (compliant) & \\
-Position & 10--100\,Hz & velocity loop, overshoot\\
-\midrule
-Machine-tool $k_v$ & 1--6\,(m/min)/mm & 17--100\,s$^{-1}$\\
-\bottomrule
-\end{tabularx}\\[2mm]
-\scriptsize Order-of-magnitude values from drive manuals and the literature [Ellis, 2012]; the achievable values depend on the mechanics far more than on the drive.
-\begin{itemize}\scriptsize
-\item Robots: velocity BW limited by gear compliance (strain wave gears) to a few tens of Hz per joint.
-\item Direct drives (linear/torque motors): velocity BW several hundred Hz.
-\end{itemize}
-\column{.42\textwidth}
-\centering
-\includegraphics[width=\linewidth,height=4.3cm,keepaspectratio]{../figures/d4_kuka_robot.jpg}\\
-\credit{Industrial robot. Oleg Yunakov, CC BY-SA 4.0, via Wikimedia Commons}
-\end{columns}
-\end{frame}
-
-% ---------------------------------------------------------------------
-\begin{frame}[t]{Measuring frequency response functions (FRFs)}
+\begin{frame}[t]{Measuring frequency responses (FRFs)}
 \begin{columns}[T,onlytextwidth]
 \column{.56\textwidth}
 \centering
@@ -1426,29 +1361,30 @@ Machine-tool $k_v$ & 1--6\,(m/min)/mm & 17--100\,s$^{-1}$\\
   \draw[sig] (-.2,1) node[left,lab]{$r$} -- (s1); \draw[sig] (s1) -- (c); \draw[sig] (c) -- node[above,lab]{$c$} (s2);
   \draw[sig] (s2) -- node[above,lab]{$u$} (g); \draw[sig] (g) -- (6.3,1) node[right,lab]{$y$};
   \draw[fb] (5.9,1) -- (5.9,0) -| (s1.south);
-  \draw[ff] (3.3,2.1) node[above,lab]{injection $d$ (sweep / chirp / PRBS)} -- (s2.north);
+  \draw[ff] (3.3,2.1) node[above,lab]{test signal $d$ (sine sweep / chirp)} -- (s2.north);
   \node[font=\tiny,mkGray] at (.45,.65) {$-$};
 \end{tikzpicture}
-\begin{eqbox}\small\centering
-$G=\dfrac{Y}{U},\qquad S=\dfrac{U}{D},\qquad L=-\dfrac{C}{U}=\dfrac1S-1$
+\begin{eqbox}\centering
+plant $G(j\omega)=\dfrac{Y(j\omega)}{U(j\omega)}$ at each test frequency
 \end{eqbox}
-\begin{itemize}\scriptsize
-\item Excite \emph{inside} the closed loop (machine stays under control); estimate with cross-spectra $\hat G=\hat S_{uy}/\hat S_{uu}$, average, check \term{coherence} $\gamma^2\approx1$.
-\item Injection at current reference $\Rightarrow$ mechanical plant ($k_t/Js$ + resonances); at velocity reference $\Rightarrow$ closed-loop BW.
-\item Amplitude: large enough above friction/noise, small enough to stay linear (no current limit).
+\begin{itemize}\small
+\item Add a small test signal \emph{inside} the running loop -- the machine stays under control.
+\item Compare output and input amplitude and phase at each frequency $\Rightarrow$ a measured Bode plot.
+\item Large enough to beat friction and noise, small enough to stay linear.
 \end{itemize}
 \column{.42\textwidth}
 \centering
 \includegraphics[width=\linewidth,height=3.2cm,keepaspectratio]{../figures/d4_signal_analyzer.jpg}\\
 \credit{HP 3562A dynamic signal analyzer. Loxyger, CC BY 4.0, via Wikimedia Commons}\\[1mm]
 \begin{notebox}
-Modern drives have this analyzer built in: the commissioning software injects a chirp and plots Bode diagrams directly.
+Modern drives have this analyser built in: the software injects a chirp and plots the Bode diagram.
 \end{notebox}
+\gofurther{estimate $\hat G=\hat S_{uy}/\hat S_{uu}$ from cross-spectra and check the \term{coherence} $\gamma^2\approx1$.}
 \end{columns}
 \end{frame}
 
 % ---------------------------------------------------------------------
-\begin{frame}[t]{A measured-style FRF: two-mass resonance and notch filter}
+\begin{frame}[t]{A measured-style FRF: resonance and notch filter}
 \begin{columns}[T,onlytextwidth]
 \column{.56\textwidth}
 \begin{tikzpicture}
@@ -1458,44 +1394,62 @@ Modern drives have this analyzer built in: the commissioning software injects a 
 \addplot[mkGray,thick,dashed] table[x=f,y=mR]{data/frf.dat};
 \addplot[mkBlue,thick] table[x=f,y=mG]{data/frf.dat};
 \addplot[mkOrange,thick] table[x=f,y=mGN]{data/frf.dat};
-\legend{rigid $k_t/(J_\Sigma s)$,two-mass,with notch}
+\legend{rigid,motor + elastic load,with notch}
 \nextgroupplot[height=2.8cm,ylabel={$\angle$ (deg)},xlabel={frequency (Hz)},ymin=-185,ymax=5,ytick={-180,-90,0}]
 \addplot[mkBlue,thick] table[x=f,y=pG]{data/frf.dat};
 \end{groupplot}
 \end{tikzpicture}
 \column{.42\textwidth}
-\scriptsize Computed: $J_m=\SI{3e-4}{}$, $J_L=\SI{9e-4}{kg\,m^2}$, $k_s=\SI{3200}{Nm/rad}$, 3\,\% damping.
-\begin{itemize}\scriptsize
-\item Anti-resonance $f_a=\frac1{2\pi}\sqrt{k_s/J_L}=\SI{300}{Hz}$, resonance $f_r=f_a\sqrt{1+J_L/J_m}=\SI{600}{Hz}$.
-\item Above $f_r$ the motor ``sees'' only $J_m$: gain jumps by $1+J_L/J_m$ (12\,dB) $\Rightarrow$ crossover may move up into the delays $\Rightarrow$ instability (``buzz'').
-\item \term{Notch filter} at $f_r$ (in the current reference): $N(s)=\dfrac{s^2+2\zeta_z\omega_rs+\omega_r^2}{s^2+2\zeta_p\omega_rs+\omega_r^2}$, here $\zeta_z=0.05$, $\zeta_p=0.5$.
-\item Notch costs phase below $f_r$; resonances move with load $\Rightarrow$ deeper treatment on Day 5.
+\begin{itemize}\small
+\item Motor and load joined by a springy shaft = \term{two-mass system}.
+\item Analogy: a playground swing -- pushed at its own frequency, it swings huge.
+\item Dip (anti-resonance) at \SI{300}{Hz}, peak (\term{resonance}) at \SI{600}{Hz}.
+\item The peak can push the loop gain above 1 where the phase is bad $\Rightarrow$ ``buzz''.
+\item \term{Notch filter}: cuts a narrow band around \SI{600}{Hz} in the current command.
 \end{itemize}
+\gofurther{$f_a=\frac1{2\pi}\sqrt{k_s/J_L}$, $f_r=f_a\sqrt{1+J_L/J_m}$; notch $N(s)=\frac{s^2+2\zeta_z\omega_rs+\omega_r^2}{s^2+2\zeta_p\omega_rs+\omega_r^2}$. More on Day 5.}
 \end{columns}
+\end{frame}
+
+% ---------------------------------------------------------------------
+\begin{frame}[t]{Check your understanding -- 3.5}
+\vspace{4mm}
+\begin{keybox}[Check your understanding]
+\large
+\begin{enumerate}
+\item A velocity loop has a bandwidth of \SI{200}{Hz}. Roughly what rise time do you expect?\\[3mm]
+\item How much phase does a \SI{200}{\micro s} delay cost at a \SI{250}{Hz} crossover?\\[3mm]
+\item The load inertia doubles but the gains stay the same. What happens to the crossover frequency?
+\end{enumerate}
+\end{keybox}
+\vfill
+\centering\small\color{mkGray} Discuss with your neighbour for 2 minutes.
 \end{frame}
 
 % ---------------------------------------------------------------------
 \begin{frame}{Summary 3.5 -- Tuning and bandwidth}
 \begin{columns}[T,onlytextwidth]
-\column{.58\textwidth}
+\column{.56\textwidth}
 \begin{keybox}[Key take-aways]
 \small
 \begin{itemize}
-\item Tune inside out; each loop on the closed inner loop.
-\item Separate bandwidths 3--10$\times$; less needs explicit modelling.
-\item The inertia ratio scales the velocity-loop gain: retune with $\hat J$.
-\item Every delay costs $360^\circ f_cT_d$ -- budget them.
-\item TO for the current loop, SO for the velocity loop as starting points.
-\item Measure FRFs in closed loop; watch coherence, resonances, notches.
+\item Bandwidth = how fast a loop can follow; $t_r\approx0.35/f_\text{BW}$.
+\item Tune inside out; separate bandwidths 3--10$\times$.
+\item Inertia changes the loop gain: retune with $\hat J$.
+\item Every delay costs $360^\circ f_cT_d$ of phase.
+\item Measure FRFs in closed loop; tame resonances with notches.
 \end{itemize}
 \end{keybox}
-\column{.38\textwidth}
-\begin{notebox}
-\textbf{Self-check}\\
-1.\ Phase lost by \SI{200}{\micro s} at \SI{250}{Hz}?\ ($18^\circ$)\\[1mm]
-2.\ Inertia ratio doubles: what happens to $\omega_c$ with fixed gains?\\[1mm]
-3.\ Why inject at the controller output rather than open the loop?
-\end{notebox}
+\column{.42\textwidth}
+\begin{defbox}[Key terms]
+\small
+\textbf{Bandwidth} -- $-3$\,dB frequency.\\
+\textbf{Phase margin} -- safety from oscillation.\\
+\textbf{Inertia ratio} -- $J_L/J_m$.\\
+\textbf{FRF} -- measured frequency response.\\
+\textbf{Resonance} -- springy mechanics amplifying one frequency.\\
+\textbf{Notch filter} -- removes a narrow band.
+\end{defbox}
 \end{columns}
 \end{frame}
 
@@ -1515,17 +1469,19 @@ Modern drives have this analyzer built in: the commissioning software injects a 
 \addplot[mkOrange,thick,dashed,domain=0.01:20,samples=2] {0.1+0.005*x};
 \addplot[mkOrange,thick,dashed,domain=-20:-0.01,samples=2,forget plot] {-0.1+0.005*x};
 \addplot[mkBlue,thick,forget plot] coordinates {(0,-0.16) (0,0.16)};
-\legend{Stribeck model,Coulomb + viscous}
+\legend{realistic (Stribeck),simple: Coulomb + viscous}
 \end{axis}
 \end{tikzpicture}\\
-\scriptsize $T_f=\operatorname{sign}(\omega)\big[T_C+(T_S-T_C)e^{-(\omega/\omega_S)^2}\big]+B\omega$; here $T_C=\SI{0.1}{Nm}$, $T_S=\SI{0.16}{Nm}$, $\omega_S=\SI{2}{rad/s}$, $B=\SI{5}{mNm\,s/rad}$.
+\small Breakaway \SI{0.16}{Nm}, sliding \SI{0.1}{Nm}, plus \SI{5}{mNm} per rad/s.
 \column{.48\textwidth}
+\begin{eqbox}\centering
+$J\dot\omega=k_ti_q-T_L-T_f(\omega)$
+\end{eqbox}
 \begin{itemize}\small
-\item Mechanics: $J\dot\omega=k_ti_q-T_L-T_f(\omega)$.
-\item \term{Load torque} $T_L$: process forces, gravity (vertical axes!), cutting forces.
-\item \term{Friction}: discontinuous at $\omega=0$ $\Rightarrow$ stick-slip, quadrant glitches on circles, limit cycles with integral action.
-\item PI rejects a step $T_L$ with zero steady-state error, but the transient dip depends on $\omega_c$ and $J$.
-\item Other disturbances: cogging and ripple torque, dead-time voltage error, measurement noise, cable forces.
+\item \term{Load torque} $T_L$: cutting forces, gravity on vertical axes.
+\item \term{Friction}: jumps at $\omega=0$ (harder to start than to keep sliding) $\Rightarrow$ stick-slip, small jerks when reversing.
+\item The PI removes a constant $T_L$ eventually, but a \hl{dip} occurs first.
+\item Also: cogging, dead time, sensor noise.
 \end{itemize}
 \src{[Armstrong-Hélouvry, Dupont \& Canudas de Wit, 1994]}
 \end{columns}
@@ -1556,91 +1512,54 @@ Modern drives have this analyzer built in: the commissioning software injects a 
 \vspace{2mm}
 \begin{columns}[T,onlytextwidth]
 \column{.5\textwidth}
-\begin{itemize}\small
-\item Ideal FF inverts the plant: $u_\text{FF}=G^{-1}x^*$. For a rigid axis: $i_q^*=\big(\hat J\ddot x^*+\hat B\dot x^*+\hat T_f\big)/k_t$.
-\item Requires smooth references (S-curve) -- FF of a jerk step is a torque step.
-\end{itemize}
+\begin{eqbox}\centering
+$i_q^*{}_{,\text{FF}}=\big(\hat J\ddot x^*+\hat T_f\big)/k_t$
+\end{eqbox}
+\small Example: $\hat J=\SI{1.2e-3}{kg\,m^2}$, $\ddot x^*=\SI{3000}{rad/s^2}$, $\hat T_f=\SI{0.1}{Nm}$: $(3.6+0.1)/0.72=\SI{5.1}{A}$.
 \column{.48\textwidth}
 \begin{itemize}\small
-\item FF acts \hl{outside the loop}: no stability change, feedback only corrects the model error.
-\item Typical gains 80--100\,\% of model; check on overshoot at the end of acceleration.
+\item Feedforward = \hl{predict} the needed current from the plan; feedback only corrects the leftover.
+\item Needs smooth (S-curve) commands and a good $\hat J$.
+\item Outside the loop: no stability change.
 \end{itemize}
 \end{columns}
 \end{frame}
 
 % ---------------------------------------------------------------------
-\begin{frame}[t]{Disturbance observer (DOB): basic logic}
+\begin{frame}[t]{Disturbance observer (DOB): estimate the unknown push}
 \begin{columns}[T,onlytextwidth]
-\column{.55\textwidth}
-\centering
-\begin{tikzpicture}[x=1cm,y=1cm]
-  \node[sumn] (s0) at (0.4,1.6) {};
-  \node[blk] (cl) at (1.8,1.6) {$k_t$};
-  \node[sumn] (s1) at (3.1,1.6) {};
-  \node[blk] (pl) at (4.4,1.6) {$\dfrac{1}{Js}$};
-  \draw[sig] (-.6,1.6) node[left,lab]{$i_q^*$} -- (s0); \draw[sig] (s0) -- node[above,lab]{$i_q$} (cl);
-  \draw[sig] (cl) -- node[above,lab]{$T_e$} (s1);
-  \draw[sig] (s1) -- (pl); \draw[sig] (pl) -- (6.2,1.6) node[right,lab]{$\omega$};
-  \draw[sig] (3.1,2.5) node[above,lab]{$T_L$ ($-$)} -- (s1.north);
-  % observer
-  \node[blko] (inv) at (4.4,0.2) {$\hat J s\,Q(s)$};
-  \node[blko] (q) at (1.8,0.2) {$k_t\,Q(s)$};
-  \node[sumn] (s2) at (3.1,-0.9) {};
-  \node[blko] (g) at (1.0,-0.9) {$1/k_t$};
-  \draw[fb] (5.6,1.6) |- (inv.east);
-  \draw[fb] (1.0,1.6) -- (1.0,.2) -- (q.west);
-  \draw[fb] (q.east) -| (s2.north);
-  \draw[fb] (inv.south) |- (s2.east);
-  \draw[fb] (s2.west) -- node[above,lab]{$\hat T_L$} (g.east);
-  \draw[fb] (g.west) -| (s0.south);
-  \node[font=\tiny,mkGray] at (3.35,-.6) {$+$}; \node[font=\tiny,mkGray] at (3.45,-1.1) {$-$};
-  \node[font=\tiny,mkGray] at (.2,1.25) {$+$};
-\end{tikzpicture}\\[1mm]
-\scriptsize $Q(s)=\dfrac{1}{1+s\tau_Q}$ low-pass makes the inverse model $\hat Js$ proper.
-\column{.43\textwidth}
-\begin{itemize}\small
-\item Idea: compare what the motor \emph{should} do ($k_ti_q$) with what it \emph{does} ($\hat J\dot\omega$). The difference is the lumped disturbance:
-\end{itemize}
-\begin{eqbox}\small\centering
-$\hat T_L=Q(s)\big[k_ti_q-\hat Js\,\omega\big]$
-\end{eqbox}
-\begin{itemize}\scriptsize
-\item Feeding $\hat T_L/k_t$ back makes the axis behave like the nominal $1/(\hat Js)$ below $1/\tau_Q$ -- load, friction and inertia error are rejected.
-\item Bandwidth of $Q$ limited by noise ($s\omega$!) and delays; typical $1/\tau_Q$ = 0.5--2$\times\omega_c$.
-\item $\hat T_L$ is also a useful signal: load monitoring, collision detection.
-\end{itemize}
-\src{[Ohnishi, Shibata \& Murakami, 1996]}
-\end{columns}
-\end{frame}
-
-% ---------------------------------------------------------------------
-\begin{frame}[t]{DOB vs.\ PI alone: load-torque step}
-\begin{columns}[T,onlytextwidth]
-\column{.56\textwidth}
+\column{.52\textwidth}
 \begin{tikzpicture}
 \begin{groupplot}[group style={group size=1 by 2,vertical sep=3mm,xticklabels at=edge bottom},
-  mkplot,width=8.2cm,xmin=0,xmax=30,legend pos=south east]
-\nextgroupplot[height=3.8cm,ylabel={$\omega$ (rad/s)},ymin=-2.1,ymax=.4]
+  mkplot,width=7.8cm,xmin=0,xmax=30,legend pos=south east]
+\nextgroupplot[height=3.6cm,ylabel={$\omega$ (rad/s)},ymin=-2.1,ymax=.4]
 \addplot[mkRed,thick] table[x=t,y=w_pi]{data/dob.dat};
 \addplot[mkBlue,thick] table[x=t,y=w_dob]{data/dob.dat};
 \legend{PI only,PI + DOB}
-\nextgroupplot[height=2.9cm,ylabel={$\hat T_L$ (Nm)},xlabel={time (ms)},ymin=-.2,ymax=2.4]
+\nextgroupplot[height=2.8cm,ylabel={$\hat T_L$ (Nm)},xlabel={time (ms)},ymin=-.2,ymax=2.4]
 \addplot[mkOrange,thick] table[x=t,y=dhat]{data/dob.dat};
 \addplot[mkGray,dashed] coordinates {(0,0) (5,0) (5,2) (30,2)};
 \end{groupplot}
-\end{tikzpicture}
-\column{.42\textwidth}
-\scriptsize Simulated: reference motor, velocity PI (SO, $a=3$) holding $\omega^*=0$, load step $T_L=\SI{2}{Nm}$ at \SI{5}{ms}; DOB with $\tau_Q=\SI{0.5}{ms}$, $\hat J=J$.
+\end{tikzpicture}\\
+\scriptsize Simulated: holding $\omega^*=0$, load step \SI{2}{Nm} at \SI{5}{ms}.
+\column{.46\textwidth}
 \begin{itemize}\small
-\item Peak speed dip: \SI{1.85}{rad/s} $\to$ \SI{0.70}{rad/s} (2.6$\times$ better), and recovery is faster.
-\item The estimate $\hat T_L$ converges to the true \SI{2}{Nm} within $\approx3\tau_Q$ plus loop delays.
-\item Same effect could be obtained with more PI gain -- but that would cost phase margin and noise; DOB adds rejection \hl{without} changing the reference response (nominal).
+\item Idea: compare what the motor \emph{should} do ($k_ti_q$) with what it \emph{does} ($\hat J\dot\omega$). The difference is the unknown disturbance.
 \end{itemize}
+\begin{eqbox}\centering
+$\hat T_L\approx k_t\,i_q-\hat J\,\dot\omega$\ \ (low-pass filtered)
+\end{eqbox}
+\begin{itemize}\small
+\item Add $\hat T_L/k_t$ to the current command $\Rightarrow$ the disturbance is cancelled.
+\item Result: speed dip \SI{1.85}{rad/s} $\to$ \SI{0.70}{rad/s} (2.6$\times$ smaller).
+\item Bonus: $\hat T_L$ can detect collisions.
+\end{itemize}
+\gofurther{the filter $Q(s)=1/(1+s\tau_Q)$ makes the derivative usable; $1/\tau_Q\approx$ 0.5--2$\times\omega_c$, limited by noise and delay [Ohnishi, Shibata \& Murakami, 1996].}
 \end{columns}
 \end{frame}
 
 % ---------------------------------------------------------------------
-\begin{frame}[t]{Cogging and torque ripple compensation (brief)}
+\begin{frame}[t]{Cogging and torque ripple compensation}
 \begin{columns}[T,onlytextwidth]
 \column{.55\textwidth}
 \begin{tikzpicture}
@@ -1648,41 +1567,62 @@ $\hat T_L=Q(s)\big[k_ti_q-\hat Js\,\omega\big]$
   xlabel={mechanical angle (deg)},ylabel={torque (Nm)},legend pos=south east,yticklabel style={/pgf/number format/fixed}]
 \addplot[mkBlue,thick] table[x=th,y=Tc]{data/cogging.dat};
 \addplot[mkOrange,thick] table[x=th,y=res]{data/cogging.dat};
-\legend{cogging torque,residual after LUT}
+\legend{cogging torque,residual after table}
 \end{axis}
 \end{tikzpicture}\\
-\scriptsize Illustrative 12-slot/8-pole motor: fundamental cogging period $360^\circ/\text{LCM}(12,8)=15^\circ$ mech. LUT with $1^\circ$ steps, 95\,\% gain: \SI{0.146}{Nm} p-p $\to$ \SI{0.015}{Nm} p-p.
+\scriptsize Illustrative 12-slot/8-pole motor: \SI{0.146}{Nm} $\to$ \SI{0.015}{Nm} peak-to-peak.
 \column{.43\textwidth}
 \begin{itemize}\small
-\item \term{Cogging}: magnets vs.\ slot openings, present at zero current, periodic in $\theta_m$.
-\item \term{Ripple}: back-EMF harmonics, current sensor offsets/gain errors (1st/2nd order in $\theta_e$), dead time (6th).
-\item Compensation: measure $i_q$ needed at constant slow speed vs.\ angle $\Rightarrow$ look-up table $\Delta i_q(\theta_m)$ added to $i_q^*$; or iterative learning / repetitive control.
-\item Effective at low speed, where the velocity loop cannot reject the ripple frequency $p\,n/60\times$ harmonic order.
-\item Sensor offset calibration first -- it is the cheapest ripple reduction.
+\item \term{Cogging}: magnets ``click'' into the slots -- felt when you turn an unpowered motor by hand.
+\item Repeats every $360^\circ/\text{LCM}(\text{slots},\text{poles})$.
+\end{itemize}
+\begin{defbox}[Example]
+\small 12 slots, 8 poles: LCM $=24$ $\Rightarrow$ period $360^\circ/24=15^\circ$ mech.
+\end{defbox}
+\begin{itemize}\small
+\item Cure: measure $i_q$ vs.\ angle at slow speed, store in a \term{look-up table}, add it to $i_q^*$.
+\item Matters most at low speed.
 \end{itemize}
 \end{columns}
 \end{frame}
 
 % ---------------------------------------------------------------------
+\begin{frame}[t]{Check your understanding -- 3.6}
+\vspace{4mm}
+\begin{keybox}[Check your understanding]
+\large
+\begin{enumerate}
+\item A vertical axis must hold a load against gravity. Which compensation would you add?\\[3mm]
+\item Explain in one sentence how a disturbance observer ``sees'' the load torque.\\[3mm]
+\item What is the cogging period of a 9-slot / 6-pole motor?
+\end{enumerate}
+\end{keybox}
+\vfill
+\centering\small\color{mkGray} Discuss with your neighbour for 2 minutes.
+\end{frame}
+
+% ---------------------------------------------------------------------
 \begin{frame}{Summary 3.6 -- Disturbances and compensation}
 \begin{columns}[T,onlytextwidth]
-\column{.58\textwidth}
+\column{.56\textwidth}
 \begin{keybox}[Key take-aways]
 \small
 \begin{itemize}
-\item Load torque and friction act at the plant input; PI rejects them with limited speed.
-\item Feedforward (velocity, acceleration/torque, friction) cancels \emph{known} effects outside the loop.
-\item DOB estimates the \emph{unknown} lumped disturbance from $k_ti_q-\hat J\dot\omega$ and compensates it.
-\item Cogging/ripple: periodic in angle $\Rightarrow$ table-based compensation.
+\item Load torque and friction push against the motor; PI fixes them slowly.
+\item Feedforward cancels \emph{known} effects from the plan.
+\item A DOB estimates the \emph{unknown} push from $k_ti_q-\hat J\dot\omega$.
+\item Cogging repeats with angle $\Rightarrow$ table compensation.
 \end{itemize}
 \end{keybox}
-\column{.38\textwidth}
-\begin{notebox}
-\textbf{Self-check}\\
-1.\ Which compensation for a vertical axis with gravity load?\ (constant torque FF / integrator / DOB)\\[1mm]
-2.\ Why does DOB need $Q(s)$?\\[1mm]
-3.\ Cogging period of a 9-slot/6-pole motor?\ ($20^\circ$)
-\end{notebox}
+\column{.42\textwidth}
+\begin{defbox}[Key terms]
+\small
+\textbf{Load torque $T_L$} -- external push on the shaft.\\
+\textbf{Stick-slip} -- jerky motion from friction.\\
+\textbf{DOB} -- disturbance observer.\\
+\textbf{Cogging} -- magnet--slot torque at zero current.\\
+\textbf{Look-up table} -- stored correction vs.\ angle.
+\end{defbox}
 \end{columns}
 \end{frame}
 
@@ -1694,19 +1634,19 @@ $\hat T_L=Q(s)\big[k_ti_q-\hat Js\,\omega\big]$
 \begin{columns}[T,onlytextwidth]
 \column{.5\textwidth}
 \begin{defbox}[From voltage to motion]
-\scriptsize
-\textbf{3.2} SVPWM synthesises $\vec v^*$ up to $V_\text{dc}/\sqrt3$; dead time and $f_\text{sw}$ shape the voltage quality; current \& voltage limits bound the $dq$ plane.\\[1mm]
-\textbf{3.3} FOC makes the PMSM a DC-like actuator: $T_e=\tfrac32p[\psi_\text{PM}i_q+(L_d-L_q)i_di_q]$, MTPA, field weakening, decoupling, correct angle.
+\small
+\textbf{3.2} PWM sets an average voltage; SVPWM reaches $V_\text{dc}/\sqrt3$; dead time, $f_\text{sw}$ and the limits shape what is possible.\\[1mm]
+\textbf{3.3} FOC: Clarke + Park (rotating camera) turn AC into DC; torque $=k_ti_q$.
 \end{defbox}
 \column{.48\textwidth}
 \begin{defbox}[From loops to accuracy]
-\scriptsize
-\textbf{3.4} Cascade P--PI--PI, TO/SO design, limits with anti-windup, S-curve trajectories.\\[1mm]
-\textbf{3.5} Inside-out tuning, 3--10$\times$ separation, inertia ratio, delay budget, FRF measurement.\\[1mm]
-\textbf{3.6} Feedforward and disturbance observers remove what feedback alone cannot.
+\small
+\textbf{3.4} Cascade P--PI--PI with simple recipes, anti-windup, S-curves.\\[1mm]
+\textbf{3.5} Bandwidth, inside-out tuning, 3--10$\times$ separation, delay cost.\\[1mm]
+\textbf{3.6} Feedforward and observers remove what feedback alone cannot.
 \end{defbox}
 \end{columns}
-\vspace{2mm}
+\vspace{3mm}
 \centering
 \begin{tikzpicture}[x=1cm]
   \foreach \x/\t/\c in {0/{PWM \&\\limits}/mkSky,2.6/{FOC}/mkMid,5.2/{cascade\\loops}/mkBlue,7.8/{tuning \&\\bandwidth}/mkNavy,10.4/{compen-\\sation}/mkOrange}{
@@ -1721,17 +1661,16 @@ $\hat T_L=Q(s)\big[k_ti_q-\hat Js\,\omega\big]$
 \column{.58\textwidth}
 \textbf{Resonance, Sensors, Measurement and System Integration}
 \begin{itemize}\small
-\item 3.7 Resonance, vibration and the use of filters -- continuing today's two-mass FRF and notch.
-\item 4.1--4.2 Sensors; encoders and resolvers -- where $\theta_m$ and $\hat\omega$ really come from.
-\item 4.3--4.4 Sampling, digitisation and signal processing -- quantisation, aliasing, filter delay.
-\item 4.5 Communication and system integration -- field buses, synchronisation of set-points.
+\item 3.7 Resonance, vibration and filters -- continuing today's swing-like resonance and notch.
+\item 4.1--4.2 Sensors; encoders and resolvers -- where $\theta_m$ and $\omega$ come from.
+\item 4.3--4.4 Sampling and signal processing -- quantisation, aliasing, filter delay.
+\item 4.5 Communication and system integration.
 \end{itemize}
 \column{.40\textwidth}
 \begin{notebox}
 \textbf{Bring along from today}\\
--- the delay budget table,\\
+-- the delay cost $360^\circ f_cT_d$,\\
 -- the velocity-loop plant $k_t/(Js)$,\\
--- the encoder quantisation example,\\
 -- the two-mass FRF.
 \end{notebox}
 \end{columns}
@@ -1783,7 +1722,6 @@ d4\_signal\_analyzer.jpg & File:3562A Dynamic Signal Analyzer HP.jpg -- Loxyger 
 \item Åström, K.\,J.; Hägglund, T.: \emph{Advanced PID Control}. ISA, 2006.
 \item Åström, K.\,J.; Murray, R.\,M.: \emph{Feedback Systems}. Princeton Univ.\ Press, 2008.
 \item Franklin, G.; Powell, J.\,D.; Emami-Naeini, A.: \emph{Feedback Control of Dynamic Systems}. Pearson.
-\item Lorenz, R.\,D.; Lipo, T.\,A.; Novotny, D.\,W.: Motion control with induction motors. \emph{Proc.\ IEEE} 82(8), 1994.
 \item Ohnishi, K.; Shibata, M.; Murakami, T.: Motion control for advanced mechatronics. \emph{IEEE/ASME Trans. Mechatronics} 1(1), 1996.
 \item Armstrong-Hélouvry, B.; Dupont, P.; Canudas de Wit, C.: A survey of models, analysis tools and compensation methods for the control of machines with friction. \emph{Automatica} 30(7), 1994.
 \item Biagiotti, L.; Melchiorri, C.: \emph{Trajectory Planning for Automatic Machines and Robots}. Springer, 2008.
