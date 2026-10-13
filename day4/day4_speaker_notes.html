@@ -1,0 +1,477 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Day 4 Speaker Notes</title>
+<style>
+  :root{
+    --navy:#0B1F3A; --blue:#14365E; --mid:#2B5A8C; --sky:#6E9BC9; --pale:#E8EEF6;
+    --orange:#F07F12; --amber:#F9A94B; --cream:#FFF3E4; --gray:#5B6573; --bg:#F6F8FB; --card:#fff; --text:#0B1F3A;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){ --bg:#0A1424; --card:#10213A; --text:#E6ECF4; --pale:#1A3152; --cream:#3a2a14; --gray:#9AA8BA; }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 "Segoe UI",system-ui,-apple-system,Roboto,Helvetica,Arial,sans-serif}
+  header{background:var(--navy);color:#fff;padding:28px 16px 22px;border-bottom:4px solid var(--orange)}
+  header .wrap{max-width:980px;margin:0 auto}
+  header .day{color:var(--orange);font-weight:700;letter-spacing:.08em;font-size:.9rem}
+  header h1{margin:.2em 0 .1em;font-size:1.9rem}
+  header p{margin:0;color:var(--sky)}
+  nav.toc{position:sticky;top:0;z-index:5;background:var(--blue);padding:8px 16px;overflow-x:auto;white-space:nowrap}
+  nav.toc a{color:#fff;text-decoration:none;margin-right:16px;font-size:.88rem}
+  nav.toc a:hover{color:var(--amber)}
+  main{max-width:980px;margin:0 auto;padding:20px 16px 60px}
+  h2.session{margin:42px 0 12px;padding:10px 14px;background:var(--blue);color:#fff;border-left:6px solid var(--orange);border-radius:4px;font-size:1.25rem}
+  h2.session small{display:block;color:var(--amber);font-weight:500;font-size:.85rem}
+  table.plan{width:100%;border-collapse:collapse;background:var(--card);margin:12px 0}
+  table.plan th{background:var(--blue);color:#fff;text-align:left;padding:8px}
+  table.plan td{padding:8px;border-bottom:1px solid var(--pale)}
+  .slide{background:var(--card);border-radius:8px;margin:14px 0;padding:14px 18px;box-shadow:0 1px 3px rgba(11,31,58,.12);border-top:3px solid var(--mid)}
+  .slide h3{margin:0 0 6px;font-size:1.05rem;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+  .slide h3 .num{background:var(--orange);color:#fff;border-radius:4px;padding:1px 8px;font-size:.85rem}
+  .slide h3 .time{margin-left:auto;color:var(--gray);font-weight:400;font-size:.85rem}
+  .say{margin:6px 0}
+  .key{background:var(--cream);border-left:4px solid var(--orange);padding:6px 10px;margin:8px 0;border-radius:3px}
+  .ask{background:var(--pale);border-left:4px solid var(--mid);padding:6px 10px;margin:8px 0;border-radius:3px}
+  .trans{color:var(--gray);font-style:italic;margin-top:6px}
+  .label{font-weight:700;font-size:.8rem;text-transform:uppercase;letter-spacing:.05em;color:var(--orange)}
+  .ask .label{color:var(--mid)}
+  ul{margin:4px 0 4px 1.1em;padding:0}
+  footer{max-width:980px;margin:0 auto;padding:20px 16px;color:var(--gray);font-size:.85rem}
+  @media print{nav.toc{display:none}.slide{break-inside:avoid;box-shadow:none;border:1px solid #ccc}}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <div class="day">DAY 4 / 5 · SPEAKER NOTES</div>
+  <h1>Servo Systems: Drives, FOC, Control Loops, Tuning and Compensation</h1>
+  <p>Mechatronics: Electrical Machines, Control, Servo Systems and Sensing · 5 h net teaching time</p>
+</div></header>
+<nav class="toc"><a href="#plan">Plan</a><a href="#s1">3.2 · (cont.) Motor driving</a><a href="#s2">3.3 · Field-oriented control</a><a href="#s3">3.4 · Current, velocity and position loops</a><a href="#s4">3.5 · Loop tuning and bandwidth</a><a href="#s5">3.6 · Disturbances and compensation + day wrap-up</a></nav>
+<main>
+  <section id="plan">
+    <h2 class="session">Day plan &amp; timing</h2>
+    <table class="plan"><tr><th>Block</th><th>Topic</th><th>Slides (PDF pages)</th><th>Duration</th></tr>
+      <tr><td>1</td><td>3.2 (cont.) PWM, SVPWM, dead time, limits</td><td>2–11</td><td>30 min</td></tr>
+      <tr><td>2</td><td>3.3 FOC part A: transforms, angle, dq model, circuits</td><td>12–19</td><td>35 min</td></tr>
+      <tr><td></td><td><i>Break</i></td><td></td><td>10 min</td></tr>
+      <tr><td>3</td><td>3.3 FOC part B: torque, MTPA, field weakening, FOC structure, decoupling, alignment</td><td>20–27</td><td>55 min</td></tr>
+      <tr><td></td><td><i>Break</i></td><td></td><td>10 min</td></tr>
+      <tr><td>4</td><td>3.4 Loops part A: cascade, signals, current-loop design and verification</td><td>28–33</td><td>38 min</td></tr>
+      <tr><td>5</td><td>3.4 Loops part B: velocity SO, position loop, anti-windup, trajectories, feedforward</td><td>34–40</td><td>52 min</td></tr>
+      <tr><td></td><td><i>Break</i></td><td></td><td>10 min</td></tr>
+      <tr><td>6</td><td>3.5 Loop tuning and bandwidth</td><td>41–50</td><td>60 min</td></tr>
+      <tr><td></td><td><i>Break</i></td><td></td><td>10 min</td></tr>
+      <tr><td>7</td><td>3.6 Disturbances and compensation; day summary, preview, credits, references</td><td>51–62</td><td>30 min</td></tr>
+      <tr><td></td><td><b>Total net teaching time</b></td><td></td><td><b>300 min (5 h)</b> + 40 min breaks</td></tr>
+    </table>
+    <p>Slide numbers refer to PDF page numbers of <code>day4.pdf</code> (section-divider pages 3, 12, 28, 41, 51, 58 have no card). The reference motor (p=4, R=0.5&nbsp;Ω, L=3&nbsp;mH, ψ<sub>PM</sub>=0.12&nbsp;Vs, k<sub>t</sub>=0.72&nbsp;Nm/A, J<sub>m</sub>=3·10<sup>-4</sup>&nbsp;kg&nbsp;m², V<sub>dc</sub>=325&nbsp;V, 16&nbsp;kHz) is used for every computed plot; the data are produced by <code>day4/src/gen_data.py</code>.</p>
+  </section>
+
+  <section id="s1">
+    <h2 class="session">Session 3.2 · (cont.) Motor driving: PWM, voltage and current limits <small>Curriculum code 3.2 · 30 min</small></h2>
+    <div class="slide">
+      <h3><span class="num">Slide 2</span>Agenda and learning objectives<span class="time">~3 min</span></h3>
+      <p class="say">Welcome to Day 4. Yesterday we built the motor models and saw how an inverter switches voltage onto the windings. Today we close the loop: we turn a measured rotor angle and two phase currents into precise torque, and then wrap velocity and position loops around that torque source. The day has five blocks: we finish PWM and the voltage and current limits, spend ninety minutes on field-oriented control, ninety minutes on the cascade of current, velocity and position loops, one hour on tuning and bandwidth, and close with disturbance compensation. Throughout the day we use one reference motor, listed at the bottom: a four-pole-pair surface PMSM with 0.72 Nm/A and a 325 V DC link. Every number you will see on the plots is computed from these parameters, so you can check them yourself.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>One reference motor for all examples: p=4, R=0.5 Ω, L=3 mH, ψ_PM=0.12 Vs, k_t=0.72 Nm/A.</li><li>Today is about the chain voltage → current → torque → speed → position.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why one motor for the whole day? <b>A:</b> So that the numbers connect: the current-loop bandwidth computed in 3.4 is the same one that limits the velocity loop in 3.5.</li></ul></div>
+      <p class="trans">Transition: Let us start where Day 3 ended: the inverter and how it creates a sinusoidal voltage.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 4</span>The two-level VSI and carrier-based sinusoidal PWM<span class="time">~4 min</span></h3>
+      <p class="say">On the left you see the three-phase two-level voltage-source inverter: three half-bridges on a common DC link, and below, a real IGBT module with the cover removed, where you can see the parallel dies and bond wires. Each leg can only connect its output to plus or minus V_dc. To get a sinusoid on average we compare a sinusoidal reference with a triangular carrier. Whenever the reference is above the carrier, the upper switch is on. The plot shows this for a modulation index of 0.8 and a carrier fifteen times the fundamental. The middle trace shows the gate signals of legs a and b; the bottom trace is the line-to-line voltage, a train of pulses whose local average follows the orange sine. With the reference normalised to V_dc/2, the fundamental phase amplitude is simply m times V_dc over two.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Pole voltage average = V_dc/2 · (1 + v*).</li><li>Sinusoidal PWM reaches at most V_dc/2 phase amplitude in the linear range.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why is the carrier ratio chosen as an odd multiple of three? <b>A:</b> It keeps the waveform symmetric and places the carrier harmonics into the zero-sequence, where they cancel in the line voltages.</li></ul></div>
+      <p class="trans">Transition: But V_dc/2 wastes part of the DC link. Let us see how a common-mode term gets us more voltage.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 5</span>Zero-sequence injection<span class="time">~3 min</span></h3>
+      <p class="say">The motor star point is isolated, so any voltage added equally to all three phases does not drive any current: it cancels in the line-to-line voltages. We can exploit this. If we want a fundamental of V_dc over root three, the pure sine, the dashed curve, clips at plus and minus one. Adding one sixth of the third harmonic flattens the peaks so the reference fits. Even better, the min-max injection subtracts the mean of the largest and smallest reference in each instant; this gives exactly the same average voltages as centred space-vector PWM. Both gain 15.5 percent of linear voltage range. Beyond that we enter overmodulation, up to six-step, which gives another ten percent but with low-order harmonics and a non-linear gain, which we avoid inside a current loop.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Common-mode voltage does not appear in the phase currents.</li><li>Linear limit rises from V_dc/2 to V_dc/√3 (+15.5 %).</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Does zero-sequence injection have side effects? <b>A:</b> Yes: the common-mode voltage of the star point changes, which matters for bearing currents and EMI, but not for torque.</li></ul></div>
+      <p class="trans">Transition: The min-max signal is equivalent to SVPWM. Let us look at SVPWM directly in the vector picture.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 6</span>Space vectors: the inverter hexagon<span class="time">~3 min</span></h3>
+      <p class="say">Eight switching states exist. Using the space-vector definition with the two-thirds factor, six of them give active vectors of length two-thirds V_dc pointing at the corners of a hexagon, and two give the zero vector. The hexagon is divided into six sectors. Between neighbouring vectors only one leg changes state, so moving around the hexagon costs one commutation per step. Any reference vector inside the hexagon can be produced on average over one PWM period by combining the two adjacent active vectors and the zero vectors. If we want a rotating vector of constant length without distortion, it must stay inside the inscribed circle, whose radius is two-thirds V_dc times cosine thirty degrees, which equals V_dc over root three: the same limit as before.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>6 active + 2 zero vectors; sectors of 60°.</li><li>Inscribed circle radius V_dc/√3 = linear limit.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> What happens in the corners of the hexagon? <b>A:</b> Larger instantaneous vectors are possible there, but a rotating vector would be distorted: that is overmodulation.</li></ul></div>
+      <p class="trans">Transition: Now let us compute how long each vector must be applied.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 7</span>SVPWM dwell times<span class="time">~4 min</span></h3>
+      <p class="say">The volt-second balance in sector one says: reference times T_s equals v1 times T1 plus v2 times T2 plus zero vectors times T0. Solving gives the dwell times shown, with sine of sixty minus theta and sine of theta. In the example, 150 V on a 325 V bus at twenty degrees, T1 is 32 microseconds, T2 is 17, and the remaining 13 microseconds are split between the 000 and 111 states. On the right the centred seven-segment pattern is drawn to scale: start with 000, then 100, then 110, then 111 in the middle, and back. Each leg switches once per half period. A very practical consequence: if we sample the currents exactly in the middle of the zero vector, the ripple is at its mean value, so we measure the average current without filtering.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>T1, T2 formulas; T0 = T_s − T1 − T2 must stay ≥ 0.</li><li>Centred PWM enables ripple-free current sampling.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> What if T0 becomes negative? <b>A:</b> The reference is outside the hexagon: the modulator must limit or rescale the vector (overmodulation strategy).</li></ul></div>
+      <p class="trans">Transition: Real switches are not ideal, which brings us to dead time.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 8</span>Dead time<span class="time">~4 min</span></h3>
+      <p class="say">The two transistors in a leg must never be on at the same time, otherwise the DC link is short-circuited. Therefore the turn-on edge of each switch is delayed by a dead time of typically one microsecond for IGBTs. During the dead time neither switch conducts and the current flows through a freewheeling diode. Which diode depends on the current sign, so the output voltage during that interval is determined by the current, not by the command. The result is an average voltage error of t_d times f_sw times V_dc, with the sign opposite to the current. With our numbers that is 5.2 volts. At 100 rpm the motor needs only about five volts, so the error is of the same size as the command. Symptoms are current clamping around zero crossings and sixth-harmonic ripple; dead-time compensation and the current loop fix most of it.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>ΔV ≈ t_d·f_sw·V_dc·sign(i) — matters most at low speed.</li><li>Compensate with sign(i*), smoothed near zero current.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why use the sign of the reference current rather than the measured one? <b>A:</b> The measured current is noisy near zero; chattering compensation would make things worse.</li></ul></div>
+      <p class="trans">Transition: Dead time scales with switching frequency, which leads to the general trade-off.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 9</span>Switching frequency and current ripple<span class="time">~3 min</span></h3>
+      <p class="say">The plot shows the simulated worst-case peak-to-peak current ripple, normalised to V_dc over L times f_sw. Centred SVPWM gives clearly less ripple than sinusoidal PWM at higher modulation. With our motor at 16 kHz the ripple is about half an ampere peak-to-peak. Ripple scales with one over f_sw, while switching losses scale with f_sw. The table summarises the trade-off: higher frequency gives less ripple, a shorter control delay and therefore more current bandwidth, and no audible noise; lower frequency gives lower losses and fewer EMI events. Typical industrial servo drives with IGBTs use 8 to 16 kHz; wide-bandgap devices push this to tens of kilohertz. The loss formula is a quick estimate from datasheet switching energies.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Ripple ∝ V_dc/(L f_sw); losses ∝ f_sw.</li><li>Higher f_s also means less delay → more bandwidth.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Can we double the control rate without doubling f_sw? <b>A:</b> Yes, by sampling twice per PWM period (at top and bottom of the carrier), at the cost of computation time.</li></ul></div>
+      <p class="trans">Transition: Finally, the limits that every operating point must respect.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 10</span>Voltage and current limits in the dq plane<span class="time">~4 min</span></h3>
+      <p class="say">Here I anticipate the dq frame we will introduce shortly. The orange circle is the current limit: i_d squared plus i_q squared below I_max squared, set by thermal and device ratings. The voltage limit, in steady state and neglecting resistance, is a circle for a surface motor, centred at minus psi over L, here minus 40 amperes, with a radius that shrinks inversely with speed. At 3000 rpm the whole current circle lies inside the voltage circle, so all torque is available. At 5000 rpm the voltage circle cuts the current circle: positive torque is only possible with negative i_d, which is field weakening. At 7000 rpm only a small region is left. Keep five to ten percent voltage reserve for the controller.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Feasible region = current circle ∩ voltage circle.</li><li>Voltage circle shrinks ∝ 1/ω_e.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why is the voltage limit centred at −ψ/L? <b>A:</b> Because at that d-current the stator flux cancels the magnet flux and no back-EMF remains.</li></ul></div>
+      <p class="trans">Transition: Let me summarise the first block.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 11</span>Summary 3.2<span class="time">~2 min</span></h3>
+      <p class="say">To summarise: sinusoidal PWM reaches V_dc over two, and zero-sequence methods including SVPWM reach V_dc over root three. SVPWM is a volt-second balance. Dead time causes a current-sign-dependent voltage error that dominates at low speed. Switching frequency is a trade-off between ripple and delay on one side and losses and EMI on the other. And every operating point has to satisfy both the current and the voltage limit. Please try the three self-check questions; the answers are given in brackets.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Linear limit V_dc/√3; dead-time error; limit circles.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Maximum linear phase amplitude at 560 V? <b>A:</b> 560/√3 = 323 V.</li></ul></div>
+      <p class="trans">Transition: With the actuator understood, we can now look at how to control the motor currents: field-oriented control.</p>
+    </div>
+  </section>
+
+  <section id="s2">
+    <h2 class="session">Session 3.3 · Field-oriented control <small>Curriculum code 3.3 · 90 min</small></h2>
+    <div class="slide">
+      <h3><span class="num">Slide 13</span>Why field-oriented control?<span class="time">~5 min</span></h3>
+      <p class="say">In a brushed DC motor the commutator keeps the armature current orthogonal to the field automatically, so torque is simply k_t times current, linear and instantaneous. That is the ideal servo actuator. In a PMSM the magnet flux rotates with the rotor, and the stator carries three AC currents. Field-oriented control is an electronic commutator: we measure the rotor angle, express the current vector in a frame fixed to the rotor flux, and control two components: i_d aligned with the magnet, which affects flux, and i_q at ninety electrical degrees, which produces torque. In that frame all quantities are DC in steady state, so simple PI controllers achieve zero error at any speed. The requirements are fast current sensing, an accurate angle and a modulator. The photograph shows typical compact servo drives connected by a field bus.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>FOC = electronic commutator: keep current at 90° el. to the rotor flux.</li><li>In the rotor frame, AC becomes DC.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Is FOC only for PMSMs? <b>A:</b> No; it was invented for induction motors (Blaschke 1972), where the flux angle must be estimated.</li></ul></div>
+      <p class="trans">Transition: To get into the rotor frame we need two transforms.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 14</span>Clarke and Park transforms<span class="time">~7 min</span></h3>
+      <p class="say">The Clarke transform maps the three phase quantities into two orthogonal stationary components, alpha and beta. With the factor two-thirds we use the amplitude-invariant form: a balanced set with peak current I-hat gives a vector of length I-hat. Because the three currents sum to zero, i_alpha equals i_a and i_beta is i_a plus two i_b over root three, so two sensors suffice. The Park transform then rotates by the electrical angle theta_e into the d-q frame. The price of amplitude invariance is a factor three-halves in power and torque. Some literature and some drive manuals use the power-invariant form with root two-thirds instead; then the three-halves disappears but current magnitudes are scaled. Always check which convention a manual uses before comparing numbers.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Amplitude-invariant: |i| = phase peak; p = 3/2 (v_d i_d + v_q i_q).</li><li>Two current sensors suffice for a star connection.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> i_a = 8 A, i_b = −4 A: what are i_α, i_β? <b>A:</b> i_α = 8 A, i_β = (8 − 8)/√3 = 0 A.</li></ul></div>
+      <p class="trans">Transition: Let us visualise the three frames geometrically.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 15</span>Reference frames abc, αβ, dq<span class="time">~5 min</span></h3>
+      <p class="say">The drawing shows the three phase axes a, b and c at 120 degrees, the stationary alpha-beta frame with alpha on phase a, and the rotating d-q frame at angle theta_e, with d on the magnet north pole. The orange current vector is one physical object; its coordinates differ in each frame. Projecting onto alpha and beta gives the stationary components; projecting onto d and q gives the rotor-frame components. The whole d-q frame rotates at omega_e. In compact complex notation, the d-q vector is the alpha-beta vector multiplied by e to the minus j theta_e. This complex notation will make the derivation of the voltage equations very short.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Same vector, three coordinate systems.</li><li>dq vector = αβ vector · e^(−jθ_e).</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why put d on the magnet axis? <b>A:</b> Then the magnet flux has only a d-component and torque comes from i_q only (for SPM).</li></ul></div>
+      <p class="trans">Transition: What do the signals look like over time in each frame?</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 16</span>The same current in three frames<span class="time">~5 min</span></h3>
+      <p class="say">Here the phase currents are balanced sinusoids and their amplitude steps from five to ten amperes after one electrical revolution. In the abc frame we see three sinusoids. In alpha-beta still two sinusoids at the electrical frequency. In d-q, i_d stays at zero and i_q is a clean DC step from five to ten amperes. That is the key benefit: a PI controller in the d-q frame tracks this without any steady-state phase or amplitude error, at any speed. In the stationary frame, the same PI would lag increasingly with speed. Equivalently, a PI in d-q acts like a resonant integrator at omega_e in the stationary frame.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>dq quantities are DC in steady state.</li><li>PI in dq → zero steady-state error at any speed.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> What if the currents contain harmonics? <b>A:</b> They appear as ripple at multiples of 6ω_e in dq, which the PI only partly suppresses.</li></ul></div>
+      <p class="trans">Transition: The transforms need the electrical angle, which is not the shaft angle.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 17</span>Electrical vs mechanical angle<span class="time">~5 min</span></h3>
+      <p class="say">The electrical angle is the pole-pair number times the mechanical angle. Our motor has four pole pairs, eight poles, so one mechanical revolution contains four electrical revolutions, as shown by the sawtooth. Electrical frequency is p times n over sixty: at 3000 rpm that is 200 Hz. Three consequences: the encoder resolution in electrical degrees is p times coarser; any mechanical alignment error is multiplied by p in the Park transform; and we must be careful to use electrical quantities in Park and decoupling, mechanical ones in the velocity loop. The photograph shows a typical concentrated stator winding.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>θ_e = p θ_m, ω_e = p ω_m, f_e = p n / 60.</li><li>Errors in θ_m are multiplied by p.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Datasheet says 8 poles: what is p? <b>A:</b> p = 4 pole pairs.</li></ul></div>
+      <p class="trans">Transition: Now we can write the motor model in the rotor frame.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 18</span>PMSM model in dq coordinates<span class="time">~8 min</span></h3>
+      <p class="say">Start from the stator voltage equation in stationary space-vector form: v equals R i plus d psi d t. Substitute x equals x_dq times e to the j theta_e and differentiate the product: the derivative produces an additional term j omega_e times psi. The flux linkages in the rotor frame are L_d i_d plus psi_PM on the d-axis and L_q i_q on the q-axis. Splitting into real and imaginary parts gives the two equations in the box. Each axis has a resistive drop and an inductive drop, plus speed-dependent cross-coupling, and the q-axis additionally carries the back-EMF omega_e psi_PM. Units are volts, amperes, henries, and volt-seconds, with omega_e in electrical radians per second. For the mechanics we add J omega-dot equals T_e minus B omega minus T_L.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>v_d = R i_d + L_d di_d/dt − ω_e L_q i_q.</li><li>v_q = R i_q + L_q di_q/dt + ω_e L_d i_d + ω_e ψ_PM.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Where does the cross-coupling physically come from? <b>A:</b> From the rotation of the reference frame: a constant flux on one axis, seen from a rotating frame, induces a voltage on the other.</li></ul></div>
+      <p class="trans">Transition: These equations correspond to two simple equivalent circuits.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 19</span>Equivalent circuits<span class="time">~5 min</span></h3>
+      <p class="say">Each axis is an R-L circuit with speed-dependent voltage sources. The red plus and minus signs give the polarity as a voltage drop in the current direction. The electrical time constant L over R is six milliseconds for our motor. For the current controllers, the speed-dependent sources are disturbances. But they are not unknown: we measure the currents and the speed, so we can compute and feed them forward. That is the decoupling we will see in a few minutes. Note also that the q-axis carries the back-EMF, which sets the voltage required at speed.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Two R-L plants with known speed voltages.</li><li>τ = L/R = 6 ms for the reference motor.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why not simply let the PI handle the coupling? <b>A:</b> It can, but the transient errors grow with speed; feedforward is cheap.</li></ul></div>
+      <p class="trans">Transition: How do these currents produce torque?</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 20</span>Torque equation and reluctance torque<span class="time">~8 min</span></h3>
+      <p class="say">Torque is three-halves p times psi_d i_q minus psi_q i_d. Inserting the flux linkages gives a magnet term psi_PM i_q and a reluctance term L_d minus L_q times i_d i_q. In a surface magnet motor the inductances are equal, torque is just k_t i_q with k_t equal to three-halves p psi_PM, 0.72 Nm per ampere for our motor, and the best choice is i_d equal zero. In an interior magnet motor L_q is larger than L_d, so negative i_d adds torque. The plot uses an illustrative IPM: as we rotate the current vector away from the q-axis, the magnet torque falls with cosine beta while the reluctance torque rises with sine two beta. The total peaks at 26.6 degrees with 11.5 Nm, nineteen percent more than with i_d zero. Note the remark on k_t: peak versus rms current conventions differ by root two.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>T_e = 3/2 p [ψ_PM i_q + (L_d − L_q) i_d i_q].</li><li>IPM: negative i_d adds reluctance torque.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Datasheet k_t is 1.02 Nm/A_rms; what is our peak-based k_t? <b>A:</b> 1.02/√2 ≈ 0.72 Nm/A.</li></ul></div>
+      <p class="trans">Transition: The optimum angle depends on current: that is MTPA.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 21</span>Maximum torque per ampere<span class="time">~7 min</span></h3>
+      <p class="say">Maximum torque per ampere asks: for a given torque, which current vector has the smallest magnitude? Geometrically, the constant-torque hyperbola must touch the current circle tangentially. Differentiating the torque with respect to beta and setting it to zero yields the closed-form expression for i_d. The orange curve is the MTPA trajectory for the illustrative IPM: it starts along the q-axis at low current and bends towards negative i_d as current increases, because reluctance torque grows with current squared. For a surface motor MTPA collapses to i_d equals zero. In practice, saturation makes L_q current-dependent, so drives use look-up tables measured on a dynamometer instead of the formula.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>MTPA: torque curve tangent to current circle.</li><li>Practice: LUT including saturation.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why is MTPA worth the effort? <b>A:</b> Less current for the same torque means lower copper and inverter losses and more torque at the current limit.</li></ul></div>
+      <p class="trans">Transition: At high speed the voltage, not the current, becomes the limit.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 22</span>Field weakening<span class="time">~6 min</span></h3>
+      <p class="say">This plot is computed for our surface motor at 325 V. Up to about 3240 rpm the full 14.4 Nm is available with i_d at zero. Above that base speed, the back-EMF approaches the voltage limit. By injecting negative i_d we reduce the effective d-axis flux, L_d i_d plus psi_PM, and gain speed. But the current used for i_d is no longer available for i_q, so torque falls while power stays roughly constant. The characteristic current psi over L is forty amperes, larger than our twenty-ampere limit, so the motor has a finite maximum speed, about 7440 rpm here. In practice a voltage-feedback loop increases negative i_d when the voltage reference exceeds about 95 percent of the limit. Servo motors rarely run deep in field weakening; spindles and traction drives do.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Base speed ≈ 3240 rpm, max ≈ 7440 rpm (computed).</li><li>Negative i_d trades current for voltage.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Is field weakening risky? <b>A:</b> Yes: if control is lost at high speed, the full back-EMF appears on the DC link and can overvoltage the inverter.</li></ul></div>
+      <p class="trans">Transition: Let us put numbers into the model at a concrete operating point.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 23</span>Worked example at 3000 rpm<span class="time">~7 min</span></h3>
+      <p class="say">Take our motor at 3000 rpm with ten amperes of i_q. The electrical speed is 1256.6 radians per second. The back-EMF is 150.8 volts. v_q is the resistive drop of five volts plus the back-EMF, 155.8 volts. v_d is minus omega L i_q, minus 37.7 volts. The magnitude is 160.3 volts, 85 percent of the linear limit of 187.6 volts. Torque is 7.2 Nm, mechanical power 2.26 kW, and the electrical input power with the three-halves factor is 2.34 kW. The difference, 75 watts, is exactly the copper loss three-halves R i squared, which confirms the factors. The vector diagram is drawn to scale: the voltage leads the current by 13.6 degrees. The omega L i term consumes voltage reserve that grows with both speed and load.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Power balance confirms the 3/2 factors.</li><li>Voltage reserve shrinks with speed and load.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> How much reserve is left for transients? <b>A:</b> 187.6 − 160.3 ≈ 27 V, about 15 %.</li></ul></div>
+      <p class="trans">Transition: Now let us assemble the complete FOC structure.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 24</span>FOC basic structure<span class="time">~8 min</span></h3>
+      <p class="say">Follow the signal from left to right. The velocity PI produces the torque-current reference i_q star. The d-current reference is zero for a surface motor, comes from MTPA for an IPM, or from the field-weakening loop. Two PI controllers regulate i_d and i_q. The decoupling block adds the feedforward terms. Inverse Park turns v_d, v_q into v_alpha, v_beta using theta_e; SVPWM computes the duty cycles; the inverter applies them. In the feedback path, two phase currents are sampled, Clarke and Park transformed with the same angle. The encoder angle is multiplied by p and corrected by the offset; its derivative, filtered, gives the speed. All of this runs every PWM period, typically within five to twenty microseconds on a modern controller.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Order per PWM period: sample → Clarke/Park → PI → decoupling → inverse Park → SVPWM.</li><li>The same θ_e must be used forward and back.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why is the measured angle often extrapolated by half a sample? <b>A:</b> Because the voltage is applied later than the angle is sampled; compensating rotation improves accuracy at high speed.</li></ul></div>
+      <p class="trans">Transition: Let me show the effect of the decoupling block quantitatively.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 25</span>Cross-coupling and decoupling<span class="time">~6 min</span></h3>
+      <p class="say">Without compensation the q-loop must integrate up the back-EMF and both PIs must fight the cross-coupling. Decoupling adds minus omega L_q i_q to the d-voltage and omega times L_d i_d plus psi to the q-voltage. The simulation shows an i_q step of ten amperes at 3000 rpm with our discrete controller. To make a fair comparison, the integrator was pre-loaded with the back-EMF in both cases, so we see only the cross-coupling effect. Without decoupling, i_d deviates by 2.3 amperes; with decoupling only 0.85 amperes remain, caused by the loop delay and the fact that the measured current changes during the step. Using the reference current instead of the measured one avoids injecting noise.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Decoupling turns the plant into two independent R-L circuits.</li><li>Residual coupling from delay and parameter errors.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> What if L is wrong by 20 %? <b>A:</b> Decoupling is 80 % effective; the PI handles the rest. It never destabilises the loop.</li></ul></div>
+      <p class="trans">Transition: All this depends on the angle being right. How do we get the offset?</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 26</span>Rotor angle alignment and offset<span class="time">~6 min</span></h3>
+      <p class="say">The encoder zero is arbitrary; FOC needs theta_e zero on the magnet axis. Common methods: DC alignment, where a current vector along alpha pulls the rotor to the aligned position and the encoder value is stored; back-EMF comparison while rotating the motor externally; Hall sensors for coarse start-up; factory-stored offsets in absolute encoders; and high-frequency injection at standstill. The plot shows why accuracy matters: torque falls with cosine of the error, slowly, but the unwanted d-current grows with sine. Two mechanical degrees on our four-pole-pair motor is eight electrical degrees: only one percent torque loss, but fourteen percent of the current in the wrong axis. Beyond ninety degrees the torque reverses and the motor runs away.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>T = k_t |i| cos Δθ_e; i_d error ∝ sin Δθ_e.</li><li>Δθ_e &gt; 90° → torque reversal, runaway.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why might DC alignment fail? <b>A:</b> With a load or friction the rotor does not reach the exact position, or it may be pushed to the unstable equilibrium at 180°.</li></ul></div>
+      <p class="trans">Transition: Let us summarise field-oriented control.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 27</span>Summary 3.3<span class="time">~2 min</span></h3>
+      <p class="say">Clarke and Park map AC quantities into DC quantities in the rotor frame, using theta_e equals p theta_m. The PMSM in d-q is two R-L circuits with cross-coupling and back-EMF. Torque equals three-halves p times magnet plus reluctance terms. Field weakening trades current for voltage. FOC runs every PWM period, and angle errors cost torque. Try the self-check questions before the break.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Know the dq equations and torque equation by heart.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Back-EMF at 1500 rpm? <b>A:</b> ω_e = 628.3 rad/s · 0.12 Vs = 75.4 V peak phase.</li></ul></div>
+      <p class="trans">Transition: After the break we stack velocity and position loops on top of the current loop.</p>
+    </div>
+  </section>
+
+  <section id="s3">
+    <h2 class="session">Session 3.4 · Current, velocity and position loops <small>Curriculum code 3.4 · 90 min</small></h2>
+    <div class="slide">
+      <h3><span class="num">Slide 29</span>Nested cascade structure<span class="time">~7 min</span></h3>
+      <p class="say">A servo drive is a cascade: the trajectory generator produces a position reference, a position controller produces a velocity reference, the velocity PI produces a current reference, and the current loop with the inverter makes torque. The mechanics integrate torque to speed and speed to position. Each loop sees the closed inner loop as its actuator. Inner loops are faster and sampled faster, here 16, 8 and 2 kHz, and they provide natural limits: limiting the current reference limits torque, limiting the velocity reference limits speed. The dashed orange lines are feedforward paths that bring the known derivatives of the reference past the slow loops. We tune inside out, and we will see why.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Each loop = actuator for the next outer loop.</li><li>Limits are applied at loop interfaces.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why not a single state-feedback controller? <b>A:</b> Possible, but the cascade gives natural limits, simple commissioning and robustness; it is the industry standard.</li></ul></div>
+      <p class="trans">Transition: How fast must each loop be relative to the others?</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 30</span>Bandwidth hierarchy<span class="time">~6 min</span></h3>
+      <p class="say">On a logarithmic frequency axis you see typical bandwidth ranges: position loops ten to eighty hertz, velocity loops fifty to four hundred, current loops half a kilohertz to three, and the PWM and sampling at eight to thirty-two kilohertz. The red line marks where mechanical resonances often appear, in the hundreds of hertz, right in the velocity-loop range. The rule is that each outer loop should be three to ten times slower than its inner loop, so the inner loop looks like unity gain at the outer crossover. The current loop is limited by sampling and PWM delays; the velocity loop by the current loop, sensor filters and resonances; the position loop by the velocity loop and allowed overshoot.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Separation factor 3–10.</li><li>Velocity loop is where mechanics bites.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Which loop is usually the bottleneck? <b>A:</b> The velocity loop, because of mechanical resonances and speed-measurement noise.</li></ul></div>
+      <p class="trans">Transition: Each loop needs a reference and a feedback signal — where do they come from?</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 31</span>Reference and feedback signals<span class="time">~7 min</span></h3>
+      <p class="say">The table lists the signals. Current: references from the velocity loop, feedback from shunts, Hall sensors or isolated sigma-delta modulators, sampled in the PWM centre. Velocity: there is usually no tachometer; we differentiate the encoder position, which is noisy, so we filter or use an observer. Position: motor encoder in semi-closed loop, or a linear scale on the load in full-closed loop. The example shows why resolution matters: with a 20-bit encoder at 8 kHz, one count corresponds to 0.05 radians per second; with a 10,000-count encoder it is five radians per second, which forces a heavy filter and adds delay. Full-closed loops remove screw errors but put compliance inside the loop, so dual-loop schemes are common.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Velocity = differentiated position → quantisation noise.</li><li>Filter delay is the price of a coarse encoder.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why not just use a 1 ms moving average for speed? <b>A:</b> It adds about 0.5 ms delay, which would cost 29° phase at 160 Hz.</li></ul></div>
+      <p class="trans">Transition: Let us design the innermost loop: the current PI.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 32</span>PI current loop design<span class="time">~10 min</span></h3>
+      <p class="say">After decoupling, each axis is one over R plus Ls, with a delay T_sigma of about one and a half sample periods: one sample for computation and half a sample for the zero-order hold of the PWM. Choose the integral time equal to L over R: the controller zero cancels the electrical pole, and the open loop becomes K_p over L s times the delay, a pure integrator. The crossover is roughly K_p over L. The technical optimum sets K_p to L over two T_sigma, giving damping 0.707 and 4.3 percent overshoot. With our numbers: T_sigma 93.75 microseconds, T_i six milliseconds, K_p 16 volts per ampere, crossover about 850 Hz, phase margin about 61 degrees, closed-loop bandwidth about 1.9 kHz. Remember that inductance drops with saturation at high current, which lowers the bandwidth.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>T_i = L/R, K_p = L/(2T_σ).</li><li>Example: K_p = 16 V/A, f_c ≈ 850 Hz, PM ≈ 61°.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> What if the actual L is half the assumed value? <b>A:</b> Crossover doubles toward the delay and phase margin drops sharply; check at maximum current.</li></ul></div>
+      <p class="trans">Transition: Let us verify the design with computed plots.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 33</span>Current loop Bode and step<span class="time">~8 min</span></h3>
+      <p class="say">The left plot is the computed open-loop Bode diagram. Without delay, the dashed curve, the phase sits at minus ninety degrees: infinite phase margin. The true loop with the delay loses phase linearly with frequency; at the 850 Hz crossover the margin is 61 degrees. The orange curve is the closed-loop magnitude. The right plot is a time simulation of a ten-ampere step. The continuous design without delay gives a first-order response with time constant 0.19 ms. The discrete implementation at 16 kHz with the real delay shows 3.9 percent overshoot, close to the 4.3 percent predicted by the technical optimum. This is how the design rules connect to the real controller.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Delay costs phase, not magnitude.</li><li>Simulation confirms TO prediction.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why does the delayed response start later? <b>A:</b> The first voltage change appears only after the computation and PWM delay.</li></ul></div>
+      <p class="trans">Transition: With a fast current loop, we can design the velocity PI.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 34</span>Velocity PI: symmetric optimum<span class="time">~10 min</span></h3>
+      <p class="say">The velocity controller sees the closed current loop, approximated as a lag of two T_sigma, plus the speed filter, together T_eq of half a millisecond, times k_t over J s: an integrator plus a small lag. For this plant the symmetric optimum is the classical choice. With a parameter a, the crossover is one over a T_eq, the integral time is a squared T_eq, and K_p is J over a k_t T_eq. The phase margin depends only on a. With our motor and an inertia ratio of three, a equals two gives K_p of 1.67 ampere-seconds per radian, T_i of two milliseconds and a crossover of 1000 radians per second, 159 Hz. The PI zero is a times below crossover, the lag a times above, so the phase curve is symmetric around crossover, hence the name.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>SO: ω_c = 1/(aT_eq), T_i = a²T_eq, K_p = J/(a k_t T_eq).</li><li>PM = arctan((a²−1)/2a).</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why not cancel the integrator pole like in the current loop? <b>A:</b> There is nothing to cancel: the plant is already an integrator; cancelling a slow pole would also give poor load rejection.</li></ul></div>
+      <p class="trans">Transition: Let us see the computed responses.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 35</span>Velocity loop Bode and step<span class="time">~8 min</span></h3>
+      <p class="say">The computed Bode plot shows both designs. With a equals two the crossover is 164 Hz and the phase margin 35 degrees; with a equals three, 107 Hz and 53 degrees. The step responses show the typical SO behaviour: the closed-loop zero from the PI causes large overshoot, 46 percent for a equals two. A reference prefilter, one over one plus s T_i, cancels this zero and the overshoot drops to seven percent, or essentially zero for a equals three, while disturbance rejection stays the same. These are small-signal results: a large step would saturate the current and then the anti-windup matters.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Prefilter removes the SO overshoot without changing load rejection.</li><li>a = 3 trades bandwidth for robustness.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Which a would you choose for a belt drive? <b>A:</b> A larger a (3–4) because of uncertain inertia and resonances.</li></ul></div>
+      <p class="trans">Transition: Now the outermost loop: position.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 36</span>Position loop and k_v<span class="time">~8 min</span></h3>
+      <p class="say">With a fast closed velocity loop, the position plant is essentially an integrator. A proportional controller then gives a type-one loop: zero error for steps, constant error for ramps. The gain, called k_v, equals the position-loop crossover, typically a quarter to a tenth of the velocity crossover. The steady following error during constant velocity is v over k_v. In machine-tool units, k_v of 3 metres per minute per millimetre is 50 per second; at a feed of 10 metres per minute the error is 3.3 millimetres. For our servo at 300 radians per second with k_v 100, it is three radians. In contouring, axes must have identical k_v, otherwise the path is distorted. PI position control would remove the error but adds overshoot, which is unacceptable when cutting metal.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>e_ss = v/k_v.</li><li>Interpolating axes need equal k_v (or feedforward).</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Following error at 0.2 m/s with k_v = 40 /s? <b>A:</b> 5 mm.</li></ul></div>
+      <p class="trans">Transition: Every real loop also saturates. What happens then?</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 37</span>Limits and anti-windup<span class="time">~8 min</span></h3>
+      <p class="say">Every loop has limits: the current reference is limited for thermal and device reasons, the speed reference for mechanical reasons, and the current controller output by the voltage. While saturated, the loop is effectively open. A free-running integrator keeps accumulating error and must later be unwound by overshooting. The simulation is a 300 radians per second step on our motor with a 20 ampere current limit. Without anti-windup the speed overshoots to 553 radians per second; with simple clamping, where the integrator stops when the output is saturated and the error pushes further, it reaches 303. Back-calculation is an alternative. Apply anti-windup to all PIs, including the current loop at the voltage limit.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Saturation opens the loop → windup.</li><li>Clamping or back-calculation on every PI.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> How do drives avoid large steps in practice? <b>A:</b> By using trajectories that respect the limits — the next topic.</li></ul></div>
+      <p class="trans">Transition: Good trajectories avoid saturation in the first place.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 38</span>Trapezoidal vs S-curve profiles<span class="time">~8 min</span></h3>
+      <p class="say">The plot shows a ten-revolution move computed with 300 radians per second maximum speed and 3000 radians per second squared acceleration. The trapezoidal profile accelerates for 0.1 seconds, cruises, and decelerates; total 309 ms. Its acceleration jumps instantly, which means infinite jerk and a hit to every resonance. The S-curve limits the jerk to 1.5 times ten to the five; each jerk phase lasts 20 ms and the move takes 329 ms, only six percent longer, but the acceleration is continuous. The peak torque, J times alpha, is 3.6 Nm, well within our limits. If the distance is too short, the profile becomes triangular. The generator supplies position, velocity and acceleration, which we will use for feedforward.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>S-curve: +6 % time, much smoother.</li><li>Generator outputs x*, ẋ*, ẍ* for feedforward.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> When is a trapezoid acceptable? <b>A:</b> With very stiff mechanics and low demands on settling, e.g. simple point-to-point moves.</li></ul></div>
+      <p class="trans">Transition: With these references, how large is the following error?</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 39</span>Following error and feedforward<span class="time">~8 min</span></h3>
+      <p class="say">This simulation runs the complete cascade on the S-curve move, with a logarithmic error axis. With a pure P position loop the peak error is 3 radians, the v over k_v we computed. Adding velocity feedforward means the velocity loop gets the reference speed directly and no longer needs a position error to create it: the error drops to 2.6 milliradians, a factor of a thousand. Adding torque feedforward, J-hat times the reference acceleration over k_t, removes the need for a velocity error to accelerate the inertia: 0.19 milliradians. Feedforward acts outside the loop, so stability is unchanged; accuracy depends on the inertia estimate and on smooth references. This is how machining centres like the one shown achieve micrometre path accuracy.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Velocity FF: ×1000 better; torque FF: another ×10.</li><li>FF does not affect stability.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> What limits FF in practice? <b>A:</b> Model errors (J, friction), delays between axes, and jerk-induced resonances.</li></ul></div>
+      <p class="trans">Transition: Let me summarise the cascade.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 40</span>Summary 3.4<span class="time">~2 min</span></h3>
+      <p class="say">The cascade is position P, velocity PI, current PI, with separated bandwidths. The current PI uses pole-zero cancellation and the technical optimum; our example gives about 850 Hz crossover. The velocity PI uses the symmetric optimum with a prefilter. A P position loop has a following error of v over k_v. Limits require anti-windup, S-curves limit jerk, and feedforward removes the following error by orders of magnitude.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>TO for current, SO for velocity, P + FF for position.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> TO gain for L = 6 mH, T_σ = 100 µs? <b>A:</b> K_p = 0.006/(2·0.0001) = 30 V/A.</li></ul></div>
+      <p class="trans">Transition: After the break we look at tuning in practice.</p>
+    </div>
+  </section>
+
+  <section id="s4">
+    <h2 class="session">Session 3.5 · Loop tuning and bandwidth <small>Curriculum code 3.5 · 60 min</small></h2>
+    <div class="slide">
+      <h3><span class="num">Slide 42</span>Tuning procedure<span class="time">~7 min</span></h3>
+      <p class="say">Tuning goes from the inside out. First, identify parameters: resistance, inductances, flux, pole pairs and the angle offset. Second, tune the current loop with the technical optimum and verify with a step and an FRF. Third, identify the inertia, for example with an acceleration test: J-hat equals k_t times the current change over the acceleration change. Fourth, tune the velocity loop including filters and notches. Fifth, the position loop without overshoot. Sixth, add feedforward. Whenever an inner loop changes, recheck the outer ones. Use explicit margin targets: phase margin at least 45 degrees, gain margin at least six decibels, peak sensitivity below two. Check large-signal behaviour last and save the final FRFs as a baseline.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Inside out; re-check outer loops after changes.</li><li>Targets: PM ≥ 45°, GM ≥ 6 dB, |S|max ≤ 2.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why measure J rather than calculate it? <b>A:</b> Couplings, screws and the load are rarely documented accurately; a measurement takes seconds.</li></ul></div>
+      <p class="trans">Transition: Why exactly does the order matter? Look at bandwidth separation.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 43</span>Bandwidth separation 3–10×<span class="time">~7 min</span></h3>
+      <p class="say">Here the velocity PI was designed for 1000 radians per second assuming an ideal current loop. We then replace the ideal current loop by a first-order loop with bandwidth omega_i equal to 1.5, 3, 5 and 10 times the velocity crossover. With a factor ten the response is as designed. At five and three it degrades gradually, and at 1.5 the overshoot becomes large. The table gives the reason: a first-order inner loop costs arctangent of omega_c over omega_i of phase at the outer crossover; 34 degrees at a factor 1.5, but only 6 degrees at ten. Below a factor three, the inner dynamics must be included in the design, as the symmetric optimum does through T_eq. Above ten, we waste potential outer bandwidth.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Phase cost of inner loop = arctan(ω_c/ω_i).</li><li>3–10× is the practical window.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Can the current loop be too fast? <b>A:</b> Not for the velocity loop, but a too aggressive current loop amplifies noise and is sensitive to L variations.</li></ul></div>
+      <p class="trans">Transition: The second big influence on the velocity loop is inertia.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 44</span>Effect of the load inertia ratio<span class="time">~7 min</span></h3>
+      <p class="say">The velocity loop gain is proportional to K_p k_t over J. If we keep the gains designed for an inertia ratio of three and change the load, the crossover moves. The computed values: without load the crossover rises to 439 Hz, close to the delays, and the phase margin collapses to 12 degrees; that is the strongly oscillating red curve. With ratio ten the crossover falls to 80 Hz, with thirty to 43 Hz and 21 degrees, giving slow and oscillatory responses. So retune with the identified inertia, or scale K_p with J-hat. As a design rule, aim for inertia ratios below three to ten for dynamic axes, otherwise use a gearbox or a larger motor. Compliant elements such as ball screws make high ratios worse because of resonances.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Fixed gains + different J = different crossover.</li><li>Too little load can be as bad as too much.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why does removing the load reduce stability? <b>A:</b> Crossover moves up toward the delays where phase is lost quickly.</li></ul></div>
+      <p class="trans">Transition: Delays have appeared repeatedly; let us budget them.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 45</span>Delays and phase cost<span class="time">~7 min</span></h3>
+      <p class="say">A pure delay does not change magnitude but costs phase proportional to frequency: 360 degrees times f_c times T_d. The plot shows this for four delays. At 1 kHz a 100 microsecond delay already costs 36 degrees. The table lists typical delay sources: one computation sample, half a sample for PWM, sensor processing, the encoder protocol, the velocity filter, and the field bus for set-points. For our velocity loop the equivalent 0.5 ms at 160 Hz costs almost 29 degrees. The practical lesson is to keep a delay budget: halving the filter time constant or doubling the sampling rate buys phase, and phase can be traded for bandwidth.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Δφ = 360° · f_c · T_d.</li><li>Keep a delay budget per loop.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Phase lost by 200 µs at 250 Hz? <b>A:</b> 360 · 250 · 0.0002 = 18°.</li></ul></div>
+      <p class="trans">Transition: Now compare the two classical tuning rules side by side.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 46</span>Technical vs symmetric optimum<span class="time">~8 min</span></h3>
+      <p class="say">The technical, or magnitude, optimum applies to a plant with one dominant time constant and a small lag: the PI cancels the dominant pole, and the result is a well-damped second-order loop with 4.3 percent overshoot and about 65 degrees phase margin. Its weakness is slow disturbance rejection when the cancelled pole is slow. The symmetric optimum applies to integrating plants: it places the PI zero below and the lag above crossover, giving good disturbance rejection but large step overshoot that needs a prefilter. That is why the current loop uses TO and the velocity loop SO. Both come from German drive practice in the 1950s and are starting points; modern auto-tuners optimise PM and GM directly, often with a between 2.5 and 4.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>TO → current loop; SO → velocity loop.</li><li>Both are starting points, then verify margins.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why does TO reject disturbances slowly? <b>A:</b> The cancelled plant pole remains in the disturbance-to-output path with its long time constant.</li></ul></div>
+      <p class="trans">Transition: What bandwidths can we expect in real machines?</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 47</span>Typical bandwidths<span class="time">~6 min</span></h3>
+      <p class="say">The table gives orders of magnitude. Current loops of industrial drives reach one to three kilohertz. Velocity loops reach 100 to 500 Hz with rigid mechanics but only 20 to 100 Hz with compliant ones. Position loops reach ten to a hundred hertz. Machine-tool k_v factors are typically one to six metres per minute per millimetre, that is 17 to 100 per second. The mechanics dominates far more than the drive electronics. For robots with strain-wave gears, the joint velocity bandwidth is often only a few tens of hertz; direct drives with linear or torque motors reach several hundred.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Mechanics, not electronics, usually limits bandwidth.</li><li>Know your k_v conversion: 1 (m/min)/mm = 16.7 /s.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> How would you increase bandwidth of a robot joint? <b>A:</b> Stiffer transmission, load-side sensing, or model-based control including joint elasticity.</li></ul></div>
+      <p class="trans">Transition: To know the mechanics, we measure its frequency response.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 48</span>Measuring FRFs<span class="time">~8 min</span></h3>
+      <p class="say">We measure frequency responses in closed loop, so the machine stays controlled. An excitation signal, a sine sweep, chirp or PRBS, is added at the controller output. Measuring u and y gives the plant G; u over d gives the sensitivity S; and the open loop follows as one over S minus one. Spectral estimates are averaged and the coherence must be close to one; low coherence indicates noise or non-linearity. Injection at the current reference gives the mechanical plant; injection at the velocity reference gives the closed-loop response. The amplitude must overcome friction but stay below the current limit. The photograph shows a classic dynamic signal analyser; today the same function is built into the commissioning software of every servo drive.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Inject inside the loop; G = Y/U, L = 1/S − 1.</li><li>Check coherence.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why not open the loop to measure? <b>A:</b> An open-loop integrating plant drifts away; with resonances it may be unsafe.</li></ul></div>
+      <p class="trans">Transition: What does a typical measured plant look like?</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 49</span>Two-mass FRF and notch<span class="time">~8 min</span></h3>
+      <p class="say">This is a computed FRF of motor velocity over current for a two-mass system: motor 3 times ten to the minus four, load three times larger, coupled by a stiffness of 3200 Nm per radian with three percent damping. At low frequency we see the rigid-body integrator. At 300 Hz there is an anti-resonance, where the load moves against the motor, and at 600 Hz the resonance. Above the resonance the motor sees only its own inertia, so the gain is four times, twelve decibels, higher than the rigid-body line. If the loop crossover gets near there, the system buzzes. A notch filter at the resonance in the current reference removes the peak, as the orange curve shows, at the cost of phase below the notch. Day 5 continues with resonance and filters.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>f_r = f_a √(1 + J_L/J_m).</li><li>Notch at f_r; costs phase below.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> What happens if the resonance shifts with load position? <b>A:</b> A narrow notch misses it; use a wider notch or adaptive notch.</li></ul></div>
+      <p class="trans">Transition: Let us summarise tuning.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 50</span>Summary 3.5<span class="time">~2 min</span></h3>
+      <p class="say">Tune inside out. Separate bandwidths by three to ten. Retune when inertia changes. Every delay costs 360 f_c T_d of phase. Use TO for the current and SO for the velocity loop as starting points, and measure FRFs in closed loop, watching coherence and resonances.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Delay budget and inertia ratio are the key tuning levers.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Inertia doubles: what happens to ω_c with fixed gains? <b>A:</b> It roughly halves (above the PI zero), and phase margin changes.</li></ul></div>
+      <p class="trans">Transition: In the last session we treat disturbances.</p>
+    </div>
+  </section>
+
+  <section id="s5">
+    <h2 class="session">Session 3.6 · Disturbances and compensation + day wrap-up <small>Curriculum code 3.6 · 30 min</small></h2>
+    <div class="slide">
+      <h3><span class="num">Slide 52</span>Load torque and friction<span class="time">~4 min</span></h3>
+      <p class="say">The mechanical equation now includes load torque and friction. Load torque comes from process forces, gravity in vertical axes, or cutting forces. Friction is the difficult one: it is discontinuous at zero speed. The Stribeck model shown has a breakaway torque of 0.16 Nm decaying to a Coulomb level of 0.1 Nm plus a viscous term. Near zero speed this causes stick-slip, quadrant glitches when circles are machined, and limit cycles when integral action meets static friction. The PI rejects a constant load with zero steady-state error, but the transient dip depends on bandwidth and inertia. Other disturbances include cogging, the dead-time error and cable forces.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Friction discontinuity at ω = 0 → stick-slip, quadrant glitches.</li><li>PI: zero steady-state error, but transient dip.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> What is a quadrant glitch? <b>A:</b> A spike in contour error when an axis reverses direction and friction changes sign.</li></ul></div>
+      <p class="trans">Transition: The first tool against known disturbances is feedforward.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 53</span>Feedforward<span class="time">~4 min</span></h3>
+      <p class="say">Feedforward injects the expected control effort directly. Velocity feedforward adds the reference speed to the velocity-loop input. Acceleration or torque feedforward adds J-hat times the reference acceleration over k_t to the current reference. Friction feedforward adds the modelled friction for the reference speed. Ideally, feedforward inverts the plant so the feedback only corrects model errors. Because it acts outside the loop, it does not change stability. However, it requires smooth references: feedforward of a jerk step is a torque step. In practice gains are set to eighty to one hundred percent of the model and adjusted by looking at the overshoot at the end of acceleration.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>i_q* = (Ĵ ẍ* + B̂ ẋ* + T̂_f)/k_t.</li><li>Outside the loop: no stability change.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why sometimes less than 100 % FF? <b>A:</b> To avoid overshoot when the model or delays are inaccurate.</li></ul></div>
+      <p class="trans">Transition: For unknown disturbances we need an estimator: the disturbance observer.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 54</span>Disturbance observer<span class="time">~5 min</span></h3>
+      <p class="say">The disturbance observer compares what the motor should do, k_t times i_q, with what it actually does, J-hat times the acceleration. The difference is the lumped disturbance: load, friction and inertia error. Because differentiating speed is noisy and an inverse model is not proper, the estimate is filtered through a low-pass Q with time constant tau_Q. The estimate divided by k_t is added to the current reference, cancelling the disturbance. Below the Q bandwidth, the axis then behaves like the nominal inertia. The Q bandwidth is limited by noise and delays, typically half to twice the velocity crossover. The estimated load torque is also a useful signal for monitoring and collision detection.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>T̂_L = Q(s)[k_t i_q − Ĵ s ω].</li><li>Below 1/τ_Q the axis behaves like the nominal model.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Is DOB the same as integral action? <b>A:</b> Related, but DOB works on the plant input, independent of the reference response.</li></ul></div>
+      <p class="trans">Transition: How much does it help in numbers?</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 55</span>DOB vs PI: simulation<span class="time">~3 min</span></h3>
+      <p class="say">The simulation holds zero speed with our velocity PI and applies a 2 Nm load step at five milliseconds. With the PI alone the speed dips by 1.85 radians per second. With the DOB, tau_Q of half a millisecond, the dip is 0.7, 2.6 times smaller, and recovery is faster. The lower plot shows the estimate converging to the true 2 Nm within about three tau_Q plus delays. The same improvement could be obtained by more PI gain, but at the cost of phase margin and noise; the DOB improves rejection without changing the nominal reference response.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>2.6× smaller dip in the example.</li><li>Rejection improved without retuning the reference path.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> What if J-hat is wrong? <b>A:</b> The DOB then also compensates the inertia error, effectively making the axis behave like J-hat — within Q bandwidth.</li></ul></div>
+      <p class="trans">Transition: Finally, periodic disturbances: cogging and ripple.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 56</span>Cogging and ripple compensation<span class="time">~3 min</span></h3>
+      <p class="say">Cogging torque comes from the magnets attracting the stator teeth and exists even at zero current. It is periodic in mechanical angle; for a 12-slot 8-pole motor the fundamental period is 15 degrees. Torque ripple adds back-EMF harmonics, current-sensor offset and gain errors, and the dead-time effect. Because the disturbance is a function of angle, we can measure the current needed at a slow constant speed, store it in a look-up table, and add it to the current reference. In the illustrative plot, a table with one-degree steps reduces the ripple by a factor of ten. Iterative learning control does this automatically. Always calibrate sensor offsets first: it is the cheapest ripple reduction.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Angle-periodic → table compensation.</li><li>Calibrate current-sensor offsets first.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Cogging period of a 9-slot 6-pole motor? <b>A:</b> 360°/LCM(9,6) = 20°.</li></ul></div>
+      <p class="trans">Transition: Let me summarise the last session.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 57</span>Summary 3.6<span class="time">~1 min</span></h3>
+      <p class="say">Load and friction act at the plant input. Feedforward cancels known effects, the DOB estimates unknown ones, and cogging and ripple are handled with angle-based tables.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Feedforward for known, DOB for unknown, LUT for periodic.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Compensation for gravity on a vertical axis? <b>A:</b> Constant torque feedforward, plus integrator or DOB for the remainder.</li></ul></div>
+      <p class="trans">Transition: Now the summary of the whole day.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 59</span>Day summary<span class="time">~4 min</span></h3>
+      <p class="say">Today we went from voltage to motion. SVPWM synthesises the voltage up to V_dc over root three; dead time and switching frequency determine the voltage quality, and current and voltage limits bound the operating region. FOC makes the PMSM behave like a DC motor with torque from i_q, plus MTPA, field weakening, decoupling and correct angle offset. On top, the cascade of P, PI and PI loops, designed with technical and symmetric optimum, protected by anti-windup and driven by S-curve trajectories. Tuning goes inside out with separated bandwidths and a delay budget. Feedforward and disturbance observers remove what feedback alone cannot.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>The chain: PWM → FOC → cascade → tuning → compensation.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Which single number most limits the velocity loop? <b>A:</b> Usually the first mechanical resonance, followed by the delay budget.</li></ul></div>
+      <p class="trans">Transition: Let me give you a preview of tomorrow.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 60</span>Preview of Day 5<span class="time">~3 min</span></h3>
+      <p class="say">Tomorrow, Day 5, covers resonance, sensors, measurement and system integration. We continue directly from today&#x27;s two-mass FRF and notch filter with resonance and vibration. Then we look at the sensors behind our feedback signals, encoders and resolvers, then sampling, digitisation and signal processing, which explains quantisation and filter delays, and finally communication and system integration with field buses. Please bring today&#x27;s delay budget, the velocity-loop plant and the encoder quantisation example.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Day 5 builds on today&#x27;s FRF, delays and quantisation.</li></ul></div>
+      <p class="trans">Transition: Two housekeeping slides follow: figure credits and references.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 61</span>Figure credits<span class="time">~1 min</span></h3>
+      <p class="say">All plots and diagrams without credit lines are original and computed from the reference parameters; the generating script is in the course folder. The seven photographs come from Wikimedia Commons under the listed Creative Commons licences.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Respect the licence terms when reusing the photographs.</li></ul></div>
+      <p class="trans">Transition: And finally the references.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 62</span>References<span class="time">~2 min</span></h3>
+      <p class="say">For further reading: Holmes and Lipo for PWM; Krishnan, Leonhard and Vas for drives and field orientation; Schröder and the original Kessler paper for the optimum criteria; Ellis for practical servo tuning; Åström for PID and feedback fundamentals; Ohnishi for disturbance observers; Armstrong-Hélouvry for friction; and Biagiotti and Melchiorri for trajectory planning. Thank you for today.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Ellis is the most practical single book for servo tuning.</li></ul></div>
+      <p class="trans">Transition: End of Day 4.</p>
+    </div>
+  </section>
+</main>
+<footer>Figures and references are listed on the final slides of the deck.</footer>
+</body>
+</html>

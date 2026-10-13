@@ -1,0 +1,193 @@
+% =====================================================================
+%  beamerthememekatronik.sty
+%  Academic Beamer theme for the 25-hour Mechatronics training series
+%  Palette: deep navy / dark blue with orange accents
+% =====================================================================
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{beamerthememekatronik}[2026/10/13 Mechatronics training theme]
+
+\RequirePackage[T1]{fontenc}
+\RequirePackage{lmodern}
+\RequirePackage{amsmath,amssymb,mathtools,bm}
+\RequirePackage{siunitx}
+\RequirePackage{booktabs,tabularx,multirow,array}
+\RequirePackage{tikz}
+\RequirePackage[siunitx,RPvoltages]{circuitikz}
+\RequirePackage{pgfplots}
+\RequirePackage[most]{tcolorbox}
+\RequirePackage{xcolor}
+\RequirePackage{graphicx}
+\RequirePackage{ragged2e}
+\pgfplotsset{compat=1.18}
+\usetikzlibrary{arrows.meta,positioning,calc,shapes,shapes.geometric,
+  decorations.pathmorphing,decorations.markings,patterns,fit,backgrounds,
+  matrix,shadows,3d,angles,quotes,intersections}
+\usepgfplotslibrary{groupplots,fillbetween}
+\sisetup{per-mode=symbol,detect-all}
+
+% ---------------------------------------------------------------- colors
+\definecolor{mkNavy}{HTML}{0B1F3A}     % deepest blue (backgrounds, title)
+\definecolor{mkBlue}{HTML}{14365E}     % primary dark blue
+\definecolor{mkMid}{HTML}{2B5A8C}      % secondary blue (lines, plots)
+\definecolor{mkSky}{HTML}{6E9BC9}      % light blue (tertiary curves)
+\definecolor{mkPale}{HTML}{E8EEF6}     % pale blue (block bodies)
+\definecolor{mkOrange}{HTML}{F07F12}   % main accent
+\definecolor{mkAmber}{HTML}{F9A94B}    % lighter accent
+\definecolor{mkCream}{HTML}{FFF3E4}    % accent block body
+\definecolor{mkGray}{HTML}{5B6573}     % secondary text
+\definecolor{mkLight}{HTML}{F4F6F9}    % frame background tint
+\definecolor{mkGreen}{HTML}{2E8B57}    % "good" in comparisons
+\definecolor{mkRed}{HTML}{C0392B}      % "bad" in comparisons
+
+% ---------------------------------------------------------------- fonts
+\renewcommand{\familydefault}{\sfdefault}
+\usefonttheme{professionalfonts}
+\setbeamerfont{title}{size=\LARGE,series=\bfseries}
+\setbeamerfont{subtitle}{size=\large}
+\setbeamerfont{frametitle}{size=\large,series=\bfseries}
+\setbeamerfont{framesubtitle}{size=\footnotesize,shape=\itshape}
+\setbeamerfont{block title}{size=\small,series=\bfseries}
+\setbeamerfont{block body}{size=\small}
+\setbeamerfont{footline}{size=\tiny}
+\setbeamerfont{caption}{size=\scriptsize}
+
+% ---------------------------------------------------------------- colors in beamer
+\setbeamercolor{normal text}{fg=mkNavy,bg=white}
+\setbeamercolor{structure}{fg=mkBlue}
+\setbeamercolor{alerted text}{fg=mkOrange}
+\setbeamercolor{example text}{fg=mkMid}
+\setbeamercolor{frametitle}{fg=white,bg=mkBlue}
+\setbeamercolor{framesubtitle}{fg=mkAmber}
+\setbeamercolor{title}{fg=white}
+\setbeamercolor{subtitle}{fg=mkAmber}
+\setbeamercolor{item}{fg=mkOrange}
+\setbeamercolor{subitem}{fg=mkMid}
+\setbeamercolor{caption name}{fg=mkOrange}
+\setbeamercolor{caption}{fg=mkGray}
+\setbeamercolor{block title}{fg=white,bg=mkBlue}
+\setbeamercolor{block body}{fg=mkNavy,bg=mkPale}
+\setbeamercolor{block title alerted}{fg=white,bg=mkOrange}
+\setbeamercolor{block body alerted}{fg=mkNavy,bg=mkCream}
+\setbeamercolor{block title example}{fg=white,bg=mkMid}
+\setbeamercolor{block body example}{fg=mkNavy,bg=mkLight}
+\setbeamercolor{bibliography entry author}{fg=mkBlue}
+\setbeamercolor{bibliography entry title}{fg=mkNavy}
+\setbeamercolor{bibliography entry location}{fg=mkGray}
+\setbeamercolor{bibliography entry note}{fg=mkGray}
+
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{itemize items}[square]
+\setbeamertemplate{enumerate items}[square]
+\setbeamertemplate{blocks}[rounded][shadow=false]
+\setbeamertemplate{caption}[numbered]
+\setbeamertemplate{bibliography item}{\color{mkOrange}\insertbiblabel}
+\setbeamersize{text margin left=7mm,text margin right=7mm}
+
+% ---------------------------------------------------------------- metadata macros
+\newcommand{\daynumber}{0}
+\newcommand{\daytitle}{}
+\newcommand{\coursetitle}{Mechatronics: Electrical Machines, Control, Servo Systems and Sensing}
+\newcommand{\setday}[2]{\renewcommand{\daynumber}{#1}\renewcommand{\daytitle}{#2}}
+
+% ---------------------------------------------------------------- frame title
+\setbeamertemplate{frametitle}{%
+  \nointerlineskip
+  \begin{beamercolorbox}[wd=\paperwidth,ht=9.5mm,dp=3mm,leftskip=7mm,rightskip=7mm]{frametitle}%
+    \usebeamerfont{frametitle}\insertframetitle%
+    \ifx\insertframesubtitle\@empty\else
+      \\[-0.4ex]{\usebeamerfont{framesubtitle}\usebeamercolor[fg]{framesubtitle}\insertframesubtitle}%
+    \fi
+  \end{beamercolorbox}%
+  \vspace{-0.6pt}%
+  {\color{mkOrange}\hbox to \paperwidth{\leaders\hrule height 1.4pt\hfill}}%
+  \vspace{-2mm}%
+}
+
+% ---------------------------------------------------------------- footline
+\setbeamertemplate{footline}{%
+  \leavevmode%
+  \hbox{%
+    \begin{beamercolorbox}[wd=.18\paperwidth,ht=3.2mm,dp=1.2mm,center]{}%
+      \setbeamercolor{fbox}{fg=white,bg=mkOrange}%
+      \colorbox{mkOrange}{\makebox[.14\paperwidth]{\color{white}\usebeamerfont{footline}\bfseries Day \daynumber}}%
+    \end{beamercolorbox}%
+    \begin{beamercolorbox}[wd=.64\paperwidth,ht=3.2mm,dp=1.2mm,left]{}%
+      \usebeamerfont{footline}\color{mkGray}\hspace*{1mm}\insertsectionhead\ \textbar\ \insertshorttitle%
+    \end{beamercolorbox}%
+    \begin{beamercolorbox}[wd=.15\paperwidth,ht=3.2mm,dp=1.2mm,right]{}%
+      \usebeamerfont{footline}\color{mkBlue}\bfseries\insertframenumber\,/\,\inserttotalframenumber\hspace*{5mm}%
+    \end{beamercolorbox}}%
+  \vskip1mm%
+}
+
+% ---------------------------------------------------------------- title page
+\setbeamertemplate{title page}{%
+  \begin{tikzpicture}[remember picture,overlay]
+    \fill[mkNavy] (current page.south west) rectangle (current page.north east);
+    \fill[mkBlue] (current page.south west) rectangle ([yshift=2.2cm]current page.south east);
+    \fill[mkOrange] ([yshift=2.2cm]current page.south west) rectangle ([yshift=2.32cm]current page.south east);
+    % decorative sinusoid + step response motif
+    \begin{scope}[shift={([xshift=-4.6cm,yshift=-2.2cm]current page.north east)},opacity=.35]
+      \draw[mkSky,line width=.8pt,domain=0:4,samples=80] plot (\x,{0.6*sin(\x*180)});
+      \draw[mkOrange,line width=1pt,domain=0:4,samples=80] plot (\x,{1-exp(-1.4*\x)*(cos(\x*160)+0.5*sin(\x*160))-0.4});
+    \end{scope}
+    \node[anchor=north west,text=mkOrange,font=\bfseries\large] at ([xshift=8mm,yshift=-9mm]current page.north west)
+      {DAY \daynumber\ \,/\, 5};
+    \node[anchor=north west,text=mkSky,font=\scriptsize,text width=10cm] at ([xshift=8mm,yshift=-16mm]current page.north west)
+      {\coursetitle};
+    \node[anchor=west,text width=11.2cm,align=left] at ([xshift=8mm,yshift=4mm]current page.west)
+      {{\usebeamerfont{title}\color{white}\inserttitle}\\[3mm]
+       {\usebeamerfont{subtitle}\color{mkAmber}\insertsubtitle}};
+    \node[anchor=south west,text=white,font=\small,text width=11cm,align=left] at ([xshift=8mm,yshift=4mm]current page.south west)
+      {\insertauthor\\[1mm]{\color{mkSky}\footnotesize\insertinstitute\ \textbullet\ \insertdate}};
+  \end{tikzpicture}%
+}
+
+% ---------------------------------------------------------------- section divider
+\AtBeginSection[]{%
+  {\setbeamertemplate{footline}{}%
+  \begin{frame}[plain,noframenumbering]
+    \begin{tikzpicture}[remember picture,overlay]
+      \fill[mkNavy] (current page.south west) rectangle (current page.north east);
+      \fill[mkOrange] ([xshift=8mm,yshift=6mm]current page.west) rectangle ([xshift=9.4mm,yshift=-14mm]current page.west);
+      \node[anchor=south west,text=mkAmber,font=\small\bfseries] at ([xshift=13mm,yshift=1mm]current page.west)
+        {Session \insertsectionnumber};
+      \node[anchor=north west,text=white,font=\LARGE\bfseries,text width=10.5cm] at ([xshift=13mm,yshift=0mm]current page.west)
+        {\insertsectionhead};
+      \node[anchor=south east,text=mkSky,font=\scriptsize] at ([xshift=-8mm,yshift=6mm]current page.south east)
+        {Day \daynumber\ \textbullet\ \inserttitle};
+    \end{tikzpicture}
+  \end{frame}}%
+}
+
+% ---------------------------------------------------------------- custom boxes
+\newtcolorbox{keybox}[1][Key idea]{enhanced,colback=mkCream,colframe=mkOrange,
+  coltitle=white,fonttitle=\bfseries\small,title=#1,boxrule=0.6pt,arc=1.5mm,
+  left=2mm,right=2mm,top=1mm,bottom=1mm,fontupper=\small}
+\newtcolorbox{defbox}[1][Definition]{enhanced,colback=mkPale,colframe=mkBlue,
+  coltitle=white,fonttitle=\bfseries\small,title=#1,boxrule=0.6pt,arc=1.5mm,
+  left=2mm,right=2mm,top=1mm,bottom=1mm,fontupper=\small}
+\newtcolorbox{eqbox}{enhanced,colback=white,colframe=mkOrange,boxrule=0.8pt,
+  arc=1mm,left=1mm,right=1mm,top=0mm,bottom=0mm,leftrule=3pt}
+\newtcolorbox{notebox}{enhanced,colback=mkLight,colframe=mkLight,boxrule=0pt,
+  borderline west={2pt}{0pt}{mkMid},arc=0mm,left=2mm,right=1mm,top=1mm,bottom=1mm,
+  fontupper=\footnotesize}
+
+% inline highlights
+\newcommand{\hl}[1]{{\color{mkOrange}\bfseries #1}}
+\newcommand{\term}[1]{{\color{mkBlue}\bfseries #1}}
+% figure credit line (bottom, small, gray)
+\newcommand{\credit}[1]{{\color{mkGray}\fontsize{5}{6}\selectfont #1}}
+% learning objectives / check icon
+\newcommand{\checkitem}{{\color{mkOrange}\ensuremath{\blacktriangleright}}}
+
+% pgfplots default style matching the palette
+\pgfplotsset{mkplot/.style={
+  axis lines=left, grid=major, grid style={mkPale,line width=.4pt},
+  every axis label/.append style={font=\scriptsize,text=mkNavy},
+  tick label style={font=\tiny,text=mkGray},
+  legend style={font=\tiny,draw=none,fill=white,fill opacity=.85,text opacity=1},
+  axis line style={mkGray}, cycle list={{mkBlue,thick},{mkOrange,thick},{mkSky,thick,dashed},{mkMid,thick,dotted}},
+}}
+
+\endinput

@@ -1,0 +1,41 @@
+\frametitle{Discrete PID implementation}
+\begin{columns}[T]
+\begin{column}{.47\textwidth}
+\scriptsize
+$C(s)=K_p+\dfrac{K_i}{s}+\dfrac{K_d s}{T_f s+1}$, period $T$:
+\begin{eqbox}
+\vspace{-2mm}
+\begin{align*}
+I_k&=I_{k-1}+K_iT\,e_k \qquad\text{(backward Euler)}\\
+D_k&=\tfrac{T_f}{T_f+T}D_{k-1}-\tfrac{K_d}{T_f+T}\,(y_k-y_{k-1})\\
+u_k&=\operatorname{sat}\!\left(K_pe_k+I_k+D_k\right)
+\end{align*}
+\vspace{-4mm}
+\end{eqbox}
+\begin{itemize}\setlength\itemsep{.3mm}
+\item D acts on $-y$ (no derivative kick on reference steps)
+\item \term{anti-windup}: stop or back-calculate $I$ when $u$ saturates
+\item \term{incremental form} $\Delta u_k$: bumpless switching
+\item fixed-point: scale $K_iT$ carefully (tiny numbers)
+\end{itemize}
+\end{column}
+\begin{column}{.51\textwidth}
+\begin{notebox}
+\scriptsize
+\begin{semiverbatim}
+// executed every T (ISR synchronised to PWM)
+e  = r - y;
+I += Ki*T*e;                         // integrate
+D  = a*D - b*(y - y_old);            // a=Tf/(Tf+T)
+y_old = y;                           // b=Kd/(Tf+T)
+u  = Kp*e + I + D;
+if (u > UMAX)      \{ I -= u - UMAX; u = UMAX; \}
+else if (u < -UMAX)\{ I -= u + UMAX; u = -UMAX;\}
+write_pwm(u);       // takes effect next period
+\end{semiverbatim}
+\end{notebox}
+\vspace{-1mm}
+{\scriptsize Anti-windup above: clamping by back-calculation with gain 1 (integrator absorbs the excess).}
+\end{column}
+\end{columns}
+\src{[{\AA}str\"om \& H\"agglund, 2006, ch.~3]; [Franklin, Powell \& Workman, 1998].}

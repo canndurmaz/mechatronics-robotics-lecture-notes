@@ -1,0 +1,6 @@
+\beamer@sectionintoc {1}{2.1 Nonlinear Effects and Linearisation}{3}{0}{1}
+\beamer@sectionintoc {2}{2.2 Transfer Functions and State Space}{11}{0}{2}
+\beamer@sectionintoc {3}{2.3 System Identification and Frequency Response}{23}{0}{3}
+\beamer@sectionintoc {4}{2.4 PID and Basic Control Structures}{34}{0}{4}
+\beamer@sectionintoc {5}{2.5 Stability and Performance Analysis}{48}{0}{5}
+\beamer@sectionintoc {6}{Wrap-up}{58}{0}{6}

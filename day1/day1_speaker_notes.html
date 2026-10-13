@@ -1,0 +1,482 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Day 1 Speaker Notes</title>
+<style>
+  :root{
+    --navy:#0B1F3A; --blue:#14365E; --mid:#2B5A8C; --sky:#6E9BC9; --pale:#E8EEF6;
+    --orange:#F07F12; --amber:#F9A94B; --cream:#FFF3E4; --gray:#5B6573; --bg:#F6F8FB; --card:#fff; --text:#0B1F3A;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){ --bg:#0A1424; --card:#10213A; --text:#E6ECF4; --pale:#1A3152; --cream:#3a2a14; --gray:#9AA8BA; }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 "Segoe UI",system-ui,-apple-system,Roboto,Helvetica,Arial,sans-serif}
+  header{background:var(--navy);color:#fff;padding:28px 16px 22px;border-bottom:4px solid var(--orange)}
+  header .wrap{max-width:980px;margin:0 auto}
+  header .day{color:var(--orange);font-weight:700;letter-spacing:.08em;font-size:.9rem}
+  header h1{margin:.2em 0 .1em;font-size:1.9rem}
+  header p{margin:0;color:var(--sky)}
+  nav.toc{position:sticky;top:0;z-index:5;background:var(--blue);padding:8px 16px;overflow-x:auto;white-space:nowrap}
+  nav.toc a{color:#fff;text-decoration:none;margin-right:16px;font-size:.88rem}
+  nav.toc a:hover{color:var(--amber)}
+  main{max-width:980px;margin:0 auto;padding:20px 16px 60px}
+  h2.session{margin:42px 0 12px;padding:10px 14px;background:var(--blue);color:#fff;border-left:6px solid var(--orange);border-radius:4px;font-size:1.25rem}
+  h2.session small{display:block;color:var(--amber);font-weight:500;font-size:.85rem}
+  table.plan{width:100%;border-collapse:collapse;background:var(--card);margin:12px 0}
+  table.plan th{background:var(--blue);color:#fff;text-align:left;padding:8px}
+  table.plan td{padding:8px;border-bottom:1px solid var(--pale)}
+  .slide{background:var(--card);border-radius:8px;margin:14px 0;padding:14px 18px;box-shadow:0 1px 3px rgba(11,31,58,.12);border-top:3px solid var(--mid)}
+  .slide h3{margin:0 0 6px;font-size:1.05rem;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+  .slide h3 .num{background:var(--orange);color:#fff;border-radius:4px;padding:1px 8px;font-size:.85rem}
+  .slide h3 .time{margin-left:auto;color:var(--gray);font-weight:400;font-size:.85rem}
+  .say{margin:6px 0}
+  .key{background:var(--cream);border-left:4px solid var(--orange);padding:6px 10px;margin:8px 0;border-radius:3px}
+  .ask{background:var(--pale);border-left:4px solid var(--mid);padding:6px 10px;margin:8px 0;border-radius:3px}
+  .trans{color:var(--gray);font-style:italic;margin-top:6px}
+  .label{font-weight:700;font-size:.8rem;text-transform:uppercase;letter-spacing:.05em;color:var(--orange)}
+  .ask .label{color:var(--mid)}
+  ul{margin:4px 0 4px 1.1em;padding:0}
+  footer{max-width:980px;margin:0 auto;padding:20px 16px;color:var(--gray);font-size:.85rem}
+  @media print{nav.toc{display:none}.slide{break-inside:avoid;box-shadow:none;border:1px solid #ccc}}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <div class="day">DAY 1 / 5 · SPEAKER NOTES</div>
+  <h1>Electrical Machines and Actuators + Introduction to Dynamic System Modelling</h1>
+  <p>Mechatronics: Electrical Machines, Control, Servo Systems and Sensing · 5 h net teaching time</p>
+</div></header>
+<nav class="toc"><a href="#plan">Plan</a><a href="#s1">1.1 · Fundamental principles and classification</a><a href="#s2">1.2 · Structure of electrical machines</a><a href="#s3">1.3 · Electrical and mechanical models</a><a href="#s4">1.4 · Actuators and motion transmission</a><a href="#s5">1.5 · Characteristics and selection criteria</a><a href="#s6">2.1 · Modelling of dynamic systems</a></nav>
+<main>
+  <section id="plan">
+    <h2 class="session">Day plan &amp; timing</h2>
+    <table class="plan"><tr><th>Block</th><th>Topic</th><th>Slides</th><th>Duration</th></tr>
+      <tr><td>Start</td><td>Title + agenda (counted in 1.1)</td><td>1–2</td><td>—</td></tr>
+      <tr><td>1.1</td><td>Fundamental principles and classification</td><td>2–9</td><td>30 min</td></tr>
+      <tr><td>1.2</td><td>Structure of electrical machines</td><td>10–20</td><td>60 min</td></tr>
+      <tr><td>Break</td><td>Suggested break</td><td>after slide 20</td><td>10 min (extra)</td></tr>
+      <tr><td>1.3</td><td>Electrical and mechanical models</td><td>21–31</td><td>60 min</td></tr>
+      <tr><td>1.4</td><td>Actuators and motion transmission</td><td>32–40</td><td>45 min</td></tr>
+      <tr><td>Break</td><td>Suggested break</td><td>after slide 31 / 40</td><td>10 min (extra)</td></tr>
+      <tr><td>1.5</td><td>Characteristics and selection criteria</td><td>41–48</td><td>45 min</td></tr>
+      <tr><td>2.1</td><td>Modelling of dynamic systems – fundamental physical models (part 1) + day wrap-up</td><td>49–62</td><td>60 min</td></tr>
+      <tr><td>Break</td><td>Suggested break</td><td>after slide 48</td><td>10 min (extra)</td></tr>
+      <tr><td></td><td><b>Total net teaching time</b></td><td>1–62</td><td><b>300 min</b></td></tr>
+    </table>
+  </section>
+
+  <section id="s1">
+    <h2 class="session">Session 1.1 · Fundamental principles and classification <small>Curriculum code 1.1 · 30 min · slides 2–9</small></h2>
+    <div class="slide">
+      <h3><span class="num">Slide 2</span>Agenda and learning objectives<span class="time">~3 min</span></h3>
+      <p class="say">Welcome to Day 1. Today we build the physical foundation for the whole course: how an electrical machine produces torque, how we model it, how motion is transmitted to the load, and how we select a motor for a real move. In the last hour we step back and look at modelling of dynamic systems in general, because the motor is only one of many energy-storing elements in a servo axis. The table shows the six blocks and their net times; we take a ten-minute break roughly every hour. The objectives on the right are what you should be able to do this evening — please use them as a checklist.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Five hours net; breaks are extra.</li><li>Everything today feeds Day 2 (control) and Day 4 (servo loops).</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Do we need prior machine theory? <b>A:</b> No; we start from Lorentz force and Faraday's law.</li></ul></div>
+      <p class="trans">Transition: Let us start with the big picture of a servo axis.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 4</span>Electromechanical energy conversion in a servo axis<span class="time">~5 min</span></h3>
+      <p class="say">A servo axis is a chain of power converters. Electrical power from the supply is shaped by the drive into voltage and current, the motor converts it into torque and speed, the transmission converts it into force and linear speed, and the load consumes it. A controller closes the loop using the encoder. At each stage we lose some power as heat: switching and conduction losses in the drive, copper, iron and friction losses in the motor, mesh friction in the gearbox. The motor itself is a reversible converter: when we brake, energy flows back to the DC bus. The coupling medium is the magnetic field in the air gap. Keep in mind that losses become heat, and heat is what ultimately limits continuous torque.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>P_el = v·i, P_mech = T·ω, efficiency 85–95 % for servo motors.</li><li>Reversibility: motoring and regenerating.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Where does braking energy go? <b>A:</b> Into DC-link capacitors, then a brake resistor or back to the grid with an active front end.</li></ul></div>
+      <p class="trans">Transition: Now: what physical laws produce the torque?</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 5</span>Lorentz force and Faraday's law<span class="time">~6 min</span></h3>
+      <p class="say">Two laws explain almost every motor. A conductor of length l carrying current i in a flux density B feels a force F = B l i. The same conductor moving at speed v through the field has an induced voltage e = B l v. Multiply them and you see that e times i equals F times v: electrical power in equals mechanical power out, with no loss in the ideal case. For a coil with N turns at radius r, torque is k_t times i and the back-EMF is k_e times omega, and both constants equal 2NBlr. That is the reason that, in SI units, the torque constant in newton-metres per ampere equals the back-EMF constant in volt-seconds per radian. We will use this identity constantly.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>k_t = k_e in SI units — same geometry, same number.</li><li>Motor and generator action always happen together.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why does a datasheet show different numbers for k_t and k_e? <b>A:</b> Different units (V/krpm, A rms, line-line) — we convert in Session 1.3.</li></ul></div>
+      <p class="trans">Transition: There is a second force mechanism that needs no current-carrying conductor in a field: reluctance.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 6</span>Reluctance force and the co-energy method<span class="time">~5 min</span></h3>
+      <p class="say">Iron in a magnetic field is pulled towards the position where the magnetic circuit has the lowest reluctance, that is the highest inductance. The rigorous way to compute this force is the co-energy method: integrate flux linkage over current at fixed position, then differentiate with respect to position at constant current. For linear magnetics this gives the compact result T = ½ i² dL/dθ. Because torque goes with i squared, the sign of the current does not matter. This is the principle of solenoids, switched-reluctance and stepper motors, and it is also the additional reluctance torque in interior-magnet synchronous motors, where the q-axis inductance is larger than the d-axis inductance. The plot shows the torque for a sinusoidally varying inductance.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>T = ½ i² dL/dθ; torque towards maximum inductance.</li><li>Use full co-energy when the iron saturates.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why not use ½Li² directly? <b>A:</b> Because flux and current change during motion; co-energy at constant current handles that correctly.</li></ul></div>
+      <p class="trans">Transition: With force mechanisms in place, we connect torque, speed and power.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 7</span>Torque, speed and power<span class="time">~4 min</span></h3>
+      <p class="say">Mechanical power is torque times angular speed. Remember the conversion from rpm to radians per second, and the handy rule that kilowatts equal newton-metres times rpm divided by 9549. In a drive, torque is limited by current — heat and magnet demagnetisation — while speed is limited by voltage, because the back-EMF grows with speed and must stay below what the inverter can provide. Up to base speed we have a constant-torque region; above it, field weakening allows higher speed at roughly constant power. Example: 1.27 newton-metres at 3000 rpm is 400 watts — a typical small AC servo.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Current limits torque, voltage limits speed.</li><li>P[kW] = T·n/9549.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Do servo motors use field weakening? <b>A:</b> PMSM servos only modestly; IPM spindle and traction motors use it extensively.</li></ul></div>
+      <p class="trans">Transition: Next we organise the zoo of actuators.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 8</span>Classification of motors and actuators<span class="time">~4 min</span></h3>
+      <p class="say">Electromagnetic actuators split into DC commutator machines, permanent-magnet brushless machines, induction machines, reluctance and stepper machines, and direct linear actuators such as linear motors and voice coils. Outside electromagnetics we have fluid power — hydraulics and pneumatics — and smart materials like piezo stacks. The table compares the main alternatives: hydraulics wins on force density, piezos on precision and bandwidth but with micrometre strokes, and the PM servo motor offers the best overall combination of controllability, precision and cleanliness, which is why it dominates industrial motion control.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>PM servo motor = default choice for precise motion.</li><li>Hydraulics for very large forces; piezo for nanometres.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Where do pneumatics fit? <b>A:</b> Cheap point-to-point motion; poor controllability because air is compressible.</li></ul></div>
+      <p class="trans">Transition: Let us summarise the first session.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 9</span>Session 1.1 – Summary<span class="time">~3 min</span></h3>
+      <p class="say">Four messages. A motor converts v times i into T times omega through the magnetic field, reversibly. Lorentz and Faraday together give k_t equals k_e in SI units. Reluctance torque needs no magnets and is proportional to current squared. And the operating limits are current for torque, voltage for speed, and temperature for the continuous operating point. The keybox holds the four formulas you should be able to write from memory.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>k_t = k_e, P = Tω.</li><li>Current, voltage and heat as the three limits.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Quick check: 2 N·m at 1500 rpm? <b>A:</b> About 314 W.</li></ul></div>
+      <p class="trans">Transition: Now we open the machines and look at their structure.</p>
+    </div>
+  </section>
+
+  <section id="s2">
+    <h2 class="session">Session 1.2 · Structure of electrical machines <small>Curriculum code 1.2 · 60 min · slides 10–20</small></h2>
+    <div class="slide">
+      <h3><span class="num">Slide 11</span>Anatomy of an industrial servo motor<span class="time">~5 min</span></h3>
+      <p class="say">This schematic longitudinal section shows the parts of a typical PM servo motor. The laminated stator stack carries the three-phase winding; the end windings stick out at both sides. The winding is close to the housing, which gives a short heat path. The rotor carries the magnets; servo rotors are long and slim to keep inertia low. The air gap is fractions of a millimetre and all torque is produced there. On the non-drive end sit the feedback device and often a spring-applied holding brake. Ratings follow IEC 60034-1. When people in industry say AC servo, they almost always mean a PMSM with sinusoidal back-EMF, an encoder and a matched drive.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Heat source in the stator = good cooling.</li><li>Encoder at NDE; brake optional.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why spring-applied brakes? <b>A:</b> They hold the axis when power fails — essential on vertical axes.</li></ul></div>
+      <p class="trans">Transition: We start with the oldest machine: the brushed DC motor.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 12</span>Brushed DC motor: construction<span class="time">~6 min</span></h3>
+      <p class="say">In the brushed DC motor, the stator provides the field, usually with permanent magnets. The rotor — the armature — carries the winding, connected to a segmented commutator. Brushes on the commutator reverse each coil's current as it passes the neutral zone, so that conductors under the north pole always carry current in the same direction. The drawing shows dots and crosses for current directions. The result is that the armature field is always perpendicular to the magnet field, which gives maximum torque per ampere automatically, without any position sensor. The photo shows a disassembled small motor: armature with commutator, magnets in the housing, brush holder.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Commutator keeps fields at 90° mechanically.</li><li>T = k_t·i directly.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why are brushed motors still used? <b>A:</b> Very cheap drive (one H-bridge), no sensor needed.</li></ul></div>
+      <p class="trans">Transition: What does the commutator do to the torque waveform?</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 13</span>Mechanical commutation and torque ripple<span class="time">~6 min</span></h3>
+      <p class="say">The commutator is a mechanical inverter. With only one coil the torque would pulsate like a rectified sine; with three coil groups the ripple drops to about 13 percent, with twelve to below one percent. The idealised formula is one minus cosine of pi over 2n. But mechanical commutation has costs: sparking, brush wear typically after a few thousand hours, electromagnetic interference and a speed limit. Worse, the losses are produced in the rotor, which is thermally isolated by the air gap, so continuous torque per volume is low. The key idea for the brushless machines is to replace the commutator by power electronics plus a rotor-position sensor.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>More segments = less ripple.</li><li>Rotor losses = poor cooling.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Is the 1−cos(π/2n) formula exact? <b>A:</b> No, idealised; real ripple also includes slotting and brush effects.</li></ul></div>
+      <p class="trans">Transition: Turning the DC motor inside out gives the brushless machines.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 14</span>PM brushless machines: BLDC and PMSM<span class="time">~7 min</span></h3>
+      <p class="say">Put the magnets on the rotor and the winding on the stator, and you have a brushless machine. Two rotor types: surface-mounted magnets, SPM, where d- and q-axis inductances are nearly equal, and interior magnets, IPM, where saliency adds reluctance torque. BLDC usually means concentrated windings with trapezoidal back-EMF and six-step commutation; PMSM means sinusoidal back-EMF and sinusoidal or field-oriented control. Note the relation between electrical and mechanical angle: theta_e equals p times theta_m, where p is the number of pole pairs. The photo shows a small outrunner BLDC from a floppy drive with the Hall sensors on the PCB.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>θ_e = p·θ_m.</li><li>BLDC = trapezoidal + six-step; PMSM = sinusoidal + FOC.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Can a BLDC be driven sinusoidally? <b>A:</b> Yes, with some torque ripple because of its non-sinusoidal EMF.</li></ul></div>
+      <p class="trans">Transition: How do we commutate electronically? First the simplest way.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 15</span>Six-step commutation with Hall sensors<span class="time">~8 min</span></h3>
+      <p class="say">Three Hall sensors, spaced 120 electrical degrees, give six states per electrical period. Each state selects which two phases conduct: one positive, one negative, the third floating. In the plot, phase-a current is a 120-degree block aligned with the flat top of the trapezoidal back-EMF. The table lists the sequence for the alignment shown. With two phases at back-EMF E carrying current I, torque is 2EI divided by omega_m, constant in the ideal case. In reality, current must transfer between phases at each step, which produces commutation torque ripple of ten to twenty percent. Sensorless BLDC control detects the back-EMF zero crossing in the floating phase instead.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>60° resolution only.</li><li>Commutation ripple 10–20 %.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> What if Hall sensors are misaligned? <b>A:</b> Torque drops and ripple increases; drives offer offset calibration.</li></ul></div>
+      <p class="trans">Transition: For precision we need sinusoidal commutation.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 16</span>Sinusoidal commutation (PMSM)<span class="time">~7 min</span></h3>
+      <p class="say">If the back-EMF is sinusoidal, we impose sinusoidal currents in phase with it. Summing e times i over three phases gives three halves times k_e times I, because the sum of the three sine-squared terms is exactly three halves — a constant torque, with no ripple in the ideal case. This requires a continuous rotor angle from an encoder or resolver, not just six Hall states. In the vector diagram, the current vector is held 90 electrical degrees ahead of the magnet flux: i_d equals zero and torque equals three halves p psi_PM i_q. This is exactly field-oriented control, which we treat in detail on Day 4.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Σ sin² = 3/2 → constant torque.</li><li>T = 3/2·p·ψ_PM·i_q.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why 90°? <b>A:</b> Maximum torque per ampere for SPM machines; IPM uses a slightly different angle.</li></ul></div>
+      <p class="trans">Transition: Briefly, two other important machine types.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 17</span>Induction motor: short introduction<span class="time">~7 min</span></h3>
+      <p class="say">The induction motor has a squirrel-cage rotor without magnets — the photo shows such a rotor. The rotating stator field induces currents in the cage only if the rotor slips behind the field; slip is the relative speed difference. Synchronous speed is 60 f over p. The Kloss formula approximates torque versus slip with a breakdown torque at slip s_k. The rated point lies at a few percent slip on the steep stable part. Induction motors are robust, cheap and easy to field-weaken; their rotor losses heat the rotor. In servo applications you find them as spindles and large axes, always with vector control and an encoder.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>n_s = 60f/p, s = (n_s − n)/n_s.</li><li>Needs slip → rotor losses.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why is starting torque low in the plot? <b>A:</b> Simple Kloss model; real deep-bar rotors have higher starting torque.</li></ul></div>
+      <p class="trans">Transition: And the stepper motor.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 18</span>Stepper motor: short introduction<span class="time">~5 min</span></h3>
+      <p class="say">The hybrid stepper has a toothed rotor with an axial magnet and two phases. Its full step angle is 360 degrees over 2 m N_r — with 50 rotor teeth that is 1.8 degrees, 200 steps per revolution. Positioning is open loop by counting steps; micro-stepping smooths the motion. The weakness is the torque–speed characteristic: torque falls quickly with speed because the winding inductance limits current rise. If the load torque exceeds the pull-out torque, steps are lost and the controller does not know. Resonances at low and medium speeds are also typical.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>1.8° = 200 steps/rev.</li><li>Lost steps are undetected in open loop.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> When choose a stepper? <b>A:</b> Low cost, low speed, known loads — printers, lab automation.</li></ul></div>
+      <p class="trans">Transition: Let us compare all machines side by side.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 19</span>Comparison of machine types<span class="time">~5 min</span></h3>
+      <p class="say">The table compares commutation method, torque density, ripple, speed range, feedback, maintenance and drive complexity. Brushed DC wins on drive simplicity, BLDC on cost-effective brushless operation, PMSM on torque density and smoothness, induction on speed range and robustness, and the stepper on needing no feedback. For industrial servo axes below roughly ten kilowatts, the PMSM is the standard; induction machines take over for large spindles and harsh environments.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>PMSM = servo standard.</li><li>Choice is driven by precision, cost and environment.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why do robots use PMSM? <b>A:</b> Highest torque per volume and low ripple for smooth joints.</li></ul></div>
+      <p class="trans">Transition: Summary of session 1.2.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 20</span>Session 1.2 – Summary<span class="time">~4 min</span></h3>
+      <p class="say">All machines share stator, rotor and air gap. Commutation keeps stator and rotor fields about 90 degrees apart: mechanically in DC motors, with six Hall states in BLDC, with a continuous angle and sinusoidal currents in PMSM. Brushless machines have the winding on the stator, which improves cooling and removes wear. Induction motors need slip; steppers move in open-loop steps. Memorise the four formulas in the box.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Commutation = keeping fields orthogonal.</li><li>θ_e = pθ_m.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Quick check: 4-pole-pair motor at 3000 rpm, electrical frequency? <b>A:</b> 200 Hz.</li></ul></div>
+      <p class="trans">Transition: After the break: the mathematical model of the motor.</p>
+    </div>
+  </section>
+
+  <section id="s3">
+    <h2 class="session">Session 1.3 · Electrical and mechanical models <small>Curriculum code 1.3 · 60 min · slides 21–31</small></h2>
+    <div class="slide">
+      <h3><span class="num">Slide 22</span>Equivalent circuit of the PM DC motor<span class="time">~6 min</span></h3>
+      <p class="say">The electrical side is a resistance, an inductance and a back-EMF source proportional to speed. The mechanical side is an inertia driven by the motor torque k_t i, opposed by viscous friction B omega and the load torque T_L. The table lists every symbol with its SI unit — please use exactly these units; most modelling errors come from mixed units. We use the consumer sign convention: voltage and current positive into the terminals, torque and speed positive in the same direction, and load torque opposing motion. The same model applies per q-axis to a PMSM under field-oriented control.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Consistent SI units.</li><li>Same model for DC motor and PMSM q-axis.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> What about iron losses? <b>A:</b> Neglected here; they act like an additional speed-dependent friction.</li></ul></div>
+      <p class="trans">Transition: Let us write the equations.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 23</span>Fundamental motor equations and k_t = k_e<span class="time">~7 min</span></h3>
+      <p class="say">Kirchhoff's voltage law gives v equals R i plus L di/dt plus k_e omega. Newton's law for rotation gives J d omega/dt equals k_t i minus B omega minus T_L. Multiply the first by i and the second by omega and you get two power balances: copper loss, change of magnetic energy and converted power on the electrical side; change of kinetic energy, friction loss and load power on the mechanical side. The converted power must be the same on both sides, which proves k_t equals k_e. For datasheets in volts per thousand rpm, divide by 104.7.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Two coupled first-order ODEs → second-order system.</li><li>V/krpm ÷ 104.7 = V·s/rad.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Does k_t change? <b>A:</b> Slightly: saturation at high current, magnet temperature ≈ −0.1 %/K.</li></ul></div>
+      <p class="trans">Transition: Friction deserves a closer look.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 24</span>Friction and load torque<span class="time">~6 min</span></h3>
+      <p class="say">Friction has several components. Viscous friction is proportional to speed and fits the linear model. Coulomb friction is constant in magnitude and switches sign with speed. Stiction is higher at standstill, and the Stribeck effect describes the drop from static to Coulomb level at low speed. These nonlinear parts cause stick-slip, limit cycles and quadrant glitches at reversal. Load torque includes process forces and gravity, which on vertical axes is constant even at standstill. In the linear model, T_L is treated as a disturbance input.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Only viscous friction is linear.</li><li>Gravity load does not vanish at standstill.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> How to identify friction? <b>A:</b> Constant-speed runs at many speeds; plot torque versus speed.</li></ul></div>
+      <p class="trans">Transition: What does the motor do in steady state?</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 25</span>Steady-state characteristics<span class="time">~7 min</span></h3>
+      <p class="say">Setting derivatives to zero gives a straight torque–speed line: no-load speed v over k_e, stall torque k_t v over R, slope minus R over k_e k_t. For our example motor at 48 volts the stall current is 48 amperes — far above what any drive would allow. Maximum mechanical power occurs at half stall torque, with 50 percent efficiency, so it is never a servo operating point. Maximum efficiency, about 81 percent here, occurs at light load and follows from one minus the square root of no-load over stall current, squared.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Linear T–ω line for constant voltage.</li><li>Stall current ≫ rated current.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why do servo drives not run at P_max? <b>A:</b> Efficiency 50 %, unacceptable heating.</li></ul></div>
+      <p class="trans">Transition: Now the dynamic view: the block diagram.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 26</span>Block diagram of the DC motor<span class="time">~6 min</span></h3>
+      <p class="say">The block diagram shows two first-order lags in cascade: the electrical lag one over Ls plus R producing current, and the mechanical lag one over Js plus B producing speed. An integrator gives position. The back-EMF forms an internal feedback loop from speed to the voltage summing point, giving the motor natural damping. The load torque enters as a disturbance at the torque summing point. In practice, servo drives close a fast current loop around the electrical part, so the motor appears as a torque source acting on the inertia — the basis of the cascade structure on Day 4.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Back-EMF = internal feedback.</li><li>T_L = disturbance input.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why close a current loop? <b>A:</b> Protects the motor, removes back-EMF and R variations, makes torque proportional to command.</li></ul></div>
+      <p class="trans">Transition: From the block diagram we derive the transfer function.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 27</span>Transfer functions and time constants<span class="time">~8 min</span></h3>
+      <p class="say">Reducing the loop gives omega over v equals k_t over the product (Ls+R)(Js+B) plus k_t k_e — a second-order system. The disturbance transfer function has the same denominator with a minus sign. Position is one more integrator, so the plant is type one. Neglecting B, define the electrical time constant L over R and the mechanical time constant R J over k_t k_e. If tau_m is much larger than tau_e, the denominator factors approximately into two first-order lags. Poles are real if tau_m is more than four times tau_e. Remember that tau_m uses total inertia: adding load inertia slows the motor proportionally.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>τ_e = L/R, τ_m = RJ/(k_t k_e).</li><li>Real poles if τ_m &gt; 4τ_e.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Typical values? <b>A:</b> τ_e 0.5–5 ms, τ_m 2–20 ms for servo motors.</li></ul></div>
+      <p class="trans">Transition: Let us put numbers in.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 28</span>Worked example: from parameters to poles<span class="time">~7 min</span></h3>
+      <p class="say">Our example motor: 48 volts, one ohm, half a millihenry, k_t 0.1, rotor inertia 1e-4 kilogram square metres. Tau_e is 0.5 milliseconds and tau_m 10 milliseconds, a ratio of 20. The denominator coefficients give the characteristic equation s squared plus 2000.5 s plus 201,000. The poles are minus 106 and minus 1894 per second, with time constants 9.4 and 0.53 milliseconds — within six percent of the approximations. The DC gain is 9.95 radians per second per volt, essentially one over k_e. Let participants verify one number on their calculator.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Approximation works when τ_m ≫ τ_e.</li><li>DC gain ≈ 1/k_e.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why is DC gain slightly less than 1/k_e? <b>A:</b> Viscous friction B adds RB to the denominator.</li></ul></div>
+      <p class="trans">Transition: What does a voltage step look like in time?</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 29</span>Step response of the example motor<span class="time">~6 min</span></h3>
+      <p class="say">This is the exact response to a 24-volt step, computed by partial fractions. Speed rises with the mechanical time constant to about 239 radians per second. The current is more interesting: it jumps to 21 amperes within 1.6 milliseconds, about 180 times the no-load current, and only falls as the back-EMF builds up. That is why real drives always limit current. With a current limit, acceleration becomes constant, k_t times I_max over J, and the speed ramps linearly.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Inrush current is set by R and L only.</li><li>Current limit → linear speed ramp.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Would a real motor survive? <b>A:</b> Briefly yes, but the drive would trip; that is why current control exists.</li></ul></div>
+      <p class="trans">Transition: Before closing the session: getting model parameters from datasheets.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 30</span>From datasheet to model<span class="time">~4 min</span></h3>
+      <p class="say">Datasheets use mixed units. Back-EMF constants in volts per thousand rpm, often line-to-line rms for three-phase motors; resistance and inductance line-to-line, so per-phase values in star are half. Inertia in kilogram square centimetres. For a three-phase PMSM with k_e in rms line-to-line volts and k_t per rms phase ampere, k_t equals root three times k_e — the identity k_t equals k_e holds only in consistent per-phase units. Also remember copper resistance rises 0.39 percent per kelvin and tolerances are five to ten percent.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Check line-line vs phase and rms vs peak.</li><li>k_t = √3·k_e (rms, LL).</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Example? <b>A:</b> 33 V/krpm → 0.315 V·s/rad → k_t ≈ 0.546 N·m/A rms.</li></ul></div>
+      <p class="trans">Transition: Summary of the modelling session.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 31</span>Session 1.3 – Summary<span class="time">~3 min</span></h3>
+      <p class="say">The motor is an RL circuit with back-EMF, coupled to an inertia with friction and load torque. Energy conservation gives k_t equals k_e. The voltage-to-speed transfer function is second order with an electrical and a mechanical time constant. Friction has linear and nonlinear parts, and load torque is a disturbance. Without current control a voltage step causes large inrush current.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Four equations in the box are essential for Days 2–4.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Quick check: τ_m with R=2 Ω, J=2e-4, k=0.2? <b>A:</b> 10 ms.</li></ul></div>
+      <p class="trans">Transition: Break, then actuators and transmissions.</p>
+    </div>
+  </section>
+
+  <section id="s4">
+    <h2 class="session">Session 1.4 · Actuators and motion transmission <small>Curriculum code 1.4 · 45 min · slides 32–40</small></h2>
+    <div class="slide">
+      <h3><span class="num">Slide 33</span>Motion transmission options<span class="time">~6 min</span></h3>
+      <p class="say">Most loads do not want the motor's speed and torque directly. Ball screws convert rotation to linear motion with high stiffness and micrometre accuracy but limited speed and length. Toothed belts are fast and long but compliant. Rack and pinion allows unlimited stroke with backlash issues. Linear motors eliminate the transmission altogether. Gearboxes adapt speed and torque for rotary loads, and direct-drive torque motors are the stiffest solution. The trade-off is summarised below: a geared drive allows a small fast motor and reduces reflected inertia, but adds backlash, compliance and friction; a direct drive is stiff and precise but large and expensive.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Every transmission trades size against stiffness and backlash.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> When direct drive? <b>A:</b> When stiffness and bandwidth justify the motor cost — rotary tables, wafer stages.</li></ul></div>
+      <p class="trans">Transition: First, linear electromechanical actuators.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 34</span>Linear motor and voice coil<span class="time">~5 min</span></h3>
+      <p class="say">A linear motor is a PMSM unrolled: forcer with coils and a magnet track. Iron-core types give high force but have cogging and a strong attraction force, three to ten times the thrust, that the bearings must carry. Ironless U-channel types are smooth but weaker. A voice coil is a single coil moving in a radial magnetic field: no commutation, no cogging, strokes of millimetres to centimetres and very high bandwidth. The equations are those of the DC motor with force, velocity and mass in place of torque, speed and inertia; k_f in newtons per ampere equals volt-seconds per metre.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>F = k_f·i, e = k_f·v.</li><li>Attraction force in iron-core motors.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Where are voice coils used? <b>A:</b> HDD heads, lens focusing, fast tool servos, vibration isolation.</li></ul></div>
+      <p class="trans">Transition: The most common rotary-to-linear converter is the ball screw.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 35</span>Ball screw: kinematics and equivalent inertia<span class="time">~7 min</span></h3>
+      <p class="say">A ball screw advances by its lead p per revolution, so x equals p over 2 pi times theta. The torque needed for a force F is p over 2 pi eta times F. The table mass seen at the motor shaft follows from kinetic energy equality: m times p over 2 pi squared. Add coupling and screw inertia; the screw inertia grows with diameter to the fourth power, so a thicker screw quickly dominates. Ball screws reach about 90 percent efficiency, sliding lead screws much less. Limits are critical whip speed, buckling, nut speed and axial stiffness. The photo shows a nut with recirculation tubes and balls.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>J_eq = m(p/2π)².</li><li>J_screw ∝ d⁴.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Small lead or large lead? <b>A:</b> Small lead: more force and less reflected mass, but higher motor speed for the same linear speed.</li></ul></div>
+      <p class="trans">Transition: For rotary loads we use gearboxes.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 36</span>Gearboxes: planetary and harmonic drives<span class="time">~6 min</span></h3>
+      <p class="say">The planetary gear with fixed ring, sun input and carrier output has the ratio one plus ring teeth over sun teeth, typically three to ten per stage, with very high efficiency. The harmonic or strain-wave drive uses a flexible spline with two fewer teeth than the circular spline; a ratio of 100 in one stage is easy, backlash is practically zero, but torsional stiffness is low and nonlinear and efficiency is lower. Cycloidal reducers are stiff and used in heavy robot axes; worm gears can be self-locking at the cost of efficiency.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Harmonic: high ratio, no backlash, compliant.</li><li>Planetary: efficient, some backlash.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why do robot joints use harmonic drives? <b>A:</b> High ratio in a compact, light, backlash-free package.</li></ul></div>
+      <p class="trans">Transition: How do loads look from the motor shaft?</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 37</span>Reflected inertia and load torque<span class="time">~7 min</span></h3>
+      <p class="say">With gear ratio N, motor speed is N times load speed. Kinetic energy equality gives the reflected inertia J_L over N squared; power balance gives the reflected load torque T_L over N eta. The motor torque equation then contains motor, gear and reflected load inertia. The table generalises this: ball screws reflect mass as m (p/2π)², belts and racks as m r². These three relations are the core of every sizing calculation.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Inertia reflects with N², torque with N.</li><li>Efficiency only on the power path.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Does efficiency also reduce inertia? <b>A:</b> Strictly the losses scale with torque; conservative sizing divides J_L by η too.</li></ul></div>
+      <p class="trans">Transition: Which gear ratio is best?</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 38</span>Inertia ratio and optimal gear ratio<span class="time">~6 min</span></h3>
+      <p class="say">For a given motor torque, the load acceleration is N T over J_m N² plus J_L. Maximising over N gives N_opt equals the square root of J_L over J_m — exactly where the reflected load inertia equals the motor inertia, called inertia matching. The curves show that the maximum is flat. In practice, the ratio is usually fixed by the required speed. The inertia ratio guideline of three to ten matters for control: large ratios with compliant mechanics lower the resonance relative to the desired bandwidth and make tuning difficult.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>N_opt = √(J_L/J_m).</li><li>Speed often decides N.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Is inertia matching always required? <b>A:</b> No; it maximises acceleration. Stiff direct drives tolerate high ratios.</li></ul></div>
+      <p class="trans">Transition: Real transmissions are not ideal.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 39</span>Efficiency, backlash, stiffness<span class="time">~5 min</span></h3>
+      <p class="say">Three non-idealities. Efficiency: losses grow with torque, and back-driving efficiency can differ — worm and lead screws may self-lock. Backlash: a dead zone of width 2 delta; at reversal the motor moves without moving the load, causing lost motion and limit cycles. Stiffness: any compliant element between motor and load forms a two-mass oscillator with resonance frequency given by the formula; we derive it in session 2.1. A load-side encoder sees backlash and compliance directly, which is the motivation for dual-loop control on Day 5.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Backlash = nonlinearity, compliance = resonance.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> How to reduce backlash? <b>A:</b> Preloaded nuts, dual pinions, anti-backlash gears, harmonic drives.</li></ul></div>
+      <p class="trans">Transition: Summary of the transmission session.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 40</span>Session 1.4 – Summary<span class="time">~3 min</span></h3>
+      <p class="say">Transmissions trade motor size against stiffness, backlash and friction. Every load is reflected by energy equivalence. The optimal acceleration ratio is the square root of the inertia ratio, but speed usually decides. Keep the reflected inertia ratio moderate, and remember that linear motors and voice coils obey the same equations.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>J/N², m(p/2π)², mr².</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Quick check: J_L = 0.01, N = 10 → reflected? <b>A:</b> 1e-4 kg·m².</li></ul></div>
+      <p class="trans">Transition: Now we use all this to select a motor.</p>
+    </div>
+  </section>
+
+  <section id="s5">
+    <h2 class="session">Session 1.5 · Characteristics and selection criteria <small>Curriculum code 1.5 · 45 min · slides 41–48</small></h2>
+    <div class="slide">
+      <h3><span class="num">Slide 42</span>Servo motor torque–speed envelope<span class="time">~6 min</span></h3>
+      <p class="say">A servo datasheet shows two regions. The continuous zone is limited by winding temperature at steady state and drops slightly with speed due to iron and friction losses. The intermittent zone extends up to peak torque, limited by drive current, demagnetisation and saturation. At high speed the peak curve drops along the voltage limit: the back-EMF consumes most of the available voltage and current cannot be forced in. This limit depends on DC-bus voltage, so the same motor on a 400-volt drive has a different curve than on 230 volts.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Continuous = thermal; intermittent = current/voltage.</li><li>Curve depends on the drive.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why does continuous torque drop at high speed? <b>A:</b> Iron losses grow with frequency and add heat.</li></ul></div>
+      <p class="trans">Transition: How fast does the motor heat up?</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 43</span>Thermal limits<span class="time">~7 min</span></h3>
+      <p class="say">The simplest thermal model is a heat source feeding a thermal resistance and capacitance: a first-order system with time constant R_th C_th, typically ten to sixty minutes for the whole motor. Copper loss grows with torque squared, so an overload factor k reaches the temperature limit after minus tau ln(1 − 1/k²): 59 percent of tau at 1.5 times rated torque, 29 percent at twice rated. But the winding itself has a much smaller time constant, seconds, so peak torque is permitted only briefly. Drives protect with I²t models and temperature sensors.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Losses ∝ T².</li><li>Two time scales: winding seconds, housing minutes.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Insulation class F means? <b>A:</b> 155 °C maximum winding temperature.</li></ul></div>
+      <p class="trans">Transition: How do we judge a periodic move?</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 44</span>Duty cycle and RMS torque<span class="time">~7 min</span></h3>
+      <p class="say">If the cycle is short compared with the thermal time constant, the winding sees the average copper loss. Because loss is proportional to torque squared, the relevant quantity is the RMS torque over the cycle, which must stay below the continuous torque at the mean speed. For a trapezoidal profile the segment torques are acceleration torque plus friction, friction alone, and minus acceleration torque plus friction. Do not forget holding torque during dwell on vertical axes. Peak torque must be checked separately against the intermittent curve at the corresponding speed.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>T_rms ≤ T_cont; T_peak ≤ T_max(n).</li><li>Dwell is not free on vertical axes.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> What if the cycle is long? <b>A:</b> Then use the thermal model directly, not RMS.</li></ul></div>
+      <p class="trans">Transition: A complete example.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 45</span>Worked sizing example (1/2)<span class="time">~7 min</span></h3>
+      <p class="say">A horizontal ball-screw axis moves 50 kilograms by 200 millimetres in half a second with 0.1-second ramps, then dwells half a second. Kinematics: top speed 0.5 metres per second, 3000 rpm with a 10-millimetre lead, angular acceleration 3142 rad/s². Inertias: the steel screw contributes 0.99e-4, the table 1.27e-4, the coupling 0.1e-4 — total 2.35e-4 kilogram square metres. Friction torque from the guide and bearings is 0.059 newton-metres. Point out the assumption about efficiency.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Systematic order: kinematics, inertia, friction.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why is the screw so significant? <b>A:</b> d⁴ dependence; a 25-mm screw would have 2.4× the inertia.</li></ul></div>
+      <p class="trans">Transition: Now choose a motor and check it.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 46</span>Worked sizing example (2/2)<span class="time">~8 min</span></h3>
+      <p class="say">Candidate: a 400-watt servo with rotor inertia 0.4e-4. Inertia ratio 5.9 — acceptable. Acceleration torque 0.865, so segment torques 0.924, 0.059, minus 0.806 and zero. RMS torque is 0.389 newton-metres, about 31 percent of rated. Peak 0.924 is far below 3.82, and the speed of 3000 rpm is within the rated speed. The plot shows the points inside the envelope. Each stop regenerates 13.6 joules into the DC bus. The note shows that a 200-watt motor would be thermally sufficient, but with an inertia ratio of 13 — whether that is acceptable depends on mechanical stiffness and tuning.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Check peak, RMS, speed, inertia ratio, regen.</li><li>Smaller motor possible: stiffness decides.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why not always take the smallest motor? <b>A:</b> Inertia ratio, margins for friction growth and future loads.</li></ul></div>
+      <p class="trans">Transition: The motor must also match the drive.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 47</span>Motor–drive matching and checklist<span class="time">~7 min</span></h3>
+      <p class="say">The drive must provide back-EMF plus resistive and inductive drops at top speed. Our motor has 33 volts rms per krpm, so 99 volts line-to-line at 3000 rpm, requiring a DC bus of at least about 140 volts plus margin — fine for a 230-volt drive, impossible on 48 volts where it would reach only about 1000 rpm. Current: peak 1.7 and RMS 0.71 amperes rms, compared against drive ratings. The same motor frame is offered with different windings: higher k_t means less current but more voltage per speed. The checklist summarises the full selection procedure.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Voltage ↔ speed, current ↔ torque.</li><li>Winding choice matches motor to bus voltage.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why √2 for the bus? <b>A:</b> With space-vector PWM, max line-line rms voltage ≈ V_DC/√2.</li></ul></div>
+      <p class="trans">Transition: Summary of selection.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 48</span>Session 1.5 – Summary<span class="time">~3 min</span></h3>
+      <p class="say">The envelope has a thermal boundary and a current/voltage boundary. Heat accumulates over minutes, so judge with RMS torque. Peak torque must exist at the speed where it is needed. Match the motor to the drive through k_t, k_e, bus voltage and currents, and follow the systematic sizing sequence.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>T_rms, T_peak, speed, inertia ratio, voltage.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Quick check: T 1 N·m 0.2 s, 0 N·m 0.8 s → T_rms? <b>A:</b> 0.45 N·m.</li></ul></div>
+      <p class="trans">Transition: Last block: general modelling of dynamic systems.</p>
+    </div>
+  </section>
+
+  <section id="s6">
+    <h2 class="session">Session 2.1 · Modelling of dynamic systems – fundamental physical models (part 1) + day wrap-up <small>Curriculum code 2.1 · 60 min · slides 49–62</small></h2>
+    <div class="slide">
+      <h3><span class="num">Slide 50</span>Lumped-parameter modelling<span class="time">~4 min</span></h3>
+      <p class="say">Modelling follows a workflow: define boundary, inputs and outputs; idealise into lumped elements; write free-body diagrams or Kirchhoff laws; insert constitutive laws; obtain differential equations and transfer functions; validate against measurements. Every domain has kinetic stores, potential stores and dissipators, listed in the table. Each independent energy store adds a state. Transformers like gears and gyrators like motors connect domains without storing energy. Choose the simplest model that answers your question.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Stores define the order.</li><li>Validate against measurement (Day 2).</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> When is lumped modelling invalid? <b>A:</b> Near or above the first neglected structural mode.</li></ul></div>
+      <p class="trans">Transition: The prototype of all models: mass–spring–damper.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 51</span>Mass–spring–damper<span class="time">~7 min</span></h3>
+      <p class="say">Draw the free-body diagram of the mass: the spring pulls back with kx, the damper with b times x-dot, and the external force F acts forward. Newton's law gives m x-double-dot plus b x-dot plus k x equals F. The transfer function is one over m s² + b s + k, which we write in standard form with natural frequency root k over m and damping ratio b over 2 root km. In the example, 2 kilograms on 200 kilonewtons per metre give 50 hertz and a damping ratio below 0.1 — typical for machine structures.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>ω_n = √(k/m), ζ = b/(2√(km)).</li><li>Always draw the FBD with sign conventions.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Static deflection under F? <b>A:</b> F/k — the DC gain.</li></ul></div>
+      <p class="trans">Transition: What do the responses look like?</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 52</span>Second-order step responses<span class="time">~6 min</span></h3>
+      <p class="say">The plot shows step responses over normalised time for damping ratios from 0.1 to 2. Low damping gives large overshoot and long ringing: 73 percent at 0.1, 37 percent at 0.3, about 4 percent at 0.707. Critical damping, zeta equals one, is the fastest response without overshoot; zeta of 2 is sluggish. On the right, the pole locations: complex poles on a circle of radius omega_n, the angle determined by zeta. Mechanical structures in servo systems typically have zeta below 0.1.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Overshoot depends only on ζ.</li><li>Pole angle ↔ damping.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why 0.707 popular? <b>A:</b> Good compromise: 4 % overshoot, maximally flat magnitude.</li></ul></div>
+      <p class="trans">Transition: The same equation appears in rotation.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 53</span>Rotational mechanical systems<span class="time">~5 min</span></h3>
+      <p class="say">For rotation, Euler's law replaces Newton's: J theta-double-dot plus B theta-dot plus k_theta theta equals T. The torsional stiffness of a shaft is G times the polar moment over length; a 10-millimetre steel shaft of 100 millimetres has 785 newton-metres per radian. Couplings, gear meshes and belts are springs too, and in series the softest dominates. An unloaded motor has no spring: one over s times (Js+B), essentially a double integrator.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>k_θ = Gπd⁴/(32l).</li><li>Series stiffness: softest dominates.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Typical coupling stiffness? <b>A:</b> Bellows couplings: hundreds to thousands of N·m/rad.</li></ul></div>
+      <p class="trans">Transition: And in the electrical domain.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 54</span>Electrical RLC network<span class="time">~5 min</span></h3>
+      <p class="say">A series RLC circuit gives L q-double-dot plus R q-dot plus q over C equals v — formally identical to the mass–spring–damper. Natural frequency is one over root LC, damping ratio R over 2 root C over L. In drives you meet this structure in DC-link input filters, output sine filters and cable resonances. The example — 1 millihenry and 470 microfarads — resonates at 232 hertz with damping 0.034: lightly damped and potentially troublesome. Without the capacitor, the motor winding alone is first order.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Same 2nd-order form.</li><li>DC-link LC filters can resonate.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> How to damp the filter? <b>A:</b> Add damping resistance or active damping in the converter control.</li></ul></div>
+      <p class="trans">Transition: These similarities are systematic: analogies.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 55</span>Analogies and energy-based modelling<span class="time">~6 min</span></h3>
+      <p class="say">In the force–voltage analogy, mass corresponds to inductance, damper to resistance and spring to inverse capacitance; in the force–current analogy, mass corresponds to capacitance. In every domain, effort times flow is power. The energy view leads to Lagrange's equations: kinetic minus potential energy, plus a Rayleigh dissipation function, generalised forces on the right. Applied to the mass–spring–damper it reproduces the same equation without a free-body diagram — very useful for multi-body systems.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Effort × flow = power.</li><li>Lagrange: energies instead of forces.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Which analogy is better? <b>A:</b> Force–current preserves topology; force–voltage is more common in textbooks.</li></ul></div>
+      <p class="trans">Transition: Now we connect domains: the motor.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 56</span>Electromechanical coupling: the gyrator<span class="time">~7 min</span></h3>
+      <p class="say">The motor is a gyrator: it converts current into torque and speed into voltage with the same constant k. In state-space form with states i and omega, the coupling terms appear skew-symmetric, meaning they exchange energy without creating or dissipating it. The energy balance shows input power split into dissipation in R and B, stored magnetic and kinetic energy, and output to the load. Seen from the terminals, inertia looks like a capacitance J over k squared. This is the bridge to the state-space treatment on Day 2.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>T = ki, e = kω.</li><li>Two energy stores → second order.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why does inertia look like a capacitor? <b>A:</b> A gyrator swaps effort and flow, turning a mechanical mass into an electrical capacitance.</li></ul></div>
+      <p class="trans">Transition: Finally, a preview of what compliance does.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 57</span>Two-inertia system preview<span class="time">~8 min</span></h3>
+      <p class="say">Connect motor and load inertia through a spring and damper and you get the two-inertia system. The transfer function from motor torque to motor speed has an anti-resonance at root k over J_L and a resonance at root k (J_m+J_L) over J_m J_L. In the Bode plot, at low frequency the axis behaves like the rigid total inertia, at high frequency like the motor alone, and in between we see the dip and peak at 113 and 225 hertz for the example values. This resonance limits achievable servo bandwidth and motivates notch filters on Days 3 and 5.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Anti-resonance first, then resonance.</li><li>Bandwidth limit from mechanics.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> What does the ratio ω_r/ω_ar depend on? <b>A:</b> √(1+J_L/J_m) — the inertia ratio again.</li></ul></div>
+      <p class="trans">Transition: Let me summarise the modelling session.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 58</span>Session 2.1 (part 1) – Summary<span class="time">~3 min</span></h3>
+      <p class="say">Lumped models consist of energy stores and dissipators; each store adds a state. Mechanical, rotational and electrical systems share the same second-order form. Analogies and Lagrange's method transfer intuition across domains. The motor is a gyrator coupling the RL circuit to inertia, and compliance between motor and load creates resonance and anti-resonance.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>ω_n, ζ, ω_ar, ω_r.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Quick check: m = 1 kg, k = 1e4 N/m → f_n? <b>A:</b> ≈ 15.9 Hz.</li></ul></div>
+      <p class="trans">Transition: Wrap-up of the day.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 59</span>Day 1 summary<span class="time">~5 min</span></h3>
+      <p class="say">Today's content in four boxes. Machines: Lorentz and Faraday give k_t equals k_e; commutation types from brushed DC to PMSM. Models: the two motor equations and two time constants. Transmissions and sizing: reflected inertia, optimal ratio, peak and RMS checks, drive matching. Dynamic modelling: lumped elements, analogies, Lagrange, the second-order prototype and two-inertia resonance. The single sentence: a servo axis is an energy converter plus a mechanical network, both described by the same lumped, energy-based equations. Invite questions.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Connect the four boxes in one picture.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Open questions from the day? <b>A:</b> Collect them and answer now or tomorrow morning.</li></ul></div>
+      <p class="trans">Transition: Here is tomorrow's plan.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 60</span>Preview of Day 2<span class="time">~3 min</span></h3>
+      <p class="say">Tomorrow we continue modelling with nonlinear effects such as the friction we saw today and learn to linearise them. Then transfer functions and state space, system identification and frequency response, PID and basic control structures, and stability and performance. Please bring the DC-motor model and the second-order prototype: they are the plants we will analyse and control.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Today's models = tomorrow's plants.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Any preparation? <b>A:</b> Revise Laplace basics: poles, zeros, first- and second-order systems.</li></ul></div>
+      <p class="trans">Transition: Figure credits and references follow for completeness.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 61</span>Figure credits<span class="time">~0.5 min</span></h3>
+      <p class="say">This slide lists all photographs and diagrams taken from Wikimedia Commons, with author and licence, as required by the Creative Commons licences. All other drawings and plots were produced for this course with TikZ and pgfplots, computed from the equations shown on the slides. No need to present this slide in detail; mention it so participants know where images come from.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Licences respected (CC BY / CC BY-SA).</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> May we reuse the slides? <b>A:</b> Yes for internal training, keeping the credits.</li></ul></div>
+      <p class="trans">Transition: And the reference list.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 62</span>References<span class="time">~0.5 min</span></h3>
+      <p class="say">The references are the classical textbooks behind today's material: Fitzgerald, Krishnan, Mohan, Hughes and Leonhard for machines and drives; Kenjo for steppers; Groß et al. and Ellis for practical servo engineering; Ogata, Franklin–Powell–Emami-Naeini and Karnopp for modelling and control; Armstrong-Hélouvry for friction; and IEC 60034-1 and IEC 61800 for ratings and drive systems. Recommend Hughes and Drury as the most accessible first read.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Hughes &amp; Drury for a gentle start; Krishnan for depth.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Free resources? <b>A:</b> Manufacturer application notes (TI, Infineon, ST) on motor control.</li></ul></div>
+      <p class="trans">Transition: End of Day 1 — thank you.</p>
+    </div>
+  </section>
+</main>
+<footer>Figures and references are listed on the final slides of the deck.</footer>
+</body>
+</html>

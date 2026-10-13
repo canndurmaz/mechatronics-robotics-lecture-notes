@@ -1,0 +1,42 @@
+\frametitle{Implementing filters: difference equations and biquads}
+\begin{columns}[T]
+\column{.5\textwidth}
+\footnotesize
+General IIR (order $n$):
+\[
+y[k]=\sum_{i=0}^{n}b_i\,x[k-i]-\sum_{j=1}^{n}a_j\,y[k-j]
+\]
+\term{Direct form II transposed} biquad (per sample):
+\begin{eqbox}
+\vspace{-2mm}
+\begin{align*}
+y&=b_0x+s_1\\
+s_1&=b_1x-a_1y+s_2\\
+s_2&=b_2x-a_2y
+\end{align*}
+\vspace{-5mm}
+\end{eqbox}
+Higher orders: cascade of biquads (second-order sections), not one high-order polynomial.
+\column{.48\textwidth}
+\begin{block}{C sketch}
+\scriptsize
+\begin{verbatim}
+typedef struct {
+    float b0,b1,b2,a1,a2,s1,s2;
+} biquad_t;
+
+static inline float biquad(biquad_t *f, float x)
+{
+    float y = f->b0*x + f->s1;
+    f->s1   = f->b1*x - f->a1*y + f->s2;
+    f->s2   = f->b2*x - f->a2*y;
+    return y;
+}
+\end{verbatim}
+\end{block}
+\begin{itemize}\scriptsize
+\item Low $f_c/f_s$ ($<10^{-3}$): poles close to $z=1$ $\Rightarrow$ coefficient rounding; use double / error feedback.
+\item Fixed point: scale to avoid overflow, watch limit cycles.
+\item Initialise states to steady state, reset on mode change.
+\end{itemize}
+\end{columns}
