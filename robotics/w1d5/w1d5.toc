@@ -1,0 +1,4 @@
+\beamer@sectionintoc {1}{3.3 Field-Oriented Control (FOC)}{5}{0}{1}
+\beamer@sectionintoc {2}{3.4 Cascaded Current, Velocity and Position Loops}{21}{0}{2}
+\beamer@sectionintoc {3}{3.5 Loop Tuning and Bandwidth}{32}{0}{3}
+\beamer@sectionintoc {4}{3.6 Trajectory Generation, Feedforward and Disturbance Compensation}{43}{0}{4}

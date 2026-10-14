@@ -1,0 +1,414 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>W1D2 Speaker Notes</title>
+<style>
+  :root{
+    --navy:#0B1F3A; --blue:#14365E; --mid:#2B5A8C; --sky:#6E9BC9; --pale:#E8EEF6;
+    --orange:#F07F12; --amber:#F9A94B; --cream:#FFF3E4; --gray:#5B6573; --bg:#F6F8FB; --card:#fff; --text:#0B1F3A;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){ --bg:#0A1424; --card:#10213A; --text:#E6ECF4; --pale:#1A3152; --cream:#3a2a14; --gray:#9AA8BA; }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 "Segoe UI",system-ui,-apple-system,Roboto,Helvetica,Arial,sans-serif}
+  header{background:var(--navy);color:#fff;padding:28px 16px 22px;border-bottom:4px solid var(--orange)}
+  header .wrap{max-width:980px;margin:0 auto}
+  header .day{color:var(--orange);font-weight:700;letter-spacing:.08em;font-size:.9rem}
+  header h1{margin:.2em 0 .1em;font-size:1.9rem}
+  header p{margin:0;color:var(--sky)}
+  nav.toc{position:sticky;top:0;z-index:5;background:var(--blue);padding:8px 16px;overflow-x:auto;white-space:nowrap}
+  nav.toc a{color:#fff;text-decoration:none;margin-right:16px;font-size:.88rem}
+  nav.toc a:hover{color:var(--amber)}
+  main{max-width:980px;margin:0 auto;padding:20px 16px 60px}
+  h2.session{margin:42px 0 12px;padding:10px 14px;background:var(--blue);color:#fff;border-left:6px solid var(--orange);border-radius:4px;font-size:1.25rem}
+  h2.session small{display:block;color:var(--amber);font-weight:500;font-size:.85rem}
+  table.plan{width:100%;border-collapse:collapse;background:var(--card);margin:12px 0}
+  table.plan th{background:var(--blue);color:#fff;text-align:left;padding:8px}
+  table.plan td{padding:8px;border-bottom:1px solid var(--pale)}
+  .slide{background:var(--card);border-radius:8px;margin:14px 0;padding:14px 18px;box-shadow:0 1px 3px rgba(11,31,58,.12);border-top:3px solid var(--mid)}
+  .slide h3{margin:0 0 6px;font-size:1.05rem;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+  .slide h3 .num{background:var(--orange);color:#fff;border-radius:4px;padding:1px 8px;font-size:.85rem}
+  .slide h3 .time{margin-left:auto;color:var(--gray);font-weight:400;font-size:.85rem}
+  .say{margin:6px 0}
+  .key{background:var(--cream);border-left:4px solid var(--orange);padding:6px 10px;margin:8px 0;border-radius:3px}
+  .ask{background:var(--pale);border-left:4px solid var(--mid);padding:6px 10px;margin:8px 0;border-radius:3px}
+  .trans{color:var(--gray);font-style:italic;margin-top:6px}
+  .label{font-weight:700;font-size:.8rem;text-transform:uppercase;letter-spacing:.05em;color:var(--orange)}
+  .ask .label{color:var(--mid)}
+  ul{margin:4px 0 4px 1.1em;padding:0}
+  footer{max-width:980px;margin:0 auto;padding:20px 16px;color:var(--gray);font-size:.85rem}
+  @media print{nav.toc{display:none}.slide{break-inside:avoid;box-shadow:none;border:1px solid #ccc}}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <div class="day">WEEK 1 · DAY 2 / 5 · SPEAKER NOTES</div>
+  <h1>Actuators II and Introduction to Control</h1>
+  <p>Mechatronics and Robotics Engineering (50 h) · 5 h net teaching time · sessions 1.5, 1.6, 1.7, 2.1, 2.2</p>
+</div></header>
+<nav class="toc"><a href="#plan">Plan</a><a href="#s15">1.5 · Robot joint actuators</a><a href="#s16">1.6 · Linear actuators and end-effectors</a><a href="#s17">1.7 · Motor sizing and selection for a robot joint</a><a href="#s21">2.1 · Modelling dynamic systems</a><a href="#s22">2.2 · Laplace transform and transfer functions</a></nav>
+<main>
+  <section id="plan">
+    <h2 class="session">Day plan &amp; timing</h2>
+    <table class="plan"><tr><th>Block</th><th>Topic</th><th>Slides</th><th>Duration</th></tr>
+      <tr><td>1.5</td><td>Robot joint actuators: gearboxes, reflected inertia, backlash, stiffness, direct drive, SEA</td><td>2–14</td><td>60 min</td></tr>
+<tr><td>—</td><td><i>Break (10 min, extra)</i></td><td></td><td></td></tr>
+<tr><td>1.6</td><td>Linear actuators and end-effectors</td><td>16–24</td><td>60 min</td></tr>
+<tr><td>—</td><td><i>Break (10 min, extra)</i></td><td></td><td></td></tr>
+<tr><td>1.7</td><td>Motor sizing and selection for a robot joint</td><td>26–33</td><td>60 min</td></tr>
+<tr><td>—</td><td><i>Break (10 min, extra)</i></td><td></td><td></td></tr>
+<tr><td>2.1</td><td>Modelling dynamic systems</td><td>35–43</td><td>60 min</td></tr>
+<tr><td>—</td><td><i>Break (10 min, extra)</i></td><td></td><td></td></tr>
+<tr><td>2.2</td><td>Laplace transform and transfer functions</td><td>45–57</td><td>60 min</td></tr>
+      <tr><td></td><td><b>Total net teaching time</b></td><td>1–57</td><td><b>300 min</b></td></tr>
+    </table>
+    <p>Section divider pages (4, 15, 25, 34, 44) need no card. Slides 2–3 (agenda, recap) are counted in Session 1.5; the day summary, preview, credits and references are counted in Session 2.2.</p>
+  </section>
+<section id="s15">
+<h2 class="session">Session 1.5 · Robot joint actuators: gearboxes, reflected inertia, backlash, stiffness, direct drive, SEA <small>Curriculum code 1.5 · 60 min</small></h2>
+<div class="slide">
+<h3><span class="num">Slide 2</span>Agenda and learning outcomes<span class="time">~2 min</span></h3>
+<p class="say">Welcome back. Yesterday we looked inside the motor; today we follow the power out of the motor shaft and into the robot. The first three hours stay with hardware: the gearbox inside every robot joint, the devices that make straight-line motion and grip parts, and how to choose a motor that is big enough but not wastefully big. The last two hours start the control block: we turn hardware into equations, and equations into transfer functions. Read the outcomes aloud and tell students that each one has a small calculation they will be able to do by the end of the day.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>Today links hardware (morning) to mathematics (afternoon); the worked robot joint returns several times.</li><li>Misconception: 'control is just software'. A controller can only be as good as the model of the hardware it controls.</li></ul></div>
+<p class="trans">Transition: Let us first recall the two motor equations from yesterday.</p>
+</div>
+<div class="slide">
+<h3><span class="num">Slide 3</span>What we learned yesterday (W1D1)<span class="time">~5 min</span></h3>
+<p class="say">Ask the class to say the two motor laws before you show them: torque is proportional to current, and back-EMF is proportional to speed, with the same constant k in SI units. Then show the two equations: the voltage equation of the winding and Newton's law for the rotor. Remind them of the two time constants: the electrical one, L over R, a few milliseconds, and the mechanical one, R J over k squared, tens of milliseconds. Today we add what sits between the motor and the load, a gearbox or screw, and later we write the same equations in Laplace form.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>k_t and k_e are the same number in SI units; this is energy conservation, not coincidence.</li><li>Misconception: a stalled motor draws no current because it does not move. In fact stall current is maximum, since there is no back-EMF.</li></ul></div>
+<div class="ask"><span class="label">Ask the audience / check answers</span><ul><li><b>Q:</b> What limits the current when the motor is stalled? <b>A:</b> Only the winding resistance R, because the back-EMF is zero.</li></ul></div>
+<p class="trans">Transition: Robot joints rarely connect the motor directly to the link. Why not?</p>
+</div>
+<div class="slide">
+<h3><span class="num">Slide 5</span>Why a robot joint needs a gearbox<span class="time">~5 min</span></h3>
+<p class="say">Start with the bicycle. On a steep hill you shift into a low gear: your legs spin fast and easily while the wheel turns slowly with a large push. A robot joint has the same problem. A compact servo motor makes about one newton-metre at three thousand rpm, but a shoulder joint of a small industrial arm needs around a hundred newton-metres at thirty rpm. A gearbox of ratio one hundred gives exactly that trade. Speed is divided by N, torque is multiplied by N, minus some losses described by the efficiency eta. Typical robot joints use ratios from fifty to one hundred and sixty.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>Power is conserved (minus losses): the gearbox does not create energy.</li><li>Misconception: a bigger ratio is always better. It also increases friction, reflected inertia and makes the joint hard to push by hand.</li></ul></div>
+<div class="ask"><span class="label">Ask the audience / check answers</span><ul><li><b>Q:</b> If N = 100 and the motor turns at 3000 rpm, how fast is the joint? <b>A:</b> 30 rpm, or about 3.1 rad/s.</li></ul></div>
+<p class="trans">Transition: Let us open the first and most common type of gearbox: the planetary gear.</p>
+</div>
+<div class="slide">
+<h3><span class="num">Slide 6</span>Planetary gearbox: sun, planets and ring<span class="time">~6 min</span></h3>
+<p class="say">Point to the drawing. The input shaft drives the sun gear in the middle. Three planets mesh with the sun and with an outer ring that is held still. The planets roll around inside the ring, and the carrier that holds their axles turns slowly: that is the output. Because three or four planets share the load, the gearbox is compact and stiff, with efficiencies of ninety-five percent or more. Work through the example: twenty teeth on the sun, eighty on the ring gives one plus four, a ratio of five. Two stages in series multiply to twenty-five.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>Ratios multiply when stages are stacked; efficiencies multiply too.</li><li>Misconception: the ratio is simply ring teeth over sun teeth. With the ring fixed and carrier output it is one plus that ratio.</li></ul></div>
+<div class="ask"><span class="label">Ask the audience / check answers</span><ul><li><b>Q:</b> Why not use one planetary stage with N = 100? <b>A:</b> The sun would become tiny relative to the ring; practical stages are limited to about 3-10, so high ratios need several stages, adding backlash.</li></ul></div>
+<p class="trans">Transition: When a robot needs N = 100 in one compact stage, engineers use a clever trick: a flexible gear.</p>
+</div>
+<div class="slide">
+<h3><span class="num">Slide 7</span>Harmonic drive (strain-wave gear): huge ratio, almost no play<span class="time">~6 min</span></h3>
+<p class="say">The harmonic drive has three parts. The wave generator is an oval cam with a thin ball bearing. Around it sits the flexspline, a thin steel cup with teeth on the outside, which bends into an oval. The rigid circular spline outside has two more teeth than the flexspline. Teeth mesh only at the two ends of the oval. When the oval turns once, the flexspline has to shift by two teeth relative to the ring. With two hundred teeth that means one output turn per hundred input turns. Many teeth are always in contact, so backlash is almost zero, which is why nearly every cobot uses one.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>One stage gives N = 50 to 160 with near-zero backlash and a hollow shaft for cables.</li><li>Misconception: zero backlash means perfectly rigid. The flexspline is a spring; stiffness is actually the weak point.</li></ul></div>
+<div class="ask"><span class="label">Ask the audience / check answers</span><ul><li><b>Q:</b> What is the ratio if the flexspline has 160 teeth and the circular spline 162? <b>A:</b> N = 160/2 = 80.</li></ul></div>
+<p class="trans">Transition: Large industrial arms need even more robustness against shocks. That is the job of the cycloidal drive.</p>
+</div>
+<div class="slide">
+<h3><span class="num">Slide 8</span>Cycloidal drive – and how the three compare<span class="time">~6 min</span></h3>
+<p class="say">In a cycloidal drive an eccentric on the input shaft makes a lobed disc wobble around inside a ring of pins. The disc has one lobe fewer than there are pins, so each wobble makes it rotate backwards by one lobe. Output pins pick up this slow rotation through the holes in the disc. With forty pins and thirty-nine lobes the ratio is thirty-nine. Many lobes carry load at the same time, so the drive is stiff and survives shocks. Use the table to compare the three: planetary for low ratios, harmonic for small precise arms, cycloidal for the heavy base and shoulder axes of big robots.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>Same principle as the harmonic drive: a small tooth difference creates a large ratio.</li><li>Misconception: one gearbox type is best. The choice depends on ratio, size, stiffness and shock loads.</li></ul></div>
+<div class="ask"><span class="label">Ask the audience / check answers</span><ul><li><b>Q:</b> Which gearbox would you pick for the base of a 200 kg payload palletising robot? <b>A:</b> A cycloidal or RV reducer: high ratio, very stiff, shock-resistant.</li></ul></div>
+<p class="trans">Transition: Whatever gearbox we choose, it changes how heavy the load feels to the motor. That is reflected inertia.</p>
+</div>
+<div class="slide">
+<h3><span class="num">Slide 9</span>Reflected inertia: what the motor “feels”<span class="time">~7 min</span></h3>
+<p class="say">Back to the bicycle: in a low gear, the bike feels light to accelerate, but you pedal fast. The same happens at the motor. Equate the kinetic energy on both sides of the gearbox: the load turns N times slower, so the motor sees the load inertia divided by N squared. One factor N comes from speed, the other from torque. Our example link with payload has 1.6 kilogram square metres. Behind a ratio of one hundred the motor feels only 1.6 times ten to the minus four, which is about nine times its own rotor inertia. The plot shows the best ratio for acceleration: reflected load equals motor inertia.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>Inertia is divided by N squared, torque by N, speed multiplied by N.</li><li>Misconception: the motor must always be matched exactly (ratio 1). In practice ratios up to about 10 are fine; speed limits usually decide N.</li></ul></div>
+<div class="ask"><span class="label">Ask the audience / check answers</span><ul><li><b>Q:</b> Why N squared and not N? <b>A:</b> The load moves N times slower (energy factor) and the gear multiplies torque by N; both together give N squared.</li></ul></div>
+<p class="trans">Transition: Real gearboxes are not perfect: they have play and they twist.</p>
+</div>
+<div class="slide">
+<h3><span class="num">Slide 10</span>Backlash and torsional stiffness<span class="time">~6 min</span></h3>
+<p class="say">Two imperfections matter for accuracy. Backlash is the small gap between teeth: when the motor reverses, it turns through the gap before the link moves. The plot shows this lost motion as a hysteresis loop. Stiffness is about twisting: every gearbox acts like a stiff torsion spring, so under a torque T it twists by T over k. Walk through the example: a harmonic drive with ten thousand newton-metres per radian carrying thirty-four newton-metres of gravity torque twists 3.4 milliradians. At half a metre from the joint that is 1.7 millimetres at the tool, far more than the backlash of 0.15 millimetres.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>Small angles become large errors at the tool: multiply by the arm length.</li><li>Misconception: backlash is the only gearbox error. For harmonic drives, elastic twist under gravity is usually larger.</li></ul></div>
+<div class="ask"><span class="label">Ask the audience / check answers</span><ul><li><b>Q:</b> How could you measure the true link angle despite twist? <b>A:</b> Add a second encoder on the link (output) side of the gearbox.</li></ul></div>
+<p class="trans">Transition: If gearboxes cause so many problems, why not leave them out?</p>
+</div>
+<div class="slide">
+<h3><span class="num">Slide 11</span>Direct drive and quasi-direct drive<span class="time">~4 min</span></h3>
+<p class="say">A direct-drive joint bolts a large, high-torque motor straight to the link. There is no backlash, no gear wear, and the joint is backdrivable: you can push the link by hand and the motor turns. The price is size, mass and cost, because the motor must produce the full joint torque; in our example a hundred times more torque than the geared motor. Legged robots use a compromise called quasi-direct drive, a ratio of six to ten, which keeps the joint backdrivable and robust against impacts. The plot is a qualitative trend, not data: as ratio rises, available torque rises but backdrivability falls.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>Backdrivability matters for safe contact and for sensing forces through motor current.</li><li>Misconception: direct drive means no motor control problems. The motor now feels the full load inertia and disturbances directly.</li></ul></div>
+<p class="trans">Transition: There is another way to make a joint safe: add a spring on purpose.</p>
+</div>
+<div class="slide">
+<h3><span class="num">Slide 12</span>Series-elastic actuator (SEA): a spring on purpose<span class="time">~5 min</span></h3>
+<p class="say">Imagine carrying a full cup of coffee with a relaxed wrist: bumps are absorbed and you can feel how hard you push. A series-elastic actuator puts a deliberate spring between the gearbox and the link. Measuring the spring twist with an encoder gives the joint torque directly: torque equals spring stiffness times twist. In the example, three hundred newton-metres per radian and a twist of 0.05 radians give fifteen newton-metres. The spring also protects the gearbox and people during impacts. The price is lower bandwidth: the joint cannot react as quickly because the spring has to wind up first.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>An SEA turns a position sensor into a torque sensor through Hooke's law.</li><li>Misconception: a soft joint is simply a bad joint. Softness is a design choice for safe, force-controlled robots.</li></ul></div>
+<p class="trans">Transition: Let us check what has stuck before we move on to straight-line motion.</p>
+</div>
+<div class="slide">
+<h3><span class="num">Slide 13</span>Session 1.5 – Check your understanding<span class="time">~5 min</span></h3>
+<p class="say">Give students two minutes in pairs. Collect answers from different pairs and ask them to say the formula they used. Question three is open: let two or three students argue and connect their answers to backlash, stiffness and backdrivability.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>Make students state units: kg m^2 for inertia, ratio is dimensionless.</li><li>Misconception to watch: dividing inertia by N instead of N squared.</li></ul></div>
+<div class="ask"><span class="label">Ask the audience / check answers</span><ul><li><b>Q:</b> Q1: z_sun = 15, z_ring = 60. <b>A:</b> N = 1 + 60/15 = 5.</li><li><b>Q:</b> Q2: J_L = 2 kg m^2 behind N = 100. <b>A:</b> 2/100^2 = 2e-4 kg m^2.</li><li><b>Q:</b> Q3: Harmonic drives in cobots; legged robots avoid high ratios. <b>A:</b> Harmonic: near-zero backlash, compact, high ratio, hollow shaft. Legged robots need backdrivability and impact tolerance; high ratios add friction, reflected inertia and fragile teeth.</li></ul></div>
+<p class="trans">Transition: Here is the summary of the session.</p>
+</div>
+<div class="slide">
+<h3><span class="num">Slide 14</span>Session 1.5 – Summary and key terms<span class="time">~3 min</span></h3>
+<p class="say">Summarise in one sentence: the motor provides speed, the gearbox converts it into joint torque, and everything on the load side is seen by the motor divided by N or N squared. Run quickly through the key terms box and ask students to name one advantage and one drawback of each gearbox type.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>Remember the three formulas in the box; they come back in Session 1.7.</li><li>Misconception: gearbox efficiency only matters for energy. It also increases the torque the motor must deliver.</li></ul></div>
+<p class="trans">Transition: Next we look at actuators that move in a straight line and at the tool at the end of the robot.</p>
+</div>
+</section>
+<section id="s16">
+<h2 class="session">Session 1.6 · Linear actuators and end-effectors <small>Curriculum code 1.6 · 60 min</small></h2>
+<div class="slide">
+<h3><span class="num">Slide 16</span>From rotation to straight-line motion<span class="time">~6 min</span></h3>
+<p class="say">Many robots need straight-line motion: the Z-axis of a SCARA, the axes of a Cartesian gantry, a seventh axis track under an arm. The table compares the options. A ball screw is accurate and strong but limited in speed and length. A toothed belt is fast and cheap over long distances but soft. A rack and pinion handles very long tracks. A linear motor gives the best performance at the highest cost. A pneumatic cylinder simply moves between two end stops. Point out that every converter has its own ratio: the lead of a screw or the radius of a pulley.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>Ratio of a screw is its lead; ratio of a belt or rack is the pulley radius.</li><li>Misconception: linear motion requires a linear motor. Most industrial linear axes use rotary motors with screws or belts.</li></ul></div>
+<p class="trans">Transition: Let us look closer at the most precise converter, the ball screw.</p>
+</div>
+<div class="slide">
+<h3><span class="num">Slide 17</span>Ball screw: a nut on a bolt, with rolling balls<span class="time">~8 min</span></h3>
+<p class="say">Hold up a bolt and a nut if you have one. Turn the bolt once and the nut moves by one thread: that is the lead. In a ball screw, balls roll in the thread instead of sliding, so efficiency is about ninety percent and there is very little play. The speed formula follows directly: one revolution per second moves the nut one lead per second. The force formula comes from power balance. Work the example: three thousand rpm with a ten millimetre lead gives half a metre per second, and one newton-metre pushes with about 565 newtons.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>v = lead times revolutions per second; F = 2 pi eta T / p.</li><li>Misconception: lead and pitch are always the same. On multi-start screws the lead is a multiple of the pitch.</li></ul></div>
+<div class="ask"><span class="label">Ask the audience / check answers</span><ul><li><b>Q:</b> What happens to force if we choose a 5 mm lead instead of 10 mm? <b>A:</b> Force doubles (about 1130 N for 1 N m) but top speed halves.</li></ul></div>
+<p class="trans">Transition: Belts and racks follow the same logic with a different ratio.</p>
+</div>
+<div class="slide">
+<h3><span class="num">Slide 18</span>Belt and rack drives: same idea, different ratio<span class="time">~8 min</span></h3>
+<p class="say">For a belt or a rack, the carriage moves with the rim speed of the pulley: v equals r omega. The reflected inertia is m r squared, like a mass on the end of a string wound on a drum. Compare it with the screw: the effective radius of a ten millimetre lead screw is the lead divided by two pi, only 1.6 millimetres, while the pulley radius is twenty millimetres. The motor therefore feels the same five kilogram carriage about one hundred and sixty times heavier on the belt axis. That is why belt axes often add a small gearbox.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>The pulley radius acts like a very low gear ratio.</li><li>Misconception: belts are always worse. They are faster and cover longer distances; they need a gearbox and careful tuning for their low stiffness.</li></ul></div>
+<p class="trans">Transition: If we want neither screw nor belt, we can build the motor itself in a straight line.</p>
+</div>
+<div class="slide">
+<h3><span class="num">Slide 19</span>Linear motor and voice coil: no conversion needed<span class="time">~7 min</span></h3>
+<p class="say">A linear motor is a permanent magnet synchronous motor cut open and rolled out flat: the magnets become a track and the coils ride on a carriage. There is nothing between the motor and the load, so it is stiff and precise, used in wafer handling and PCB machines. The voice coil is the loudspeaker principle: a coil in a magnetic gap feels a force proportional to current. The equations are exactly the DC-motor equations with force for torque, velocity for speed and mass for inertia. Example: twenty newtons per ampere at three amperes gives sixty newtons.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>Same physics as yesterday: force on a current-carrying conductor in a field.</li><li>Misconception: linear motors are always better. They are expensive, need cooling and offer no self-locking against gravity.</li></ul></div>
+<p class="trans">Transition: Now let us move to the end of the robot: the gripper.</p>
+</div>
+<div class="slide">
+<h3><span class="num">Slide 20</span>Grippers: electric and pneumatic jaws<span class="time">~9 min</span></h3>
+<p class="say">A two-finger gripper usually holds a part by friction, not by its shape. Draw the forces: each jaw squeezes with force F_g, the friction at both jaws must carry the weight plus the inertial force when the robot accelerates upwards. Add a safety factor because friction coefficients vary with oil, dust and wear. Go through the numbers: two kilograms with five metres per second squared gives 29.6 newtons, doubled for safety gives 59, and with a friction coefficient of 0.4 each jaw must squeeze with 74 newtons. Then compare pneumatic and electric grippers.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>Vertical acceleration adds to gravity; the robot's motion matters for gripping.</li><li>Misconception: gripping force equals the weight. It must be weight times (g+a)/g times safety, divided by 2 mu, often several times the weight.</li></ul></div>
+<div class="ask"><span class="label">Ask the audience / check answers</span><ul><li><b>Q:</b> What if the jaws have shaped fingers that wrap under the part? <b>A:</b> Form-fit gripping: much lower squeeze force is needed because the shape, not friction, carries the load.</li></ul></div>
+<p class="trans">Transition: For flat or delicate parts, we let the air do the work: vacuum grippers.</p>
+</div>
+<div class="slide">
+<h3><span class="num">Slide 21</span>Vacuum grippers and suction cups<span class="time">~8 min</span></h3>
+<p class="say">Start with a correction: a suction cup does not pull. The pump lowers the pressure inside the cup, and the atmosphere outside pushes the part against the cup. The force is pressure difference times area. A forty millimetre cup at sixty kilopascals of vacuum gives about 75 newtons. A five kilogram box accelerated upwards at ten metres per second squared, with a safety factor of two, needs about 198 newtons, so we use three cups. Vacuum grippers are fast and gentle, ideal for boxes, sheets and glass, but porous or dusty surfaces leak.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>The maximum possible pressure difference is one atmosphere, about 100 kPa.</li><li>Misconception: a stronger pump can make a cup hold any load. The force is limited by atmospheric pressure times area.</li></ul></div>
+<div class="ask"><span class="label">Ask the audience / check answers</span><ul><li><b>Q:</b> What happens at high altitude? <b>A:</b> Atmospheric pressure is lower, so the maximum holding force decreases.</li></ul></div>
+<p class="trans">Transition: Finally the simplest actuators of all: solenoids and cylinders.</p>
+</div>
+<div class="slide">
+<h3><span class="num">Slide 22</span>Solenoids and pneumatic cylinders: simple two-position actuators<span class="time">~6 min</span></h3>
+<p class="say">A solenoid is a coil that pulls an iron plunger. The plot shows its key property: the force grows strongly as the air gap closes, roughly with one over the gap squared, so the plunger snaps in. That is ideal for valves, locks and part stops but bad for positioning in between. A pneumatic cylinder pushes with air pressure times piston area: a thirty-two millimetre bore at six bar gives about 480 newtons. Both are bang-bang actuators: they move between two end positions. In a robot cell they appear in fixtures, clamps and simple grippers.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>Two-position actuators are cheap and robust; they need no feedback controller.</li><li>Misconception: a solenoid force is constant over its stroke. It is weakest at the start, when the gap is largest.</li></ul></div>
+<p class="trans">Transition: Time for a quick check.</p>
+</div>
+<div class="slide">
+<h3><span class="num">Slide 23</span>Session 1.6 – Check your understanding<span class="time">~5 min</span></h3>
+<p class="say">Let students solve individually for two minutes, then compare with a neighbour. Insist on unit conversion for question one: rpm to revolutions per second, millimetres to metres.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>Check that students convert rpm to rev/s before multiplying by the lead.</li><li>Misconception: using diameter instead of radius in m r^2 or in area formulas.</li></ul></div>
+<div class="ask"><span class="label">Ask the audience / check answers</span><ul><li><b>Q:</b> Q1: lead 5 mm at 1200 rpm. <b>A:</b> 20 rev/s x 5 mm = 100 mm/s = 0.1 m/s.</li><li><b>Q:</b> Q2: 1e-3 m^2 cup at 50 kPa. <b>A:</b> F = 50 000 x 0.001 = 50 N (theoretical).</li><li><b>Q:</b> Q3: belt vs ball screw. <b>A:</b> Belt reflects m r^2 with r around 20 mm; screw reflects m (p/2pi)^2 with an effective radius of about 1.6 mm, so the belt load feels about 160 times heavier.</li></ul></div>
+<p class="trans">Transition: Let us summarise the session.</p>
+</div>
+<div class="slide">
+<h3><span class="num">Slide 24</span>Session 1.6 – Summary and key terms<span class="time">~3 min</span></h3>
+<p class="say">Recap the three families: rotary-to-linear converters, direct linear motors, and end-effectors. Ask a student to explain in one sentence why a suction cup holds a part. Run through the key terms.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>Every formula on this slide is a power balance or a pressure times area.</li><li>Misconception: 'suction pulls'. Repeat: the atmosphere pushes.</li></ul></div>
+<p class="trans">Transition: Now we have all the pieces to choose a motor for a real robot joint.</p>
+</div>
+</section>
+<section id="s17">
+<h2 class="session">Session 1.7 · Motor sizing and selection for a robot joint <small>Curriculum code 1.7 · 60 min</small></h2>
+<div class="slide">
+<h3><span class="num">Slide 26</span>What loads a robot joint motor?<span class="time">~8 min</span></h3>
+<p class="say">Present the sizing workflow as a recipe. Then explain the torque equation term by term. The first term accelerates the total inertia, motor plus reflected load. The second term holds the link against gravity, divided by the ratio and the efficiency. The third is friction. Stress that in a robot arm, unlike a horizontal machine axis, gravity torque acts all the time, even when the robot stands still, and is largest when the arm is horizontal. Payload changes both inertia and gravity torque, so always size for the heaviest payload at the longest reach.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>Gravity torque = weight x horizontal lever arm; worst case with the arm horizontal.</li><li>Misconception: motor sizing is only about acceleration. In robot joints holding torque often dominates the heating.</li></ul></div>
+<p class="trans">Transition: Every motor has limits, shown in its torque-speed envelope.</p>
+</div>
+<div class="slide">
+<h3><span class="num">Slide 27</span>Servo motor torque–speed envelope<span class="time">~6 min</span></h3>
+<p class="say">Use the sprint analogy: you can sprint for ten seconds but only jog for an hour. The blue line is the continuous torque: the motor can deliver it forever without overheating. The orange line is the peak torque, about three times higher, limited by the drive current and the magnets, usable for short bursts during acceleration. At high speed the back-EMF uses up the supply voltage, so the available torque falls. The numbers are for a typical 200 watt servo, which we will use in the worked example.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>Two zones: continuous for heating, short-time for acceleration.</li><li>Misconception: rated torque is the maximum torque. It is the continuous value; the peak is about three times higher.</li></ul></div>
+<p class="trans">Transition: How do we compare a changing torque with the continuous limit? With the RMS value.</p>
+</div>
+<div class="slide">
+<h3><span class="num">Slide 28</span>Duty cycle and RMS torque<span class="time">~8 min</span></h3>
+<p class="say">The motor heats up slowly, over minutes, while a robot cycle lasts a few seconds. So the motor only notices the average heating, and heating is proportional to current squared, hence torque squared. The right average is the root mean square. Walk through the plot of our robot joint: acceleration, cruise, deceleration and a long hold phase in which gravity still needs 0.34 newton-metres. Explain why we cannot use the plain average: braking or negative torque heats the copper just as much as positive torque.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>T_rms compares with continuous torque; the largest |T| compares with peak torque.</li><li>Misconception: a motor that stands still does not heat. Holding against gravity costs current and heat.</li></ul></div>
+<div class="ask"><span class="label">Ask the audience / check answers</span><ul><li><b>Q:</b> Why square before averaging? <b>A:</b> Copper losses are I^2 R, and torque is proportional to current.</li></ul></div>
+<p class="trans">Transition: Where does the 'minutes' time scale come from? From the thermal model.</p>
+</div>
+<div class="slide">
+<h3><span class="num">Slide 29</span>Thermal limits: the motor warms like an RC circuit charges<span class="time">~7 min</span></h3>
+<p class="say">Draw the analogy with an RC circuit students know: the copper losses are a current source, the thermal resistance to ambient is the resistor, the heat capacity of the iron and copper is the capacitor, and temperature rise is the voltage. The temperature rises exponentially with a thermal time constant of several minutes. The plot shows why short overloads are fine: at twice the rated torque the losses are four times higher, but the winding needs some time to reach its limit. Example: fifty watts through 1.6 kelvin per watt gives eighty kelvin rise.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>Same first-order exponential as the RC circuit; it returns in Session 2.2 as a transfer function.</li><li>Misconception: double torque means double heating. It means four times the losses.</li></ul></div>
+<p class="trans">Transition: Let us now size a real joint, step by step.</p>
+</div>
+<div class="slide">
+<h3><span class="num">Slide 30</span>Worked example (1/2): shoulder-type joint, the load side<span class="time">~10 min</span></h3>
+<p class="say">Describe the joint: a four kilogram arm, half a metre long, carrying a five kilogram payload at its end, moving ninety degrees with a trapezoidal profile and then holding for one second. Step 1: inertia of a point mass plus a uniform rod about its end, about 1.6 kilogram square metres. Step 2: worst-case gravity torque with the arm horizontal, about 34 newton-metres. Step 3: peak joint speed from the distance and time, and the acceleration. Step 4: multiply by the ratio of one hundred to get two thousand rpm and 838 radians per second squared at the motor.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>Do the load side first, then move everything to the motor side through N.</li><li>Misconception: using the payload alone. The arm's own mass adds inertia and gravity torque.</li></ul></div>
+<div class="ask"><span class="label">Ask the audience / check answers</span><ul><li><b>Q:</b> Why does a uniform rod contribute m L^2/3? <b>A:</b> Its mass is spread along the length; integrating r^2 dm from 0 to L gives m L^2/3.</li></ul></div>
+<p class="trans">Transition: Now pick a motor and check it.</p>
+</div>
+<div class="slide">
+<h3><span class="num">Slide 31</span>Worked example (2/2): motor torques and checks<span class="time">~10 min</span></h3>
+<p class="say">Try the 200 watt servo. The total inertia at the motor is 1.78 times ten to the minus four. Multiplied by the motor acceleration this gives 0.15 newton-metres for acceleration, while gravity alone needs 0.34. Combine them for each segment: 0.49 during acceleration, 0.34 cruising, 0.19 decelerating because gravity helps, and 0.34 during the hold. The RMS over the two-second cycle is 0.35, below the 0.64 continuous rating. Peak and speed are also inside the envelope. Point out the note: gravity dominates, and a holding brake during the hold phase would cut the RMS torque considerably.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>All three checks must pass: peak, RMS, speed. Also check gearbox rating.</li><li>Misconception: if the acceleration is small, any motor will do. Gravity makes the hold phase expensive.</li></ul></div>
+<div class="ask"><span class="label">Ask the audience / check answers</span><ul><li><b>Q:</b> Why is the deceleration torque smaller? <b>A:</b> Gravity torque and the decelerating inertia torque partly cancel in this direction of motion.</li></ul></div>
+<p class="trans">Transition: Let us test that with a changed payload.</p>
+</div>
+<div class="slide">
+<h3><span class="num">Slide 32</span>Session 1.7 – Check your understanding<span class="time">~7 min</span></h3>
+<p class="say">Question two is the interesting one: give students four minutes and let them use the worked example as a template. Ask a pair to present their result and discuss margins.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>A margin of 20-30 % on RMS torque is good practice.</li><li>Misconception: just under the limit is good enough. Real friction, efficiency and temperature reduce the margin.</li></ul></div>
+<div class="ask"><span class="label">Ask the audience / check answers</span><ul><li><b>Q:</b> Q1: 1 N m for 0.25 s in a 1 s cycle. <b>A:</b> T_rms = sqrt(1^2 x 0.25 / 1) = 0.5 N m.</li><li><b>Q:</b> Q2: payload 10 kg. <b>A:</b> Gravity grows most: T_g = 49 + 9.8 = 59 N m (0.59 N m at the motor); J_L = 2.8 kg m^2 (inertia ratio 16). RMS is about 0.60 N m, only 6 % below 0.64 and the inertia ratio is too high: choose the 400 W motor or add a brake.</li><li><b>Q:</b> Q3: 3x torque, not permanently. <b>A:</b> Heating is proportional to torque squared (9x losses); the thermal time constant allows it only for short bursts.</li></ul></div>
+<p class="trans">Transition: Here is the summary.</p>
+</div>
+<div class="slide">
+<h3><span class="num">Slide 33</span>Session 1.7 – Summary and key terms<span class="time">~4 min</span></h3>
+<p class="say">Summarise the recipe: describe the motion, compute load inertia and gravity torque, reflect to the motor, compute segment torques, compare peak and RMS with the envelope. Emphasise that robot joints differ from machine tool axes because gravity is always present.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>Sizing is a loop: if a check fails, change the ratio or the motor and recompute.</li><li>Misconception: the biggest motor is the safest choice. It adds inertia, mass to the next joint and cost.</li></ul></div>
+<p class="trans">Transition: After the break we change perspective: from choosing hardware to describing it with equations.</p>
+</div>
+</section>
+<section id="s21">
+<h2 class="session">Session 2.1 · Modelling dynamic systems <small>Curriculum code 2.1 · 60 min</small></h2>
+<div class="slide">
+<h3><span class="num">Slide 35</span>Why model? From hardware to equations<span class="time">~6 min</span></h3>
+<p class="say">Open the control block with a question: how does cruise control know how hard to press the accelerator? It needs to predict how the car responds. A model is that prediction. Present the six-step recipe and the table of building blocks. In every physical domain we have something that stores motion energy, something that stores position energy, and something that dissipates energy. Each energy store adds one order to the differential equation. Stress the engineering rule: use the simplest model that answers the question you have.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>Lumped model: each property sits in one ideal element.</li><li>Misconception: a more detailed model is always better. Detail costs time and needs parameters we often do not know.</li></ul></div>
+<p class="trans">Transition: Let us build the classic model: mass, spring and damper.</p>
+</div>
+<div class="slide">
+<h3><span class="num">Slide 36</span>Mass–spring–damper: from free-body diagram to ODE<span class="time">~9 min</span></h3>
+<p class="say">Use the car suspension. The spring carries the car, the shock absorber stops it from bouncing. Draw the free-body diagram on the board: the applied force pushes right, the spring force k x and the damper force b x-dot pull back. Newton's second law gives the equation in the box. Then introduce the two numbers that describe the behaviour: the natural frequency, how fast it bounces, and the damping ratio, how quickly the bouncing dies out. Compute the example: two kilograms on a stiff spring give 316 radians per second, fifty hertz, with very little damping.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>omega_n depends on stiffness and mass; zeta depends on damping relative to both.</li><li>Misconception: damping changes the natural frequency strongly. For small damping it barely changes the oscillation frequency; it mainly controls decay.</li></ul></div>
+<div class="ask"><span class="label">Ask the audience / check answers</span><ul><li><b>Q:</b> What happens to omega_n if the mass is four times larger? <b>A:</b> It halves, because omega_n = sqrt(k/m).</li></ul></div>
+<p class="trans">Transition: What does the damping ratio look like in a response?</p>
+</div>
+<div class="slide">
+<h3><span class="num">Slide 37</span>Step responses: the role of damping<span class="time">~7 min</span></h3>
+<p class="say">A step input means we suddenly apply a constant force and keep it. The plot shows the response for different damping ratios on a normalised time axis. With zeta equals 0.1 the mass overshoots by seventy-three percent and rings for a long time, like a car with worn shock absorbers. At 0.7 the response is fast with only four percent overshoot, a common design target. At one or more there is no overshoot but the response is slower. Show the overshoot formula and stress that overshoot depends only on zeta.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>Overshoot depends only on zeta; speed scales with omega_n.</li><li>Misconception: no overshoot is always best. Critically damped or overdamped systems are slower.</li></ul></div>
+<p class="trans">Transition: The same equation appears in rotation, for example in a robot joint.</p>
+</div>
+<div class="slide">
+<h3><span class="num">Slide 38</span>Rotational systems: the flexible robot joint<span class="time">~8 min</span></h3>
+<p class="say">For rotation, replace mass by inertia, force by torque and the linear spring by a torsional spring. The gearbox we met in Session 1.5 is exactly such a spring between the motor and the link. Hold the motor still and the link can swing on the gearbox stiffness with natural frequency square root of k over J_L. Calculate it for our shoulder joint: about 79 radians per second, only 12.6 hertz. That low resonance is the reason robot arms wobble after fast moves, and it will limit how aggressively the controller can be tuned.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>The gearbox stiffness and the link inertia form a mass-spring system inside every joint.</li><li>Misconception: resonance only matters for bridges and buildings. Robot joints resonate at 5-30 Hz.</li></ul></div>
+<p class="trans">Transition: Next we connect the mechanical and electrical worlds through the motor.</p>
+</div>
+<div class="slide">
+<h3><span class="num">Slide 39</span>Electromechanical systems: one equation, three domains<span class="time">~7 min</span></h3>
+<p class="say">Show the analogy table: force, torque and voltage are the push; velocity, speed and current are the flow; mass, inertia and inductance store energy; dampers and resistors dissipate. Push times flow is always power. Then show the motor circuit: a resistor, an inductor and a back-EMF source. The two equations are coupled: current makes torque, and speed makes back-EMF. Two energy stores, the inductance and the inertia, give a second-order system. The motor constant k is the bridge between the domains.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>One mathematical structure covers mechanical, rotational and electrical systems.</li><li>Misconception: analogies are only a memory trick. They let us reuse the same solution and tools across domains.</li></ul></div>
+<p class="trans">Transition: So far everything was linear. Real robots are not.</p>
+</div>
+<div class="slide">
+<h3><span class="num">Slide 40</span>Linearisation: zoom in until the curve looks straight<span class="time">~7 min</span></h3>
+<p class="say">Gravity torque depends on cosine of the angle, friction jumps at zero speed, magnet forces depend on one over gap squared. Our tools for the rest of the course need linear equations. The trick is the tangent line: near an operating point every smooth curve looks straight. Show the example of x squared at three: the slope is six, the approximation is excellent at 3.1 and poor at 4. So a linear model is valid only near the point where we made it.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>Linearisation = first-order Taylor series around an operating point.</li><li>Misconception: a linearised model is valid everywhere. It is only locally accurate.</li></ul></div>
+<p class="trans">Transition: Let us apply this to a robot link hanging under gravity.</p>
+</div>
+<div class="slide">
+<h3><span class="num">Slide 41</span>Example: a robot link under gravity<span class="time">~7 min</span></h3>
+<p class="say">Write the pendulum equation: inertia times angular acceleration equals motor torque minus gravity torque minus friction. Only the sine is nonlinear. Its slope at the operating angle is the cosine. Hanging down, the cosine is plus one: gravity behaves like a spring and the link swings stably. Upright, the cosine is minus one: a negative spring, and the link falls over. The small-angle approximation sine theta equals theta is good within about fifteen degrees.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>The sign of the linearised spring term decides stability.</li><li>Misconception: one model fits all positions. The same arm has different dynamics at different poses.</li></ul></div>
+<p class="trans">Transition: Let us check understanding.</p>
+</div>
+<div class="slide">
+<h3><span class="num">Slide 42</span>Session 2.1 – Check your understanding<span class="time">~6 min</span></h3>
+<p class="say">Pairs, three minutes. For question two ask what zeta the overshoot corresponds to, using the plot on the step-response slide.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>Connect each answer to a formula from the slides.</li><li>Misconception: stiffness changes damping only. It changes omega_n and, through zeta, also the damping ratio.</li></ul></div>
+<div class="ask"><span class="label">Ask the audience / check answers</span><ul><li><b>Q:</b> Q1: 4x stiffer gearbox. <b>A:</b> omega_n doubles (square root of 4).</li><li><b>Q:</b> Q2: 40 % overshoot. <b>A:</b> Increase b: overshoot of 40 % means zeta around 0.28; more damping reduces overshoot.</li><li><b>Q:</b> Q3: mass analogue. <b>A:</b> The inductance L: both store energy of motion/flow and resist sudden changes of flow.</li></ul></div>
+<p class="trans">Transition: Summary of the session.</p>
+</div>
+<div class="slide">
+<h3><span class="num">Slide 43</span>Session 2.1 – Summary and key terms<span class="time">~3 min</span></h3>
+<p class="say">Restate the core message: the same second-order equation with omega_n and zeta describes suspensions, gearbox-link systems and electrical circuits. Linearise around an operating point before using linear tools.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>Write m x'' + b x' + k x = F from memory.</li><li>Misconception: modelling means writing as many equations as possible.</li></ul></div>
+<p class="trans">Transition: Next we learn a tool that turns these ODEs into simple algebra: the Laplace transform.</p>
+</div>
+</section>
+<section id="s22">
+<h2 class="session">Session 2.2 · Laplace transform and transfer functions <small>Curriculum code 2.2 · 60 min</small></h2>
+<div class="slide">
+<h3><span class="num">Slide 45</span>Refresher: complex numbers and the complex plane<span class="time">~6 min</span></h3>
+<p class="say">Students have met complex numbers; we only need three facts. A complex number is a point in the plane with a magnitude and an angle. Multiplying complex numbers multiplies magnitudes and adds angles. And Euler's formula links exponentials to sines and cosines. The last bullet is the key one for today: e to the s t with a complex s is a sinusoid inside an exponential envelope. The real part sets growth or decay, the imaginary part sets oscillation.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>s = sigma + j omega: sigma decides decay or growth, omega decides oscillation.</li><li>Misconception: imaginary means not physical. The imaginary part of a pole is a real, measurable oscillation frequency.</li></ul></div>
+<p class="trans">Transition: With complex s in hand, here is the Laplace transform.</p>
+</div>
+<div class="slide">
+<h3><span class="num">Slide 46</span>Refresher: the Laplace transform as a tool<span class="time">~8 min</span></h3>
+<p class="say">Use the logarithm analogy: logarithms turn multiplication into addition; the Laplace transform turns differentiation into multiplication by s. We will not compute integrals; we only use the table. Work the RC example step by step: write the ODE, replace v-dot by s V with zero initial voltage, solve for the ratio V over U. For a one volt step multiply by one over s and look up the inverse in the table: the familiar charging curve one minus e to the minus t over RC.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>d/dt becomes s; integration becomes 1/s.</li><li>Misconception: s is a frequency in hertz. It is a complex variable; only on the imaginary axis does it relate to sinusoidal frequency.</li></ul></div>
+<p class="trans">Transition: The ratio V over U we found has a name: the transfer function.</p>
+</div>
+<div class="slide">
+<h3><span class="num">Slide 47</span>Transfer function, poles and zeros<span class="time">~7 min</span></h3>
+<p class="say">The transfer function is a system's recipe: the Laplace transform of the output divided by that of the input, starting from rest. It is a ratio of polynomials. The roots of the denominator are the poles; they decide stability and speed. The roots of the numerator are the zeros; they shape the response. The DC gain is the value at s equals zero, the final output for a unit step. Work through the example and plot the poles and the zero on the plane: everything on the left half is stable.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>Order = number of poles = number of energy stores.</li><li>Misconception: zeros decide stability. Only poles decide stability.</li></ul></div>
+<div class="ask"><span class="label">Ask the audience / check answers</span><ul><li><b>Q:</b> What is the DC gain of 5/(2s+1)? <b>A:</b> G(0) = 5.</li></ul></div>
+<p class="trans">Transition: The simplest case has one pole: the first-order system.</p>
+</div>
+<div class="slide">
+<h3><span class="num">Slide 48</span>First-order system: one energy store<span class="time">~6 min</span></h3>
+<p class="say">A cup of coffee cools, an RC circuit charges, a motor winding builds up current: all are first-order. The transfer function has a gain K and a time constant tau. After one tau the output reaches sixty-three percent of its final value, after three tau ninety-five percent, and it never overshoots. Show the initial slope tangent: it hits the final value exactly at one tau. Give the two motor examples: the winding with L over R and a flywheel with friction J over B.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>Read tau from a measured step response at 63 %.</li><li>Misconception: the system reaches its final value at t = tau. It takes about 4 tau to be within 2 %.</li></ul></div>
+<p class="trans">Transition: Two energy stores give the second-order system.</p>
+</div>
+<div class="slide">
+<h3><span class="num">Slide 49</span>Second-order system: the car suspension again<span class="time">~7 min</span></h3>
+<p class="say">Laplace-transform the mass-spring-damper equation: m s squared plus b s plus k times X equals F. Normalise to the standard form with omega_n and zeta. The poles are the roots of the denominator; with zeta below one they are complex, giving oscillation. The plot uses omega_n = 12.6 rad/s (2 Hz) on a real time axis, showing zeta 0.2, 0.7 and 1. Finish with the quarter-car numbers: omega_n of eight and zeta of one half.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>The standard form makes omega_n and zeta visible at a glance.</li><li>Misconception: two poles always mean oscillation. Real poles (zeta &gt;= 1) do not oscillate.</li></ul></div>
+<p class="trans">Transition: Let us collect all of this in one picture of the complex plane.</p>
+</div>
+<div class="slide">
+<h3><span class="num">Slide 50</span>Where the poles are tells you how the system moves<span class="time">~6 min</span></h3>
+<p class="say">This is the most important picture of the afternoon. Each small curve shows the motion produced by a pole at that location. Left of the axis the motion decays; the further left, the faster. Above and below the axis the motion oscillates; the further up, the faster it wiggles. On the imaginary axis the oscillation never dies, and on the right it grows: unstable. When there are several poles, the slowest one, nearest the imaginary axis, dominates the response.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>Settling time is roughly 4 divided by the distance of the dominant pole from the imaginary axis.</li><li>Misconception: a pole far to the left is the important one. The slowest pole dominates.</li></ul></div>
+<p class="trans">Transition: Now apply this to our robot joint motor.</p>
+</div>
+<div class="slide">
+<h3><span class="num">Slide 51</span>Worked example: transfer function of a robot joint motor<span class="time">~7 min</span></h3>
+<p class="say">Take yesterday's motor equations, ignore the inductance because the electrical time constant is much faster, and ignore viscous friction. Laplace-transform and eliminate the current: the speed response to voltage is first order with gain one over k and mechanical time constant R J over k squared. Compute with the numbers: ten milliseconds and ten radians per second per volt, so twenty-four volts gives 240 radians per second. Position is the integral of speed, which adds a pole at zero, an integrator, shown in the block diagram.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>Speed is first order; position adds 1/s.</li><li>Misconception: a constant voltage gives a constant position. It gives a constant speed, so the position ramps.</li></ul></div>
+<p class="trans">Transition: Quick check before we wrap up.</p>
+</div>
+<div class="slide">
+<h3><span class="num">Slide 52</span>Session 2.2 – Check your understanding<span class="time">~4 min</span></h3>
+<p class="say">Individual work, two minutes. Ask one student to write the transfer function on the board for question one.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>Check that students divide by the coefficient of y to read the gain.</li><li>Misconception: the pole of 2/(0.5s+1) is at -0.5. It is at -1/0.5 = -2.</li></ul></div>
+<div class="ask"><span class="label">Ask the audience / check answers</span><ul><li><b>Q:</b> Q1: 0.5 y' + y = 2u. <b>A:</b> G = 2/(0.5 s + 1): gain 2, tau = 0.5 s, pole at -2.</li><li><b>Q:</b> Q2: poles -1 +/- 5j. <b>A:</b> It oscillates at about 5 rad/s (0.8 Hz), is stable (real part negative) and settles in about 4/1 = 4 s.</li><li><b>Q:</b> Q3: position keeps growing. <b>A:</b> Position is the integral of speed; a constant speed integrates to a ramp (pole at s = 0).</li></ul></div>
+<p class="trans">Transition: Summary of the session.</p>
+</div>
+<div class="slide">
+<h3><span class="num">Slide 53</span>Session 2.2 – Summary and key terms<span class="time">~2 min</span></h3>
+<p class="say">Recap: Laplace turns derivatives into s, the transfer function is output over input, poles tell everything about stability and speed. Run through the key terms.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>Memorise the first- and second-order standard forms.</li><li>Misconception: transfer functions apply to nonlinear systems directly. Linearise first.</li></ul></div>
+<p class="trans">Transition: Let us summarise the whole day.</p>
+</div>
+<div class="slide">
+<h3><span class="num">Slide 54</span>Day summary<span class="time">~3 min</span></h3>
+<p class="say">Walk through the five sessions in one sentence each. The thread of the day: motor plus gear plus link becomes equations, equations become a transfer function. Tomorrow we put a controller around that transfer function and close the loop.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>Ask students which formula of today they found most useful.</li><li>Misconception: hardware and control are separate subjects. Control design starts from the hardware model.</li></ul></div>
+<p class="trans">Transition: Here is what comes tomorrow.</p>
+</div>
+<div class="slide">
+<h3><span class="num">Slide 55</span>Preview of W1D3: Control in robotic and mechatronic systems<span class="time">~2 min</span></h3>
+<p class="say">Show the feedback loop: a reference, an error, a PID controller and our joint transfer function. Tomorrow covers block diagrams, Bode plots, PID control and stability margins. Ask students to revise poles, omega_n and zeta tonight.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>The plant G(s) in the loop is exactly what we built today.</li><li>Misconception: PID tuning is trial and error. With a model it becomes systematic.</li></ul></div>
+<p class="trans">Transition: Credits and references follow.</p>
+</div>
+<div class="slide">
+<h3><span class="num">Slide 56</span>Figure credits<span class="time">~1 min</span></h3>
+<p class="say">All photographs are from Wikimedia Commons under free licences, credited on the slides where they appear and listed here. All other drawings and plots were created for this course.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>Students may reuse the figures under the stated licences.</li></ul></div>
+<p class="trans">Transition: References for further reading.</p>
+</div>
+<div class="slide">
+<h3><span class="num">Slide 57</span>References<span class="time">~1 min</span></h3>
+<p class="say">Point to Spong and Craig for robot mechanics, Ellis and Hughes for drives and sizing, Ogata and Franklin for transfer functions, and Pratt and Williamson for the original series-elastic actuator paper.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>Recommend one textbook chapter: Ogata or Franklin on transfer functions.</li></ul></div>
+<p class="trans">Transition: End of Day 2.</p>
+</div>
+</section>
+</main>
+<footer>Figures and references are listed on the final slides of the deck.</footer>
+</body>
+</html>

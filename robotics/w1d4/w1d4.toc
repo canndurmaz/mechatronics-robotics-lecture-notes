@@ -1,0 +1,5 @@
+\beamer@sectionintoc {1}{2.7 Filters and Compensation}{4}{0}{1}
+\beamer@sectionintoc {2}{2.8 Digital Control}{16}{0}{2}
+\beamer@sectionintoc {3}{2.9 Control of Robot Manipulators}{26}{0}{3}
+\beamer@sectionintoc {4}{3.1 Servo System Architecture and Control Modes}{37}{0}{4}
+\beamer@sectionintoc {5}{3.2 Power Electronics for Drives}{46}{0}{5}

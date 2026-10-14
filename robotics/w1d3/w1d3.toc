@@ -1,0 +1,5 @@
+\beamer@sectionintoc {1}{2.3 Block Diagrams, Feedback and State-Space Basics}{5}{0}{1}
+\beamer@sectionintoc {2}{2.4 Frequency Response and Bode Plots}{18}{0}{2}
+\beamer@sectionintoc {3}{2.5 PID Control}{28}{0}{3}
+\beamer@sectionintoc {4}{2.6 Stability and Performance}{42}{0}{4}
+\beamer@sectionintoc {5}{Wrap-up}{55}{0}{5}

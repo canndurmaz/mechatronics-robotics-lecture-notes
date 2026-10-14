@@ -1,0 +1,5 @@
+\beamer@sectionintoc {1}{4.4 Inverse kinematics}{5}{0}{1}
+\beamer@sectionintoc {2}{4.5 Velocity kinematics: the Jacobian}{16}{0}{2}
+\beamer@sectionintoc {3}{4.6 Introduction to robot dynamics}{27}{0}{3}
+\beamer@sectionintoc {4}{4.7 Motion systems and trajectory planning}{38}{0}{4}
+\beamer@sectionintoc {5}{5.1 Robotic manufacturing and flexible automation}{49}{0}{5}

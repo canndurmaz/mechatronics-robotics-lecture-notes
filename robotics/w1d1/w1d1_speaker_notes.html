@@ -1,0 +1,442 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>W1D1 Speaker Notes</title>
+<style>
+  :root{
+    --navy:#0B1F3A; --blue:#14365E; --mid:#2B5A8C; --sky:#6E9BC9; --pale:#E8EEF6;
+    --orange:#F07F12; --amber:#F9A94B; --cream:#FFF3E4; --gray:#5B6573; --bg:#F6F8FB; --card:#fff; --text:#0B1F3A;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){ --bg:#0A1424; --card:#10213A; --text:#E6ECF4; --pale:#1A3152; --cream:#3a2a14; --gray:#9AA8BA; }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 "Segoe UI",system-ui,-apple-system,Roboto,Helvetica,Arial,sans-serif}
+  header{background:var(--navy);color:#fff;padding:28px 16px 22px;border-bottom:4px solid var(--orange)}
+  header .wrap{max-width:980px;margin:0 auto}
+  header .day{color:var(--orange);font-weight:700;letter-spacing:.08em;font-size:.9rem}
+  header h1{margin:.2em 0 .1em;font-size:1.9rem}
+  header p{margin:0;color:var(--sky)}
+  nav.toc{position:sticky;top:0;z-index:5;background:var(--blue);padding:8px 16px;overflow-x:auto;white-space:nowrap}
+  nav.toc a{color:#fff;text-decoration:none;margin-right:16px;font-size:.88rem}
+  nav.toc a:hover{color:var(--amber)}
+  main{max-width:980px;margin:0 auto;padding:20px 16px 60px}
+  h2.session{margin:42px 0 12px;padding:10px 14px;background:var(--blue);color:#fff;border-left:6px solid var(--orange);border-radius:4px;font-size:1.25rem}
+  h2.session small{display:block;color:var(--amber);font-weight:500;font-size:.85rem}
+  table.plan{width:100%;border-collapse:collapse;background:var(--card);margin:12px 0}
+  table.plan th{background:var(--blue);color:#fff;text-align:left;padding:8px}
+  table.plan td{padding:8px;border-bottom:1px solid var(--pale)}
+  .slide{background:var(--card);border-radius:8px;margin:14px 0;padding:14px 18px;box-shadow:0 1px 3px rgba(11,31,58,.12);border-top:3px solid var(--mid)}
+  .slide h3{margin:0 0 6px;font-size:1.05rem;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+  .slide h3 .num{background:var(--orange);color:#fff;border-radius:4px;padding:1px 8px;font-size:.85rem}
+  .slide h3 .time{margin-left:auto;color:var(--gray);font-weight:400;font-size:.85rem}
+  .say{margin:6px 0}
+  .key{background:var(--cream);border-left:4px solid var(--orange);padding:6px 10px;margin:8px 0;border-radius:3px}
+  .ask{background:var(--pale);border-left:4px solid var(--mid);padding:6px 10px;margin:8px 0;border-radius:3px}
+  .trans{color:var(--gray);font-style:italic;margin-top:6px}
+  .label{font-weight:700;font-size:.8rem;text-transform:uppercase;letter-spacing:.05em;color:var(--orange)}
+  .ask .label{color:var(--mid)}
+  ul{margin:4px 0 4px 1.1em;padding:0}
+  footer{max-width:980px;margin:0 auto;padding:20px 16px;color:var(--gray);font-size:.85rem}
+  @media print{nav.toc{display:none}.slide{break-inside:avoid;box-shadow:none;border:1px solid #ccc}}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <div class="day">WEEK 1 · DAY 1 / 5 · SPEAKER NOTES</div>
+  <h1>Electrical Machines &amp; Actuators in Robots I</h1>
+  <p>Mechatronics and Robotics Engineering (50 h) · 5 h net teaching time · audience: 2nd-year engineering students</p>
+</div></header>
+<nav class="toc"><a href="#plan">Plan</a><a href="#s1">1.1 · Electromechanical energy conversion &amp; the actuator landscape in robots</a><a href="#s2">1.2 · DC, BLDC and PMSM motors</a><a href="#s3">1.3 · Electrical and mechanical motor models</a><a href="#s4">1.4 · Stepper and induction motors in automation</a></nav>
+<main>
+  <section id="plan">
+    <h2 class="session">Day plan &amp; timing</h2>
+    <table class="plan"><tr><th>Block</th><th>Topic</th><th>Slides</th><th>Duration</th></tr>
+      <tr><td>1.1</td><td>Electromechanical energy conversion &amp; the actuator landscape in robots</td><td>2–14</td><td>60 min</td></tr>
+      <tr><td>—</td><td><i>Break (extra, not counted)</i></td><td></td><td>10 min</td></tr>
+      <tr><td>1.2</td><td>DC, BLDC and PMSM motors: structure and commutation</td><td>16–28</td><td>90 min</td></tr>
+      <tr><td>—</td><td><i>Break (extra, not counted)</i></td><td></td><td>10 min</td></tr>
+      <tr><td>1.3</td><td>Electrical and mechanical motor models</td><td>30–43</td><td>90 min</td></tr>
+      <tr><td>—</td><td><i>Break (extra, not counted)</i></td><td></td><td>10 min</td></tr>
+      <tr><td>1.4</td><td>Stepper and induction motors in automation (+ day wrap-up)</td><td>45–57</td><td>60 min</td></tr>
+      <tr><td></td><td><b>Net teaching time</b></td><td></td><td><b>300 min</b></td></tr>
+    </table>
+  </section>
+
+  <section id="s1">
+    <h2 class="session">Session 1.1 · Electromechanical energy conversion &amp; the actuator landscape in robots <small>Curriculum code 1.1 · 60 min</small></h2>
+    <div class="slide">
+      <h3><span class="num">Slide 2</span>Agenda and learning outcomes<span class="time">~4 min</span></h3>
+      <p class="say">Welcome to the first day of the course. Over two weeks we follow a robot from the inside out: today the motors that make it move, then control, servo drives, mechanisms, manufacturing cells and sensors. Today has four sessions, all about turning electrical energy into motion. Read the outcomes aloud: by tonight every student should be able to explain how a motor makes torque, compare actuator types, sketch commutation, write the two motor equations and choose between a stepper, an induction motor and a servo. Tell them the maths needs only Newton&#x27;s laws, Ohm&#x27;s law and simple first-order ODEs.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>The verbs in the outcomes (explain, compare, calculate) are what the exam will ask.</li><li>Misconception: &#x27;robotics is mainly programming&#x27;. A robot is first a set of motors, gears and sensors.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Who has taken a motor apart? <b>A:</b> Use the answers to pick examples later (toy cars, drills, printers).</li></ul></div>
+      <p class="trans">Transition: Let us start by looking at a single robot joint as a chain of energy converters.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 4</span>A robot joint is a chain of energy converters<span class="time">~5 min</span></h3>
+      <p class="say">Point at the robot photo: six joints, and inside each one the same chain. Power comes from a DC bus, the drive&#x27;s power electronics chop it into the right voltage and current, the motor turns electrical power into torque and speed, the gearbox trades speed for torque, and the link moves. Information goes the other way: the encoder tells the controller where the motor is. Every box wastes some energy as heat, and heat is what usually limits a motor. Today we zoom into the orange box, the motor; the other boxes come back later in the course.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Energy flows forward, information flows back: two different kinds of arrows.</li><li>Misconception: &#x27;the motor alone decides the robot&#x27;s strength&#x27;. The gearbox and the drive matter just as much.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Where does the lost energy go? <b>A:</b> Into heat in the drive, the motor windings and the gearbox friction.</li></ul></div>
+      <p class="trans">Transition: Before we look inside the motor we need three words: torque, speed and power.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 5</span>Refresher: torque, speed and power<span class="time">~6 min</span></h3>
+      <p class="say">Start with the spanner: the same hand force gives more turning effect on a longer handle, so torque is force times lever arm. A robot link holding a payload is exactly that spanner. Then the bicycle: the same pedalling power can be a lot of force at low cadence or little force at high cadence. In rotation, power is torque times angular speed, with speed in radians per second. Walk through the example: 50 newton-metres at 60 degrees per second is only about 52 watts, and a small motor at 1000 rpm can supply it through a 100 to 1 gearbox with half a newton-metre.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Always convert rpm to rad/s before using P = T omega (multiply by 2 pi / 60).</li><li>Misconception: &#x27;a gearbox gives more power&#x27;. It only trades torque against speed; power is conserved minus losses.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> What is 3000 rpm in rad/s? <b>A:</b> About 314 rad/s.</li></ul></div>
+      <p class="trans">Transition: So where does motor torque come from? From a magnetic field and a current.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 6</span>Refresher: magnetic field and the force on a wire<span class="time">~6 min</span></h3>
+      <p class="say">Draw the two magnet poles and the field arrows from north to south. A wire carrying current across those arrows is pushed sideways, at right angles to both the current and the field. The size of the push is B times l times i. Do the example: half a tesla, ten centimetres of wire, four amperes gives 0.2 newtons, which is not much. That is why real motors use hundreds of turns of wire, strong magnets and iron to concentrate the field. Show the right-hand rule with your hand and have the students copy it.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Force is perpendicular to current and to field, not along either.</li><li>Misconception: &#x27;the magnet pulls the wire towards it&#x27;. The force is sideways, across the field lines.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> What happens if you reverse the current? <b>A:</b> The force reverses direction.</li></ul></div>
+      <p class="trans">Transition: If current gives force, what does motion give? That is the other half of the story.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 7</span>Motor action and generator action: two halves of every motor<span class="time">~7 min</span></h3>
+      <p class="say">Every motor is also a generator. When the wire moves through the field it gets a voltage, the back-EMF, equal to B l v. Wind the wire into a coil and both effects share one constant: torque equals k_t times current, back-EMF equals k_e times speed, and in SI units the two numbers are equal. Work through the coil example step by step. The punchline to repeat several times today: current makes torque, speed makes voltage. A motor spinning faster needs more supply voltage because its own back-EMF pushes against the supply.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>k_t in Nm/A and k_e in Vs/rad are the same number in SI units.</li><li>Misconception: &#x27;back-EMF is a loss&#x27;. It is the useful conversion itself: e times i is the power that becomes mechanical.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why does a motor that spins faster need a higher voltage? <b>A:</b> Because its back-EMF grows with speed and the supply must exceed it to push current in.</li></ul></div>
+      <p class="trans">Transition: There is a second way to make force with magnetism that does not need a magnet on the rotor at all.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 8</span>Reluctance force: iron is pulled into the field<span class="time">~5 min</span></h3>
+      <p class="say">Use the fridge magnet: plain iron is pulled to where the magnetic path is easiest. A coil with an iron bar nearby turns the bar until it lines up, because that position has the highest inductance. The torque is one half i squared times the slope of the inductance curve, so the current direction does not matter. Point to the plot: torque is zero where the inductance is at a maximum or minimum and largest in between. Tell them this principle is behind solenoids and stepper motors, which come back in Session 1.4.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Reluctance torque depends on i squared: current direction does not matter.</li><li>Misconception: &#x27;only permanent magnets make motors work&#x27;. Iron alone can produce torque.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Where on the plot is the rotor stable? <b>A:</b> Where torque is zero and pushes back towards it: the inductance maximum.</li></ul></div>
+      <p class="trans">Transition: Now we zoom out: besides electric motors, what other actuators can move a robot?</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 9</span>The actuator landscape: three ways to move a robot<span class="time">~6 min</span></h3>
+      <p class="say">Three families. Electric: energy arrives by cable and the motor converts it, easy to measure and control. Pneumatic: compressed air at about six bar pushes a piston; it is cheap and fast but air is springy like a bicycle pump with your finger on the hole. Hydraulic: oil at two hundred bar or more; nearly incompressible, so it is stiff and extremely strong for its size. Today&#x27;s industrial arms and cobots are almost all electric, pneumatics live in grippers and suction cups, and hydraulics appear in heavy machinery and some legged robots.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Each family stores and transmits energy differently: cable, air hose, oil hose.</li><li>Misconception: &#x27;pneumatic and hydraulic are the same except for the fluid&#x27;. Compressibility changes everything about control.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Name a pneumatic device in a robot cell. <b>A:</b> A gripper or vacuum suction cup.</li></ul></div>
+      <p class="trans">Transition: Let us put numbers on fluid power with one simple formula.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 10</span>Fluid power in numbers: force from pressure<span class="time">~6 min</span></h3>
+      <p class="say">Force equals pressure times piston area. Show the photo of a real pneumatic cylinder and the drawing next to it. Walk through the example: a 40 millimetre bore has an area of about 1.26 times ten to the minus three square metres. At six bar that is about 750 newtons, enough to clamp a part. The same cylinder at 200 bar of oil gives 25 kilonewtons, thirty-three times more. Then the catch: air compresses, so a pneumatic cylinder is great for end-to-end moves against hard stops but very hard to stop accurately in the middle.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Convert bar to pascal: one bar is 10^5 Pa.</li><li>Misconception: &#x27;bigger pressure means faster motion&#x27;. Pressure sets force; flow rate sets speed.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Force with a 20 mm bore at 6 bar? <b>A:</b> Area is a quarter, so about 190 N.</li></ul></div>
+      <p class="trans">Transition: With these numbers in mind we can compare the three families side by side.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 11</span>Comparing actuator technologies for robots<span class="time">~5 min</span></h3>
+      <p class="say">Go through the table row by row but do not read every cell. Electric wins on accuracy, control and efficiency; pneumatic wins on cost and simplicity; hydraulic wins on force per size. The efficiency row surprises students: a compressed-air system often delivers only 10 to 20 percent of the electrical energy as useful work because of compressor losses and leaks. The key box explains why robots went electric: clean, efficient, digitally controllable, and the low-torque weakness is fixed with gearboxes, which is tomorrow&#x27;s first topic.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Electric motors plus gearboxes beat hydraulics for most robot arms today.</li><li>Misconception: &#x27;compressed air is free because the factory already has it&#x27;. It is one of the most expensive energy forms in a plant.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> When would you still pick hydraulics? <b>A:</b> Very high forces in a small space, e.g. heavy-duty manipulators or excavators.</li></ul></div>
+      <p class="trans">Transition: Within the electric family there are several motor types; here is the family tree.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 12</span>Family tree of electromagnetic actuators<span class="time">~3 min</span></h3>
+      <p class="say">Use this as a map for the rest of the day. The highlighted branch, permanent-magnet brushless motors, is what sits in almost every robot arm joint. Brushed DC motors appear in toy and hobby robots and small grippers. Induction motors drive conveyors and pumps around the robot. Steppers move 3D printers and small gantries. Linear motors and solenoids come tomorrow. The other branch, fluid power and smart materials, gets one sentence each; mention soft robots as a going-further example.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Today covers the rotary electromagnetic branch; Day 2 covers linear actuators and grippers.</li><li>Misconception: &#x27;AC servo motor&#x27; means an induction motor. In industry it almost always means a PMSM.</li></ul></div>
+      <p class="trans">Transition: Time to check that the basics are in place.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 13</span>Session 1.1 – Check your understanding<span class="time">~5 min</span></h3>
+      <p class="say">Give the students two minutes alone, then two minutes with a neighbour. Insist they write the formula first and then numbers with units. Collect answers by show of hands before revealing. Answers: (1) Torque doubles from 0.2 to 0.4 Nm because T = k_t i is linear. (2) 1500 rpm is about 157 rad/s, so P = 2 times 157, roughly 314 W. (3) Air is compressible: the piston acts like a spring, overshoots and oscillates, and there is no stiff way to hold it at a mid-stroke position without extra valves or brakes.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Answers: 0.4 Nm; about 314 W; air compressibility makes mid-stroke stopping imprecise.</li><li>Misconception to check: students forgetting to convert rpm to rad/s and getting 3000 W.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Q2 answer <b>A:</b> P = 2 Nm x 157 rad/s = 314 W.</li></ul></div>
+      <p class="trans">Transition: Let us summarise the session and fix the key terms.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 14</span>Session 1.1 – Summary and key terms<span class="time">~2 min</span></h3>
+      <p class="say">Read the four bullets quickly and point at the remember box: P = T omega, T = k_t i, e = k_e omega, F = p A. Ask the students to copy the key terms into their own glossary. The single sentence to take away: a motor converts electrical power into mechanical power through a magnetic field, current makes torque and speed makes voltage. Mention that the pneumatic and hydraulic comparison will return on Day 2 with grippers and in Week 2 with work-cell design.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>The four formulas in the box are used all day.</li><li>Misconception: back-EMF and torque constant are different physics. They are the same constant viewed from two sides.</li></ul></div>
+      <p class="trans">Transition: Next session: we open real motors and see how they keep the torque pointing in one direction.</p>
+    </div>
+  </section>
+
+  <section id="s2">
+    <h2 class="session">Session 1.2 · DC, BLDC and PMSM motors: structure and commutation <small>Curriculum code 1.2 · 90 min</small></h2>
+    <div class="slide">
+      <h3><span class="num">Slide 16</span>Anatomy of a robot servo motor<span class="time">~6 min</span></h3>
+      <p class="say">Walk around the cut-away from left to right. The stator is the fixed outer ring with copper windings; it produces the heat, so it sits against the housing. The rotor carries the magnets and is long and slim to keep its inertia low. Between them is the air gap, less than a millimetre, where the torque is actually produced. At the back are the brake and the encoder. Stress the brake for robots: without power, a robot arm would fall under gravity, so a spring-applied brake holds it whenever the drive is off.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Stator = fixed, rotor = turning; heat is made where the current flows.</li><li>Misconception: &#x27;the brake is for stopping a moving robot&#x27;. It is mainly a holding brake; the drive does the stopping.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why is the rotor long and slim? <b>A:</b> Low inertia means it can accelerate quickly.</li></ul></div>
+      <p class="trans">Transition: To understand how the rotor is driven, we need one picture: a magnet following a rotating field.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 17</span>Refresher: a magnet follows a rotating field<span class="time">~8 min</span></h3>
+      <p class="say">Use the compass analogy. Three coils A, B and C sit 120 degrees apart. Switch on A and the stator field points up; the magnet rotor lines up with it. Switch on A and B together and the field points between them; the rotor follows. Keep moving the field and the rotor keeps chasing it, like a donkey chasing a carrot on a stick. The torque depends on the angle between the field and the magnet: zero when aligned, largest at 90 degrees. Commutation simply means: keep the field about 90 degrees ahead of the rotor.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Torque is maximum at 90 degrees between stator field and rotor magnet.</li><li>Misconception: &#x27;the field pulls hardest when it is aligned with the magnet&#x27;. Aligned means zero torque.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> What happens if the field stops moving? <b>A:</b> The rotor lines up and stops; the motor holds position but produces no rotation.</li></ul></div>
+      <p class="trans">Transition: The oldest way to keep the field ahead of the rotor is a mechanical switch: the brushed DC motor.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 18</span>Brushed DC motor: construction<span class="time">~6 min</span></h3>
+      <p class="say">Show the photo of the opened motor: magnets glued inside the steel can, the armature with its coils on the shaft and the copper commutator segments. The drawing shows the same thing in cross-section: magnets on the stator, coils on the rotor carrying current in opposite directions on the two sides. The commutator and brushes feed current to the rotating coils. The great advantage is simplicity: connect a battery and it spins, with speed roughly proportional to voltage. That is why they appear in toys, small grippers and car wipers.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>In a brushed motor the coils rotate and the magnets stand still.</li><li>Misconception: &#x27;DC motor&#x27; means it runs on DC inside. The coil currents actually alternate; the commutator does the switching.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Where is the heat produced? <b>A:</b> In the rotor coils, which are hard to cool.</li></ul></div>
+      <p class="trans">Transition: Let us see exactly what the commutator does as the rotor turns.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 19</span>How the commutator keeps the torque in one direction<span class="time">~8 min</span></h3>
+      <p class="say">Look at the three snapshots. At zero degrees the coil sides cross the field at the best angle and the torque is maximum. Near ninety degrees the coil reaches the dead position where torque would change sign, and just there the commutator swaps the current direction. At 180 degrees the coil is upside down, but because the current was flipped the torque pushes the same way again. The plot shows the result: a single coil gives a bumpy rectified cosine; three coils overlap and fill in the dips, which reduces torque ripple. Then mention the weaknesses of brushes.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>The commutator is a rotating mechanical switch synchronised with the rotor angle.</li><li>Misconception: &#x27;more coils make more torque&#x27;. They mainly make the torque smoother.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> What wears out in a brushed motor? <b>A:</b> The carbon brushes and commutator surface.</li></ul></div>
+      <p class="trans">Transition: If we put the magnets on the rotor and the coils on the stator, transistors can do the switching: the brushless motor.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 20</span>Brushless DC (BLDC): the “inside-out” DC motor<span class="time">~7 min</span></h3>
+      <p class="say">The BLDC motor is a DC motor turned inside out. Magnets go on the rotor, three-phase coils go on the stator, shown in the photo. There are no brushes to wear, and the heat is produced in the stator right next to the housing, so it is easy to cool. But now nobody switches the coils mechanically, so the drive must know where the rotor is. Three cheap Hall sensors, which detect north or south, give six different codes per electrical turn. The transistors in the drive replace the commutator: this is electronic commutation.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Same physics, T = k_t i and e = k_e omega; only the switch moved into the drive.</li><li>Misconception: &#x27;brushless motors are AC motors so the DC formulas do not apply&#x27;. The model is the same.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why is a BLDC easier to cool? <b>A:</b> Heat comes from stator windings that touch the housing.</li></ul></div>
+      <p class="trans">Transition: How exactly does the drive use the Hall signals? With a six-step table.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 21</span>BLDC six-step commutation<span class="time">~9 min</span></h3>
+      <p class="say">Read the table with the class. Each Hall code tells the drive which phase to connect to plus and which to minus; the third phase rests. After 60 electrical degrees the Hall code changes and the drive moves to the next row. Six steps make one electrical turn. The plots show phase A: a trapezoidal back-EMF and a block-shaped current that is switched on during the flat top. It is simple and cheap, used in drones, fans and e-bikes, but each switch-over causes a small torque dip, which we call torque ripple.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Two phases conduct at any time; the step changes every 60 electrical degrees.</li><li>Misconception: &#x27;Hall sensors measure the exact angle&#x27;. They only tell which 60-degree sector the rotor is in.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> How many Hall codes per electrical turn? <b>A:</b> Six (000 and 111 are invalid and signal a fault).</li></ul></div>
+      <p class="trans">Transition: If we want smoother torque we need the exact angle and smooth currents: the PMSM.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 22</span>PMSM: smooth sine currents – the robot servo motor<span class="time">~8 min</span></h3>
+      <p class="say">The PMSM is built almost like a BLDC, but its back-EMF is sine-shaped and an encoder gives the exact rotor angle. The drive then feeds three smooth sine currents 120 degrees apart, so the stator field turns smoothly instead of in jumps. The result is almost ripple-free torque. Show the two rotor styles: surface magnets and buried magnets. Industrial AC servo motors and nearly every robot arm joint use a PMSM. The way the drive calculates the sine currents, field-oriented control, comes on Day 5 of this week.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>PMSM = smooth field rotation = smooth torque; requires an encoder.</li><li>Misconception: &#x27;BLDC and PMSM are completely different machines&#x27;. The hardware is similar; the feeding is different.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why does a PMSM need an encoder rather than Halls? <b>A:</b> Sine currents need the angle continuously, not just in 60-degree sectors.</li></ul></div>
+      <p class="trans">Transition: Let us compare the torque quality of the two methods directly.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 23</span>Torque ripple: six-step versus sinusoidal<span class="time">~6 min</span></h3>
+      <p class="say">The plot compares the torque of a sine-EMF motor fed with block currents against the same motor fed with sine currents. Block feeding gives dips every 60 degrees of about 13 percent; sine feeding gives a flat line in the ideal case. Use the bicycle analogy: jerky pushes versus smooth circles. In a robot, ripple becomes vibration at the tool tip and poor slow-speed motion, which ruins a painted or welded seam. Drones and fans do not care, so they use cheap six-step drives.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Ripple frequency rises with speed; at low speed it is felt as jerky motion.</li><li>Misconception: &#x27;average torque is all that matters&#x27;. Ripple decides the smoothness of the robot path.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Where would you accept six-step? <b>A:</b> Fans, pumps, drones, AMR wheels with low precision needs.</li></ul></div>
+      <p class="trans">Transition: One more idea about these motors: pole pairs and the electrical angle.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 24</span>Pole pairs: electrical versus mechanical angle<span class="time">~8 min</span></h3>
+      <p class="say">A motor can have more than one north-south pair on its rotor. Each pair passing a coil is one electrical cycle, so with p pole pairs, one mechanical turn equals p electrical turns. Work the example: a robot joint PMSM with four pole pairs at 3000 rpm turns 50 times per second, so the drive must produce 200 hertz currents. More poles give more torque from a flat, short motor, which is ideal for compact robot joints, but they demand a faster drive and encoder.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Electrical angle = p times mechanical angle; all commutation happens in electrical degrees.</li><li>Misconception: &#x27;electrical frequency equals rotation speed&#x27;. Only when p = 1.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> p = 5 at 600 rpm? <b>A:</b> 10 rev/s times 5 = 50 Hz.</li></ul></div>
+      <p class="trans">Transition: Now let us see how these motors are packaged inside a robot joint.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 25</span>Inside a robot joint: frameless motor, brake, encoder, gear<span class="time">~7 min</span></h3>
+      <p class="say">Walk along the drawing: encoder at the back, then the brake, then the motor, then the gearbox, then the output flange to the next link. Cobot makers often buy frameless motors: just a stator ring and a rotor ring, with the robot&#x27;s own housing acting as the motor case. The hollow shaft lets cables pass through the joint so they do not wrap around the outside. Everything is compact and light, which matters because each joint must carry all the joints beyond it.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>A heavy joint near the wrist must be carried by every joint closer to the base.</li><li>Misconception: &#x27;the motor directly drives the link&#x27;. Almost always a gearbox sits in between.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why integrate the motor into the housing? <b>A:</b> Saves mass and length, and the housing conducts heat away.</li></ul></div>
+      <p class="trans">Transition: Let us summarise the three motor types side by side.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 26</span>Comparison: DC, BLDC and PMSM in robots<span class="time">~5 min</span></h3>
+      <p class="say">Use the table to consolidate. Read the commutation and coils rows, then the robot examples row. The rule of thumb: precise, smooth and dynamic means PMSM; cheap and simple means brushed DC or BLDC. Stress again that BLDC and PMSM are built almost the same, so the difference is in how the drive feeds them. Ask the class where each type would go in a mobile robot with an arm: wheels BLDC, arm joints PMSM, maybe a small DC motor in a cheap gripper.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Selection depends on precision, smoothness, cost and maintenance.</li><li>Misconception: &#x27;brushed motors are obsolete&#x27;. They remain the cheapest solution for simple tasks.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Which motor for a lawn-mowing robot&#x27;s wheels? <b>A:</b> BLDC: robust, efficient, no brushes, precision not critical.</li></ul></div>
+      <p class="trans">Transition: Quick check before we move to equations.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 27</span>Session 1.2 – Check your understanding<span class="time">~8 min</span></h3>
+      <p class="say">Pair work for four minutes, then discuss. Answers: (1) The commutator switches the coil currents according to rotor position so the torque always pushes the same way; in a BLDC the transistors of the drive do this, guided by Hall sensors. (2) In a brushless motor the current-carrying coils are on the stator, which touches the housing, so heat escapes easily; in a brushed motor the heat is trapped in the rotor. (3) 1200 rpm is 20 rev/s; times p = 5 gives 100 Hz.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Answers: transistors + Hall sensors; heat in stator; 100 Hz.</li><li>Watch for students multiplying rpm directly by p without dividing by 60.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Q3 answer <b>A:</b> f_el = 5 x 1200 / 60 = 100 Hz.</li></ul></div>
+      <p class="trans">Transition: Summary of the session.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 28</span>Session 1.2 – Summary and key terms<span class="time">~4 min</span></h3>
+      <p class="say">Recap the story: every motor has a stator, a rotor and an air gap; torque needs the field about 90 degrees ahead of the magnet; someone must switch the coil currents as the rotor turns. Brushes do it mechanically, BLDC drives with Hall sensors in six steps, PMSM drives with an encoder in smooth sine waves. More pole pairs mean more torque but a higher electrical frequency. Ask students to add the key terms to their glossary.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Commutation is the central idea of the session.</li><li>Misconception: &#x27;brushless means sensorless&#x27;. Most brushless motors still need an angle sensor.</li></ul></div>
+      <p class="trans">Transition: Next we describe the motor with equations, so we can predict its behaviour.</p>
+    </div>
+  </section>
+
+  <section id="s3">
+    <h2 class="session">Session 1.3 · Electrical and mechanical motor models <small>Curriculum code 1.3 · 90 min</small></h2>
+    <div class="slide">
+      <h3><span class="num">Slide 30</span>Refresher: Newton&#x27;s law for rotation<span class="time">~6 min</span></h3>
+      <p class="say">Use the playground roundabout: a heavy one is hard to start and hard to stop because of its moment of inertia J. Compare the linear and rotational columns: force becomes torque, mass becomes inertia, F = m a becomes T = J times the rate of change of speed. The sum of torques counts: motor torque minus friction minus load. Work the example: 0.5 newton-metres on a rotor of 10^-4 kilogram square metres gives 5000 rad/s squared, so 3000 rpm is reached in about 63 milliseconds.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Net torque, not motor torque alone, sets the acceleration.</li><li>Misconception: &#x27;a constant torque gives a constant speed&#x27;. It gives a constant acceleration.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> What if the inertia is ten times larger? <b>A:</b> Acceleration is ten times smaller, about 0.63 s to full speed.</li></ul></div>
+      <p class="trans">Transition: We will also need the simplest kind of ODE and its exponential solution.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 31</span>Refresher: first-order ODEs and the exponential response<span class="time">~6 min</span></h3>
+      <p class="say">Remind them of the RC circuit from their circuits course: the capacitor voltage rises quickly at first and then slower and slower. Every system with a single energy store behaves like this and is described by one time constant tau. After one tau it reaches 63 percent, after three tau 95 percent, after five tau we call it done. For an RL circuit tau is L over R; with half a millihenry and one ohm that is half a millisecond. This exponential picture is all we need to understand motor dynamics today.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Remember 63 % at 1 tau and 95 % at 3 tau.</li><li>Misconception: &#x27;the response reaches the final value at t = tau&#x27;. It only reaches 63 %.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Tau for R = 2 ohm, L = 4 mH? <b>A:</b> 2 ms.</li></ul></div>
+      <p class="trans">Transition: Now we build the motor model from these two refreshers.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 32</span>Equivalent circuit of the DC motor<span class="time">~6 min</span></h3>
+      <p class="say">The electrical side is an RL circuit the students already know, plus one extra source, the back-EMF, that grows with speed and opposes the supply. The mechanical side is a rotating inertia driven by the motor torque k_t i, slowed by friction B omega and by the load torque. Go through the symbol table and units. State the sign convention clearly: voltage and current positive into the motor, load torque acting against the motion. Mention that brushless motors use the same model per phase.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>The motor is one electrical loop plus one mechanical inertia, coupled by k_t and k_e.</li><li>Misconception: &#x27;the back-EMF source is a battery inside the motor&#x27;. It exists only while the motor turns.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> What is the back-EMF at standstill? <b>A:</b> Zero.</li></ul></div>
+      <p class="trans">Transition: Writing Kirchhoff and Newton gives the two motor equations.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 33</span>The two motor equations<span class="time">~7 min</span></h3>
+      <p class="say">Write both on the board. Kirchhoff around the loop: supply voltage equals resistive drop plus inductive drop plus back-EMF. Newton for the shaft: inertia times acceleration equals motor torque minus friction minus load. The two are coupled both ways, so together they form a second-order system. Show the energy argument for k_t equals k_e: power absorbed by the back-EMF must equal power delivered to the shaft. Then the practical datasheet tip: dividing volts per thousand rpm by 104.7 gives SI units.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>These two equations are the most important result of the day.</li><li>Misconception: &#x27;k_t and k_e are unrelated datasheet values&#x27;. In SI units for a DC motor they are equal.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> A motor has 20.9 V/krpm. k_t? <b>A:</b> About 0.2 Nm/A.</li></ul></div>
+      <p class="trans">Transition: Let us use the equations on a real-looking datasheet.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 34</span>Reading a motor datasheet: worked example<span class="time">~8 min</span></h3>
+      <p class="say">Take the example datasheet of a 200 watt class motor. Step one: rated current is rated torque divided by k_t, about 5.3 amperes. Step two: at 3000 rpm, 314 rad/s, the back-EMF is 0.12 times 314, about 38 volts. Step three: the voltage needed is R i plus e, about 42 volts, which fits under the 48 volt supply. Step four: copper loss R i squared is about 23 watts of heat. Point out that the back-EMF eats most of the supply voltage at full speed; that is what limits top speed.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>At high speed, voltage limits; at high torque, current and heat limit.</li><li>Misconception: &#x27;a 48 V motor sees 48 V across its resistance&#x27;. Most of it is balanced by the back-EMF.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Max speed at 48 V with rated current? <b>A:</b> e = 48 - 4.2 = 43.8 V, so about 365 rad/s or 3480 rpm.</li></ul></div>
+      <p class="trans">Transition: Our model so far ignores friction; let us see what real friction looks like.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 35</span>Friction and load torque<span class="time">~6 min</span></h3>
+      <p class="say">Use the heavy box analogy: hard to get moving, easier once it slides. The plot shows three friction parts. Viscous friction grows with speed like stirring honey. Coulomb friction is a constant torque that flips sign with direction. Stiction is the extra sticking torque at standstill, which causes jerky starts and small position errors in robots. The load torque is what the task asks for: gravity on the arm, the payload, contact forces. Today we keep only the linear viscous part because it keeps the maths simple.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Load torque in a robot often comes from gravity and changes with arm pose.</li><li>Misconception: &#x27;friction is always proportional to speed&#x27;. Coulomb friction and stiction are not.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why does stiction hurt positioning? <b>A:</b> Small torque commands do not move the joint until stiction is overcome, causing stick-slip.</li></ul></div>
+      <p class="trans">Transition: If we set all time derivatives to zero we get the steady-state behaviour.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 36</span>Steady state: the speed–torque line<span class="time">~7 min</span></h3>
+      <p class="say">At constant speed the derivatives vanish and the two equations give a straight line: speed equals voltage over k_e minus a droop proportional to torque. Walk the numbers: no-load speed 480 rad/s at 48 volts, stall current 48 amperes and stall torque 4.8 newton-metres. More load means the speed droops along the line; more voltage shifts the whole line up. This is the key picture for understanding how voltage sets speed and current sets torque.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Voltage sets the no-load speed; resistance sets the slope.</li><li>Misconception: &#x27;a motor runs at its rated speed whatever the load&#x27;. Without control, speed drops with load.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Where is the line at 24 V? <b>A:</b> Parallel, shifted down to half the no-load speed.</li></ul></div>
+      <p class="trans">Transition: Power and efficiency vary along this line too.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 37</span>Output power and efficiency along the line<span class="time">~6 min</span></h3>
+      <p class="say">Output power is torque times speed, so along the straight line it is a parabola: zero at no load, zero at stall, maximum at about half the stall torque. Efficiency is a different story: it is highest at light load and falls as the copper loss grows with the current squared. Real motors are rated far below the maximum power point because heat sets the limit. Point out that efficiency is zero at no load here because of the small friction torque.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Maximum power and maximum efficiency happen at different operating points.</li><li>Misconception: &#x27;operate at maximum power for best performance&#x27;. The motor would overheat quickly.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Where is the efficiency peak roughly? <b>A:</b> At light load, around 0.6 Nm in this example (about 73 %).</li></ul></div>
+      <p class="trans">Transition: Next we redraw the equations as a picture: the block diagram.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 38</span>Block diagram of the DC motor<span class="time">~7 min</span></h3>
+      <p class="say">A block diagram draws the equations as signal flow. Follow the arrows: voltage minus back-EMF drives the RL circuit, giving current; times k_t gives torque; minus load torque accelerates the inertia, giving speed; integrating speed gives angle. The back-EMF path from speed back to the input is a built-in feedback loop: faster means more back-EMF, less current, less torque, so the motor calms itself. The load torque enters as a disturbance. Mention that real drives control current directly, so the motor acts as a torque source.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Back-EMF is natural negative feedback inside every motor.</li><li>Misconception: &#x27;feedback needs a sensor and a controller&#x27;. Physics can create feedback loops too.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> What does T_L represent for a robot joint? <b>A:</b> Mainly gravity on the link and payload, plus contact forces.</li></ul></div>
+      <p class="trans">Transition: How fast does this system respond? It has two time constants.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 39</span>The motor&#x27;s two time constants: worked example<span class="time">~8 min</span></h3>
+      <p class="say">Show the simulated response to a 24 volt step. The current jumps up quickly, governed by the electrical time constant L over R, half a millisecond. Then it falls as the speed builds up and the back-EMF grows. The speed rises with the mechanical time constant R J over k_t k_e, ten milliseconds here, towards 240 rad/s. The electrical part is twenty times faster than the mechanical part. Point out the 21 ampere peak current: real drives limit it, otherwise they would trip or damage the motor.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>tau_e is much smaller than tau_m: current is fast, speed is slow.</li><li>Misconception: &#x27;the start current equals the running current&#x27;. At start there is no back-EMF so the current is huge.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why does the current fall after the peak? <b>A:</b> Back-EMF grows with speed and opposes the supply.</li></ul></div>
+      <p class="trans">Transition: In a robot, the motor does not spin alone: it drives an arm. What does that do?</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 40</span>What the robot arm adds: load inertia slows the motor<span class="time">~6 min</span></h3>
+      <p class="say">The motor must accelerate its own rotor plus everything attached: gearbox, link and payload. Because tau_m is proportional to the total inertia, doubling the inertia doubles the time to reach speed; four times the inertia, four times slower. The final speed does not change because it is set by voltage and k_e. A robot arm stretched out has much more inertia about its shoulder than when folded, so the same joint behaves differently in different poses. Gearboxes help by reducing the inertia the motor feels by the ratio squared.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Inertia changes the speed of response, not the final speed.</li><li>Misconception: &#x27;a heavier load makes the motor slower at steady state&#x27;. Only friction and load torque do that, not inertia.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Tau_m with J x 3? <b>A:</b> 30 ms.</li></ul></div>
+      <p class="trans">Transition: Finally, a very practical case: holding an arm still against gravity.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 41</span>Worked example: holding a robot arm against gravity<span class="time">~8 min</span></h3>
+      <p class="say">Step one: a 2 kilogram payload half a metre from the joint needs about 9.8 newton-metres. Step two: a direct-drive motor with k_t of 0.1 would need 98 amperes, which is absurd. Step three: with a 100 to 1 gearbox the motor sees only 0.098 newton-metres. Step four: that needs about one ampere and one watt of copper loss. The punchline: holding still needs torque but no mechanical power, yet current flows and heats the motor. That is why robots use gearboxes and holding brakes.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Holding torque costs heat even though no work is done.</li><li>Misconception: &#x27;if the arm does not move, the motor uses no energy&#x27;. It still dissipates R i^2.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> What if the payload doubles? <b>A:</b> Torque and current double, copper loss quadruples.</li></ul></div>
+      <p class="trans">Transition: Let us check understanding of the motor model.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 42</span>Session 1.3 – Check your understanding<span class="time">~7 min</span></h3>
+      <p class="say">Let the students work in pairs. Answers: (1) 95 percent takes about three time constants, so about 60 milliseconds. (2) Doubling J doubles tau_m to 40 milliseconds, but the final speed is unchanged because it depends on voltage and k_e. (3) At switch-on the speed is zero, so there is no back-EMF and only the small resistance limits the current; as the motor speeds up, the back-EMF grows, reduces the voltage across R and L, and the current falls.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Answers: about 60 ms; tau doubles, final speed unchanged; no back-EMF at start.</li><li>Watch for students saying the final speed halves when J doubles.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Q1 <b>A:</b> 3 tau = 60 ms.</li></ul></div>
+      <p class="trans">Transition: Summary of the modelling session.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 43</span>Session 1.3 – Summary and key terms<span class="time">~2 min</span></h3>
+      <p class="say">The motor is an RL circuit plus back-EMF, coupled to an inertia with friction and load. Energy conservation gives k_t equals k_e. At constant speed we get a straight speed-torque line; dynamically there are two time constants, a fast electrical one and a slow mechanical one. Ask students to copy the box with the two equations; they will use them on Day 2 for the Laplace transform. Close by asking one student to explain, without formulas, why a motor draws a large current at start-up; if they mention back-EMF, the session has done its job.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>These equations come back in control (W1D2-W1D3) and servo drives (W1D4-W1D5).</li><li>Misconception: models must be perfect to be useful. Simple linear models already explain most behaviour.</li></ul></div>
+      <p class="trans">Transition: In the last session we meet two motors that work without a fine angle sensor: the stepper and the induction motor.</p>
+    </div>
+  </section>
+
+  <section id="s4">
+    <h2 class="session">Session 1.4 · Stepper and induction motors in automation (+ day wrap-up) <small>Curriculum code 1.4 · 60 min</small></h2>
+    <div class="slide">
+      <h3><span class="num">Slide 45</span>Stepper motor: moving in exact steps<span class="time">~7 min</span></h3>
+      <p class="say">Use the clock analogy: the second hand jumps tick by tick and you know the time by counting ticks. The four snapshots show a simple two-phase stepper: energise A plus, the magnet rotor points up; B plus, it turns right; A minus, down; B minus, left. Each pulse moves the rotor exactly one step. Real hybrid steppers have many small teeth and make 200 steps per revolution, 1.8 degrees each. Show the photo of the disassembled stepper with its toothed rotor. Position is known by counting pulses, so no sensor is needed: open loop.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Step angle = 360 degrees / steps per revolution.</li><li>Misconception: &#x27;open loop means the position is unknown&#x27;. It is known by counting, as long as no step is lost.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Steps for 90 degrees with 1.8-degree steps? <b>A:</b> 50 steps.</li></ul></div>
+      <p class="trans">Transition: Full steps are coarse and jerky; drivers can do better.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 46</span>Full step, half step and microstepping<span class="time">~7 min</span></h3>
+      <p class="say">In full-step mode the phase currents are only plus or minus full current, giving jerky, noisy motion. Half-step mode adds in-between positions with one phase on, giving 400 steps per revolution. Microstepping shapes the currents like sine and cosine staircases, so the rotor moves in tiny smooth steps. Work the 3D-printer example: 16 microsteps give 3200 per revolution; with an 8 millimetre lead screw that is 2.5 micrometres per microstep, and 50 millimetres per second needs 20000 pulses per second.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Microstepping mainly improves smoothness; accuracy per microstep is limited by load and friction.</li><li>Misconception: &#x27;microstepping gives 16 times more accuracy&#x27;. Resolution improves, real accuracy much less.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Pulses per second for 25 mm/s? <b>A:</b> 10000.</li></ul></div>
+      <p class="trans">Transition: Steppers have a weakness at speed, and it can cost steps.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 47</span>Stepper limits: torque falls with speed, steps can be lost<span class="time">~6 min</span></h3>
+      <p class="say">The pull-out curve shows the maximum torque the stepper can deliver at each speed. At rest it has its holding torque; at higher speeds the winding inductance stops the current from rising fast enough within each step, so torque collapses. If the load needs more torque than is available, the rotor slips a step and the controller never knows. That is the main danger of open loop. Keep a safety margin of 30 to 50 percent and ramp the speed up. Also mention that steppers run warm because holding current flows even at rest.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Lost steps are silent errors: the controller&#x27;s count no longer matches reality.</li><li>Misconception: &#x27;a stepper never loses position because it is digital&#x27;. Overload or fast acceleration makes it slip.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> How do you detect lost steps? <b>A:</b> Add an encoder (closed-loop stepper) or reference with a home switch.</li></ul></div>
+      <p class="trans">Transition: The second motor in this session needs no magnets at all: the induction motor.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 48</span>Induction motor: currents induced in a cage<span class="time">~6 min</span></h3>
+      <p class="say">The photo shows a squirrel-cage rotor: aluminium bars shorted by rings, no magnets and no connections. The three-phase stator makes a rotating field. Because the field sweeps past the bars, Faraday&#x27;s law induces currents in them, and Lorentz&#x27;s law then pushes them, so the rotor follows the field. But it must always run a little slower; if it caught up, the bars would see no change and no current would be induced. This lag is the slip. Example: 50 hertz with two pole pairs gives 1500 rpm synchronous speed; at 1440 rpm the slip is 4 percent.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>No slip, no torque.</li><li>Misconception: &#x27;induction motors run exactly at synchronous speed&#x27;. That only applies to synchronous machines like PMSM.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> n_s for 60 Hz, p = 2? <b>A:</b> 1800 rpm.</li></ul></div>
+      <p class="trans">Transition: How does torque depend on speed for this motor?</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 49</span>Torque–speed curve of the induction motor<span class="time">~6 min</span></h3>
+      <p class="say">Read the curve from right to left. At synchronous speed the torque is zero. As load increases the speed drops a little and torque rises steeply along the stable part of the curve: the operating point is where motor torque equals load torque, here a conveyor. Further down is the breakdown torque, the maximum; beyond it the motor stalls. At standstill there is still a starting torque. The motor runs straight off the mains, which makes it cheap and rugged: ideal for conveyors, pumps and fans around a robot cell.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>The steep part near n_s makes speed almost independent of load.</li><li>Misconception: &#x27;maximum torque is at standstill&#x27;, as for DC motors. Here it is at the breakdown slip.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> What happens if load exceeds breakdown torque? <b>A:</b> Speed collapses and the motor stalls, drawing high current.</li></ul></div>
+      <p class="trans">Transition: Mains frequency fixes the speed. A frequency inverter frees it.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 50</span>Variable speed with a frequency inverter (V/f)<span class="time">~5 min</span></h3>
+      <p class="say">A variable-frequency drive generates three-phase power at any frequency. Since synchronous speed is 60 f over p, changing f moves the whole curve along the speed axis, as the plot shows for 20, 35 and 50 hertz. Keeping voltage proportional to frequency keeps the magnetic field, and therefore the maximum torque, the same. Example: a 4-pole conveyor motor that must turn at 1000 rpm needs a little over 33 hertz plus slip, about 35 hertz. This simple V/f control is standard for conveyors.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>V/f constant keeps the field constant.</li><li>Misconception: &#x27;lower frequency means lower torque&#x27;. With V/f the available torque stays roughly constant.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Frequency for 750 rpm on a 4-pole motor? <b>A:</b> About 25 Hz plus slip, roughly 27 Hz.</li></ul></div>
+      <p class="trans">Transition: Let us put all three motor families side by side for automation tasks.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 51</span>Which motor where? Choosing for an automation task<span class="time">~5 min</span></h3>
+      <p class="say">Use the table as a decision aid. Steppers: low cost, no sensor, good at low speed, weak at high speed. Induction motor with VFD: cheap, robust, controls speed but not exact position. PMSM servo: encoder feedback, excellent accuracy and dynamics, but the most expensive. Ask the decision questions aloud: must it stop at exact positions, must it react fast, is the load constant, what may it cost? Then point out that a real production line usually uses all three side by side.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Match the motor to the task, not the other way round.</li><li>Misconception: &#x27;servo is always best&#x27;. For a constant-speed conveyor it is overkill.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Which motor for a lab pipetting gantry? <b>A:</b> Stepper (cheap, slow, light loads), possibly closed-loop.</li></ul></div>
+      <p class="trans">Transition: A short check before the day summary.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 52</span>Session 1.4 – Check your understanding<span class="time">~6 min</span></h3>
+      <p class="say">Give three minutes. Answers: (1) One step is 1.8 degrees, so 40 millimetres divided by 200, which is 0.2 millimetres per step. (2) The controller believes the axis moved 1000 steps, 200 millimetres with that belt, but the real axis is short by however many steps were lost during the jam; without a sensor nobody knows until the next homing. (3) Synchronous speed is 1500 rpm, so slip is 45 over 1500, which is 3 percent.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Answers: 0.2 mm; controller&#x27;s count is wrong, real position is behind; 3 %.</li><li>Watch for students thinking the stepper &#x27;catches up&#x27; automatically after a jam.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Q3 <b>A:</b> s = (1500 - 1455)/1500 = 0.03.</li></ul></div>
+      <p class="trans">Transition: Summary of the last session.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 53</span>Session 1.4 – Summary and key terms<span class="time">~3 min</span></h3>
+      <p class="say">Steppers move by pulses without a sensor; their torque drops with speed and steps can be lost. Microstepping smooths the motion. Induction motors need slip, are cheap and rugged, and a VFD with constant V/f gives variable speed. Ask students to complete their glossary with the six terms. Point back to the comparison table and remind them that the choice is driven by the task: exact positions, speed of response, load and cost. Ask each student to name one device at home or in a lab that uses a stepper (printer, scanner, camera lens) and one that uses an induction motor (washing machine, fan, pump).</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Open loop is cheap but blind.</li><li>Misconception: &#x27;induction motors cannot be precisely controlled&#x27;. With vector control they can, but that is advanced.</li></ul></div>
+      <p class="trans">Transition: Let us pull the whole day together.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 54</span>Day summary: W1D1<span class="time">~4 min</span></h3>
+      <p class="say">Go through the four boxes: energy conversion and the actuator landscape, the motor types, the motor model and the key numbers. Read the one-sentence summary aloud. Ask two or three students to say in their own words what they found most surprising today; typical answers are back-EMF, the 98 ampere direct-drive example and lost steps. Use these answers to correct any remaining misunderstandings before the end of the day.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>The two motor equations are the bridge to tomorrow&#x27;s control topics.</li><li>Misconception: memorising the table of motor types is enough. Understanding why each behaves as it does matters more.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> What one equation would you keep from today? <b>A:</b> Any of T = k_t i, e = k_e omega, J d omega/dt = k_t i - B omega - T_L.</li></ul></div>
+      <p class="trans">Transition: Here is what comes tomorrow.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 55</span>Preview of W1D2: Actuators II + Introduction to Control<span class="time">~3 min</span></h3>
+      <p class="say">Tomorrow we put a gearbox between the motor and the link and learn about reflected inertia, backlash and stiffness, then linear actuators and grippers, then the motor sizing question: which motor is big enough? The afternoon starts control: modelling dynamic systems and the Laplace transform. Ask the students to bring the two motor equations, the time constants and today&#x27;s gravity example. A good homework question: repeat the gravity example with a 3 kg payload at 0.6 m and a 50:1 gearbox, and compute the motor current.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Tomorrow&#x27;s sizing session reuses today&#x27;s datasheet and gravity examples.</li><li>Misconception: control is a separate subject. It starts from the motor model we built today.</li></ul></div>
+      <p class="trans">Transition: Close with credits and references.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 56</span>Figure credits<span class="time">~1 min</span></h3>
+      <p class="say">Mention briefly that all photographs come from Wikimedia Commons under free licences, credited on each slide and listed here; all other drawings and plots were made for this course. Students may reuse the drawings for their own study notes; if they publish any photo they must keep the author and licence line.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Licences require attribution on every reuse.</li></ul></div>
+      <p class="trans">Transition: References for further reading.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 57</span>References<span class="time">~1 min</span></h3>
+      <p class="say">Recommend Hughes and Drury for a very readable introduction to motors and drives, Fitzgerald for the machine theory, Kenjo for stepper motors, and Craig or Siciliano for the robotics parts of the course. None of these books is required reading; the slides and notes are self-contained. Students who want one book for today should pick Hughes and Drury, chapters on DC motors, induction motors and stepping motors.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Hughes &amp; Drury is the best first book for sophomores.</li></ul></div>
+      <p class="trans">Transition: End of Day 1.</p>
+    </div>
+  </section>
+</main>
+<footer>Figures and references are listed on the final slides of the deck. Slide numbers refer to PDF pages (section dividers included).</footer>
+</body>
+</html>

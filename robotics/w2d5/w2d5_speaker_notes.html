@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>W2D5 Speaker Notes</title>
+<style>
+  :root{
+    --navy:#0B1F3A; --blue:#14365E; --mid:#2B5A8C; --sky:#6E9BC9; --pale:#E8EEF6;
+    --orange:#F07F12; --amber:#F9A94B; --cream:#FFF3E4; --gray:#5B6573; --bg:#F6F8FB; --card:#fff; --text:#0B1F3A;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){ --bg:#0A1424; --card:#10213A; --text:#E6ECF4; --pale:#1A3152; --cream:#3a2a14; --gray:#9AA8BA; }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 "Segoe UI",system-ui,-apple-system,Roboto,Helvetica,Arial,sans-serif}
+  header{background:var(--navy);color:#fff;padding:28px 16px 22px;border-bottom:4px solid var(--orange)}
+  header .wrap{max-width:980px;margin:0 auto}
+  header .day{color:var(--orange);font-weight:700;letter-spacing:.08em;font-size:.9rem}
+  header h1{margin:.2em 0 .1em;font-size:1.9rem}
+  header p{margin:0;color:var(--sky)}
+  nav.toc{position:sticky;top:0;z-index:5;background:var(--blue);padding:8px 16px;overflow-x:auto;white-space:nowrap}
+  nav.toc a{color:#fff;text-decoration:none;margin-right:16px;font-size:.88rem}
+  nav.toc a:hover{color:var(--amber)}
+  main{max-width:980px;margin:0 auto;padding:20px 16px 60px}
+  h2.session{margin:42px 0 12px;padding:10px 14px;background:var(--blue);color:#fff;border-left:6px solid var(--orange);border-radius:4px;font-size:1.25rem}
+  h2.session small{display:block;color:var(--amber);font-weight:500;font-size:.85rem}
+  table.plan{width:100%;border-collapse:collapse;background:var(--card);margin:12px 0}
+  table.plan th{background:var(--blue);color:#fff;text-align:left;padding:8px}
+  table.plan td{padding:8px;border-bottom:1px solid var(--pale)}
+  .slide{background:var(--card);border-radius:8px;margin:14px 0;padding:14px 18px;box-shadow:0 1px 3px rgba(11,31,58,.12);border-top:3px solid var(--mid)}
+  .slide h3{margin:0 0 6px;font-size:1.05rem;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+  .slide h3 .num{background:var(--orange);color:#fff;border-radius:4px;padding:1px 8px;font-size:.85rem}
+  .slide h3 .time{margin-left:auto;color:var(--gray);font-weight:400;font-size:.85rem}
+  .say{margin:6px 0}
+  .key{background:var(--cream);border-left:4px solid var(--orange);padding:6px 10px;margin:8px 0;border-radius:3px}
+  .ask{background:var(--pale);border-left:4px solid var(--mid);padding:6px 10px;margin:8px 0;border-radius:3px}
+  .trans{color:var(--gray);font-style:italic;margin-top:6px}
+  .label{font-weight:700;font-size:.8rem;text-transform:uppercase;letter-spacing:.05em;color:var(--orange)}
+  .ask .label{color:var(--mid)}
+  ul{margin:4px 0 4px 1.1em;padding:0}
+  footer{max-width:980px;margin:0 auto;padding:20px 16px;color:var(--gray);font-size:.85rem}
+  @media print{nav.toc{display:none}.slide{break-inside:avoid;box-shadow:none;border:1px solid #ccc}}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <div class="day">WEEK 2 · DAY 5 / 5 · SPEAKER NOTES</div>
+  <h1>Sensors, Measurement and System Integration</h1>
+  <p>Mechatronics and Robotics Engineering (50 h) · 6.4 Machine vision · 6.5 Sampling · 6.6 Signal processing · 6.7 Communication · 6.8 Case study &amp; course wrap-up · 5 h net teaching time</p>
+</div></header>
+<nav class="toc"><a href="#plan">Plan</a><a href="#s1">6.4 Machine vision in robotics</a><a href="#s2">6.5 Sampling and digitisation</a><a href="#s3">6.6 Signal processing and filters</a><a href="#s4">6.7 Communication and integration</a><a href="#s5">6.8 System-integration case study and course wrap-up</a></nav>
+<main>
+  <section id="plan">
+    <h2 class="session">Day plan &amp; timing</h2>
+    <table class="plan"><tr><th>Block</th><th>Topic</th><th>Slides</th><th>Duration</th></tr><tr><td>1</td><td>6.4 Machine vision in robotics (incl. opening)</td><td>1–15</td><td>60 min</td></tr><tr><td></td><td><i>Break (extra)</i></td><td></td><td>10 min</td></tr><tr><td>2</td><td>6.5 Sampling and digitisation</td><td>17–25</td><td>60 min</td></tr><tr><td></td><td><i>Break (extra)</i></td><td></td><td>10 min</td></tr><tr><td>3</td><td>6.6 Signal processing and filters</td><td>27–36</td><td>60 min</td></tr><tr><td></td><td><i>Break (extra)</i></td><td></td><td>10 min</td></tr><tr><td>4</td><td>6.7 Communication and integration</td><td>38–48</td><td>60 min</td></tr><tr><td></td><td><i>Break (extra)</i></td><td></td><td>10 min</td></tr><tr><td>5</td><td>6.8 System-integration case study and course wrap-up</td><td>50–62</td><td>60 min</td></tr><tr><td></td><td><b>Total net teaching time</b></td><td></td><td><b>300 min</b></td></tr></table>
+    <p>Audience: 2nd-year engineering students. Slide numbers are PDF page numbers (section divider pages are included in the count and need no notes). Answers to every “Check your understanding” frame are in the blue boxes.</p>
+  </section>
+<section id="s1">
+<h2 class="session">Session 1 · Machine vision in robotics <small>Curriculum code 6.4 · 60 min</small></h2>
+<div class="slide">
+<h3><span class="num">Slide 1</span>Title page<span class="time">~1 min</span></h3>
+<p class="say">Welcome to the last day of the course. Today we close the loop from the sensor to the finished robot cell. Yesterday we met the sensors themselves: encoders, IMUs, force sensors and LiDAR. Today we ask what happens after the sensor: how a camera turns light into a robot target, how a voltage becomes a number, how we clean that number, and how all the devices in a cell exchange data on time. The final hour is a case study that uses everything, followed by a wrap-up of all ten days.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>Today is about the whole chain, not single components.</li><li>Misconception: a better sensor alone fixes a measurement problem. Sampling, filtering and timing matter as much.</li></ul></div>
+<p class="trans">Transition: Let us look at the plan for the day.</p></div>
+<div class="slide">
+<h3><span class="num">Slide 2</span>Agenda and learning outcomes<span class="time">~3 min</span></h3>
+<p class="say">Here is the plan: five one-hour sessions. Vision first, because it is the most visual and gives a strong start. Then sampling and digitisation, then filters, then networks, and finally the integration case study and the course wrap-up. Read the learning outcomes aloud with the students: each one is a verb they should be able to do by tonight, such as project a point into an image or build an error budget. Tell them that every session ends with a short check and a summary with key terms, so they can test themselves.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>Outcomes are skills: explain, calculate, choose.</li><li>Breaks are extra, about every hour.</li></ul></div>
+<div class="ask"><span class="label">Ask the audience / answers</span><ul><li><b>Q:</b> Which of these have you already met in another course? <b>A:</b> Often binary numbers and RC filters; use that as an anchor.</li></ul></div>
+<p class="trans">Transition: Before we start, a quick look back at yesterday.</p></div>
+<div class="slide">
+<h3><span class="num">Slide 3</span>What we learned yesterday (W2D4)<span class="time">~4 min</span></h3>
+<p class="say">Yesterday we covered material handling, safety standards and the first sensor sessions. Three ideas come back today. Resolution versus accuracy: a camera pixel or an ADC step is a resolution; calibration decides accuracy. The IMU: its gyro and accelerometer each have a weakness, and today we fuse them. And the homogeneous transform from week two, day one: vision results are only useful once we transform them into the robot base frame. Ask the students to recall one sentence about each.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>Resolution is not accuracy.</li><li>Misconception: a high-resolution sensor is automatically accurate.</li></ul></div>
+<div class="ask"><span class="label">Ask the audience / answers</span><ul><li><b>Q:</b> What does a homogeneous transform contain? <b>A:</b> A rotation matrix and a translation vector in one 4x4 matrix.</li></ul></div>
+<p class="trans">Transition: Let us start with the robot's eyes: machine vision.</p></div>
+<div class="slide">
+<h3><span class="num">Slide 5</span>Why robots need eyes<span class="time">~5 min</span></h3>
+<p class="say">Ask: what does a robot do if the part is two centimetres away from where it was taught? It misses. A taught robot is blind; it needs parts in fixtures. A camera removes that need: it tells the robot where the part is, which part it is and whether it is good. Go through the four task types: locate, inspect, read, guide. Then distinguish 2D vision, where parts lie on a known plane, from 3D vision, where we also need height. The sketch shows the most common industrial case: parts at random angles on a conveyor, a fixed camera, and a robot.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>Vision replaces expensive fixtures with software.</li><li>Misconception: vision means artificial intelligence. Most industrial vision is classic geometry and good lighting.</li></ul></div>
+<div class="ask"><span class="label">Ask the audience / answers</span><ul><li><b>Q:</b> Name a vision task in a car factory. <b>A:</b> Reading a VIN, checking a weld seam, locating a windscreen for gluing.</li></ul></div>
+<p class="trans">Transition: To use a camera we need a model of how it forms an image.</p></div>
+<div class="slide">
+<h3><span class="num">Slide 6</span>Refresher: the pinhole camera<span class="time">~5 min</span></h3>
+<p class="say">Use the dark-room analogy: a small hole in a window shutter projects an upside-down image of the street onto the wall. Draw the similar triangles: image height over focal length equals object height over distance. In pixel units we write u equals f x times X over Z plus c x. Walk through the example: f x is 1000 pixels, the point is 0.1 m to the side at 0.5 m distance, so it lands 200 pixels from the centre. One pixel then covers half a millimetre. Doubling the distance halves the size in the image.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>Every symbol: X, Z in metres; f, c, u in pixels.</li><li>Misconception: focal length is in millimetres here. In the model we use pixels.</li></ul></div>
+<div class="ask"><span class="label">Ask the audience / answers</span><ul><li><b>Q:</b> What happens to u if Z doubles? <b>A:</b> u minus c x halves.</li></ul></div>
+<p class="trans">Transition: Real cameras need a few more parameters.</p></div>
+<div class="slide">
+<h3><span class="num">Slide 7</span>The camera model: intrinsics and lens distortion<span class="time">~5 min</span></h3>
+<p class="say">The matrix K collects the four intrinsic numbers: two focal lengths and the image centre. They belong to the camera and lens and do not change when we move the camera. Where the camera is located is described by the extrinsics, which is a transform like the ones from W2D1. Real lenses are not perfect: straight lines bend, outwards like a barrel or inwards like a pincushion. A simple polynomial in the radius corrects this. Stress the note: every point on one ray hits the same pixel, so one camera cannot measure depth.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>Intrinsics: camera itself. Extrinsics: camera pose.</li><li>Misconception: a single camera can measure distance. It cannot without extra knowledge.</li></ul></div>
+<div class="ask"><span class="label">Ask the audience / answers</span><ul><li><b>Q:</b> Do intrinsics change if the robot moves the camera? <b>A:</b> No, only the extrinsics change (unless you zoom or refocus).</li></ul></div>
+<p class="trans">Transition: How do we find K and the distortion values in practice?</p></div>
+<div class="slide">
+<h3><span class="num">Slide 8</span>Camera calibration: measuring K and the distortion<span class="time">~5 min</span></h3>
+<p class="say">Calibration is like tuning a guitar with a reference tone: we show the camera a pattern whose geometry we know exactly. Walk through the five steps. Emphasise variety of poses: tilted, near, far, in the corners of the image, otherwise distortion is poorly estimated. The software adjusts K, the distortion values and each board pose until the projected corners match the detected corners. The remaining mismatch is the reprojection error; below about 0.3 pixel is good. Mention that OpenCV and MATLAB do this in a few lines.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>Many different poses give a good calibration.</li><li>Misconception: a low reprojection error proves the system is accurate. It only shows the model fits the calibration images.</li></ul></div>
+<div class="ask"><span class="label">Ask the audience / answers</span><ul><li><b>Q:</b> Why not take all images straight on? <b>A:</b> Then focal length and distance cannot be separated well, and edge distortion is not seen.</li></ul></div>
+<p class="trans">Transition: With a calibrated camera we can find where an object is.</p></div>
+<div class="slide">
+<h3><span class="num">Slide 9</span>Pose estimation: where is the object?<span class="time">~5 min</span></h3>
+<p class="say">If we know at least four points on the object, for example the corners of a printed marker or features in a CAD model, and we see them in the image, we can compute the full pose of the object relative to the camera: three rotations and three translations. This is called Perspective-n-Point. Fiducial markers like ArUco or AprilTag are square black-and-white codes designed so that software finds them fast and knows which one it is. They are used for calibration, for AMR docking and in teaching labs.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>Pose means position and orientation together.</li><li>Misconception: PnP gives the pose in robot coordinates. It gives it in camera coordinates.</li></ul></div>
+<div class="ask"><span class="label">Ask the audience / answers</span><ul><li><b>Q:</b> Why are four points enough? <b>A:</b> Each image point gives two equations; six unknowns need at least three points, four make it unique and robust.</li></ul></div>
+<p class="trans">Transition: What if we really need depth, for example in a bin of parts?</p></div>
+<div class="slide">
+<h3><span class="num">Slide 10</span>Seeing depth: stereo, structured light, time of flight<span class="time">~5 min</span></h3>
+<p class="say">Our eyes solve depth with two views. A stereo camera does the same: the same point appears shifted between left and right images; this shift is the disparity. Distance is focal length times baseline divided by disparity. Example: 700 pixel focal length, 10 cm baseline, 35 pixel disparity gives 2 m. The plot shows the price: the depth error grows with the square of the distance. Mention the two other 3D methods briefly: structured light projects a known pattern; time of flight measures travel time, the same principle as LiDAR from yesterday.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>Depth error grows with Z squared.</li><li>Misconception: a 3D camera is equally accurate at all distances.</li></ul></div>
+<div class="ask"><span class="label">Ask the audience / answers</span><ul><li><b>Q:</b> How do we make a stereo camera more accurate at long range? <b>A:</b> A wider baseline or a longer focal length.</li></ul></div>
+<p class="trans">Transition: Now the camera knows where the part is, but the robot does not yet.</p></div>
+<div class="slide">
+<h3><span class="num">Slide 11</span>Hand–eye calibration: where is the camera on the robot?<span class="time">~6 min</span></h3>
+<p class="say">The camera reports the object in its own frame. The robot needs it in the base frame. Show the chain: base to flange is known from forward kinematics, camera to object comes from vision, and the missing piece is flange to camera, which we cannot measure with a ruler accurately enough. Hand-eye calibration finds it: move the robot to many poses and look at a fixed checkerboard each time. For a fixed camera the unknown is base to camera instead. Mention the AX equals XB equation only as a name.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>Transforms chain by multiplication, in order.</li><li>Misconception: the camera's mounting drawing is accurate enough. Millimetre errors at the flange become larger errors at the part.</li></ul></div>
+<div class="ask"><span class="label">Ask the audience / answers</span><ul><li><b>Q:</b> Which frame do we need for a fixed camera? <b>A:</b> Base to camera.</li></ul></div>
+<p class="trans">Transition: Let us do the full calculation once with numbers.</p></div>
+<div class="slide">
+<h3><span class="num">Slide 12</span>Worked example: from pixel to robot target<span class="time">~5 min</span></h3>
+<p class="say">Go slowly through the four steps. The part is found at pixel 840, 520; the centre is 640, 480. The offset is 200 by 40 pixels. With 0.5 mm per pixel that is 100 by 20 mm in the camera frame. The camera image y-axis points along negative base y, so we flip the sign. Finally add the camera axis position, 600 mm along base x. The robot target is 700, minus 20 mm. Point out that steps three and four are exactly a homogeneous transform applied to a point.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>Check signs of axes every time.</li><li>Misconception: pixel axes match robot axes. They rarely do.</li></ul></div>
+<div class="ask"><span class="label">Ask the audience / answers</span><ul><li><b>Q:</b> If the part were found at the centre pixel, what is the target? <b>A:</b> (600, 0) mm.</li></ul></div>
+<p class="trans">Transition: A few practical rules make vision work in a real factory.</p></div>
+<div class="slide">
+<h3><span class="num">Slide 13</span>Practical vision: light, contrast and speed<span class="time">~4 min</span></h3>
+<p class="say">Industrial vision engineers say: light first, software second. A back light gives a crisp silhouette, ideal for measuring outlines and holes. A ring light from the front shows surface detail like printing or scratches. Two time effects: motion blur during exposure, and processing time. One millisecond exposure at half a metre per second is already half a millimetre of smear. Processing takes tens of milliseconds, so the result is old when it arrives. The solution, a time stamp, returns in the case study.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>Lighting is the cheapest accuracy improvement.</li><li>Misconception: a faster computer solves the age of the vision result. Time-stamping does.</li></ul></div>
+<div class="ask"><span class="label">Ask the audience / answers</span><ul><li><b>Q:</b> How do you reduce blur without a faster camera? <b>A:</b> Shorter exposure with brighter or strobed light.</li></ul></div>
+<p class="trans">Transition: Time to check understanding.</p></div>
+<div class="slide">
+<h3><span class="num">Slide 14</span>Check your understanding: machine vision<span class="time">~4 min</span></h3>
+<p class="say">Give the students two minutes to work in pairs, then collect answers from two or three pairs before you reveal anything. The first question is a direct use of the pinhole model, so ask for the units at every step: metres divided by pixels gives metres per pixel. The second question checks whether they understood that a single camera loses depth; good answers mention that every point on one ray lands on the same pixel. The third question checks the stereo error formula; listen for the word squared. Praise reasoning, not only the number. Answers are below.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>Let students explain to each other before you reveal answers.</li></ul></div>
+<div class="ask"><span class="label">Ask the audience / answers</span><ul><li><b>Q1:</b> Pixel size on the part: Z / f = 0.4 / 800 = 0.5 mm per pixel.</li><li><b>Q2:</b> All points on one ray land on the same pixel; without a known plane, marker size or second view, distance is unknown.</li><li><b>Q3:</b> Error grows with Z squared: twice the distance gives about four times the error, so about 20 mm.</li></ul></div>
+<p class="trans">Transition: Let us summarise the vision session.</p></div>
+<div class="slide">
+<h3><span class="num">Slide 15</span>Summary and key terms: machine vision<span class="time">~3 min</span></h3>
+<p class="say">Run through the five bullets and ask a student to define each key term in their own words. The thread through this session is a chain of transforms: pixel to camera ray, camera to object, flange to camera, base to flange. If one link is wrong, the robot misses. The references are the standard books: Corke for robotics and vision together, Szeliski for computer vision. Before the break, ask everyone to write down one number they remember from this session, such as half a millimetre per pixel.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>Vision is geometry plus calibration plus lighting.</li><li>Misconception: vision results can be used without hand-eye calibration.</li></ul></div>
+<p class="trans">Transition: After the break we look at the step every sensor signal goes through: sampling.</p></div>
+</section>
+<section id="s2">
+<h2 class="session">Session 2 · Sampling and digitisation <small>Curriculum code 6.5 · 60 min</small></h2>
+<div class="slide">
+<h3><span class="num">Slide 17</span>Refresher: sampling and the wagon-wheel effect<span class="time">~8 min</span></h3>
+<p class="say">Start with the wagon-wheel effect from old films: the wheel seems to turn backwards. The camera takes 24 pictures a second; between two pictures each spoke moves almost to the next spoke position, so the eye matches it to the wrong spoke. A computer reading a sensor does the same: it only sees samples. Nyquist says the signal frequency must stay below half the sampling frequency. Faster content does not disappear; it is disguised as a slower signal. This is aliasing.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>Sampling is like a strobe light.</li><li>Misconception: frequencies above f_s/2 are simply lost. They come back as false low frequencies.</li></ul></div>
+<div class="ask"><span class="label">Ask the audience / answers</span><ul><li><b>Q:</b> Who has seen helicopter blades standing still in a video? <b>A:</b> Same effect: rotation rate matches the frame rate.</li></ul></div>
+<p class="trans">Transition: Here is the whole path from sensor to processor.</p></div>
+<div class="slide">
+<h3><span class="num">Slide 18</span>The measurement chain, and a refresher on binary numbers<span class="time">~7 min</span></h3>
+<p class="say">Walk along the chain: a strain gauge gives millivolts, an amplifier makes volts, an analogue filter removes fast content, the sample-and-hold freezes the voltage, the ADC converts it, and the processor filters and controls. The left part is continuous, the right part is numbers at instants k T s. Refresh binary numbers: N bits give 2 to the N values; work out 1011 binary equals 11. Two errors appear: between samples in time and between steps in amplitude. This session handles both.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>Two kinds of loss: time and amplitude.</li><li>Misconception: digital means exact. Every number is rounded and sampled.</li></ul></div>
+<div class="ask"><span class="label">Ask the audience / answers</span><ul><li><b>Q:</b> How many levels has a 10-bit ADC? <b>A:</b> 1024.</li></ul></div>
+<p class="trans">Transition: Let us see aliasing in a real-looking signal.</p></div>
+<div class="slide">
+<h3><span class="num">Slide 19</span>Aliasing in a measured signal<span class="time">~7 min</span></h3>
+<p class="say">The plot shows a 900 Hz signal sampled at 1 kHz. The samples, the blue dots, fit perfectly onto a 100 Hz sine. The calculation: half the sampling rate is 500 Hz, 900 is above it, so it appears at 1000 minus 900, 100 Hz. Stress the final bullet: once sampled, the fake 100 Hz looks exactly like a real 100 Hz vibration. No digital filter can tell them apart. In a robot this could be motor vibration aliasing into the force-sensor data.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>Alias frequency: distance to the nearest multiple of f_s.</li><li>Misconception: a digital low-pass after the ADC removes aliasing.</li></ul></div>
+<div class="ask"><span class="label">Ask the audience / answers</span><ul><li><b>Q:</b> 1.2 kHz sampled at 1 kHz? <b>A:</b> Appears at 200 Hz.</li></ul></div>
+<p class="trans">Transition: So the protection must sit before the ADC.</p></div>
+<div class="slide">
+<h3><span class="num">Slide 20</span>Anti-aliasing: analogue before the ADC, digital after<span class="time">~7 min</span></h3>
+<p class="say">The spectrum sketch shows the useful signal band and some noise above half the sampling rate. Without protection, that noise folds into the useful band. Only an analogue filter in front of the ADC can stop it. A practical trick is oversampling: sample much faster than needed, so a simple RC filter is enough, then do the sharp filtering digitally. Warn that the analogue filter also adds delay; keep its corner five to ten times above the loop bandwidth.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>Anti-alias filter: analogue, before the ADC.</li><li>Misconception: the anti-alias filter can be designed after the system is built, in software.</li></ul></div>
+<div class="ask"><span class="label">Ask the audience / answers</span><ul><li><b>Q:</b> Why oversample? <b>A:</b> It relaxes the analogue filter, which is expensive and drifts; digital filters are cheap and exact.</li></ul></div>
+<p class="trans">Transition: Now the amplitude side: quantisation.</p></div>
+<div class="slide">
+<h3><span class="num">Slide 21</span>Quantisation: turning a voltage into a number<span class="time">~8 min</span></h3>
+<p class="say">An N-bit ADC divides its range into 2 to the N steps. Each sample is rounded to the nearest step, so the error is at most half a step. The plot shows a 3-bit converter: the staircase and the error below it. For a full-scale sine the signal-to-noise ratio is about 6 dB per bit. Example: a joint torque sensor with a 200 Nm range and 12 bits has steps of 0.049 Nm and an SNR of about 74 dB. Each extra bit doubles the number of steps.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>Step size q = range / 2^N.</li><li>Misconception: more bits always means more accuracy. Noise and offset errors may be larger than one step.</li></ul></div>
+<div class="ask"><span class="label">Ask the audience / answers</span><ul><li><b>Q:</b> Step size of 16 bits on the same sensor? <b>A:</b> 200/65536 = about 3 mNm.</li></ul></div>
+<p class="trans">Transition: There are two main ADC families.</p></div>
+<div class="slide">
+<h3><span class="num">Slide 22</span>ADC types: SAR and sigma-delta<span class="time">~7 min</span></h3>
+<p class="say">The successive-approximation ADC plays the game of guess the number: is the voltage above half range? Then above three quarters? One bit per guess. It is fast and has little delay, so it is used for motor currents. The sigma-delta converter runs a very fast one-bit converter and averages; it gives very high resolution but with more delay, ideal for load cells and force sensors. The sample-and-hold freezes the input while the SAR guesses.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>SAR: fast. Sigma-delta: precise but slower.</li><li>Misconception: the higher-resolution ADC is always better for control. Its delay may hurt the loop.</li></ul></div>
+<div class="ask"><span class="label">Ask the audience / answers</span><ul><li><b>Q:</b> Which ADC for a 6-axis F/T sensor? <b>A:</b> Usually sigma-delta: high resolution, moderate bandwidth.</li></ul></div>
+<p class="trans">Transition: Timing of the sample matters too.</p></div>
+<div class="slide">
+<h3><span class="num">Slide 23</span>Sampling in step with the PWM, and delay<span class="time">~7 min</span></h3>
+<p class="say">In a motor drive the PWM makes the current ripple. If we sample at a random moment we see ripple and aliasing. Sampling exactly at the peak or valley of the PWM carrier gives the average current. More generally, every delay costs phase: 360 degrees times frequency times delay. The example: 94 microseconds of delay costs 34 degrees at 1 kHz. Link back to W1D3 and W1D4: phase margin is our safety distance, and delays eat it.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>Delay costs phase linearly with frequency.</li><li>Misconception: a small delay does not matter. At the loop bandwidth it can eat most of the phase margin.</li></ul></div>
+<div class="ask"><span class="label">Ask the audience / answers</span><ul><li><b>Q:</b> Phase cost of 1 ms at 50 Hz? <b>A:</b> 18 degrees.</li></ul></div>
+<p class="trans">Transition: Let us check understanding.</p></div>
+<div class="slide">
+<h3><span class="num">Slide 24</span>Check your understanding: sampling<span class="time">~5 min</span></h3>
+<p class="say">Pairs, two minutes, then discuss. The first question uses the alias rule directly; ask a student to draw the frequency axis with f_s and f_s/2 on the board and fold the 9 kHz line back. The second question practises the 6 dB per bit rule; some students will compute 16/12 and say 33 percent better, which is the misconception to correct: each bit doubles the number of steps, so the gain is exponential. The third question is the key idea of the session: once aliased, a false signal is indistinguishable from a real one. Answers below.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>Use the alias rule f_alias = |f - k f_s|.</li></ul></div>
+<div class="ask"><span class="label">Ask the audience / answers</span><ul><li><b>Q1:</b> |9 - 10| = 1 kHz: it appears at 1 kHz.</li><li><b>Q2:</b> 4 bits more, about 6 dB each: 24 dB, a factor of 16 in amplitude.</li><li><b>Q3:</b> After sampling the alias is indistinguishable from a real signal, so it must be removed before the sampler.</li></ul></div>
+<p class="trans">Transition: Summary of sampling.</p></div>
+<div class="slide">
+<h3><span class="num">Slide 25</span>Summary and key terms: sampling and digitisation<span class="time">~4 min</span></h3>
+<p class="say">Read the five bullets and the key terms. Ask a student to explain aliasing using the wagon wheel without notes. Point out that the delay rule connects this session to every control session of the course. Then connect forward: everything after the ADC is numbers, and the next session is about what we do with those numbers. Remind them that the digital world cannot undo mistakes made before the sampler, so the analogue front end, the sample rate and the number of bits are decisions to take early in a design, not after the robot is built.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>Nyquist, anti-alias filter, bits and delay are the four design choices.</li><li>Misconception: Nyquist alone is enough; in practice sample 5 to 10 times faster than the highest frequency of interest.</li></ul></div>
+<p class="trans">Transition: After the break: what we do with the numbers, signal processing.</p></div>
+</section>
+<section id="s3">
+<h2 class="session">Session 3 · Signal processing and filters <small>Curriculum code 6.6 · 60 min</small></h2>
+<div class="slide">
+<h3><span class="num">Slide 27</span>Filter types at a glance<span class="time">~6 min</span></h3>
+<p class="say">Four basic filter shapes. Low-pass keeps slow signals: smoothing a noisy speed or force. High-pass removes offsets and drift. Band-pass keeps one band, for example to measure one vibration. Band-stop or notch removes one band, for example a resonance. Each plot shows gain in decibels against frequency relative to the corner. The dashed curves are first order, the solid ones second order: steeper. Ask students which filter a hand-held phone camera stabiliser might use.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>Name the filter by what it lets through.</li><li>Misconception: a filter only changes the size. It also shifts the timing (phase).</li></ul></div>
+<div class="ask"><span class="label">Ask the audience / answers</span><ul><li><b>Q:</b> Which filter removes a slowly drifting offset? <b>A:</b> High-pass.</li></ul></div>
+<p class="trans">Transition: The simplest one is the RC low-pass, and it fits in one line of code.</p></div>
+<div class="slide">
+<h3><span class="num">Slide 28</span>From an RC low-pass to one line of code<span class="time">~7 min</span></h3>
+<p class="say">Students know the RC circuit: the output chases the input with time constant RC. In software, at every sample we move the output a fraction alpha of the way towards the input. Work the example: a 500 Hz corner gives tau of 318 microseconds; with a 16 kHz sample rate alpha is about 0.18. The code line is y plus equals alpha times x minus y. Stress the note: the filter delays the signal by roughly tau. In a control loop, that costs phase.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>First-order low-pass: y += alpha (x - y).</li><li>Misconception: a filter with a lower corner is always better. It is smoother but slower.</li></ul></div>
+<div class="ask"><span class="label">Ask the audience / answers</span><ul><li><b>Q:</b> What is alpha if T_s equals tau? <b>A:</b> About 0.63 exact, the filter then follows very quickly.</li></ul></div>
+<p class="trans">Transition: Another simple filter: the moving average.</p></div>
+<div class="slide">
+<h3><span class="num">Slide 29</span>Moving average: the simplest digital filter<span class="time">~6 min</span></h3>
+<p class="say">Average the last N samples. It is easy to understand and always stable. Its special property: it cancels completely any disturbance whose period fits exactly into the window, the zeros in the plot at f_s over N and multiples. Between the zeros it damps only weakly. Delay is half the window. Example: 16 samples at 16 kHz cancel 1 kHz and its harmonics, useful when a known periodic disturbance exists, like a gear-mesh frequency at constant speed.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>Moving average: zeros at multiples of f_s/N.</li><li>Misconception: a longer moving average is free. Its delay grows with N.</li></ul></div>
+<div class="ask"><span class="label">Ask the audience / answers</span><ul><li><b>Q:</b> Delay of N = 16 at 16 kHz? <b>A:</b> 7.5 samples, about 0.47 ms.</li></ul></div>
+<p class="trans">Transition: These are examples of two families: FIR and IIR.</p></div>
+<div class="slide">
+<h3><span class="num">Slide 30</span>FIR versus IIR filters<span class="time">~6 min</span></h3>
+<p class="say">A finite impulse response filter uses only past inputs, like the moving average. An infinite impulse response filter also feeds back past outputs, like the RC filter. Compare in the table: FIR is always stable but needs many terms and has more delay; IIR needs few terms and has little delay but must be designed carefully. Inside a fast control loop the low delay usually makes IIR the winner. Mention biquads only as a name for further study.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>FIR: no feedback. IIR: feedback.</li><li>Misconception: IIR filters are unstable. They are stable if designed correctly.</li></ul></div>
+<div class="ask"><span class="label">Ask the audience / answers</span><ul><li><b>Q:</b> Is the RC-type filter FIR or IIR? <b>A:</b> IIR, it uses the previous output.</li></ul></div>
+<p class="trans">Transition: Now a special filter for robot joints: the notch.</p></div>
+<div class="slide">
+<h3><span class="num">Slide 31</span>Notch filter: cutting out one robot-joint resonance<span class="time">~6 min</span></h3>
+<p class="say">Recall W2D1: a gearbox or a long, light arm makes a joint ring at one frequency, like a playground swing. Here at 400 Hz. A notch filter removes a narrow band around that frequency. The upper plot shows a wide and a narrow notch, the lower plot the phase. A wide notch is robust when the resonance moves with payload or arm pose, but costs more phase at lower frequency. A narrow notch costs little phase but must hit the frequency. Give the rule: stiffen mechanics first.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>Notch width is a trade-off between robustness and phase.</li><li>Misconception: a notch filter fixes a weak mechanical design. It hides it within limits.</li></ul></div>
+<div class="ask"><span class="label">Ask the audience / answers</span><ul><li><b>Q:</b> Why does the resonance move in a robot? <b>A:</b> Inertia seen by the joint changes with pose and payload.</li></ul></div>
+<p class="trans">Transition: Differentiation is the next challenge.</p></div>
+<div class="slide">
+<h3><span class="num">Slide 32</span>Filtered derivative: speed from position<span class="time">~6 min</span></h3>
+<p class="say">Many controllers need speed but the sensor gives position. The simple difference of two encoder readings divided by the sample time is a difference of rounded numbers: at low speed it jumps between 0, 48 and 96 rpm. Differentiation amplifies fast changes, 20 dB per decade. The fix is a filtered derivative: differentiate and low-pass in one block. The same block is used for the D-term of a PID controller from W1D3. The orange line is smooth but about 1.5 ms late.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>Never use a pure derivative on measured data.</li><li>Misconception: higher sample rate gives a better speed estimate. With the same encoder it gives a noisier one.</li></ul></div>
+<div class="ask"><span class="label">Ask the audience / answers</span><ul><li><b>Q:</b> Two ways to get a better speed signal? <b>A:</b> More encoder resolution, or an observer/filter.</li></ul></div>
+<p class="trans">Transition: Sometimes two different sensors together beat one: sensor fusion.</p></div>
+<div class="slide">
+<h3><span class="num">Slide 33</span>Sensor fusion: the complementary filter<span class="time">~7 min</span></h3>
+<p class="say">An IMU has a gyro and an accelerometer. The accelerometer gives tilt from gravity: right on average but very noisy when the robot vibrates. The gyro gives angular rate: smooth, but integrating a small bias makes the angle drift away, the dotted line. The complementary filter combines them: integrate the gyro, and pull gently towards the accelerometer. Alpha 0.98 at 100 Hz gives a time constant of about half a second. The orange fused line follows the true angle without noise and without drift.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>Gyro: trust short-term. Accelerometer: trust long-term.</li><li>Misconception: averaging the two angles gives the same result. It keeps half the noise and half the drift.</li></ul></div>
+<div class="ask"><span class="label">Ask the audience / answers</span><ul><li><b>Q:</b> What happens with alpha = 1? <b>A:</b> Pure gyro integration, the angle drifts.</li></ul></div>
+<p class="trans">Transition: The Kalman filter generalises this idea.</p></div>
+<div class="slide">
+<h3><span class="num">Slide 34</span>The Kalman filter idea: blend by trust<span class="time">~6 min</span></h3>
+<p class="say">Keep this conceptual. A Kalman filter repeats two steps. Predict: use a model to move the estimate forward; uncertainty grows. Update: compare with the measurement and blend; uncertainty shrinks. The weight, the Kalman gain, depends on trust: prediction variance over the sum of both variances. Work the example: both variances 4, so K is a half, the estimate lands in the middle at 11 degrees, and the variance halves to 2. The curves show the blend being narrower than both inputs.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>Blend by trust: more weight to the less uncertain source.</li><li>Misconception: the Kalman filter is magic. It is a weighted average with self-updating weights.</li></ul></div>
+<div class="ask"><span class="label">Ask the audience / answers</span><ul><li><b>Q:</b> If the sensor were very noisy (R large), what is K? <b>A:</b> Close to zero, we mostly trust the prediction.</li></ul></div>
+<p class="trans">Transition: Check your understanding.</p></div>
+<div class="slide">
+<h3><span class="num">Slide 35</span>Check your understanding: filters<span class="time">~5 min</span></h3>
+<p class="say">Pairs, two minutes, then discuss. The first question applies the moving-average zero rule; ask for the window length in time as well, which is 1 ms, so a 1 kHz disturbance fits exactly once. The second question checks the fusion idea: students should explain drift from integrating a small constant error, not just say the gyro is bad. The third question links back to delay and phase margin from the control week: in a loop, the filter with less delay is preferred, and that is usually IIR. Answers below.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>Connect each answer to delay or trust.</li></ul></div>
+<div class="ask"><span class="label">Ask the audience / answers</span><ul><li><b>Q1:</b> f_s/N = 1 kHz and multiples: 1, 2, 3 kHz ...</li><li><b>Q2:</b> The gyro is smooth but its bias integrates to growing drift, so only short-term changes are reliable.</li><li><b>Q3:</b> IIR: few terms and small delay, so less phase loss in the loop.</li></ul></div>
+<p class="trans">Transition: Summary of filters.</p></div>
+<div class="slide">
+<h3><span class="num">Slide 36</span>Summary and key terms: signal processing and filters<span class="time">~5 min</span></h3>
+<p class="say">Go through the bullets and the which-filter table. Ask: you have a noisy force signal and a resonance at 300 Hz in the same joint, which filters? A low-pass well above the loop bandwidth and a notch at 300 Hz. Repeat that every filter costs delay. Also remind the students that a filter design always starts from the question: which frequencies carry information, and which carry noise or resonance? If they can sketch that on a frequency axis, the filter choice becomes obvious. Close by repeating the fusion idea in one sentence, because it is the most transferable idea of the session.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>Every filter = gain change + delay.</li><li>Misconception: more filtering is always safer.</li></ul></div>
+<p class="trans">Transition: After the break: how all these numbers travel between devices.</p></div>
+</section>
+<section id="s4">
+<h2 class="session">Session 4 · Communication and integration <small>Curriculum code 6.7 · 60 min</small></h2>
+<div class="slide">
+<h3><span class="num">Slide 38</span>Refresher: what is a network packet?<span class="time">~5 min</span></h3>
+<p class="say">Use the letter analogy. A packet has an envelope with sender and receiver, the letter itself, and a seal that shows whether someone tampered with it. On a network the seal is a CRC check value. Define four words: bit rate, cycle time, latency and fieldbus. Latency is the age of the data when it arrives, and that is what control cares about. A fieldbus is a network designed for machines, with guaranteed timing.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>Packet = header + payload + check.</li><li>Misconception: a fast bit rate means low latency. Waiting for the cycle often dominates.</li></ul></div>
+<div class="ask"><span class="label">Ask the audience / answers</span><ul><li><b>Q:</b> What does the CRC not tell you? <b>A:</b> Whether the data is fresh.</li></ul></div>
+<p class="trans">Transition: Where do which networks sit in a robot cell?</p></div>
+<div class="slide">
+<h3><span class="num">Slide 39</span>Networks in a robot cell: the automation pyramid<span class="time">~6 min</span></h3>
+<p class="say">The automation pyramid: at the bottom field devices like sensors, valves and drives; above them PLCs and robot controllers; then HMI and SCADA; at the top MES, ERP and cloud. Going up, there is more data but deadlines become softer. The table gives typical cycle times, from tens of microseconds inside a drive to a second for factory IT. Define real time carefully: it means on time, every time, not simply fast.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>Real time = guaranteed deadline.</li><li>Misconception: Ethernet is always too slow for control. Industrial Ethernet variants are faster than old fieldbuses.</li></ul></div>
+<div class="ask"><span class="label">Ask the audience / answers</span><ul><li><b>Q:</b> Where does a camera sit? <b>A:</b> At the field/control level, but its data is large and its timing soft, so usually standard Ethernet with time stamps.</li></ul></div>
+<p class="trans">Transition: We start at the bottom with CAN.</p></div>
+<div class="slide">
+<h3><span class="num">Slide 40</span>CAN and CANopen<span class="time">~6 min</span></h3>
+<p class="say">CAN uses two twisted wires shared by all nodes, with a 120 ohm resistor at each end. Each message has an identifier; if two nodes start together, the lower identifier wins without collision, like a polite queue by priority. A frame carries up to 8 bytes. The example shows the limit: 9 frames take about 1.1 ms, fine for a gripper or an AMR, but not for a fast 6-axis robot. CANopen adds a standard dictionary of parameters; CiA 402 is the drive profile.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>Arbitration by identifier: no data lost.</li><li>Misconception: CAN is obsolete. It is everywhere in AMRs, cobots and cars.</li></ul></div>
+<div class="ask"><span class="label">Ask the audience / answers</span><ul><li><b>Q:</b> Which message wins, ID 0x100 or 0x080? <b>A:</b> 0x080, the lower one.</li></ul></div>
+<p class="trans">Transition: For fast multi-axis robots EtherCAT is popular.</p></div>
+<div class="slide">
+<h3><span class="num">Slide 41</span>EtherCAT: processing on the fly<span class="time">~6 min</span></h3>
+<p class="say">Use the train analogy: one Ethernet frame leaves the master and passes every drive; each drive unloads its set-point and loads its actual values while the frame passes, then the frame returns. A working counter tells the master everybody answered. Distributed clocks give all drives one common time. The example: 32 axes fit in about 35 microseconds of wire time, so a 100 microsecond cycle is possible. The photo shows a slave controller chip that does this in hardware.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>Processing on the fly: no store-and-forward.</li><li>Misconception: EtherCAT needs a special network card in the master. A standard Ethernet port is enough.</li></ul></div>
+<div class="ask"><span class="label">Ask the audience / answers</span><ul><li><b>Q:</b> What does the working counter detect? <b>A:</b> A device that did not read or write its data.</li></ul></div>
+<p class="trans">Transition: PROFINET is the other big player; let us compare.</p></div>
+<div class="slide">
+<h3><span class="num">Slide 42</span>PROFINET, and comparing industrial networks<span class="time">~6 min</span></h3>
+<p class="say">PROFINET is Ethernet for PLCs, widespread in European factories. RT skips the slow TCP/IP layers for cycles of milliseconds; IRT reserves a fixed time slot in each cycle, like a bus lane closed to other traffic, for synchronised motion. The table compares the networks in a robot cell: CAN for small devices, EtherCAT and PROFINET IRT for motion, PROFINET RT for PLC I/O, OPC UA for factory data and ROS 2 for robot software. Choose by cycle time and synchronisation, and by what the vendor supports.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>Pick the network per link, not one for everything.</li><li>Misconception: the highest bit rate wins.</li></ul></div>
+<div class="ask"><span class="label">Ask the audience / answers</span><ul><li><b>Q:</b> Network between PLC and safety light curtain? <b>A:</b> A safety protocol on PROFINET or EtherCAT (PROFIsafe, FSoE), or hard-wired.</li></ul></div>
+<p class="trans">Transition: Higher up, the question is not speed but meaning: OPC UA.</p></div>
+<div class="slide">
+<h3><span class="num">Slide 43</span>OPC UA: machines that describe themselves<span class="time">~6 min</span></h3>
+<p class="say">Old fieldbuses send raw bytes: you need the manual to know that byte 7 is the temperature. OPC UA sends named, typed data: the robot controller offers a tree with state, cycle time, joint temperatures with units, and even methods like start and stop. Clients like the HMI, the MES or a cloud dashboard browse this tree. It supports client-server and publish-subscribe, and has security built in. It is not meant for fast control loops.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>OPC UA = information model + secure transport.</li><li>Misconception: OPC UA replaces the fieldbus. It complements it at higher levels.</li></ul></div>
+<div class="ask"><span class="label">Ask the audience / answers</span><ul><li><b>Q:</b> Why does a MES prefer OPC UA? <b>A:</b> Machines from different vendors describe their data in the same way.</li></ul></div>
+<p class="trans">Transition: In research and mobile robots another glue is common: ROS.</p></div>
+<div class="slide">
+<h3><span class="num">Slide 44</span>ROS: the software glue of research and mobile robots<span class="time">~6 min</span></h3>
+<p class="say">ROS is not an operating system but middleware: libraries and tools that let programs called nodes exchange messages. A camera driver publishes images on a topic; a detector subscribes and publishes objects; a planner combines them with LiDAR scans and publishes velocity commands to the motor controller. Use the radio analogy: anyone may broadcast on a channel, anyone may listen. ROS 2 uses DDS for transport, and ros2_control connects to real hardware. Stress the note: fast loops stay in the drive.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>Nodes, topics, services, actions.</li><li>Misconception: ROS runs the current loop. It coordinates; drives do hard real-time.</li></ul></div>
+<div class="ask"><span class="label">Ask the audience / answers</span><ul><li><b>Q:</b> What is the advantage of publish-subscribe? <b>A:</b> Sender and receivers do not need to know each other; adding a new listener changes nothing.</li></ul></div>
+<p class="trans">Transition: Now the timing of the whole chain.</p></div>
+<div class="slide">
+<h3><span class="num">Slide 45</span>Synchronisation and latency: which loops may run over the bus?<span class="time">~6 min</span></h3>
+<p class="say">The bar shows the delay from measurement to action over a bus: wait for the cycle, transfer, compute, transfer back, apply. Typically two to three bus cycles. Example: 625 microseconds costs 7 degrees at a 30 Hz position loop, fine, but 45 degrees at a 200 Hz velocity loop, far too much. So the fast loops are closed inside the drive and only position set-points travel over the bus. Synchronisation keeps all six axes of a robot acting at the same instant.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>Close fast loops locally.</li><li>Misconception: a faster network lets you close any loop centrally.</li></ul></div>
+<div class="ask"><span class="label">Ask the audience / answers</span><ul><li><b>Q:</b> Why must the axes be synchronised? <b>A:</b> Otherwise each joint uses a set-point from a slightly different time and the tool leaves the path.</li></ul></div>
+<p class="trans">Transition: Finally: how do we know the data is valid?</p></div>
+<div class="slide">
+<h3><span class="num">Slide 46</span>Is the data valid? CRC, counters, watchdogs, timestamps<span class="time">~5 min</span></h3>
+<p class="say">Walk through the flow chart. The CRC catches damaged bits. A counter that increases every cycle catches frozen or lost data. A watchdog timer trips if nothing fresh arrives. A time stamp tells the age of a value. A plausibility check asks whether the value is physically possible, such as the three phase currents summing to zero. If any check fails, the machine stops safely and raises an alarm. Link this to the safety session yesterday.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>Correct is not the same as fresh.</li><li>Misconception: a valid CRC means the data can be used.</li></ul></div>
+<div class="ask"><span class="label">Ask the audience / answers</span><ul><li><b>Q:</b> Plausibility check for a gripper force? <b>A:</b> Within sensor range and consistent with the gripper state.</li></ul></div>
+<p class="trans">Transition: Check your understanding.</p></div>
+<div class="slide">
+<h3><span class="num">Slide 47</span>Check your understanding: communication<span class="time">~4 min</span></h3>
+<p class="say">Pairs, two minutes, then discuss. The first question has no single correct network, so reward good reasons: cycle time and synchronisation for the joints, named data and security for the MES. The second question reuses the phase rule from sampling: 360 times frequency times delay. Ask what phase margin the loop might have had, perhaps 50 degrees, so losing 36 would leave too little. The third question is about freshness rather than correctness; the CRC is fine, but a counter or time stamp shows that the value is old. Answers below.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>Phase cost: 360 f T_d.</li></ul></div>
+<div class="ask"><span class="label">Ask the audience / answers</span><ul><li><b>Q1:</b> (a) EtherCAT or PROFINET IRT: microsecond cycles, synchronisation. (b) OPC UA: named, secure data; timing is soft.</li><li><b>Q2:</b> 360 x 100 x 0.001 = 36 degrees: too much, close that loop locally.</li><li><b>Q3:</b> A sequence counter or time stamp with a watchdog.</li></ul></div>
+<p class="trans">Transition: Summary of communication.</p></div>
+<div class="slide">
+<h3><span class="num">Slide 48</span>Summary and key terms: communication and integration<span class="time">~4 min</span></h3>
+<p class="say">Read the bullets and terms. Draw attention to the theme of the whole day: timing. A measurement is only useful if we know how old it is. This leads directly into the case study. Ask the students to name, for each level of the automation pyramid, one network and its typical cycle time. Then remind them that the safest design closes fast loops locally and sends slow, meaningful data upwards. If time permits, ask which networks they have seen in a lab or internship; many will have met CAN in cars or ROS in student projects.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>Every link has a cycle time and a latency.</li><li>Misconception: one network type should be used for the whole factory.</li></ul></div>
+<p class="trans">Transition: After the break we put everything together in a real cell.</p></div>
+</section>
+<section id="s5">
+<h2 class="session">Session 5 · System-integration case study and course wrap-up <small>Curriculum code 6.8 · 60 min</small></h2>
+<div class="slide">
+<h3><span class="num">Slide 50</span>Case study: a vision-guided conveyor-picking cell<span class="time">~6 min</span></h3>
+<p class="say">Describe the cell: parts arrive at random angles on a conveyor moving at half a metre per second. A photo-eye triggers the camera, the vision PC finds each part, and a robot with a vacuum gripper picks 60 per minute. A light curtain guards the opening; a safety PLC and cell PLC coordinate; the MES collects data over OPC UA. List which day each element came from. The single question for the hour: will the gripper hit the part within plus or minus 2 mm?</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>Integration means all topics at once.</li><li>Misconception: if every component meets its datasheet, the system works.</li></ul></div>
+<div class="ask"><span class="label">Ask the audience / answers</span><ul><li><b>Q:</b> Which sessions of the course appear in this picture? <b>A:</b> Nearly all: actuators, servo loops, kinematics, programming, safety, sensors, networks.</li></ul></div>
+<p class="trans">Transition: First we map who talks to whom.</p></div>
+<div class="slide">
+<h3><span class="num">Slide 51</span>Case study: who talks to whom, and how fast<span class="time">~7 min</span></h3>
+<p class="say">Follow the arrows: the photo-eye triggers the camera, images go over GigE to the vision PC, the result goes over Ethernet to the robot controller, which commands six drives over EtherCAT. The table sums the vision latency to 80 ms. In that time the part moves 40 mm, twenty times the tolerance. Ask the class for solutions. Most suggest a faster computer. The real solution is the dashed red line: the same trigger latches the conveyor encoder count, so we know exactly where the part was when the picture was taken.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>Latency is fine if it is known and compensated.</li><li>Misconception: the vision system must be faster than the conveyor.</li></ul></div>
+<div class="ask"><span class="label">Ask the audience / answers</span><ul><li><b>Q:</b> What would happen if processing time varied between 50 and 110 ms without time stamps? <b>A:</b> A position error of up to 30 mm varying from part to part.</li></ul></div>
+<p class="trans">Transition: Let us compute the tracking with numbers.</p></div>
+<div class="slide">
+<h3><span class="num">Slide 52</span>Case study: conveyor tracking, step by step<span class="time">~6 min</span></h3>
+<p class="say">The part position at any later time is the position seen in the image plus the encoder counts since the exposure times the belt travel per count. Work the four steps: a 100 mm roller has a 314 mm circumference; 1000 counts per revolution give 0.314 mm per count; the part was at 120 mm, 1900 counts have passed, so it is now at 717 mm. The robot controller treats this as a user frame on wheels, as in robot programming on W2D3.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>Measure the conveyor, do not assume its speed.</li><li>Misconception: using nominal belt speed is good enough. Speed varies with load.</li></ul></div>
+<div class="ask"><span class="label">Ask the audience / answers</span><ul><li><b>Q:</b> How far has the part moved after 1000 more counts? <b>A:</b> 314 mm.</li></ul></div>
+<p class="trans">Transition: Is the result accurate enough? Build an error budget.</p></div>
+<div class="slide">
+<h3><span class="num">Slide 53</span>Case study: the error budget<span class="time">~7 min</span></h3>
+<p class="say">List each independent error source: one pixel of vision, hand-eye calibration, one encoder count, one millisecond of timing jitter, and robot repeatability. The worst case adds them: 1.86 mm. Independent errors rarely peak together, so engineers use the root of the sum of squares: 0.92 mm. Both are under the 2 mm tolerance, so the design works. To improve it, attack the biggest terms first: lens and lighting, calibration, hardware time stamps. Robot repeatability is the smallest term.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>RSS for independent errors; worst case for safety-critical limits.</li><li>Misconception: the robot is the main source of error. Here it is the smallest.</li></ul></div>
+<div class="ask"><span class="label">Ask the audience / answers</span><ul><li><b>Q:</b> Which single improvement helps most? <b>A:</b> Any of the three 0.5 mm terms; halving one reduces RSS to about 0.81 mm.</li></ul></div>
+<p class="trans">Transition: How do we bring such a cell to life?</p></div>
+<div class="slide">
+<h3><span class="num">Slide 54</span>Case study: commissioning the cell<span class="time">~5 min</span></h3>
+<p class="say">Commissioning goes inside-out, like tuning cascaded loops in W1D5: wiring and networks first, then safety, then drives and robot frames, then camera calibration, then tracking at low speed, and finally full speed with logging. Define system integration: making separately good parts work as one system. Explain FAT and SAT. Experienced integrators say most problems they meet are timing problems, so log everything with time stamps. Add a short story if you have one from industry: a cell that failed at the customer because the encoder latch was wired to the wrong input, for example.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>Inside-out, one layer at a time.</li><li>Misconception: start at full speed to save time.</li></ul></div>
+<div class="ask"><span class="label">Ask the audience / answers</span><ul><li><b>Q:</b> Why safety before tuning? <b>A:</b> People work near the cell during tuning; protection must already work.</li></ul></div>
+<p class="trans">Transition: Check your understanding of the case.</p></div>
+<div class="slide">
+<h3><span class="num">Slide 55</span>Check your understanding: integration case study<span class="time">~5 min</span></h3>
+<p class="say">Pairs, three minutes, then discuss. For the first question let a volunteer recompute the error budget on the board: only the timing-jitter line changes, from 0.5 to 1.0 mm, because the belt moves twice as far in the same jitter time. Point out that motion blur also grows, so a shorter exposure or strobe light may be needed. The second question is the central idea of the case study: a known delay is harmless when it is measured. The third question links back to safety on W2D4. Answers below.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>Recompute the budget in the open.</li></ul></div>
+<div class="ask"><span class="label">Ask the audience / answers</span><ul><li><b>Q1:</b> Timing jitter becomes 1.0 mm. RSS = sqrt(0.25+0.25+0.096+1.0+0.0025) = about 1.26 mm, still within 2 mm (worst case 2.36 mm exceeds it; blur also grows).</li><li><b>Q2:</b> The position at exposure is linked to an exact encoder count; the delay only changes how many counts are added, which is measured.</li><li><b>Q3:</b> People are near the machine during commissioning; risk reduction must be in place first (ISO 10218, W2D4).</li></ul></div>
+<p class="trans">Transition: Now let us step back and look at the whole course.</p></div>
+<div class="slide">
+<h3><span class="num">Slide 56</span>Course wrap-up: ten days, one robot<span class="time">~5 min</span></h3>
+<p class="say">Show the ten days in two columns. Week one built one good joint: actuators, models, control and servo drives. Week two made many joints do useful work: mechanisms and kinematics, manufacturing systems, then sensors and integration. Ask students which day they found hardest and which most useful; collect a few answers. This is also a good moment for feedback on the course. Remind the students that the course followed the same path as a real robot design: choose the actuator, make it controllable, describe the geometry, place it in a production system, and finally measure and connect it.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>Week 1: one joint. Week 2: the whole robot.</li><li>Misconception: the topics are separate subjects. They are layers of one machine.</li></ul></div>
+<div class="ask"><span class="label">Ask the audience / answers</span><ul><li><b>Q:</b> Which topic links both weeks most strongly? <b>A:</b> Feedback control: it appears in servo loops, robot control and filtering.</li></ul></div>
+<p class="trans">Transition: All of this meets in a single robot joint.</p></div>
+<div class="slide">
+<h3><span class="num">Slide 57</span>Course wrap-up: every topic in one robot joint<span class="time">~6 min</span></h3>
+<p class="say">Follow the signal around the loop: the PLC program commands a move, trajectory generation and inverse kinematics give joint set-points, the position, velocity and current loops drive the motor through the gearbox, the link and payload move, sensors measure, the ADC and filters clean the signal, and networks connect it all. The orange numbers are the session codes where each block was taught. Read the one-sentence summary: the weakest link sets the performance.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>Design all blocks together.</li><li>Misconception: a better controller can compensate any weak block.</li></ul></div>
+<div class="ask"><span class="label">Ask the audience / answers</span><ul><li><b>Q:</b> Which block limits a joint with a soft gearbox? <b>A:</b> The mechanics: resonance limits the loop bandwidth.</li></ul></div>
+<p class="trans">Transition: Ten principles to take home.</p></div>
+<div class="slide">
+<h3><span class="num">Slide 58</span>Course wrap-up: ten principles to take home<span class="time">~6 min</span></h3>
+<p class="say">Read the ten principles, one per student if the group is small. Each one names the day where it came from, so students can go back to the slides. Ask each student to choose the one principle they think they will use first in their next project or lab, and say why. If the group is large, ask them to vote with raised hands on the most important principle; the discussion of why is often more valuable than the vote itself.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>Principles are easier to remember than formulas.</li><li>Misconception: the course content is only theory; each principle is a practical rule.</li></ul></div>
+<p class="trans">Transition: A short summary of today.</p></div>
+<div class="slide">
+<h3><span class="num">Slide 59</span>Day summary<span class="time">~3 min</span></h3>
+<p class="say">Summarise today session by session using the bullets, and run through the key terms quickly as a quiz: point at a term, a student defines it. Ask: which session today connected most strongly to week one? Most will say signal processing, because filters and delay appeared in the control sessions. Link the threads together: vision gives a pose through a chain of transforms, sampling and filtering decide how much we can trust a number, and networks decide how old it is when it arrives.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>Timing and transforms were the threads of today.</li></ul></div>
+<p class="trans">Transition: And finally, where to go from here.</p></div>
+<div class="slide">
+<h3><span class="num">Slide 60</span>Course wrap-up: where to go next<span class="time">~4 min</span></h3>
+<p class="say">Point to further courses and practical projects: state-space control, robot dynamics and force control, motion planning and SLAM, 3D perception and learning-based grasping, and practical work with ROS 2, PLCs and real servo drives. Thank the students. Invite questions and remind them of the challenge: next time they see a robot cell, name its actuators, sensors, loops and networks. Finally, collect written feedback if your institution requires it, and remind students where the slides, notes and references can be found for exam preparation.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>Learning continues in the lab.</li><li>Misconception: robotics is mainly programming. It is mechanics, electronics, control and software together.</li></ul></div>
+<div class="ask"><span class="label">Ask the audience / answers</span><ul><li><b>Q:</b> Questions and discussion.</li></ul></div>
+<p class="trans">Transition: End of the course.</p></div>
+<div class="slide">
+<h3><span class="num">Slide 61</span>Figure credits<span class="time">~0 min</span></h3>
+<p class="say">Figure credits: show briefly; all photographs are from Wikimedia Commons under free licences, all diagrams and plots were drawn for this course. If a student asks about reusing images, explain the licence types briefly: CC BY requires attribution, CC BY-SA also requires sharing derived works under the same licence, and public-domain images can be reused freely. Every image on these slides lists author and licence on the slide itself.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>Credit every image you reuse.</li></ul></div>
+<p class="trans">Transition: References.</p></div>
+<div class="slide">
+<h3><span class="num">Slide 62</span>References<span class="time">~0 min</span></h3>
+<p class="say">References: point students to Corke for robotics and vision, Oppenheim and Schafer for signal processing, and the standards for networks and safety. Recommend one book per area for students who want to go further: Corke for robotics and vision with code examples, Oppenheim and Schafer for digital filters, Thrun et al. for Kalman filters and localisation, and the Springer Handbook of Robotics as a reference. Standards are expensive but often available through the university library.</p>
+<div class="key"><span class="label">Emphasise</span><ul><li>Use textbooks and standards, not only web searches.</li></ul></div>
+<p class="trans">Transition: End.</p></div>
+</section>
+</main>
+<footer>Figures and references are listed on the final slides of the deck.</footer>
+</body>
+</html>

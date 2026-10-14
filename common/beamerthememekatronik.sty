@@ -88,6 +88,10 @@
 \newcommand{\daytitle}{}
 \newcommand{\coursetitle}{Mechatronics: Electrical Machines, Control, Servo Systems and Sensing}
 \newcommand{\setday}[2]{\renewcommand{\daynumber}{#1}\renewcommand{\daytitle}{#2}}
+% optional week support (two-week programmes): \setweek{1} -> "Week 1 · Day N"
+\newcommand{\weekprefix}{}
+\newcommand{\weekprefixup}{}
+\newcommand{\setweek}[1]{\renewcommand{\weekprefix}{Week #1\,\textperiodcentered\,}\renewcommand{\weekprefixup}{WEEK #1\ \textperiodcentered\ }}
 
 % ---------------------------------------------------------------- frame title
 \setbeamertemplate{frametitle}{%
@@ -109,7 +113,7 @@
   \hbox{%
     \begin{beamercolorbox}[wd=.18\paperwidth,ht=3.2mm,dp=1.2mm,center]{}%
       \setbeamercolor{fbox}{fg=white,bg=mkOrange}%
-      \colorbox{mkOrange}{\makebox[.14\paperwidth]{\color{white}\usebeamerfont{footline}\bfseries Day \daynumber}}%
+      \colorbox{mkOrange}{\makebox[.14\paperwidth]{\color{white}\usebeamerfont{footline}\bfseries \weekprefix Day \daynumber}}%
     \end{beamercolorbox}%
     \begin{beamercolorbox}[wd=.64\paperwidth,ht=3.2mm,dp=1.2mm,left]{}%
       \usebeamerfont{footline}\color{mkGray}\hspace*{1mm}\insertsectionhead\ \textbar\ \insertshorttitle%
@@ -132,7 +136,7 @@
       \draw[mkOrange,line width=1pt,domain=0:4,samples=80] plot (\x,{1-exp(-1.4*\x)*(cos(\x*160)+0.5*sin(\x*160))-0.4});
     \end{scope}
     \node[anchor=north west,text=mkOrange,font=\bfseries\large] at ([xshift=8mm,yshift=-9mm]current page.north west)
-      {DAY \daynumber\ \,/\, 5};
+      {\weekprefixup DAY \daynumber\ \,/\, 5};
     \node[anchor=north west,text=mkSky,font=\scriptsize,text width=10cm] at ([xshift=8mm,yshift=-16mm]current page.north west)
       {\coursetitle};
     \node[anchor=west,text width=11.2cm,align=left] at ([xshift=8mm,yshift=4mm]current page.west)
@@ -155,7 +159,7 @@
       \node[anchor=north west,text=white,font=\LARGE\bfseries,text width=10.5cm] at ([xshift=13mm,yshift=0mm]current page.west)
         {\insertsectionhead};
       \node[anchor=south east,text=mkSky,font=\scriptsize] at ([xshift=-8mm,yshift=6mm]current page.south east)
-        {Day \daynumber\ \textbullet\ \inserttitle};
+        {\weekprefix Day \daynumber\ \textbullet\ \inserttitle};
     \end{tikzpicture}
   \end{frame}}%
 }

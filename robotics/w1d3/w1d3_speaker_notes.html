@@ -1,0 +1,446 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>W1D3 Speaker Notes</title>
+<style>
+  :root{
+    --navy:#0B1F3A; --blue:#14365E; --mid:#2B5A8C; --sky:#6E9BC9; --pale:#E8EEF6;
+    --orange:#F07F12; --amber:#F9A94B; --cream:#FFF3E4; --gray:#5B6573; --bg:#F6F8FB; --card:#fff; --text:#0B1F3A;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){ --bg:#0A1424; --card:#10213A; --text:#E6ECF4; --pale:#1A3152; --cream:#3a2a14; --gray:#9AA8BA; }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 "Segoe UI",system-ui,-apple-system,Roboto,Helvetica,Arial,sans-serif}
+  header{background:var(--navy);color:#fff;padding:28px 16px 22px;border-bottom:4px solid var(--orange)}
+  header .wrap{max-width:980px;margin:0 auto}
+  header .day{color:var(--orange);font-weight:700;letter-spacing:.08em;font-size:.9rem}
+  header h1{margin:.2em 0 .1em;font-size:1.9rem}
+  header p{margin:0;color:var(--sky)}
+  nav.toc{position:sticky;top:0;z-index:5;background:var(--blue);padding:8px 16px;overflow-x:auto;white-space:nowrap}
+  nav.toc a{color:#fff;text-decoration:none;margin-right:16px;font-size:.88rem}
+  nav.toc a:hover{color:var(--amber)}
+  main{max-width:980px;margin:0 auto;padding:20px 16px 60px}
+  h2.session{margin:42px 0 12px;padding:10px 14px;background:var(--blue);color:#fff;border-left:6px solid var(--orange);border-radius:4px;font-size:1.25rem}
+  h2.session small{display:block;color:var(--amber);font-weight:500;font-size:.85rem}
+  table.plan{width:100%;border-collapse:collapse;background:var(--card);margin:12px 0}
+  table.plan th{background:var(--blue);color:#fff;text-align:left;padding:8px}
+  table.plan td{padding:8px;border-bottom:1px solid var(--pale)}
+  .slide{background:var(--card);border-radius:8px;margin:14px 0;padding:14px 18px;box-shadow:0 1px 3px rgba(11,31,58,.12);border-top:3px solid var(--mid)}
+  .slide h3{margin:0 0 6px;font-size:1.05rem;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+  .slide h3 .num{background:var(--orange);color:#fff;border-radius:4px;padding:1px 8px;font-size:.85rem}
+  .slide h3 .time{margin-left:auto;color:var(--gray);font-weight:400;font-size:.85rem}
+  .say{margin:6px 0}
+  .key{background:var(--cream);border-left:4px solid var(--orange);padding:6px 10px;margin:8px 0;border-radius:3px}
+  .ask{background:var(--pale);border-left:4px solid var(--mid);padding:6px 10px;margin:8px 0;border-radius:3px}
+  .trans{color:var(--gray);font-style:italic;margin-top:6px}
+  .label{font-weight:700;font-size:.8rem;text-transform:uppercase;letter-spacing:.05em;color:var(--orange)}
+  .ask .label{color:var(--mid)}
+  ul{margin:4px 0 4px 1.1em;padding:0}
+  footer{max-width:980px;margin:0 auto;padding:20px 16px;color:var(--gray);font-size:.85rem}
+  @media print{nav.toc{display:none}.slide{break-inside:avoid;box-shadow:none;border:1px solid #ccc}}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <div class="day">WEEK 1 · DAY 3 / 5 · SPEAKER NOTES</div>
+  <h1>Control in Robotic &amp; Mechatronic Systems</h1>
+  <p>Mechatronics and Robotics Engineering (50 h) · Sessions 2.3–2.6 · 5 h net teaching time</p>
+</div></header>
+<nav class="toc"><a href="#plan">Plan</a><a href="#open">Opening</a><a href="#s23">2.3 · Block diagrams</a><a href="#s24">2.4 · Bode</a><a href="#s25">2.5 · PID</a><a href="#s26">2.6 · Stability</a></nav>
+<main>
+  <section id="plan">
+    <h2 class="session">Day plan &amp; timing</h2>
+    <table class="plan"><tr><th>Block</th><th>Topic</th><th>Slides</th><th>Duration</th></tr>
+      <tr><td>1</td><td>Opening, recap of W1D2 + 2.3 Block diagrams, feedback and state-space basics</td><td>1–17</td><td>60 min</td></tr>
+      <tr><td>–</td><td><i>Break</i> (extra, not counted)</td><td></td><td>10–15 min</td></tr>
+      <tr><td>2</td><td>2.4 Frequency response and Bode plots</td><td>18–27</td><td>60 min</td></tr>
+      <tr><td>–</td><td><i>Break</i> (extra, not counted)</td><td></td><td>10–15 min</td></tr>
+      <tr><td>3</td><td>2.5 PID control (P/I/D effects, tuning, windup &amp; anti-windup, feedforward)</td><td>28–41</td><td>90 min</td></tr>
+      <tr><td>–</td><td><i>Break</i> (extra, not counted)</td><td></td><td>10–15 min</td></tr>
+      <tr><td>4</td><td>2.6 Stability and performance + day wrap-up</td><td>42–59</td><td>90 min</td></tr>
+      <tr><td></td><td><b>Total net teaching time</b></td><td></td><td><b>300 min</b></td></tr>
+    </table>
+    <p>Section-divider pages (5, 18, 28, 42, 55) need no card. Opening (8 min) is part of block 1; wrap-up slides 56–59 (7 min) are part of block 4.</p>
+  </section>
+
+  <section id="open">
+    <h2 class="session">Title, agenda and recap of W1D2 <small>8 min</small></h2>
+    <div class="slide">
+      <h3><span class="num">Slide 1</span>Title<span class="time">~1 min</span></h3>
+      <p class="say">Welcome to day three. Yesterday ended with transfer functions; today we use them to make a robot joint do what we want. The whole day is about one question: how do we turn a motor, a gearbox and a link into a joint that goes exactly to a commanded angle, quickly, without overshooting and without shaking? We will need four tools for that: block diagrams, Bode plots, the PID controller and a way to judge stability and performance. Each tool gets its own session, and each session ends with a short check and a summary.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Today is the first full control day; everything later (servo drives, manipulators) builds on it.</li></ul></div>
+      <p class="trans">Transition: Let us look at the plan and what you should be able to do by this afternoon.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 2</span>Agenda and learning outcomes<span class="time">~3 min</span></h3>
+      <p class="say">Here is the plan: one hour on block diagrams and state space, one hour on frequency response and Bode plots, then ninety minutes each on PID control and on stability and performance. Breaks are extra. We will use one running example all day: a single robot joint with inertia 0.5 kilogram metre squared. Read the outcomes on the right aloud with the class; they are verbs you can check at the end of the day. Refresher boxes cover the maths you may not have seen yet. Anything in small grey text marked Going further is optional.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Outcomes are skills: draw, reduce, read, explain, judge.</li><li>Misconception: control is not only maths; it is about physical limits too.</li></ul></div>
+      <p class="trans">Transition: First, a quick recap of what we built in the last two days.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 3</span>What we learned so far (1/2): the robot joint hardware<span class="time">~2 min</span></h3>
+      <p class="say">Remember the chain from W1D1 and W1D2: an amplifier pushes current into the motor, the motor makes torque k_t times i, a gearbox with ratio N multiplies torque and divides speed, and the link with its payload moves. The load inertia appears at the motor divided by N squared, like a bicycle in low gear making a heavy load feel light. We also saw that real gearboxes have backlash and elasticity. Today we take this hardware as given and ask how to command it so the link goes exactly where we want.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Reflected inertia J_L/N^2 is why gear ratio matters for control.</li><li>Misconception: a gearbox does not remove the load; it only rescales it.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why do we care about elasticity today? <b>A:</b> Because springy gears create resonances that limit how fast a controller can be (session 2.4).</li></ul></div>
+      <p class="trans">Transition: And the second half of the recap: the models.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 4</span>What we learned so far (2/2): models and transfer functions<span class="time">~2 min</span></h3>
+      <p class="say">Yesterday you turned ODEs into transfer functions with the Laplace transform. The poles, the roots of the denominator, tell us whether a system is stable and how fast it is. A first-order system is described by a gain and a time constant; a second-order one by a natural frequency and a damping ratio, as the plot shows: same speed scale, very different shapes. Our joint model, torque in and angle out, is one over J s squared plus B s. Note there is a pole at zero: the joint is an integrator of speed, so it never settles by itself.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Joint model G = 1/(Js^2+Bs), J = 0.5, B = 0.1 is used all day.</li><li>Misconception: a pole at s = 0 is not 'stable'; the angle drifts with any constant torque.</li></ul></div>
+      <p class="trans">Transition: With this in mind, let us start session 2.3 and ask why a robot needs feedback at all.</p>
+    </div>
+  </section>
+
+  <section id="s23">
+    <h2 class="session">Session 2.3 · Block diagrams, feedback and state-space basics <small>Curriculum code 2.3 · 52 min</small></h2>
+    <div class="slide">
+      <h3><span class="num">Slide 6</span>Why does a robot need feedback at all?<span class="time">~4 min</span></h3>
+      <p class="say">Look at the industrial arm. It repeats a pose to a few hundredths of a millimetre, even though the payload changes, the gearbox warms up and friction varies. Could we just compute the torque needed and send it open loop? No. The joint is a double integrator: a tiny torque error integrates twice into a large angle error. And the model is never exact. The answer is to measure the angle with an encoder, compare it with the target and correct the torque. That is closed-loop control, and it is in every robot joint.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Open loop cannot cope with unknown loads.</li><li>Misconception: a better model removes the need for feedback. It does not; the world always differs from the model.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Name a disturbance on a robot joint. <b>A:</b> Gravity on the link, payload change, friction, a person pushing a cobot.</li></ul></div>
+      <p class="trans">Transition: Before the robot, let us use an everyday feedback loop: cruise control.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 7</span>Feedback: the cruise-control story<span class="time">~5 min</span></h3>
+      <p class="say">Cruise control is the classic example. You set a speed; the controller compares it with the measured speed and adjusts the throttle. A hill is a disturbance: open loop, the car slows down and nobody notices; closed loop, the error grows and the controller opens the throttle. Map it onto a robot joint: set speed becomes target angle, speedometer becomes encoder, throttle becomes motor current. Now the worked example: with only a proportional controller and loop gain 9, the car reaches 90 instead of 100 km/h. A P controller needs an error to produce any throttle at all.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Measure, compare, correct.</li><li>Misconception: P control reaches the target exactly. It leaves an offset 1/(1+L).</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> How could we reduce the 10 km/h offset? <b>A:</b> Raise the gain (offset 1/(1+L)) or add integral action, which removes it.</li></ul></div>
+      <p class="trans">Transition: To talk about loops precisely we need a drawing language: block diagrams.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 8</span>Block diagrams: the four building blocks<span class="time">~4 min</span></h3>
+      <p class="say">A block diagram has only four elements. Signals are arrows carrying a quantity with units. A block multiplies its input signal by a transfer function. A summing junction adds or subtracts signals, which must have the same units. A pick-off point copies a signal, which is what a sensor does. On the right is our joint drive chain: amplifier, motor constant, joint dynamics. Blocks in series simply multiply. Feedback appears as soon as an arrow goes back to an earlier summing junction.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Arrows show cause and effect, not wires.</li><li>Misconception: a block diagram is a circuit diagram. It is a signal-flow map.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> What are the units of the signal between motor and joint? <b>A:</b> Torque, in newton metres.</li></ul></div>
+      <p class="trans">Transition: Now the rules for simplifying these diagrams.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 9</span>Block-diagram algebra<span class="time">~5 min</span></h3>
+      <p class="say">Four rules handle almost every diagram. Series blocks multiply; parallel blocks add; a negative feedback loop becomes forward over one plus loop; and a summing point can be moved through a block if you add the same block in the side path. The key box shows why feedback is so powerful: with forward gain 10 the closed loop is 0.91; double the forward gain to 20 and it only rises to 0.95. A 100 percent change in the plant changes the closed loop by 4 percent. That is why feedback makes robots robust to payload changes.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Forward over one plus loop: G1/(1+G1G2).</li><li>Misconception: feedback makes the system faster only. Its main gift is insensitivity to plant changes.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> What if the feedback sign is positive? <b>A:</b> Then G1/(1-G1G2), which blows up when G1G2 approaches 1.</li></ul></div>
+      <p class="trans">Transition: Let us name the important quantities in the standard loop.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 10</span>The standard feedback loop and its two key functions<span class="time">~5 min</span></h3>
+      <p class="say">This is the standard loop we will use all day: controller C, plant G, reference r, disturbance d, output y. Going once around the loop gives the loop gain L equals C times G. Two functions describe everything: the sensitivity S, one over one plus L, tells how much of a disturbance survives; the complementary sensitivity T, L over one plus L, tells how well the output follows the reference. They always add to one. The photo shows Watt's governor, a mechanical P controller; Maxwell analysed it in 1868 and started control theory.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>S + T = 1: you cannot make both small at the same frequency.</li><li>Misconception: high loop gain is always good. It also passes sensor noise to the output.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> For cruise control with L = 9, what fraction of a disturbance remains? <b>A:</b> S = 0.1, so 10 percent.</li></ul></div>
+      <p class="trans">Transition: Now apply this to our robot joint with a P controller.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 11</span>Worked example: closing a P loop around the robot joint<span class="time">~5 min</span></h3>
+      <p class="say">Put a P controller around the joint. Using the feedback rule we get K_p over J s squared plus B s plus K_p. Compare it with the standard second-order form: omega_n is the square root of K_p over J, which is 10 rad/s for K_p equal to 50. The damping ratio is B over two root K_p J, only 0.01. The plot shows what that means: the arm rings for many seconds around the target. Feedback alone is not enough; the controller has to be designed. P is a spring, and a spring on a mass without a damper keeps oscillating.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>P on an inertia equals a spring: almost no damping.</li><li>Misconception: if it is closed-loop it must be well behaved.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> What would add damping? <b>A:</b> A term proportional to velocity: the D in PID, session 2.5.</li></ul></div>
+      <p class="trans">Transition: Before we fix that, a second way of writing models: state space, which starts with a short matrix refresher.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 12</span>Refresher: matrices for state space<span class="time">~4 min</span></h3>
+      <p class="say">A quick refresher. A matrix times a vector: each row times the vector gives one entry, as in the example. Why do we need this? Two coupled first-order ODEs, x1 dot equals x2 and x2 dot equals minus 4 x1 minus 2 x2, fit into one line x dot equals A x. The eigenvalues of A, the roots of det of lambda I minus A, are the natural speeds of the system. Here they are minus 1 plus or minus j 1.73, exactly the poles of a mass-spring-damper with omega_n 2 and zeta 0.5.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Eigenvalues of A = poles.</li><li>Misconception: matrices are a new theory. They are just bookkeeping for several ODEs.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> What does a negative real part of an eigenvalue mean? <b>A:</b> The corresponding motion decays: stable.</li></ul></div>
+      <p class="trans">Transition: Now the general state-space form.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 13</span>State-space representation<span class="time">~5 min</span></h3>
+      <p class="say">The state is the small set of numbers that tells you where the system is now: here angle and angular velocity. The state equation x dot equals A x plus B u, and the output equation y equals C x plus D u. For the joint, A has a 1 in the top right, meaning angle changes with speed, and minus B over J at the bottom right for friction. In the diagram each state is the output of one integrator: integrators remember. State space handles many inputs and outputs, so it suits a six-axis arm, and it is the basis of the Kalman filter later.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>One integrator per state.</li><li>Misconception: state variables must be measurable. They need not be; observers estimate them.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Eigenvalues of the joint's A? <b>A:</b> 0 and -B/J = -0.2 per second, matching the transfer function poles.</li></ul></div>
+      <p class="trans">Transition: Let us write the joint motor in both forms.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 14</span>The joint motor in both representations<span class="time">~4 min</span></h3>
+      <p class="say">Here is the DC motor from W1D1. Kirchhoff gives the electrical equation, Newton the mechanical one. Two energy stores, the inductance and the inertia, mean two states: current and speed. Write them as A, B, C. Or take Laplace transforms and eliminate the current to get the transfer function. Notice the k_t k_e term: back-EMF acts as a built-in feedback loop, because a faster motor gets less current. Load torque, for example gravity on the link, enters as a second input: a disturbance.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Number of states = number of independent energy stores.</li><li>Misconception: the motor has no feedback without a controller. Back-EMF is natural feedback.</li></ul></div>
+      <p class="trans">Transition: Let us put numbers in.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 15</span>Worked example: a small joint servo motor<span class="time">~4 min</span></h3>
+      <p class="say">With realistic numbers, the denominator divided by L_a J is s squared plus 500 s plus 20,860. The two poles are minus 46, the slow mechanical one, and minus 454, the fast electrical one. The DC gain is about 10 rad/s per volt, so a 24 volt step gives about 240 rad/s and settles in about 87 ms, four over 46. The dashed curve ignores the inductance and is almost identical: the slow pole dominates. But the starting current is 20 amps, which is why drives use current control, W1D5.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Slow pole dominates the response.</li><li>Misconception: the fast pole can always be ignored; it matters for current and for fast loops.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Settling time from the dominant pole? <b>A:</b> About 4 time constants: 4/46 = 87 ms.</li></ul></div>
+      <p class="trans">Transition: Time to check your understanding.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 16</span>Session 2.3 – Check your understanding<span class="time">~4 min</span></h3>
+      <p class="say">Give students three minutes in pairs. Question one: the forward path is 4 over s plus 1, so the closed loop is 4 over s plus 5; its final value for a unit step is 4/5 = 0.8. Question two: omega_n equals root K_p over J, so doubling J divides omega_n by root 2, about 7.1 rad/s; zeta equals B over two root K_p J, which also falls by root 2: slower and even less damped. Question three: two states, current and speed, because there are two energy stores, the inductance and the inertia.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Answers: (1) Y/R = 4/(s+5), final value 0.8. (2) omega_n and zeta both drop by a factor 1.41. (3) Two: i_a and omega.</li><li>Misconception to watch: students forget the 1 in 1 + L.</li></ul></div>
+      <p class="trans">Transition: Let us summarise the session.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 17</span>Session 2.3 – Summary and key terms<span class="time">~3 min</span></h3>
+      <p class="say">Summary: feedback means measure, compare, correct, and it fights disturbances you do not model. Block diagrams have simple algebra; the feedback rule is forward over one plus loop. S and T describe every loop. State space packs coupled ODEs into matrices whose eigenvalues are the poles. And P control of a pure inertia behaves like an undamped spring, so we need more than P. Go over the key terms box and ask a student to define loop gain in their own words.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Key terms: open/closed loop, summing junction, loop gain, sensitivity, state.</li></ul></div>
+      <p class="trans">Transition: After the break: what happens when we shake a system with sine waves, the frequency response.</p>
+    </div>
+  </section>
+
+  <section id="s24">
+    <h2 class="session">Session 2.4 · Frequency response and Bode plots <small>Curriculum code 2.4 · 60 min</small></h2>
+    <div class="slide">
+      <h3><span class="num">Slide 19</span>Refresher: what a sinusoidal frequency response means<span class="time">~7 min</span></h3>
+      <p class="say">Wave a robot arm slowly by hand and the tip follows. Wave it fast and the tip moves less and lags behind. That is frequency response. For a linear stable system a sine input gives a sine output of the same frequency, only scaled by |G(j omega)| and shifted by the angle of G(j omega). The recipe is simple: replace s by j omega and compute the complex number. For one over s plus one at 1 rad/s we get 0.707 at minus 45 degrees; at 10 rad/s only 0.0995 at minus 84 degrees.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Same frequency out; only amplitude and phase change.</li><li>Misconception: the output frequency changes. It does not in a linear system.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> What does a phase of -90 degrees mean in time? <b>A:</b> The output peaks a quarter period after the input.</li></ul></div>
+      <p class="trans">Transition: Gains range over many orders of magnitude, so we need decibels.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 20</span>Refresher: decibels and logarithmic scales<span class="time">~6 min</span></h3>
+      <p class="say">Gains in a servo range from a thousandth to a thousand. A log scale keeps both visible. In decibels, gain is 20 log10 of |G|. Useful anchors: 10 is 20 dB, 2 is 6 dB, 0.707 is minus 3 dB, 0.1 is minus 20 dB. Because gains in series multiply, their dB values add, which makes Bode plots of chained blocks easy. On the frequency axis, a decade is a factor of ten; equal steps mean equal ratios. Practise one: 0.05 is about minus 26 dB.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>dB values add when blocks are in series.</li><li>Misconception: 0 dB means zero gain. It means gain 1.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> What is 6 dB plus 20 dB as a gain? <b>A:</b> 2 times 10 = 20.</li></ul></div>
+      <p class="trans">Transition: Now we can read a Bode plot.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 21</span>How to read a Bode plot<span class="time">~8 min</span></h3>
+      <p class="say">A Bode plot shows magnitude in dB on top and phase in degrees below, both over log frequency. To read it, pick a frequency, read the magnitude and phase. At 0.1 rad/s, 40 dB means a gain of 100, and the phase is about minus 85 degrees. Straight-line rules make sketching easy: each pole adds minus 20 dB per decade after its corner and up to minus 90 degrees; each zero does the opposite; an integrator is minus 20 dB per decade everywhere. The example has an integrator, a zero at 1 and a pole at 10. Bode developed this at Bell Labs.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Slopes come in multiples of 20 dB/decade.</li><li>Misconception: the straight lines are the real curve. They are approximations, worst at corners.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Slope after the pole at 10? <b>A:</b> -20 dB/dec: integrator -20, zero +20, pole -20.</li></ul></div>
+      <p class="trans">Transition: Let us do one completely with numbers.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 22</span>Worked example: Bode plot of a first-order lag<span class="time">~7 min</span></h3>
+      <p class="say">Take a joint motor with its current loop, seen from the speed command, as a first-order lag with tau equal to 50 ms. The corner frequency is one over tau, 20 rad/s. Compute three points: at 2 rad/s, ten times below the corner, practically no change and minus 5.7 degrees; at the corner, minus 3 dB and minus 45 degrees; at 200 rad/s, ten times above, about minus 20 dB and minus 84 degrees. The two asymptotes, flat then minus 20 dB per decade, are within 3 dB everywhere: very good for hand sketches.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Corner: -3 dB and -45 degrees.</li><li>Misconception: at the corner the gain has already dropped to half. It is 0.707, not 0.5.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> What is the -3 dB frequency in Hz? <b>A:</b> 20/(2 pi) = 3.2 Hz.</li></ul></div>
+      <p class="trans">Transition: Second-order systems can do something first-order ones cannot: resonate.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 23</span>Resonance: pushing a swing at the right moment<span class="time">~7 min</span></h3>
+      <p class="say">Think of a playground swing: small pushes at its own rhythm give a big motion. That is resonance. For a second-order system the peak at omega_n is one over two zeta. Below omega_n the output follows; at omega_n the phase is minus 90 degrees; above it the gain falls at 40 dB per decade and the phase goes to minus 180. With zeta equal to 0.05, typical of a gearbox or belt in a robot joint, the peak is a factor 10, plus 20 dB. Any controller that pushes energy near that frequency will shake the arm.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Peak height 1/(2 zeta).</li><li>Misconception: resonance is only a problem if you command that frequency. Noise and steps contain all frequencies.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> zeta = 0.1: how high is the peak? <b>A:</b> 1/0.2 = 5, about +14 dB.</li></ul></div>
+      <p class="trans">Transition: How do we measure such a plot on a real robot?</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 24</span>Measuring a frequency response on a robot axis<span class="time">~6 min</span></h3>
+      <p class="say">Servo drives have a built-in frequency-response tool. The drive adds a test signal, a chirp sweep, a pseudo-random binary sequence or stepped sines, while the joint is held in closed loop, which keeps it safe against gravity. It records the input and output and computes gain and phase at each frequency. The amplitude must be large enough to beat friction and noise but small enough to stay within limits. Several runs are averaged to reduce noise.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Measure in closed loop for safety.</li><li>Misconception: a bigger test signal is always better. It can hit limits and excite nonlinear behaviour.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why not measure open loop on a vertical joint? <b>A:</b> Gravity would make the link fall; the loop must hold it.</li></ul></div>
+      <p class="trans">Transition: Here is what such a measurement reveals.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 25</span>Measured response of a compliant joint: two masses and a spring<span class="time">~7 min</span></h3>
+      <p class="say">This is a measured-style plot of a motor driving a load through a springy gear. The dashed line is the rigid model, one over total inertia times s. Up to about 50 Hz it fits. Near 130 Hz an anti-resonance dip and at 260 Hz a resonance peak appear, where the rigid model is completely wrong. The coherence below tells you where to trust the data: above about 0.8. The design rule: keep the control bandwidth well below the first resonance, or use notch filters, which come tomorrow.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Bandwidth below the first resonance.</li><li>Misconception: a stiffer controller fixes a springy joint. It excites the resonance instead.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> What sets f_r? <b>A:</b> Spring stiffness and the two inertias: higher k or lower inertias raise it.</li></ul></div>
+      <p class="trans">Transition: Let us check.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 26</span>Session 2.4 – Check your understanding<span class="time">~7 min</span></h3>
+      <p class="say">Give three minutes. Question one: 0.1 is minus 20 dB, 1000 is plus 60 dB. Question two: the gain is 2, which is about plus 6 dB, and a lag of a quarter period is minus 90 degrees. Question three: the sharp peak at 40 Hz is a lightly damped resonance from the springy strain-wave gear; the controller bandwidth must stay well below it, around 13 Hz or less, or the resonance must be removed with a notch filter. The photo shows such a gear set: zero backlash, but springy.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Answers: (1) -20 dB, +60 dB. (2) +6 dB, -90 degrees. (3) limit bandwidth to about 40/3 Hz or add a notch filter.</li><li>Misconception: a quarter period lag is -45 degrees. A full period is 360, so a quarter is 90.</li></ul></div>
+      <p class="trans">Transition: Summary of the session.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 27</span>Session 2.4 – Summary and key terms<span class="time">~5 min</span></h3>
+      <p class="say">Summary: sine in gives sine out, scaled and shifted. The Bode plot shows this in dB and degrees on a log frequency axis. Each pole bends the magnitude by minus 20 dB per decade and costs up to 90 degrees; at the corner we are at minus 3 dB. A low damping ratio gives a sharp resonance peak, and measured plots reveal such resonances in real robot joints, which limits the bandwidth we can use. Review the key terms quickly.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Key terms: frequency response, decibel, corner frequency, resonance, coherence.</li></ul></div>
+      <p class="trans">Transition: Next session: the controller that runs in almost every robot joint, PID.</p>
+    </div>
+  </section>
+
+  <section id="s25">
+    <h2 class="session">Session 2.5 · PID control <small>Curriculum code 2.5 · 90 min</small></h2>
+    <div class="slide">
+      <h3><span class="num">Slide 29</span>P, I and D: present, past and future of the error<span class="time">~8 min</span></h3>
+      <p class="say">The PID controller adds three terms: P reacts to the error now, I to the accumulated past error, D to the trend, a guess about the future. The left plot shows P only on a third-order plant: more gain is faster but more oscillatory, and an offset always remains. On the right, the same plant with four controllers: PI removes the offset, PD damps, PID combines both. The table summarises the effects. Remember the table, but remember too that these are tendencies, not laws.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>P = now, I = past, D = future.</li><li>Misconception: D speeds up the response. Mostly it adds damping.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Which term removes steady-state error? <b>A:</b> I, because it keeps growing while any error remains.</li></ul></div>
+      <p class="trans">Transition: For a robot joint, P and D have a beautiful mechanical meaning.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 30</span>PD control of a joint = a virtual spring and damper<span class="time">~8 min</span></h3>
+      <p class="say">A PD controller on a joint makes it feel like a mass on a spring with a shock absorber, the car suspension from yesterday. The spring is anchored at the target angle with stiffness K_p; the damper has coefficient K_d. Notice D acts on the measured speed, so a jump in the target does not cause a torque kick. Worked example: for omega_n of 10 and zeta of 0.7, K_p equals J omega_n squared, 50 Nm/rad; total damping 2 zeta omega_n J is 7, minus the natural B gives K_d about 7.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>K_p = J omega_n^2, K_d = 2 zeta omega_n J - B.</li><li>Misconception: gains are arbitrary numbers. They have physical units: Nm/rad and Nm s/rad.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Payload doubles J. What happens with the same gains? <b>A:</b> omega_n falls by 1.41, zeta falls too: slower and more overshoot.</li></ul></div>
+      <p class="trans">Transition: Let us see the effect of D in a simulation.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 31</span>Effect of D on the joint: from ringing to smooth<span class="time">~6 min</span></h3>
+      <p class="say">Same K_p, three values of K_d. With no D the arm rings, about 97 percent overshoot. K_d of 3 gives zeta 0.31, still bouncy. K_d of 7 gives zeta 0.71 and about 4 percent overshoot. The stiffness and the rough speed stay the same because K_p is unchanged; D only adds damping. Too much D makes the response sluggish and amplifies encoder noise. In a real servo drive the D on position is usually realised by the inner velocity loop, which we will meet on W1D5.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>D = damping.</li><li>Misconception: more D is always safer. It amplifies noise and makes the motor 'sing'.</li></ul></div>
+      <p class="trans">Transition: But there is still a problem: gravity.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 32</span>Gravity: why the I-term is needed<span class="time">~8 min</span></h3>
+      <p class="say">A horizontal link with 1 kg at 0.5 m needs about 4.9 Nm just to hold it. With PD only, at rest the spring torque K_p times e must equal the gravity torque, so the error is 4.9 over 50, about 0.1 rad or 5.6 degrees: the arm sags. Adding I removes the sag: the integrator keeps growing until the error is exactly zero, so it learns the 4.9 Nm. Notice the slight overshoot it brings. If we know m and l, gravity feedforward gives the same torque instantly; that is gravity compensation, session 2.9.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Sag = load torque / K_p.</li><li>Misconception: a higher K_p removes the sag. It only shrinks it.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> K_p doubled to 100: new sag? <b>A:</b> 0.049 rad, half, but never zero.</li></ul></div>
+      <p class="trans">Transition: Before tuning, a practical warning about how PID gains are written.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 33</span>PID forms: same idea, different parameters<span class="time">~5 min</span></h3>
+      <p class="say">PID gains come in different forms. The parallel form has K_p, K_i, K_d; the ideal or ISA form has K_p, integral time T_i and derivative time T_d; older PLCs use a series form. Conversion: K_i equals K_p over T_i, K_d equals K_p times T_d. Example: K_p 2, T_i 4 s, T_d 0.5 s gives K_i 0.5 and K_d 1. The pitfall is copying numbers between devices without checking the form and the units, seconds versus minutes, percent versus amps.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Always check form and units before copying gains.</li><li>Misconception: a larger T_i means more integral action. It means less.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> T_i doubles: what happens to K_i? <b>A:</b> It halves.</li></ul></div>
+      <p class="trans">Transition: Now a closer look at the D-term.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 34</span>Derivative action: always filter it<span class="time">~6 min</span></h3>
+      <p class="say">A pure derivative has a gain that grows without limit with frequency, so it turns small, fast sensor noise into huge torque commands. The fix is a first-order filter: the D-gain then levels off at K_p times N, with N typically 5 to 20. A second fix: differentiate the measurement instead of the error, so a sudden target jump does not cause a kick. A concrete number: with a 20-bit encoder sampled every 125 microseconds, a single count change looks like a speed jump of 0.048 rad/s.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Filtered D, on the measurement.</li><li>Misconception: digital encoders have no noise. Quantisation is noise.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> What is the D-gain limit for N = 10 in dB? <b>A:</b> 20 log10(10) = 20 dB above K_p.</li></ul></div>
+      <p class="trans">Transition: How do we actually find good gains? Recipe one: by hand.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 35</span>Tuning recipe 1: by hand on the robot joint<span class="time">~7 min</span></h3>
+      <p class="say">Hand tuning in five steps. Start safely with low speed, small steps, I and D at zero and limits active. Raise K_p until the response is fast but rings. Raise K_d until the ringing is gone. Add a little K_i to remove the gravity sag. Finally re-check with the heaviest payload and the worst pose, for example the arm stretched out. The sketch shows the path in the K_p-K_d plane. A stiffer joint needs proportionally more damping to keep zeta near 0.7. If the motor sings, halve the gain that caused it.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Re-check at worst payload and pose.</li><li>Misconception: tuning once in one pose is enough. Inertia changes with arm configuration.</li></ul></div>
+      <p class="trans">Transition: Recipe two is the classic Ziegler-Nichols method.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 36</span>Tuning recipe 2: Ziegler–Nichols (1942)<span class="time">~7 min</span></h3>
+      <p class="say">Ziegler and Nichols proposed: P only, raise the gain until the loop just keeps oscillating, note the ultimate gain K_u and period T_u, then read the gains from the table. Worked example for one over s plus one cubed: the phase reaches minus 180 degrees at root 3 rad/s, the gain there is one eighth, so K_u is 8 and T_u 3.63 s, giving K_p 4.8, T_i 1.81 s and T_d 0.45 s. The result is fast but aggressive, and pushing a real robot to oscillation can be unsafe. Use it only as a starting point.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>ZN = starting point, not final answer.</li><li>Misconception: ZN gives optimal gains. It gives about 25 percent decay ratio, quite oscillatory.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why is ZN risky on a robot? <b>A:</b> Sustained oscillation can damage gears or hit things; it is also hard to stop at exactly the limit.</li></ul></div>
+      <p class="trans">Transition: Next: what happens when the actuator hits its limit.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 37</span>Saturation and integrator windup<span class="time">~7 min</span></h3>
+      <p class="say">Every actuator saturates: the drive has a current limit, the motor a torque limit. Imagine the joint blocked by an obstacle, or a long fast move. The torque is stuck at the limit, but the integrator keeps adding up error: it winds up. When the joint is free again the integrator must first unwind, causing a big overshoot, 18 percent here, and slow settling. In the plot the light blue curve is what the controller wishes, far above the limit. On a robot a wound-up joint can lunge when the obstacle is removed: a safety issue.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Windup = integrator grows while the actuator is saturated.</li><li>Misconception: saturation only slows things down. With an integrator it causes overshoot.</li></ul></div>
+      <p class="trans">Transition: The cure: anti-windup.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 38</span>Anti-windup: two standard cures<span class="time">~6 min</span></h3>
+      <p class="say">Two standard cures. Clamping: stop integrating while the output is at its limit and the error pushes further. It is simple and standard in servo drives. Back-calculation: compare what the controller wished, v, with what the actuator delivered, u, and feed that difference back into the integrator through a gain one over T_t, so the integrator tracks the limit. The diagram shows the orange path. Rule: every controller with an integrator and a saturating actuator needs one of these.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Every saturating integrator needs anti-windup.</li><li>Misconception: anti-windup changes normal behaviour. It is inactive until the limit is reached.</li></ul></div>
+      <p class="trans">Transition: Finally, feedforward: helping the loop with what we already know.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 39</span>Feedforward: let feedback correct only what is unknown<span class="time">~7 min</span></h3>
+      <p class="say">A driver who sees the hill presses the pedal before the car slows: that is feedforward. In a robot the trajectory generator knows the desired acceleration and speed, so we can directly add J-hat times acceleration plus B-hat times speed, plus gravity if known. Feedback then only corrects what is unknown. The plot shows tracking error: feedback alone 8.8 mrad; feedforward with a 10 percent inertia error 0.86 mrad; perfect feedforward almost zero. Feedforward sits outside the loop, so it does not change stability.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>FF does not affect stability.</li><li>Misconception: feedforward replaces feedback. It needs feedback for everything unknown.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> What if J-hat is 50 percent wrong? <b>A:</b> Error is still roughly halved; feedback handles the rest.</li></ul></div>
+      <p class="trans">Transition: Time to check.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 40</span>Session 2.5 – Check your understanding<span class="time">~8 min</span></h3>
+      <p class="say">Give four minutes. Question one: the sag is load over K_p, 10 over 200, 0.05 rad or about 2.9 degrees; the I-term or gravity feedforward removes it. Question two: because a pure derivative amplifies high-frequency noise without limit; the filter caps it at K_p N. Question three: the integrator keeps growing during the 2 s although the torque cannot increase; when the gripper releases or the part moves, the stored integral produces a large torque, overshoot or a sudden jerk.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Answers: (1) 0.05 rad, I-term or gravity FF. (2) noise amplification. (3) windup, then a jerk/overshoot.</li><li>Misconception: students think the D-term causes the sag. It is P versus load.</li></ul></div>
+      <p class="trans">Transition: Summary of the PID session.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 41</span>Session 2.5 – Summary and key terms<span class="time">~7 min</span></h3>
+      <p class="say">Summary: P is a virtual spring, D a virtual damper, I learns constant loads such as gravity. Starting gains: K_p equals J omega_n squared, K_d about 2 zeta omega_n J. Always filter D and apply it to the measurement. Every saturating integrator needs anti-windup. Feedforward of inertia, friction and gravity improves tracking without touching stability. Use the remaining minutes to let students explain the spring and damper picture to a neighbour.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Key terms: PID, T_i, T_d, saturation, windup, feedforward.</li></ul></div>
+      <p class="trans">Transition: After the break: how do we judge whether a loop is good enough? Stability and performance.</p>
+    </div>
+  </section>
+
+  <section id="s26">
+    <h2 class="session">Session 2.6 · Stability and performance <small>Curriculum code 2.6 · 83 min + 7 min wrap-up (slides 56–59)</small></h2>
+    <div class="slide">
+      <h3><span class="num">Slide 43</span>What does “stable” mean?<span class="time">~7 min</span></h3>
+      <p class="say">Three balls: in a bowl it returns, on a hill it runs away, on a flat table it stays where pushed. Those are stable, unstable and marginal. Shower analogy: the hot water arrives late, and if you over-react you make the temperature swing ever more. Feedback can create instability. Formally: closed-loop poles are the roots of one plus L equals zero; stable means all of them have negative real part. Example: K over s(s+2)(s+5). For K = 20 the poles are in the left half-plane; for K = 100 two cross to the right.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Stability is decided by closed-loop poles.</li><li>Misconception: a stable plant always gives a stable closed loop. Too much gain destabilises.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Is a pole at s = 0 stable? <b>A:</b> Marginal: it does not decay; a joint angle drifts.</li></ul></div>
+      <p class="trans">Transition: Stable is not enough; we also want a good response.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 44</span>Time-domain specifications<span class="time">~7 min</span></h3>
+      <p class="say">Four numbers describe a step response: rise time from 10 to 90 percent, overshoot, settling time within 2 percent, and steady-state error. For a second-order closed loop the damping ratio alone fixes overshoot, and settling time is about 4 over zeta omega_n. The table connects zeta, overshoot and phase margin: zeta 0.7 gives under 5 percent overshoot and about 65 degrees phase margin. For a robot doing pick-and-place, overshoot should usually stay below 5 percent, otherwise the gripper hits the table.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>zeta sets overshoot, zeta omega_n sets settling.</li><li>Misconception: fast rise time means fast settling. Oscillation can make settling slow.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> zeta = 0.5: overshoot? <b>A:</b> About 16 percent.</li></ul></div>
+      <p class="trans">Transition: These specs translate into regions for the poles.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 45</span>From specifications to pole positions<span class="time">~8 min</span></h3>
+      <p class="say">Each specification draws a line in the s-plane. The overshoot limit becomes two angle lines: poles must stay inside them, which means zeta at least 0.7. The settling-time limit is a vertical line: the real part must be left of minus 4 over t_s. The right half-plane is unstable. Good poles live in the shaded wedge. Worked example: settle in 0.4 s with under 5 percent overshoot means zeta at least 0.7, zeta omega_n at least 10, so omega_n at least 14.3 rad/s and K_p equal to J omega_n squared, about 102 Nm/rad.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Specs become regions in the s-plane.</li><li>Misconception: poles far left are always best. They need large gains, which saturate and amplify noise.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> What does a pole near the imaginary axis mean? <b>A:</b> Slow decay: long ringing.</li></ul></div>
+      <p class="trans">Transition: Now the error that remains at the end.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 46</span>Steady-state error and system type<span class="time">~8 min</span></h3>
+      <p class="say">The final value theorem gives the error at the end, but only for a stable loop. The system type is the number of integrators in L. Type 0 leaves a step error; type 1 follows steps exactly but lags behind a ramp by one over K_v; type 2 follows ramps too. Worked example on a gantry axis: the position loop is type 1 with K_v 126 per second; moving at 0.2 m/s with a 10 mm screw the motor turns at 126 rad/s, so the error is 1 rad, 1.6 mm behind the command. Velocity feedforward removes this following error.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Following error = speed / K_v.</li><li>Misconception: an integrator makes all errors zero. Type 1 still lags on ramps.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Double K_v? <b>A:</b> Following error halves to 0.8 mm.</li></ul></div>
+      <p class="trans">Transition: How do poles move as we raise the gain? The root locus.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 47</span>Root locus: how closed-loop poles move with gain<span class="time">~7 min</span></h3>
+      <p class="say">The root locus shows the path of the closed-loop poles as K grows from zero. They start at the open-loop poles, 0, minus 2 and minus 5. Two of them meet and split into a complex pair, so oscillation starts. At K = 20 they are at minus 0.56 plus or minus j 1.76, zeta 0.3 and 37 percent overshoot. At K = 70 they reach the imaginary axis: the stability limit. Above 70 the loop is unstable. The Routh table gives the same limit from the coefficients; Nyquist is a frequency-domain version. Both are optional.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>More gain moves poles toward instability.</li><li>Misconception: root locus needs heavy computation. Today software draws it; we just read it.</li></ul></div>
+      <p class="trans">Transition: The same information appears in the Bode plot as margins.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 48</span>Gain and phase margins: how far from the edge?<span class="time">~8 min</span></h3>
+      <p class="say">A loop oscillates if a signal comes back around with gain one and phase minus 180 degrees, because the minus sign at the summing junction turns it into positive feedback. Margins measure the distance from that point. Find the crossover where |L| is 0 dB, read the phase, minus 144: phase margin 36 degrees. Find where the phase is minus 180, read the gain, minus 10.9 dB: gain margin 10.9 dB, a factor 3.5. Check: this is the K = 20 loop, and 20 times 3.5 is 70, the root-locus limit. Targets: 45 to 60 degrees, at least 6 dB.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>PM 45-60 degrees, GM at least 6 dB.</li><li>Misconception: a positive margin means good. A 10 degree PM is stable but rings badly.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Gain margin in plain words? <b>A:</b> How much more gain the loop can take before it oscillates.</li></ul></div>
+      <p class="trans">Transition: Let us compute margins for our joint position loop.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 49</span>Worked example: margins of a joint position loop<span class="time">~8 min</span></h3>
+      <p class="say">Our joint position loop with an inner speed loop is roughly 100 over s times 0.01 s plus 1. Set |L| equal to one: crossover at 78.6 rad/s, 12.5 Hz. The phase there is minus 90 minus arctan 0.786, minus 128 degrees, so the phase margin is 52 degrees: good. The phase never reaches minus 180, so the gain margin is infinite. But real loops have delays. A delay removes omega_c times T_d radians: 2 ms costs 9 degrees, 6 ms costs 27. The dashed curves show the phase falling at high frequency.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Delay costs phase omega_c T_d.</li><li>Misconception: infinite gain margin means the loop cannot go unstable. Delay can still destabilise it.</li></ul></div>
+      <p class="trans">Transition: Let us see what that delay does in time.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 50</span>Time delay: the shower problem in a robot<span class="time">~6 min</span></h3>
+      <p class="say">Here is the same loop in time. Without delay, 16 percent overshoot; with 2 ms, 26 percent; with 6 ms, 53 percent. Delays come from sampling, computation, filters and fieldbus networks. A delay changes only phase, not gain, so you cannot see it in the magnitude plot. With 52 degrees, 0.904 rad, of margin, the loop would oscillate with 11.5 ms of delay. The faster the loop, the less delay it tolerates: that is why servo drives run current loops at tens of kilohertz.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Faster loop = less delay tolerance.</li><li>Misconception: a few milliseconds cannot matter. At 12.5 Hz crossover they do.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Crossover doubles: delay limit? <b>A:</b> Roughly halves.</li></ul></div>
+      <p class="trans">Transition: Margins are one way to measure robustness; sensitivity is another.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 51</span>Sensitivity, robustness and loop shaping<span class="time">~6 min</span></h3>
+      <p class="say">The sensitivity S at each frequency tells how much of a disturbance survives. At low frequency |S| is small: disturbances are removed. Near crossover |S| is above one: feedback actually amplifies disturbances there. The peak M_s is a single robustness number; aim for 1.2 to 2. For the K = 20 loop, M_s is 2.1 and the step response rings; K = 10 is calmer. Loop shaping means making |L| large at low frequency for tracking and small at high frequency to ignore noise and resonances.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>M_s between 1.2 and 2.</li><li>Misconception: feedback reduces disturbances at all frequencies. Near crossover it amplifies them.</li></ul></div>
+      <p class="trans">Transition: Finally: how fast can the joint follow? Bandwidth.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 52</span>Bandwidth: how fast can the joint follow?<span class="time">~6 min</span></h3>
+      <p class="say">Bandwidth is the highest frequency the closed loop still follows, where |T| has dropped by 3 dB. It links to rise time: t_r is about 2.2 over omega_bw, or 0.35 over f_bw. As a rule, bandwidth is 1 to 1.6 times the crossover. For our joint, crossover 78.6 rad/s gives a bandwidth around 127 rad/s, 20 Hz, so a rise time around 17 ms. Higher bandwidth is faster, but it is limited by resonances, a third of the first resonance, by delay, and by noise. Low zeta shows a resonance peak in T as well.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>t_r about 0.35/f_bw.</li><li>Misconception: bandwidth is the maximum speed of the motor. It is how fast the loop follows commands.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Resonance at 60 Hz: maximum bandwidth? <b>A:</b> About 20 Hz.</li></ul></div>
+      <p class="trans">Transition: Let us check.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 53</span>Session 2.6 – Check your understanding<span class="time">~8 min</span></h3>
+      <p class="say">Give four minutes. Question one: real part minus 1 is negative, so stable; zeta is 1 over root 10, about 0.32, so large overshoot, about 35 percent. Question two: a 10 degree phase margin gives strong ringing with large overshoot, roughly 70 percent, and slow settling. Question three: following error equals 50 over 100, 0.5 rad. Question four: 40 degrees is 0.70 rad; divided by 100 rad/s gives 7 ms of delay to reach the edge.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Answers: (1) stable, zeta 0.32, about 35 percent overshoot. (2) heavy ringing. (3) 0.5 rad. (4) 7 ms.</li><li>Misconception: students divide degrees by rad/s. Convert to radians first.</li></ul></div>
+      <p class="trans">Transition: Summary and design targets.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 54</span>Session 2.6 – Summary, design targets and key terms<span class="time">~4 min</span></h3>
+      <p class="say">Summary: stable means all closed-loop poles in the left half-plane. Damping ratio sets overshoot, and phase margin is about 100 times zeta. System type sets the steady-state error. Delay eats phase, omega_c times T_d. Bandwidth sets speed, rise time about 0.35 over f_bw. The table gives typical targets you can use as a checklist when you design or check a servo loop: PM 45 to 60, GM at least 6 dB, M_s 1.2 to 2, overshoot under 5 percent, bandwidth under a third of the first resonance.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Use the targets table as a design checklist.</li></ul></div>
+      <p class="trans">Transition: Let us wrap up the day.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 56</span>Day summary<span class="time">~3 min</span></h3>
+      <p class="say">The whole day fits into one chain: model the plant, draw the block diagram with a controller, look at the Bode plot of the loop gain, pick PID gains, check poles, margins and bandwidth, then add anti-windup and feedforward. If the margins are too small, go back and re-tune. Read the numbers to remember aloud: minus 20 dB per decade per pole, minus 3 dB at the corner, zeta 0.7 for 5 percent overshoot, phase margin 45 to 60 degrees, gain margin at least 6 dB, rise time 0.35 over bandwidth.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Design is a loop: tune, check, re-tune.</li><li>Misconception: control design is a one-shot calculation.</li></ul></div>
+      <p class="trans">Transition: Here is what comes tomorrow.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 57</span>Preview of W1D4: control (cont.) and servo systems I<span class="time">~2 min</span></h3>
+      <p class="say">Tomorrow we finish control and begin servo systems. Filters and compensation, including the notch filter that deals with today's resonance. Digital control, because every real controller runs on a processor with sampling and delay. Control of robot manipulators: independent joints, gravity compensation and computed torque. Then servo architecture with its torque, velocity and position modes, and the power electronics inside the drive. The PID loops from today live inside boxes like these servo drives.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Today's resonance and delay problems are solved tomorrow.</li></ul></div>
+      <p class="trans">Transition: Credits and references follow.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 58</span>Figure credits<span class="time">~1 min</span></h3>
+      <p class="say">All photos come from Wikimedia Commons under free licences, listed here with author and licence. Every drawing and plot is our own, made with TikZ and pgfplots; the plot data are in the data folder of the course material. Mention to students that they may reuse the figures under the same licence terms, with attribution.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Respect image licences when reusing slides.</li></ul></div>
+      <p class="trans">Transition: And the references.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 59</span>References<span class="time">~1 min</span></h3>
+      <p class="say">For further reading: Ogata and Franklin-Powell-Emami-Naeini are the classic undergraduate control textbooks. Astrom and Murray is free online and very readable. Astrom and Hagglund is the reference on PID, including windup. Ellis is practical for servo systems. Spong and Craig are the robotics textbooks we will use in week two. The papers by Ziegler-Nichols, Skogestad and Maxwell are historical and practical milestones.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Astrom and Murray is free: a good first read.</li></ul></div>
+      <p class="trans">Transition: End of day three.</p>
+    </div>
+  </section>
+</main>
+<footer>Figures and references are listed on the final slides of the deck (slides 58–59).</footer>
+</body>
+</html>

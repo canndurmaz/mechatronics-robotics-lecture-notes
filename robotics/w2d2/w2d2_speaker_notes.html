@@ -1,0 +1,453 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>W2D2 Speaker Notes</title>
+<style>
+  :root{
+    --navy:#0B1F3A; --blue:#14365E; --mid:#2B5A8C; --sky:#6E9BC9; --pale:#E8EEF6;
+    --orange:#F07F12; --amber:#F9A94B; --cream:#FFF3E4; --gray:#5B6573; --bg:#F6F8FB; --card:#fff; --text:#0B1F3A;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){ --bg:#0A1424; --card:#10213A; --text:#E6ECF4; --pale:#1A3152; --cream:#3a2a14; --gray:#9AA8BA; }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 "Segoe UI",system-ui,-apple-system,Roboto,Helvetica,Arial,sans-serif}
+  header{background:var(--navy);color:#fff;padding:28px 16px 22px;border-bottom:4px solid var(--orange)}
+  header .wrap{max-width:980px;margin:0 auto}
+  header .day{color:var(--orange);font-weight:700;letter-spacing:.08em;font-size:.9rem}
+  header h1{margin:.2em 0 .1em;font-size:1.9rem}
+  header p{margin:0;color:var(--sky)}
+  nav.toc{position:sticky;top:0;z-index:5;background:var(--blue);padding:8px 16px;overflow-x:auto;white-space:nowrap}
+  nav.toc a{color:#fff;text-decoration:none;margin-right:16px;font-size:.88rem}
+  nav.toc a:hover{color:var(--amber)}
+  main{max-width:980px;margin:0 auto;padding:20px 16px 60px}
+  h2.session{margin:42px 0 12px;padding:10px 14px;background:var(--blue);color:#fff;border-left:6px solid var(--orange);border-radius:4px;font-size:1.25rem}
+  h2.session small{display:block;color:var(--amber);font-weight:500;font-size:.85rem}
+  table.plan{width:100%;border-collapse:collapse;background:var(--card);margin:12px 0}
+  table.plan th{background:var(--blue);color:#fff;text-align:left;padding:8px}
+  table.plan td{padding:8px;border-bottom:1px solid var(--pale)}
+  .slide{background:var(--card);border-radius:8px;margin:14px 0;padding:14px 18px;box-shadow:0 1px 3px rgba(11,31,58,.12);border-top:3px solid var(--mid)}
+  .slide h3{margin:0 0 6px;font-size:1.05rem;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+  .slide h3 .num{background:var(--orange);color:#fff;border-radius:4px;padding:1px 8px;font-size:.85rem}
+  .slide h3 .time{margin-left:auto;color:var(--gray);font-weight:400;font-size:.85rem}
+  .say{margin:6px 0}
+  .key{background:var(--cream);border-left:4px solid var(--orange);padding:6px 10px;margin:8px 0;border-radius:3px}
+  .ask{background:var(--pale);border-left:4px solid var(--mid);padding:6px 10px;margin:8px 0;border-radius:3px}
+  .trans{color:var(--gray);font-style:italic;margin-top:6px}
+  .label{font-weight:700;font-size:.8rem;text-transform:uppercase;letter-spacing:.05em;color:var(--orange)}
+  .ask .label{color:var(--mid)}
+  ul{margin:4px 0 4px 1.1em;padding:0}
+  footer{max-width:980px;margin:0 auto;padding:20px 16px;color:var(--gray);font-size:.85rem}
+  @media print{nav.toc{display:none}.slide{break-inside:avoid;box-shadow:none;border:1px solid #ccc}}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <div class="day">WEEK 2 · DAY 2 / 5 · SPEAKER NOTES</div>
+  <h1>Robot Mechanisms II and Introduction to Robotic Manufacturing</h1>
+  <p>Mechatronics and Robotics Engineering (50 h) · 5 h net teaching time · Slide numbers = PDF page numbers</p>
+</div></header>
+<nav class="toc"><a href="#plan">Plan</a><a href="#s1">4.4 · Inverse kinematics</a><a href="#s2">4.5 · Velocity kinematics:</a><a href="#s3">4.6 · Introduction to</a><a href="#s4">4.7 · Motion systems</a><a href="#s5">5.1 · Robotic manufacturing</a></nav>
+<main>
+  <section id="plan">
+    <h2 class="session">Day plan &amp; timing</h2>
+    <table class="plan"><tr><th>Block</th><th>Topic</th><th>Slides</th><th>Duration</th></tr>
+      <tr><td>1</td><td>4.4 Inverse kinematics (incl. agenda and recap)</td><td>2–15</td><td>60 min</td></tr>
+      <tr><td></td><td><i>Break</i></td><td></td><td>10 min (extra)</td></tr>
+      <tr><td>2</td><td>4.5 Velocity kinematics: the Jacobian</td><td>17–26</td><td>60 min</td></tr>
+      <tr><td></td><td><i>Break</i></td><td></td><td>10 min (extra)</td></tr>
+      <tr><td>3</td><td>4.6 Introduction to robot dynamics</td><td>28–37</td><td>60 min</td></tr>
+      <tr><td></td><td><i>Break</i></td><td></td><td>10 min (extra)</td></tr>
+      <tr><td>4</td><td>4.7 Motion systems and trajectory planning</td><td>39–48</td><td>60 min</td></tr>
+      <tr><td></td><td><i>Break</i></td><td></td><td>10 min (extra)</td></tr>
+      <tr><td>5</td><td>5.1 Robotic manufacturing and flexible automation (incl. wrap-up)</td><td>50–63</td><td>60 min</td></tr>
+      <tr><td></td><td><b>Total net teaching time</b></td><td>1–63</td><td><b>300 min</b></td></tr>
+    </table>
+    <p>Reference robot all day: planar 2-link arm, L1 = 0.4 m, L2 = 0.3 m. Block 1 includes agenda and recap (slides 2–4); block 5 includes the day wrap-up (slides 60–63). Section-divider pages (5, 16, 27, 38, 49) need no notes.</p>
+  </section>
+
+  <section id="s1">
+    <h2 class="session">Session 4.4 Inverse kinematics (incl. agenda and recap) <small>Curriculum code 4.4 · 60 min</small></h2>
+    <div class="slide">
+      <h3><span class="num">Slide 2</span>Agenda and learning outcomes<span class="time">~3 min</span></h3>
+      <p class="say">Welcome to day two of week two. Yesterday we described where a robot&#x27;s tool is when we know its joint angles. Today we ask the questions a robot programmer really faces: which joint angles reach a given point, how fast and how hard must each joint work, and what torque does the motor need. In the last hour we step back and look at the whole factory. One small robot accompanies us all day: a planar two-link arm with a 0.4 m upper arm and a 0.3 m forearm. Keep these two numbers in mind; almost every example uses them.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Read the outcomes aloud; students will tick them off at the end of the day.</li><li>Misconception: &quot;kinematics and dynamics are the same thing&quot;. Kinematics is geometry only; dynamics adds masses and forces.</li></ul></div>
+      <p class="trans">Transition: Let us first refresh what we did yesterday.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 3</span>What we learned so far (W2D1)<span class="time">~2 min</span></h3>
+      <p class="say">Yesterday covered four topics. Joints are not perfectly stiff, so they can resonate, and notch filters help. We classified robots by their joint types: articulated, SCARA, gantry, delta and mobile. We described a pose with a rotation matrix and a position vector, packed into a homogeneous transform T. Finally we chained transforms to get forward kinematics: from joint angles to the tool pose. Today we reverse that arrow. Think of yesterday as learning to read a map, and today as learning to plan a route on it.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Pose = position + orientation.</li><li>Misconception: a rotation matrix is &quot;just an angle&quot;. In 3D it is a 3x3 matrix whose columns are the new axes.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / check answers</span><ul><li><b>Q:</b> What does the last column of T contain? <b>A:</b> The position of the new frame&#x27;s origin, expressed in the old frame.</li></ul></div>
+      <p class="trans">Transition: Here is the forward kinematics we will invert.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 4</span>Recap: forward kinematics of our 2-link arm<span class="time">~3 min</span></h3>
+      <p class="say">The tip position is simply the sum of two vectors: link one pointing at angle theta-one, and link two pointing at theta-one plus theta-two, because the elbow angle is measured relative to link one. Check the example on the slide together: with the shoulder at zero and the elbow at ninety degrees, link one lies along x for 0.4 m and link two points straight up for 0.3 m, so the tip is at 0.4, 0.3. We will use the short-hand c1, s12 and so on to keep formulas readable. Write these two equations at the top of your notes page.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>theta-2 is relative, not absolute.</li><li>Misconception: adding the lengths 0.4 + 0.3 gives the tip position. Only when the arm is stretched along one direction.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / check answers</span><ul><li><b>Q:</b> Where is the tip for theta1 = 90 deg, theta2 = 0? <b>A:</b> (0, 0.7) m: the arm points straight up.</li></ul></div>
+      <p class="trans">Transition: Now we turn the question around.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 6</span>The inverse question: where must the joints go?<span class="time">~4 min</span></h3>
+      <p class="say">Forward kinematics is easy: give me the angles and I compute one unique tool position. But the tasks we give robots are described in the world: pick the bolt lying at this x and y. So the controller must solve the inverse problem, from the desired position to joint angles. Your own body does this constantly. When you reach for a cup, you think about the cup, not about your shoulder angle; your brain solves inverse kinematics. The inverse is harder because the equations contain sines and cosines, and because there may be no answer, exactly one, two, or even more.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>FK: one answer always. IK: zero, one, two or more answers.</li><li>Misconception: &quot;IK is just FK solved backwards with a calculator&quot;. Nonlinear equations need care with multiple solutions and quadrants.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / check answers</span><ul><li><b>Q:</b> Why can&#x27;t we just invert the matrix T? <b>A:</b> Because the joint angles appear inside sin and cos; inverting T gives the pose of the base in the tool frame, not the angles.</li></ul></div>
+      <p class="trans">Transition: Before solving, let us check whether a point can be reached at all.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 7</span>Reachability: the workspace of the 2-link arm<span class="time">~5 min</span></h3>
+      <p class="say">Imagine a compass with two hinged arms. Stretched out, the tip is 0.7 m from the base; folded back, it is only 0.1 m away. Every distance in between can be reached by bending the elbow, and the shoulder rotates that around in a full circle. So the reachable workspace is a ring, an annulus, with outer radius L1 plus L2 and inner radius the difference. A point outside the ring, like the red one, has no solution. Real robots have joint limits and cables, which cut slices out of this ring. That is why robot datasheets show workspace drawings.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Test first: compute r and compare with |L1 - L2| and L1 + L2.</li><li>Misconception: &quot;the hole in the middle is unreachable because of the base&quot;. It is geometric: link 2 is shorter than link 1.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / check answers</span><ul><li><b>Q:</b> What if L1 = L2? <b>A:</b> The hole shrinks to a point: the tip can reach the base itself.</li></ul></div>
+      <p class="trans">Transition: We need two maths tools for the solution; here is a quick refresher.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 8</span>Refresher: law of cosines and the two-argument arctangent<span class="time">~5 min</span></h3>
+      <p class="say">Two tools. First the law of cosines: it is Pythagoras for any triangle, with a correction term minus 2ab cos gamma. When gamma is ninety degrees the correction vanishes and we get Pythagoras back. Second, atan2. The ordinary arctangent only sees the ratio y over x, so the points (1,1) and (-1,-1) look identical: both give 45 degrees. But one lies in the first quadrant and the other in the third. atan2 takes y and x separately and returns the correct angle anywhere on the circle. Every programming language has it; in robotics we never use the plain arctan of a ratio.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>atan2(y, x): note the order, y first.</li><li>Misconception: arctan(y/x) works if you are careful. It fails silently in two quadrants and divides by zero at x = 0.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / check answers</span><ul><li><b>Q:</b> atan2(0, -1)? <b>A:</b> 180 degrees.</li></ul></div>
+      <p class="trans">Transition: Now we apply the law of cosines to the arm.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 9</span>Geometric solution, step 1: the elbow angle<span class="time">~6 min</span></h3>
+      <p class="say">Look at the triangle formed by the base, the elbow and the tip. Its sides are L1, L2 and the distance r. The interior angle at the elbow is 180 degrees minus theta-two. Apply the law of cosines and, after one line of algebra using cos(180 - a) = -cos a, we get the boxed formula: cos theta-two equals x squared plus y squared minus L1 squared minus L2 squared, over 2 L1 L2. If this number comes out larger than one or smaller than minus one, the target is outside the ring: unreachable. Otherwise arccos gives an angle, and because cosine is symmetric, both plus and minus that angle work.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>The sign of theta2 is a choice, not an error.</li><li>Misconception: arccos gives the only answer. It gives one of two.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / check answers</span><ul><li><b>Q:</b> What is cos theta2 when the arm is stretched? <b>A:</b> +1, so theta2 = 0.</li></ul></div>
+      <p class="trans">Transition: With theta-two known, the shoulder angle follows.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 10</span>Geometric solution, step 2: the shoulder angle<span class="time">~6 min</span></h3>
+      <p class="say">The shoulder angle is a difference of two angles. Beta is the direction from the base to the target, given by atan2 of y and x. Psi is the angle between link one and that line; it depends only on the elbow, so we find it with a second atan2 using the forearm&#x27;s components seen from link one. Then theta-one equals beta minus psi. Each of the two theta-two values gives its own theta-one. Last step, always: plug the answer back into forward kinematics. It takes thirty seconds and catches nearly every sign mistake.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Two atan2 calls, never arctan.</li><li>Misconception: theta1 = atan2(y, x). That is only the direction to the target, and only correct when the arm is stretched.</li></ul></div>
+      <p class="trans">Transition: Let us see the two solutions as pictures.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 11</span>Two solutions: elbow up and elbow down<span class="time">~5 min</span></h3>
+      <p class="say">Here are both solutions for the same target. They are mirror images about the dashed line from the base to the target. With a positive elbow angle the elbow sits below the line, elbow down; with a negative one, above, elbow up. On a SCARA, which we see from above, the same pair is called right-handed and left-handed arm, just like you can reach a point on your desk with your right or left arm bent differently. The robot program must store which one it wants; this is the configuration. Switching configuration in the middle of a task means a big, possibly dangerous, swing of the arm.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Same tip, different arm shape, different collision risk.</li><li>Misconception: both solutions are equally good. One may hit a fixture or exceed a joint limit.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / check answers</span><ul><li><b>Q:</b> How many solutions on the outer boundary? <b>A:</b> One: the two shapes merge when the arm is stretched.</li></ul></div>
+      <p class="trans">Transition: Now let us calculate one case with numbers.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 12</span>Worked example: IK for the target (0.5, 0.3) m<span class="time">~8 min</span></h3>
+      <p class="say">Go through the steps slowly and let students compute along. Step one, reach: r is the square root of 0.34, about 0.583 m, inside the ring. Step two: cos theta-two is 0.09 over 0.24, which is 0.375, so theta-two is plus or minus 68 degrees. Step three: beta is atan2 of 0.3 and 0.5, 31 degrees; psi is atan2 of 0.278 and 0.513, 28.5 degrees. Step four: elbow down gives theta-one 2.5 degrees, elbow up gives 59.5 degrees with theta-two negative. The box checks the elbow-down answer with forward kinematics: we get back 0.50 and 0.30 metres.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Keep degrees vs radians consistent in calculators.</li><li>Misconception: for elbow up just negate theta1. No: psi changes sign, so theta1 = beta + psi.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / check answers</span><ul><li><b>Q:</b> Check the elbow-up answer quickly. <b>A:</b> x = 0.4 cos 59.5 + 0.3 cos(-8.5) = 0.203 + 0.297 = 0.50 m; y = 0.345 - 0.044 = 0.30 m.</li></ul></div>
+      <p class="trans">Transition: How do real six-axis robots handle this?</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 13</span>IK of real robots<span class="time">~5 min</span></h3>
+      <p class="say">A six-axis industrial arm must reach a position and an orientation. For the usual design, up to eight solutions exist: shoulder in front or behind, elbow up or down, wrist flipped or not. Most arms have a spherical wrist, the last three axes meet in one point, which splits the problem neatly: the first three axes place the wrist centre, the last three orient the tool. Joint limits remove some solutions, and the controller picks the one matching the programmed configuration. The SCARA photo shows the simplest industrial case, essentially our 2-link arm plus a vertical axis.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Spherical wrist = position and orientation decouple.</li><li>Misconception: robots search all solutions at run time. Closed-form formulas give them instantly.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / check answers</span><ul><li><b>Q:</b> What if no formula exists? <b>A:</b> Numerical IK: iterate with the Jacobian, which we meet next session.</li></ul></div>
+      <p class="trans">Transition: Time to check your understanding.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 14</span>Check your understanding (4.4)<span class="time">~5 min</span></h3>
+      <p class="say">Give students three minutes in pairs, then discuss. Ask one pair to explain each answer at the board, sketching the ring. The answers are below; do not show them on the slide.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Q3 is the classic atan trap; let students find the wrong arm direction themselves.</li><li>Misconception: a point on the boundary has two solutions.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / check answers</span><ul><li><b>Q:</b> 1. Is (0.6, 0.5) m reachable? <b>A:</b> r = sqrt(0.36 + 0.25) = 0.78 m &gt; 0.7 m, so no.</li><li><b>Q:</b> 2. How many solutions for (0.7, 0)? <b>A:</b> One: cos theta2 = (0.49 - 0.25)/0.24 = 1, so theta2 = 0, theta1 = 0 (arm stretched along x).</li><li><b>Q:</b> 3. arctan(y/x) for (-0.3, -0.2)? <b>A:</b> arctan(0.667) = 33.7 deg points into the first quadrant; the true direction is atan2 = -146.3 deg, so the arm would reach to (0.3, 0.2) instead.</li></ul></div>
+      <p class="trans">Transition: Let us summarise the session.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 15</span>Session 4.4 summary and key terms<span class="time">~3 min</span></h3>
+      <p class="say">Summarise in four sentences. IK finds joint angles for a desired tool position. First test reachability with the ring condition. Then the law of cosines gives the elbow, two atan2 calls give the shoulder, and there are two mirror solutions. Always verify with forward kinematics. Point at the key terms box and ask students to explain configuration in their own words.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Recipe: reach test, theta2, theta1, FK check.</li></ul></div>
+      <p class="trans">Transition: After a short break we ask: if we know the angles, how fast does the tip move?</p>
+    </div>
+  </section>
+  <section id="s2">
+    <h2 class="session">Session 4.5 Velocity kinematics: the Jacobian <small>Curriculum code 4.5 · 60 min</small></h2>
+    <div class="slide">
+      <h3><span class="num">Slide 17</span>From joint speeds to tip speed<span class="time">~5 min</span></h3>
+      <p class="say">Start with a door. If you swing it at a fixed rotational speed, the handle moves faster than a point near the hinge: speed equals omega times radius. A robot arm is two doors in series. Turning only the shoulder swings the whole arm; the tip moves perpendicular to the line from the base to the tip, with a speed proportional to that distance. Turning only the elbow swings the forearm, and the tip moves perpendicular to link two. The real tip velocity is the vector sum. The key message: the same joint speeds give different tip speeds in different poses.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>v = omega r for each joint, with the right radius.</li><li>Misconception: tip speed is joint speed times link length of that joint only. The shoulder moves the whole arm.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / check answers</span><ul><li><b>Q:</b> Which joint moves the tip faster at 1 rad/s? <b>A:</b> The shoulder, because its radius (base to tip) is longer.</li></ul></div>
+      <p class="trans">Transition: To write this compactly we need two refreshers.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 18</span>Refresher: partial derivatives and matrix–vector products<span class="time">~5 min</span></h3>
+      <p class="say">A partial derivative asks: if I wiggle only theta-one and freeze everything else, how much does x change? The chain rule says the total change of x is the sum of the changes caused by each joint. Then a quick reminder of matrix times vector: each row of the result is a weighted sum of the vector&#x27;s entries. If we collect all the partial derivatives in a matrix, multiplying it by the vector of joint speeds gives the tip velocity. That matrix has a name: the Jacobian, after the mathematician Carl Jacobi.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Row = output (x or y); column = input (joint 1 or 2).</li><li>Misconception: the Jacobian is a new physical quantity. It is just a table of sensitivities.</li></ul></div>
+      <p class="trans">Transition: Here is the Jacobian of our arm.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 19</span>The Jacobian of the 2-link arm<span class="time">~7 min</span></h3>
+      <p class="say">Differentiate the forward kinematics. The derivative of cosine is minus sine, and the chain rule brings out the joint speeds. The result is the 2-by-2 matrix in the box. Read it column by column: column one is the tip velocity you get for one radian per second at the shoulder, column two the same for the elbow. The entries have units of metres; they behave like lever arms. Because the entries contain sines and cosines of the angles, the Jacobian changes as the robot moves. For a six-axis robot it is a 6-by-6 matrix: three linear and three angular velocity rows.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Each column is a velocity direction the tip can be pushed in.</li><li>Misconception: J is a constant of the robot. It is a function of the pose.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / check answers</span><ul><li><b>Q:</b> Why is the (1,2) entry -L2 s12 and not involving L1? <b>A:</b> The elbow joint moves only link 2.</li></ul></div>
+      <p class="trans">Transition: Numbers make this concrete.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 20</span>Worked example: tip velocity<span class="time">~7 min</span></h3>
+      <p class="say">Use the pose we know: shoulder at zero, elbow at ninety degrees, tip at 0.4, 0.3. Step one, the sines and cosines: s1 is zero, c1 one, s12 one, c12 zero. Step two, fill in the Jacobian: minus 0.3, minus 0.3 on top, 0.4 and zero below. Step three, shoulder only at one radian per second: the tip moves at minus 0.3, 0.4, a speed of 0.5 metres per second. And 0.5 metres is exactly the distance from the base to the tip, so this is just the door rule. Step four, elbow only: minus 0.3, zero, 0.3 metres per second, the forearm length.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Sanity check every Jacobian with v = omega r.</li><li>Misconception: the shoulder-only velocity points along link 1. It is perpendicular to the base-to-tip line.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / check answers</span><ul><li><b>Q:</b> What joint speeds give a pure +x tip velocity of 0.3 m/s here? <b>A:</b> From row 2: 0.4 theta1-dot = 0, so theta1-dot = 0; then theta2-dot = -1 rad/s.</li></ul></div>
+      <p class="trans">Transition: What happens when this matrix cannot be inverted?</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 21</span>Singularities: when the Jacobian loses a direction<span class="time">~8 min</span></h3>
+      <p class="say">The determinant of our Jacobian simplifies to L1 L2 sine theta-two. It is zero when the arm is fully stretched or fully folded. In those poses the two columns of J point in the same direction, so the tip can only move sideways, never along the arm. That is a singularity. Stretch your arm fully: you cannot push your hand further out, no matter how you move your shoulder and elbow. Worse, near the singularity the inverse Jacobian has huge entries, so even a slow tip speed demands very fast joint motion, the orange curve. Real controllers stop with a speed error.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>det J = 0 means a lost direction and exploding joint speeds nearby.</li><li>Misconception: singularities are rare edge cases. They lie on the workspace boundary and inside it for 6-axis robots.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / check answers</span><ul><li><b>Q:</b> Is the folded pose (theta2 = 180) also singular? <b>A:</b> Yes, sin 180 = 0.</li></ul></div>
+      <p class="trans">Transition: Six-axis robots have three kinds of singularity.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 22</span>Singularities of real 6-axis robots<span class="time">~6 min</span></h3>
+      <p class="say">Industrial arms have three typical singularities. The wrist singularity is the most common: when axis five is at zero, axes four and six line up and turn the tool about the same line, so the controller cannot decide how to split the motion and one of them may spin 180 degrees in an instant. The elbow singularity is our stretched arm. The shoulder singularity happens when the wrist centre lies directly above axis one. During a straight-line move through such a pose the joints accelerate wildly and the controller stops. Programmers avoid them by changing the path or using joint moves.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Wrist singularity: axis 5 near zero.</li><li>Misconception: the robot breaks at a singularity. It only loses a direction; the controller protects it by stopping.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / check answers</span><ul><li><b>Q:</b> How would you avoid a wrist singularity? <b>A:</b> Tilt the tool a few degrees so axis 5 stays away from zero, or use a PTP move.</li></ul></div>
+      <p class="trans">Transition: The same Jacobian also connects forces and torques.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 23</span>Statics: from tip force to joint torques<span class="time">~6 min</span></h3>
+      <p class="say">Now the robot is not moving but pushing: holding a part, pressing a tool on a surface. What torque must each motor give? Use energy: the power the motors put in, torque times joint speed, equals the power at the tip, force times velocity, if we ignore losses. Insert v equals J theta-dot and the Jacobian appears again, but transposed: tau equals J-transpose F. It is the robot version of a lever. The same table of lever arms that turns joint speeds into tip speed turns tip force into joint torques. Force F is what the tip exerts on the world.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>One matrix, two uses: v = J theta-dot and tau = J^T F.</li><li>Misconception: J^T is the same as J^-1. Transpose just swaps rows and columns; no division.</li></ul></div>
+      <p class="trans">Transition: Let us hold a part.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 24</span>Worked example: holding a 2 kg part<span class="time">~7 min</span></h3>
+      <p class="say">Same pose again. The part weighs about 20 newtons downwards, so the tip must push upwards with F equal to zero, 20. Write the transposed Jacobian: rows become columns. Then tau-one is 0.4 times 20, which is 8 newton-metres, and tau-two is zero. Does it make sense? For the shoulder the force acts with a horizontal lever arm of 0.4 metres: 8 newton-metres. For the elbow the forearm is vertical, so the vertical force passes straight through the elbow joint and needs no torque. We ignored the links&#x27; own mass here; we add it in the dynamics session.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Always cross-check tau = J^T F with force times lever arm.</li><li>Misconception: F is the weight. F is the force the robot applies, opposite to the weight.</li></ul></div>
+      <p class="trans">Transition: Your turn.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 25</span>Check your understanding (4.5)<span class="time">~6 min</span></h3>
+      <p class="say">Pairs, four minutes. Encourage students to check question one with the lever-arm method as well. For question three, have someone stand up with straight versus bent knees.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Locked knees: singular poses resist forces along the limb with no torque.</li><li>Misconception: singular poses are weak in every direction.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / check answers</span><ul><li><b>Q:</b> 1. F = (10, 0) N in the same pose? <b>A:</b> tau = J^T F: tau1 = -0.3 x 10 = -3 N m, tau2 = -0.3 x 10 = -3 N m (clockwise). Lever-arm check: horizontal force at height 0.3 m.</li><li><b>Q:</b> 2. Why does the straight-line move stop? <b>A:</b> Near the stretched pose det J -&gt; 0, the required joint speeds exceed their limits, so the controller stops with an error.</li><li><b>Q:</b> 3. Resisting force at a singularity? <b>A:</b> Easy: a force along the stretched arm passes through all joints, so tau = J^T F = 0; like standing on locked knees.</li></ul></div>
+      <p class="trans">Transition: Let us summarise.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 26</span>Session 4.5 summary and key terms<span class="time">~3 min</span></h3>
+      <p class="say">The Jacobian is a table of lever arms that changes with the pose. It maps joint speeds to tip velocity and, transposed, tip force to joint torques. Where its determinant is zero the robot loses a direction of motion; near there joint speeds blow up. Engineers use it for motor sizing, force control and numerical inverse kinematics.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>v = J theta-dot, tau = J^T F.</li></ul></div>
+      <p class="trans">Transition: After the break we add mass: robot dynamics.</p>
+    </div>
+  </section>
+  <section id="s3">
+    <h2 class="session">Session 4.6 Introduction to robot dynamics <small>Curriculum code 4.6 · 60 min</small></h2>
+    <div class="slide">
+      <h3><span class="num">Slide 28</span>Why dynamics? Geometry is not enough<span class="time">~4 min</span></h3>
+      <p class="say">So far masses did not matter. But the motors must accelerate links and hold them against gravity. Pick up a full bucket and hold it close to your body, then at arm&#x27;s length: same bucket, much more effort. That is dynamics: the torques needed to produce a motion. We need it to size motors, which we did on W1D2, to compute feedforward torques for the servo loops, and to simulate robots before building them. The flow on the right: kinematics provides angle, speed and acceleration; the dynamics model turns them into torques and finally motor currents.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Dynamics = kinematics + masses + gravity.</li><li>Misconception: a robot that is not moving needs no torque. Gravity needs holding torque.</li></ul></div>
+      <p class="trans">Transition: A short refresher on rotation and energy.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 29</span>Refresher: rotation, energy and the Lagrange idea<span class="time">~6 min</span></h3>
+      <p class="say">Newton&#x27;s law for rotation: torque equals moment of inertia times angular acceleration. For a point mass at radius r the inertia is m r squared, so mass far from the axis costs a lot. Kinetic energy is one half m v squared, potential energy m g h. The French-Italian mathematician Lagrange found a recipe: write the total kinetic minus potential energy of the arm, differentiate it in a standard way, and out come the joint torques. We will not do the algebra; we will look at the shape of the result. Robot software uses an equivalent, faster recursion called Newton-Euler.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>J = m r^2: distance squared.</li><li>Misconception: Lagrange gives different physics from Newton. Same physics, different bookkeeping.</li></ul></div>
+      <p class="trans">Transition: Here is the shape of the result.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 30</span>The robot equation of motion<span class="time">~8 min</span></h3>
+      <p class="say">Every robot arm, from our two links to a six-axis welder, obeys this equation. The first term is the inertia matrix times acceleration: like J alpha, but a matrix that changes with the pose. The second term collects Coriolis and centrifugal effects, forces that appear because links rotate; they grow with speed squared. The third term is gravity: the torque needed just to hold the pose. Friction is added separately. Compare it with the mass-spring-damper from W1D2: mass times acceleration plus a velocity term plus a position term equals the force. The robot is the same story with matrices.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Three terms: inertia, velocity, gravity.</li><li>Misconception: the inertia of a joint is a fixed number. It depends on where the other links are.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / check answers</span><ul><li><b>Q:</b> Which term is present at standstill? <b>A:</b> Gravity (plus static friction).</li></ul></div>
+      <p class="trans">Transition: Start with gravity, the easiest term.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 31</span>Gravity torque of the 2-link arm<span class="time">~7 min</span></h3>
+      <p class="say">Use the simplest model: put the mass of link one, with the elbow motor, as a point at the elbow, and the mass of link two plus payload as a point at the tip. The gravity torque is then weight times horizontal lever arm. The elbow carries only m2 with lever arm L2 cos of the absolute forearm angle. The shoulder carries both masses with lever arm L1 cos theta-one, plus the elbow&#x27;s term. The plot shows them as the stretched arm swings from pointing down to pointing up: maximal when horizontal, zero when vertical. Motors are sized for the horizontal case.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Torque = weight x horizontal distance.</li><li>Misconception: gravity torque is largest with the arm pointing up. Vertical arm: zero lever arm.</li></ul></div>
+      <p class="trans">Transition: Let us calculate the horizontal case.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 32</span>Worked example: holding the arm horizontal<span class="time">~7 min</span></h3>
+      <p class="say">Values: m1 3 kilograms, m2 2 kilograms, g rounded to 10. Step one, the elbow: 2 times 10 times 0.3 gives 6 newton-metres. Step two, the shoulder&#x27;s own part: both masses, 5 kilograms, at 0.4 metres gives 20. Step three, total shoulder torque 26 newton-metres. Step four, add a one-kilogram payload at the tip: the elbow needs 9, the shoulder 33. So one extra kilogram costs 7 newton-metres at the shoulder, because its lever arm is the whole reach of 0.7 metres. This is why payload capacity is always specified together with a distance.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Payload at the tip has the longest lever arm.</li><li>Misconception: the elbow mass m1 affects the elbow torque. It does not; it sits on the elbow axis.</li></ul></div>
+      <p class="trans">Transition: Gravity is one part; inertia is the other.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 33</span>Inertia changes with the pose<span class="time">~7 min</span></h3>
+      <p class="say">The inertia that the shoulder motor feels is m1 L1 squared plus m2 times the squared distance from the shoulder to the tip; the formula in the box is just the law of cosines again. Stretched, it is 1.46 kilogram metres squared; folded, only 0.50. A factor of three. A figure skater uses exactly this: pulling in the arms reduces the inertia and the spin speeds up. For control it matters a lot: a PID tuned for the folded pose will be sluggish when stretched, and one tuned for stretched may oscillate when folded. Payload raises the whole curve.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Inertia varies by about 3x for our arm.</li><li>Misconception: one set of PID gains is equally good everywhere. Inertia ratio changes with pose.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / check answers</span><ul><li><b>Q:</b> Why does the folded arm give 0.50 and not 0.48? <b>A:</b> The tip mass is still 0.1 m from the shoulder: 2 x 0.01 = 0.02.</li></ul></div>
+      <p class="trans">Transition: What else does payload change, and what about Coriolis?</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 34</span>Payload effects and Coriolis forces<span class="time">~6 min</span></h3>
+      <p class="say">Payload adds both gravity torque and inertia. Datasheets give a rated payload at a certain distance from the flange, and a wrong payload setting in the controller causes overshoot, path errors and false collision alarms, because the controller&#x27;s model no longer matches reality. Coriolis and centrifugal forces: walk outward on a turning merry-go-round and you feel pushed sideways. They grow with speed squared, so they are negligible for slow robots and important for fast pick-and-place. Mention computed-torque control from W1D4 as the controller that uses this whole model.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Always enter correct payload data in the robot controller.</li><li>Misconception: Coriolis forces are only for weather and planets.</li></ul></div>
+      <p class="trans">Transition: Now combine inertia and gravity in one number.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 35</span>Worked example: torque to accelerate the shoulder<span class="time">~7 min</span></h3>
+      <p class="say">The arm is stretched and horizontal and starts moving upwards with 10 radians per second squared. Because it starts from rest, the Coriolis term is zero. Step one, the equation: tau equals M11 times acceleration plus gravity. Step two, without payload: 1.46 times 10 is 14.6, plus 26, gives 40.6 newton-metres. Step three, with one kilogram payload: inertia becomes 1.95, so 19.5 plus 33 gives 52.5. The bar chart shows that for this moderate acceleration gravity is the larger part, and payload adds about thirty percent. These are the numbers you would feed into the motor sizing from W1D2.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>tau = M alpha + g, at rest.</li><li>Misconception: acceleration torque always dominates. For slow, heavy arms gravity often dominates.</li></ul></div>
+      <p class="trans">Transition: Your turn to check.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 36</span>Check your understanding (4.6)<span class="time">~5 min</span></h3>
+      <p class="say">Three minutes, then discuss. Ask a student to show question two with the skater analogy.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Gravity is never negligible for a vertical-plane arm.</li><li>Misconception: no torque needed at theta1 = 90 means the robot can switch the motor off safely. Any disturbance would make it fall; brakes or control still needed.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / check answers</span><ul><li><b>Q:</b> 1. Arm pointing straight up? <b>A:</b> g1 = g2 = 0: cos 90 = 0, the weights pass through both joints.</li><li><b>Q:</b> 2. Why more torque when stretched? <b>A:</b> The tip mass is farther from the shoulder; inertia grows with distance squared (M11 = 1.46 vs 0.50).</li><li><b>Q:</b> 3. Slow painting robot? <b>A:</b> Coriolis/centrifugal can be ignored at low speed; gravity can never be ignored.</li></ul></div>
+      <p class="trans">Transition: Summary.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 37</span>Session 4.6 summary and key terms<span class="time">~3 min</span></h3>
+      <p class="say">The equation of motion has three parts: pose-dependent inertia, speed-dependent Coriolis and centrifugal terms, and gravity. Gravity sets the holding torque and is largest with the arm horizontal. Inertia varied by a factor of three in our arm. Payload raises both. The full model is used in computed-torque control and in simulation.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>tau = M theta-ddot + C theta-dot + g.</li></ul></div>
+      <p class="trans">Transition: After the break: how does the robot plan its motion?</p>
+    </div>
+  </section>
+  <section id="s4">
+    <h2 class="session">Session 4.7 Motion systems and trajectory planning <small>Curriculum code 4.7 · 60 min</small></h2>
+    <div class="slide">
+      <h3><span class="num">Slide 39</span>Path and trajectory<span class="time">~5 min</span></h3>
+      <p class="say">Two words that are often mixed up. A path is the geometric curve: where the tool goes. A trajectory adds time: where it is at each instant, with velocity and acceleration. A route on a map versus a train timetable. Inside the robot controller, the program gives targets and speeds; the trajectory planner, also called the interpolator, cuts the motion into small steps and every one to four milliseconds sends new set-points. For Cartesian moves it runs inverse kinematics at every step, and the servo loops from W1D5 follow the set-points.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Path = where; trajectory = where + when.</li><li>Misconception: the program sends one target and the servo drives go there by themselves. The planner feeds set-points every few ms.</li></ul></div>
+      <p class="trans">Transition: The simplest move type works directly in joint space.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 40</span>Point-to-point (PTP) moves in joint space<span class="time">~7 min</span></h3>
+      <p class="say">In a point-to-point move the planner interpolates each joint angle from start to end, and the joints are synchronised so they start and stop together. It is the fastest move and needs no inverse kinematics along the way, so singularities are no problem. The price: the tool path is a curve. The plot shows our arm going from A, the elbow-down solution we computed, to B at minus 0.2, 0.45. The orange PTP path bulges outwards compared with the blue straight line. For a move through free air that is fine; near a fixture it can cause a collision.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>PTP: joints straight, tool curved.</li><li>Misconception: PTP means the tool moves in a straight line between points.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / check answers</span><ul><li><b>Q:</b> Why does the path bulge outward here? <b>A:</b> Both joint angles change linearly, and FK is nonlinear; here the elbow opens while the shoulder turns.</li></ul></div>
+      <p class="trans">Transition: How fast does each joint move along the way?</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 41</span>Velocity profiles: trapezoid and S-curve<span class="time">~8 min</span></h3>
+      <p class="say">Recall W1D5: a joint accelerates, cruises and decelerates, a trapezoid in the speed plot. Work the example: ninety degrees, maximum speed 180 degrees per second, acceleration 720. Acceleration time is 0.25 seconds, covering 22.5 degrees. Accelerating and braking together use 45 degrees, leaving 45 degrees of cruise, which takes another 0.25 seconds. Total 0.75 seconds. The trapezoid has sudden jumps in acceleration, which shake the robot and excite the resonances from W2D1. An S-curve limits the jerk and is smoother; in this example it needs about 1.6 times the peak acceleration for the same time.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Total time = accel + cruise + decel.</li><li>Misconception: smoother profiles are always slower. With the same peak acceleration yes; with the same time they need more peak acceleration.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / check answers</span><ul><li><b>Q:</b> What if the move were only 30 degrees? <b>A:</b> It never reaches 180 deg/s: triangular profile, t = 2 sqrt(30/720) = 0.41 s.</li></ul></div>
+      <p class="trans">Transition: Now moves that control the tool path itself.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 42</span>Linear (LIN) and circular (CIRC) moves in Cartesian space<span class="time">~7 min</span></h3>
+      <p class="say">When the tool path matters, for welding, gluing or inserting a pin, we use Cartesian moves. A linear move keeps the tool centre point, the TCP, on a straight line; a circular move follows an arc through a programmed via point. The planner cuts the path into small steps and runs inverse kinematics at every tick, the small marks on the line. This is exactly where singularities bite: a straight line passing near a stretched arm demands huge joint speeds. Blending, also called fly-by, rounds the corner between two moves so the robot does not stop at every point.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>IK at every interpolation step.</li><li>Misconception: blending makes the robot miss the point badly. The blend zone size is programmable, from millimetres to zero.</li></ul></div>
+      <p class="trans">Transition: When should we use which?</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 43</span>Joint space vs. Cartesian space: when to use which<span class="time">~5 min</span></h3>
+      <p class="say">Walk through the table row by row. The joint-space move is fast and robust; the Cartesian move is predictable and needed for processes. The rule of thumb: PTP through the air, LIN near the part. A typical pick sequence is PTP to a point above the part, LIN down, close gripper, LIN up, PTP away. Note the configuration row: a PTP move may change elbow up to elbow down, while a linear move cannot, because the arm would have to pass through the singular stretched pose.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>PTP through the air, LIN near the part.</li><li>Misconception: Cartesian moves are always better because they are &quot;precise&quot;. Both reach the end point equally precisely.</li></ul></div>
+      <p class="trans">Transition: Some robots make kinematics trivial.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 44</span>Linear axes and gantries: the easy kinematics<span class="time">~5 min</span></h3>
+      <p class="say">A Cartesian or gantry robot has three prismatic axes along x, y and z. Forward and inverse kinematics are trivial: x equals q1, and so on, and there are no singularities. The axes are driven by ball screws, belts, rack-and-pinion or linear motors, which we met on W1D2. Gantries can be huge, stiff and accurate, so they are used for CNC loading, 3D printers and palletising over long distances. A related idea is the seventh axis: an articulated robot mounted on a linear track to serve several machines.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Cartesian robots: simple kinematics, large footprint.</li><li>Misconception: simple kinematics means simple control. Long belts and beams bring resonance and gantry racking.</li></ul></div>
+      <p class="trans">Transition: Mobile robots have their own kinematics.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 45</span>Differential-drive mobile robots (AMRs)<span class="time">~6 min</span></h3>
+      <p class="say">Most small autonomous mobile robots use differential drive: two driven wheels on one axle, plus caster wheels for balance. If both wheels turn at the same speed the robot drives straight; different speeds make it turn; opposite speeds make it spin on the spot. The forward speed is the average wheel surface speed; the turning rate is the difference divided by the track width. The robot cannot move sideways: it is nonholonomic. A shopping trolley with fixed rear wheels behaves the same way: to park sideways you must manoeuvre.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>v = average, omega = difference / b.</li><li>Misconception: nonholonomic means it cannot reach every position. It can, but not along every path.</li></ul></div>
+      <p class="trans">Transition: Let us drive one through a warehouse.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 46</span>Worked example: an AMR turning in a warehouse<span class="time">~7 min</span></h3>
+      <p class="say">Wheel radius 0.1 metres, track 0.5 metres, right wheel 10, left 8 radians per second. Step one: forward speed 0.1 times 18 over 2, 0.9 metres per second. Step two: turning rate 0.1 times 2 over 0.5, 0.4 radians per second. Step three: the turning radius is v over omega, 2.25 metres. Step four: a quarter turn of pi over 2 radians takes about 3.9 seconds. The plot shows the quarter circle. The photo is a pallet-stacking AGV; many such forklift vehicles use a steered drive wheel instead, while smaller AMRs typically use differential drive.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>R = v / omega.</li><li>Misconception: the faster wheel is on the inside of the curve. The faster wheel is on the outside.</li></ul></div>
+      <p class="trans">Transition: Check your understanding.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 47</span>Check your understanding (4.7)<span class="time">~6 min</span></h3>
+      <p class="say">Pairs, four minutes. For question two, refer back to the PTP plot.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Q3: zero forward speed but nonzero turn rate.</li><li>Misconception: a straight joint interpolation produces a straight tool line.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / check answers</span><ul><li><b>Q:</b> 1. Gluing a straight window edge? <b>A:</b> LIN: the glue bead must follow the straight edge; PTP gives a curve.</li><li><b>Q:</b> 2. Why is PTP not straight? <b>A:</b> Joint angles are interpolated linearly, but FK (sin/cos) is nonlinear, so the tool path is curved.</li><li><b>Q:</b> 3. omega_R = 5, omega_L = -5 rad/s? <b>A:</b> v = 0, omega = 0.1 x 10 / 0.5 = 2 rad/s: it spins on the spot, one turn in about 3.1 s.</li></ul></div>
+      <p class="trans">Transition: Summary.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 48</span>Session 4.7 summary and key terms<span class="time">~4 min</span></h3>
+      <p class="say">A trajectory is a path plus timing, generated every few milliseconds. PTP moves interpolate joints: fast, but curved. LIN and CIRC moves interpolate the tool: predictable, but they need IK each cycle and can hit singularities. Gantries have trivial kinematics. Differential-drive AMRs move with the average wheel speed and turn with the difference.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>PTP vs LIN, v and omega of an AMR.</li></ul></div>
+      <p class="trans">Transition: Last session today: from one robot to the whole factory.</p>
+    </div>
+  </section>
+  <section id="s5">
+    <h2 class="session">Session 5.1 Robotic manufacturing and flexible automation (incl. wrap-up) <small>Curriculum code 5.1 · 60 min</small></h2>
+    <div class="slide">
+      <h3><span class="num">Slide 50</span>Why automate?<span class="time">~5 min</span></h3>
+      <p class="say">We now zoom out from one arm to the factory. Why do companies automate? Quality: a robot makes the same weld or glue bead every time. Cost: at high volume the cost per part falls, and robots can work three shifts. Safety: robots take the dull, dirty and dangerous jobs, like the spot-welding line in the photo, with sparks and heavy car bodies. Speed: shorter cycle times. But be honest about the limits: high investment, the need for skilled maintenance and programming people, and poor flexibility if the system is badly planned.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>The 3 D: dull, dirty, dangerous.</li><li>Misconception: automation always removes jobs. It shifts work to programming, maintenance and supervision.</li></ul></div>
+      <p class="trans">Transition: Not all automation is the same.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 51</span>Fixed, programmable and flexible automation<span class="time">~6 min</span></h3>
+      <p class="say">Classic textbooks such as Groover use three types. Fixed or hard automation is a special machine built for one product at very high volume, like a bottle-filling line. Programmable automation can be re-programmed between batches, but each changeover costs time: a CNC machine or a robot loaded with a new program. Flexible automation switches between known product variants without lost time, for example an FMS or a robot cell with automatic tool changers. The chart places them: fixed at high volume and low variety, programmable at low volume and high variety, flexible in between.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Key difference programmable vs flexible: changeover time.</li><li>Misconception: a robot is automatically flexible automation.</li></ul></div>
+      <p class="trans">Transition: Let us compare them side by side.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 52</span>Comparing the three types<span class="time">~4 min</span></h3>
+      <p class="say">Walk through the table quickly: volume, variety, changeover, investment, example. Then the note at the bottom: an industrial robot by itself is a programmable machine. It becomes the core of flexible automation when combined with tool changers, vision to recognise the product variant, and a cell controller that chooses the right program automatically.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Flexibility is a property of the system, not of the robot alone.</li><li>Misconception: flexible automation is always the best choice. It is the most expensive.</li></ul></div>
+      <p class="trans">Transition: When does the investment pay off?</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 53</span>Worked example: when does a robot cell pay off?<span class="time">~7 min</span></h3>
+      <p class="say">A simple cost model: total cost equals fixed cost plus cost per part times the number of parts. Manual work: no investment, two euros per part. Robot cell: 150 thousand euros, then fifty cents per part. Set the totals equal: 2N equals 150 thousand plus 0.5N, so N is 100 thousand parts. At 400 parts per day that is 250 working days, about one year. The plot shows the two lines crossing. The lesson: automation needs volume. Flexibility helps because one cell can reach that volume by producing several products.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Break-even N = fixed cost / saving per part.</li><li>Misconception: ignoring the per-part cost of the robot (energy, maintenance, grippers).</li></ul></div>
+      <p class="trans">Transition: The classic example of flexible automation is the FMS.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 54</span>Flexible manufacturing systems (FMS)<span class="time">~6 min</span></h3>
+      <p class="say">A flexible manufacturing system has three ingredients: several CNC machines or robot cells, an automated material-handling system such as AGVs, conveyors or a rail-guided vehicle, and a host computer that schedules the work and routes each part to the right machine with the right program and tools. Parts are fixed on pallets at a load station, then travel automatically. Many systems run unattended at night. The photo shows an FMS with machine tools on the right and a rail-guided transport system in the middle.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Machines + automated handling + central computer.</li><li>Misconception: an FMS is just several CNC machines in a room. Without automated handling and central control it is not an FMS.</li></ul></div>
+      <p class="trans">Transition: Where do robots sit in the information hierarchy?</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 55</span>Where does the robot sit? The automation pyramid<span class="time">~5 min</span></h3>
+      <p class="say">The automation pyramid sorts systems by their time scale. At the bottom, sensors, motors and drives work in microseconds to milliseconds. Above them PLCs and robot controllers, tomorrow&#x27;s topic. Then supervisory systems, SCADA and operator screens. Then the manufacturing execution system, which manages production orders, and on top the ERP system for business planning, working in days. Lower levels handle small amounts of fast data; upper levels handle large amounts of slow data. Industrial networks connect the levels, which we cover on W2D5.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Robots and PLCs: control level.</li><li>Misconception: the ERP system controls the robot directly.</li></ul></div>
+      <p class="trans">Transition: Industry 4.0 tries to flatten this pyramid.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 56</span>Industry 4.0: the connected factory<span class="time">~5 min</span></h3>
+      <p class="say">The term Industry 4.0 started in Germany in the 2010s and describes a fourth industrial revolution after steam, electricity and electronics with IT. Its core idea is the cyber-physical system: a machine combined with a computer and a network. Sensors everywhere, the industrial internet of things, send data to edge or cloud servers. A digital twin is a live simulation model of a cell, which we meet tomorrow. Uses include predictive maintenance, batch size one and traceability. Cobots and AMRs make it easy to re-arrange cells.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Cyber-physical system = machine + computer + network.</li><li>Misconception: Industry 4.0 is a specific product or standard. It is a concept.</li></ul></div>
+      <p class="trans">Transition: How do we measure whether a cell performs well?</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 57</span>Measuring a production cell: cycle time and OEE<span class="time">~6 min</span></h3>
+      <p class="say">Three numbers every production engineer uses. Cycle time: the time between two finished parts. Takt time: the available time divided by customer demand, so the cycle time the customer needs. OEE multiplies availability, performance and quality. Work the example: an eight-hour shift and 960 parts give a takt of 30 seconds. The cell is down 48 minutes, so availability is 432 over 480, 0.90. It runs at 95 percent of ideal speed and makes one percent scrap. OEE is 0.90 times 0.95 times 0.99, about 0.85, which is considered world class.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Cycle time must be shorter than takt time.</li><li>Misconception: OEE of 100 percent is a realistic target.</li></ul></div>
+      <p class="trans">Transition: Check your understanding.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 58</span>Check your understanding (5.1)<span class="time">~5 min</span></h3>
+      <p class="say">Pairs, three minutes.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Programmable vs flexible: changeover.</li><li>Misconception: high variety always means flexible automation.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / check answers</span><ul><li><b>Q:</b> 1. Bakery and job shop? <b>A:</b> Bakery: fixed automation (one product, very high volume). Job shop: programmable (batches, re-programming between them).</li><li><b>Q:</b> 2. What makes a cell flexible? <b>A:</b> It switches between known variants with (almost) no changeover time: tool changers, vision, automatic program selection.</li><li><b>Q:</b> 3. Cheaper gripper, EUR 0.25 per part? <b>A:</b> N = 150000 / (2 - 0.25) = about 85700 parts: break-even comes earlier.</li></ul></div>
+      <p class="trans">Transition: Summary.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 59</span>Session 5.1 summary and key terms<span class="time">~3 min</span></h3>
+      <p class="say">We automate for quality, cost, safety and speed. Fixed, programmable and flexible automation differ in volume, variety and changeover time. Break-even is the fixed cost divided by the saving per part. An FMS combines machines, automated handling and a central computer. Industry 4.0 connects everything with data.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Three automation types, break-even, OEE.</li></ul></div>
+      <p class="trans">Transition: Let us wrap up the day.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 60</span>Day summary<span class="time">~4 min</span></h3>
+      <p class="say">Walk along the five boxes. Inverse kinematics: from pose to joints, often two answers. The Jacobian links speeds and forces, and singularities are where it fails. Dynamics: inertia, Coriolis and gravity, with gravity and payload dominating a slow arm. Motion: PTP, LIN and CIRC moves and the differential-drive AMR. Automation: fixed, programmable and flexible. Then ask students to name the three things to remember without looking.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>IK may have none or several answers; avoid det J = 0; gravity and payload dominate slow arms.</li></ul></div>
+      <p class="trans">Transition: Tomorrow we build robot cells.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 61</span>Preview of tomorrow (W2D3): manufacturing and automation<span class="time">~2 min</span></h3>
+      <p class="say">Tomorrow is all manufacturing: robot applications such as welding and palletising, how to design a robot work cell, PLCs and ladder logic, and how robots are programmed with a teach pendant and offline tools. The delta robot in the photo is a typical pick-and-place machine. Today&#x27;s reachability check returns tomorrow when we place a robot in a cell layout.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Bring today&#x27;s workspace ring to the cell-layout exercise.</li></ul></div>
+      <p class="trans">Transition: Credits and references follow.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 62</span>Figure credits<span class="time">~1 min</span></h3>
+      <p class="say">All photographs come from Wikimedia Commons under the licences listed; every other drawing and plot was made for this course. Full URLs are in the shared credits file.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Respect licences when reusing slides.</li></ul></div>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 63</span>References<span class="time">~1 min</span></h3>
+      <p class="say">For further reading, Craig and Spong are the classic robotics textbooks for kinematics and dynamics; Lynch and Park&#x27;s Modern Robotics is freely available online with videos. Siegwart covers mobile robots, and Groover covers automation and flexible manufacturing.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Recommend Lynch &amp; Park videos for self-study.</li></ul></div>
+      <p class="trans">Transition: End of day.</p>
+    </div>
+  </section>
+</main>
+<footer>Figures and references are listed on the final slides of the deck.</footer>
+</body>
+</html>

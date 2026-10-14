@@ -1,0 +1,429 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>W1D5 Speaker Notes</title>
+<style>
+  :root{
+    --navy:#0B1F3A; --blue:#14365E; --mid:#2B5A8C; --sky:#6E9BC9; --pale:#E8EEF6;
+    --orange:#F07F12; --amber:#F9A94B; --cream:#FFF3E4; --gray:#5B6573; --bg:#F6F8FB; --card:#fff; --text:#0B1F3A;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){ --bg:#0A1424; --card:#10213A; --text:#E6ECF4; --pale:#1A3152; --cream:#3a2a14; --gray:#9AA8BA; }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 "Segoe UI",system-ui,-apple-system,Roboto,Helvetica,Arial,sans-serif}
+  header{background:var(--navy);color:#fff;padding:28px 16px 22px;border-bottom:4px solid var(--orange)}
+  header .wrap{max-width:980px;margin:0 auto}
+  header .day{color:var(--orange);font-weight:700;letter-spacing:.08em;font-size:.9rem}
+  header h1{margin:.2em 0 .1em;font-size:1.9rem}
+  header p{margin:0;color:var(--sky)}
+  nav.toc{position:sticky;top:0;z-index:5;background:var(--blue);padding:8px 16px;overflow-x:auto;white-space:nowrap}
+  nav.toc a{color:#fff;text-decoration:none;margin-right:16px;font-size:.88rem}
+  nav.toc a:hover{color:var(--amber)}
+  main{max-width:980px;margin:0 auto;padding:20px 16px 60px}
+  h2.session{margin:42px 0 12px;padding:10px 14px;background:var(--blue);color:#fff;border-left:6px solid var(--orange);border-radius:4px;font-size:1.25rem}
+  h2.session small{display:block;color:var(--amber);font-weight:500;font-size:.85rem}
+  table.plan{width:100%;border-collapse:collapse;background:var(--card);margin:12px 0}
+  table.plan th{background:var(--blue);color:#fff;text-align:left;padding:8px}
+  table.plan td{padding:8px;border-bottom:1px solid var(--pale)}
+  .slide{background:var(--card);border-radius:8px;margin:14px 0;padding:14px 18px;box-shadow:0 1px 3px rgba(11,31,58,.12);border-top:3px solid var(--mid)}
+  .slide h3{margin:0 0 6px;font-size:1.05rem;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+  .slide h3 .num{background:var(--orange);color:#fff;border-radius:4px;padding:1px 8px;font-size:.85rem}
+  .slide h3 .time{margin-left:auto;color:var(--gray);font-weight:400;font-size:.85rem}
+  .say{margin:6px 0}
+  .key{background:var(--cream);border-left:4px solid var(--orange);padding:6px 10px;margin:8px 0;border-radius:3px}
+  .ask{background:var(--pale);border-left:4px solid var(--mid);padding:6px 10px;margin:8px 0;border-radius:3px}
+  .trans{color:var(--gray);font-style:italic;margin-top:6px}
+  .label{font-weight:700;font-size:.8rem;text-transform:uppercase;letter-spacing:.05em;color:var(--orange)}
+  .ask .label{color:var(--mid)}
+  ul{margin:4px 0 4px 1.1em;padding:0}
+  footer{max-width:980px;margin:0 auto;padding:20px 16px;color:var(--gray);font-size:.85rem}
+  @media print{nav.toc{display:none}.slide{break-inside:avoid;box-shadow:none;border:1px solid #ccc}}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <div class="day">WEEK 1 · DAY 5 / 5 · SPEAKER NOTES</div>
+  <h1>Servo Systems II: FOC, Cascaded Loops, Tuning and Trajectories</h1>
+  <p>Mechatronics and Robotics Engineering (50 h) · Week 1 · Day 5 · 5 h net teaching time</p>
+</div></header>
+<nav class="toc"><a href="#plan">Plan</a><a href="#s1">3.3 · Field-oriented control (with agenda and recap)</a><a href="#s2">3.4 · Cascaded current, velocity and position loops</a><a href="#s3">3.5 · Loop tuning and bandwidth</a><a href="#s4">3.6 · Trajectory generation, feedforward and disturbance compensation + wrap-up</a></nav>
+<main>
+  <section id="plan">
+    <h2 class="session">Day plan &amp; timing</h2>
+    <table class="plan"><tr><th>Block</th><th>Topic</th><th>Slides (PDF pages)</th><th>Duration</th></tr>
+      <tr><td>1</td><td>Agenda, recap of W1D3–W1D4; 3.3 FOC part A: three-phase, rotation, Clarke, Park, frames</td><td>2–11</td><td>46 min</td></tr>
+      <tr><td></td><td><i>Break</i></td><td></td><td>10 min</td></tr>
+      <tr><td>2</td><td>3.3 FOC part B: θ_e, dq circuits, torque, worked example, FOC loop, alignment, robot joint, check, summary</td><td>12–20</td><td>44 min</td></tr>
+      <tr><td></td><td><i>Break</i></td><td></td><td>10 min</td></tr>
+      <tr><td>3</td><td>3.4 Cascade, robot-joint loops, current loop, velocity-loop recipe</td><td>22–26</td><td>51 min</td></tr>
+      <tr><td>4</td><td>3.4 Velocity plots, position loop, windup, check, summary</td><td>27–31</td><td>39 min</td></tr>
+      <tr><td></td><td><i>Break</i></td><td></td><td>10 min</td></tr>
+      <tr><td>5</td><td>3.5 Loop tuning and bandwidth</td><td>33–42</td><td>60 min</td></tr>
+      <tr><td></td><td><i>Break</i></td><td></td><td>10 min</td></tr>
+      <tr><td>6</td><td>3.6 Trajectories, feedforward, gravity compensation, DOB; day summary, preview, credits, references</td><td>44–57</td><td>60 min</td></tr>
+      <tr><td></td><td><b>Total net teaching time</b></td><td></td><td><b>300 min (5 h)</b> + 40 min breaks</td></tr>
+    </table>
+    <p>Slide numbers refer to PDF page numbers of <code>w1d5.pdf</code> (title page 1 and section-divider pages 5, 21, 32, 43 have no card). The reference motor (p=4, R=0.5&nbsp;Ω, L=3&nbsp;mH, ψ<sub>PM</sub>=0.12&nbsp;Vs, k<sub>t</sub>=0.72&nbsp;Nm/A, J<sub>m</sub>=3·10<sup>-4</sup>&nbsp;kg&nbsp;m², V<sub>dc</sub>=325&nbsp;V, 16&nbsp;kHz) is used for every computed plot; plus a harmonic gear N = 100 for the robot-joint examples; the data are produced by <code>w1d5/src/gen_data.py</code>.</p>
+  </section>
+
+  <section id="s1">
+    <h2 class="session">Session 3.3 · Field-oriented control (with agenda and recap) <small>Curriculum code 3.3 · 90 min</small></h2>
+    <div class="slide">
+      <h3><span class="num">Slide 2</span>Agenda and learning outcomes<span class="time">~3 min</span></h3>
+      <p class="say">Welcome to the last day of Week 1. On Monday we met the motors, then we learned feedback control, and yesterday we built the servo drive&#x27;s power stage. Today we connect everything: how a drive turns a torque command into the right phase currents, how three loops are stacked around that, how to tune them, and how a robot controller plans a move so the loops have an easy job. We use one reference joint all day, listed in the grey box: a small permanent-magnet servo motor behind a gear of ratio 100. Every number on today&#x27;s plots is computed from these parameters, so students can check them.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>One reference joint for all examples: k_t = 0.72 Nm/A, N = 100.</li><li>Misconception: &#x27;the drive just applies a voltage&#x27; — today shows it controls current, then torque, speed and position.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why keep the same motor all day? <b>A:</b> So the current-loop bandwidth from 3.4 is the same one that limits the velocity loop in 3.5 — the numbers connect.</li></ul></div>
+      <p class="trans">Transition: First, a quick look back at the control tools we will need.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 3</span>What we learned so far (1/2): control tools<span class="time">~3 min</span></h3>
+      <p class="say">Let us refresh four ideas from Wednesday and Thursday. PID reacts to the error now, its history and its trend. The Bode plot shows gain and phase against frequency, and the phase margin tells us how far a loop is from oscillating. Filters are useful but always cost phase. And a digital controller adds a delay of roughly one and a half samples. From session 2.9 we keep the key robot idea: one servo loop per joint, plus a model-based torque prediction such as gravity compensation. Today we see where those loops physically live: inside the servo drive.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Phase margin and delay are the two words we reuse most today.</li><li>Misconception: feedforward is not a &#x27;fourth loop&#x27; — it has no feedback path and cannot destabilise.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> What does the orange dashed arrow represent? <b>A:</b> A torque predicted from the model (feedforward), added without waiting for an error.</li></ul></div>
+      <p class="trans">Transition: And the second half: the servo drive and the power stage.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 4</span>What we learned so far (2/2): the servo drive<span class="time">~3 min</span></h3>
+      <p class="say">Yesterday we opened the servo drive. It can run in torque, velocity or position mode. Inside, a DC bus feeds a three-leg inverter, and pulse-width modulation sets the average voltage on each motor phase. There are hard limits: peak current, which protects transistors and magnets, and the bus voltage, which caps speed. The chain on the right is today&#x27;s road map. Session 3.3 turns voltage into controlled current using field-oriented control; 3.4 stacks current, velocity and position loops; 3.5 tunes them; 3.6 plans the move and compensates the disturbances a robot joint sees.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>PWM gives us a controllable average voltage — today we decide which voltage.</li><li>Misconception: higher DC-bus voltage does not mean more torque; torque comes from current.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Which mode does a robot drive usually run in? <b>A:</b> Position or velocity mode with feedforward; torque mode when the robot controller computes torques itself.</li></ul></div>
+      <p class="trans">Transition: Let us start with field-oriented control.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 6</span>Why field-oriented control? The DC-motor analogy<span class="time">~7 min</span></h3>
+      <p class="say">In a brushed DC motor, the commutator automatically keeps the current at ninety degrees to the magnet, so torque is simply k_t times current. In a permanent-magnet synchronous motor the magnet sits on the rotor and turns, so the current pattern must turn with it. Think of opening a door: you push hardest per newton if you push perpendicular to the door, even while it swings. FOC is an electronic commutator: it measures the rotor angle and splits the current into a part along the magnet, i_d, which makes no torque, and a part ninety degrees ahead, i_q, which makes torque.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>i_q makes torque; i_d along the magnet makes none (surface magnets).</li><li>Misconception: &#x27;FOC is a different motor type&#x27; — it is a control method for the same PMSM.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why not just drive the three phases with fixed sine waves? <b>A:</b> Without the rotor angle the current is not kept at 90° to the magnet: torque per amp drops and the motor can lose step under load.</li></ul></div>
+      <p class="trans">Transition: To understand the transforms, we first refresh three-phase sinusoids.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 7</span>Refresher: three-phase sinusoids<span class="time">~6 min</span></h3>
+      <p class="say">Three phase currents have the same amplitude and are shifted by one third of a period, 120 degrees. At the red line, phase a is at plus one and b and c are at minus one half: the sum is zero, and that is true at every instant. So only two of the three are independent, which is why drives measure only two currents. The coils are also 120 degrees apart in space. Fed with these currents, they create one magnetic field arrow of constant length that rotates at the electrical frequency. Three wiggling numbers equal one rotating arrow.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Sum of the three currents is zero: two sensors suffice.</li><li>Misconception: three phases do not make three separate fields — they combine into one rotating field.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> If i_a = 1 and i_b = −0.5, what is i_c? <b>A:</b> −0.5, because the sum must be zero.</li></ul></div>
+      <p class="trans">Transition: Rotating arrows need rotation matrices — a quick refresher.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 8</span>Refresher: rotating vectors and rotation matrices<span class="time">~5 min</span></h3>
+      <p class="say">A vector in the plane can be written as a complex number, and multiplying by e to the j theta rotates it. The same thing in matrix form is the rotation matrix R of theta. Work the example: rotating the unit vector along x by ninety degrees gives the unit vector along y. The important twist is that turning the axes is the opposite of turning the vector: an observer whose axes are turned by plus theta sees the vector turned by minus theta. Students will meet exactly this matrix again in Week 2 for robot frames, so it is worth getting it right now.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>R(θ) keeps length and changes direction.</li><li>Misconception: rotating the axes and rotating the vector are the same operation — they have opposite signs.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Rotate (1,0) by 180°? <b>A:</b> (−1, 0).</li></ul></div>
+      <p class="trans">Transition: Now the first transform: Clarke.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 9</span>Clarke transform: three phases to two axes<span class="time">~7 min</span></h3>
+      <p class="say">Each phase current pushes along its own coil axis. Add the three pushes as arrows, and write the result in x–y form: that is the Clarke transform, giving i_alpha and i_beta in axes fixed to the stator. The factor two thirds makes the arrow length equal to the peak phase current. Go through the example: i_a equals 8 amps, i_b and i_c minus 4: i_alpha is 8 and i_beta zero, the arrow points along phase a. Because the sum is zero, i_alpha equals i_a and i_beta can be computed from i_a and i_b alone. Note the arrow still rotates, so alpha and beta are still sine waves.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Clarke = add the three coil pushes as vectors.</li><li>Misconception: Clarke alone does not give DC values — αβ are still sinusoids.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> i_a = 0, i_b = 5 A, i_c = −5 A: i_α? <b>A:</b> 0 A; i_β = (0 + 10)/√3 ≈ 5.8 A.</li></ul></div>
+      <p class="trans">Transition: To make the sines stand still we need a rotating viewpoint: Park.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 10</span>Park transform: the rotating camera<span class="time">~7 min</span></h3>
+      <p class="say">Imagine bolting a camera to the rotor. In its picture the magnet stands still. The current arrow rotates at the same speed as the rotor, so in the camera picture it also stands still: two constant numbers, i_d along the magnet and i_q across it. Mathematically we rotate the axes by the electrical angle, which is the same as rotating the vector by minus that angle, exactly the refresher two slides ago. The physical current does not change; only our coordinates change. This is the trick that turns AC control into DC control.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Park uses the measured rotor angle θ_e.</li><li>Misconception: Park does not change the physical currents — only the coordinates we describe them in.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> What happens if the angle used in Park is wrong? <b>A:</b> i_d and i_q get mixed: we push at the wrong angle and lose torque (see the alignment slide).</li></ul></div>
+      <p class="trans">Transition: Let us see the same current in all three frames.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 11</span>The same current seen in the three frames<span class="time">~5 min</span></h3>
+      <p class="say">This computed plot shows one current seen three ways while the torque command steps from 5 to 10 amps. In abc we see three sines whose amplitude changes. In alpha-beta, two sines of the same frequency. In d-q, flat lines: i_d stays zero, and i_q makes a clean step from 5 to 10. A PI controller from Wednesday handles constant targets perfectly, with zero steady-state error. If we tried to control the sines directly, the controller would always lag behind at high speed. That is why every modern servo drive controls in d-q.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>In dq, steady state = DC values.</li><li>Misconception: &#x27;a PI can track a sine perfectly&#x27; — it can&#x27;t at high frequency; it can track a constant.</li></ul></div>
+      <p class="trans">Transition: One more detail before the motor model: electrical versus mechanical angle.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 12</span>Electrical vs mechanical angle<span class="time">~5 min</span></h3>
+      <p class="say">A motor with eight magnet poles has four pole pairs. For one mechanical turn, the current pattern has to go through four full electrical cycles, so theta_e equals p times theta_m. The plot shows the saw-tooth of the electrical angle for p equals four. Example: at 3000 rpm, the electrical frequency is 4 times 3000 over 60, which is 200 hertz. An important practical consequence: an angle error is multiplied by p. Two degrees of mechanical encoder error become eight electrical degrees, which matters for the alignment slide later.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>θ_e = p θ_m; f_e = p n / 60.</li><li>Misconception: the current frequency equals the shaft speed in rev/s — only for p = 1.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> 8-pole motor at 1500 rpm: electrical frequency? <b>A:</b> p = 4: 4·1500/60 = 100 Hz.</li></ul></div>
+      <p class="trans">Transition: Now we look at the motor through the rotating camera.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 13</span>The motor seen by the rotating camera: two R-L circuits<span class="time">~6 min</span></h3>
+      <p class="say">Seen from the rotor, each axis looks like the winding we modelled on Monday: a resistor and an inductor, with a time constant L over R of 6 milliseconds. On top come speed-dependent voltage sources. The back-EMF, omega_e times the magnet flux, appears only on the q axis, because the magnet lies on d. The omega L i terms couple the two axes. Do not derive these equations with students; instead read them: each axis is an R-L circuit plus known voltages that the controller can subtract. That makes each axis easy to control with a PI.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Each axis = R–L circuit; back-EMF only on q.</li><li>Misconception: the coupling terms are not disturbances we cannot know — they are computed and cancelled (decoupling).</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why does back-EMF appear only on q? <b>A:</b> The magnet flux lies along d; its rotation induces a voltage 90° ahead, i.e. on q.</li></ul></div>
+      <p class="trans">Transition: Which current makes torque?</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 14</span>Torque comes from i_q<span class="time">~6 min</span></h3>
+      <p class="say">For a surface-magnet motor the torque is three halves times p times the magnet flux times i_q, which is simply k_t times i_q. With our numbers k_t is 0.72 newton-metres per amp, so 10 amps of i_q give 7.2 newton-metres. Keep i_d at zero and all the current makes torque. If the current arrow is tilted away from q by an angle beta, only the cosine of beta is useful: the blue curve. The orange curve and MTPA point belong to interior-magnet motors; mention them as &#x27;going further&#x27; only.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>T = k_t i_q with k_t = 1.5 p ψ_PM.</li><li>Misconception: i_d = 0 is not always optimal — in IPM motors a negative i_d adds reluctance torque (going further).</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> What does field weakening do, in one sentence? <b>A:</b> A negative i_d reduces the effective flux so the back-EMF stays below the bus voltage at high speed.</li></ul></div>
+      <p class="trans">Transition: Let us put numbers on an operating point.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 15</span>Worked example: operating point at 3000 rpm<span class="time">~6 min</span></h3>
+      <p class="say">Take the reference motor at 3000 rpm with 10 amps of i_q. Step one: the electrical speed is 1257 radians per second. Step two: the back-EMF is 1257 times 0.12, about 151 volts. Step three: the q voltage is the resistive drop plus the back-EMF, about 156 volts; the d voltage is minus omega L i_q, about minus 38 volts. Step four: the length of the voltage vector is 160 volts, below the 188-volt limit. So we use 85 percent of the available voltage. At higher speed or torque we would run out of voltage.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>The voltage limit V_dc/√3 caps speed.</li><li>Misconception: v_q is not just R·i_q — at speed it is dominated by the back-EMF.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> What happens at 3600 rpm with the same current? <b>A:</b> E ≈ 181 V; the vector exceeds 188 V — the drive runs out of voltage unless it weakens the field.</li></ul></div>
+      <p class="trans">Transition: Now the complete FOC loop.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 16</span>FOC: the basic structure<span class="time">~6 min</span></h3>
+      <p class="say">Follow the loop once with the students. Every PWM period, 62.5 microseconds, the drive measures two phase currents and the rotor angle, applies Clarke and Park to get i_d and i_q, runs two PI controllers, one for each axis, transforms the voltage commands back to alpha-beta with inverse Park, and computes new duty cycles. The velocity PI on the left produces the i_q command; i_d command is zero. The encoder supplies both the angle for the transforms and, differentiated and filtered, the speed. The orange block adds the known coupling terms.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Sequence: measure → Clarke/Park → PI → inverse Park → PWM.</li><li>Misconception: FOC does not need three current sensors or a separate speed sensor — two currents plus the encoder are enough.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> What is the most important sensor for FOC? <b>A:</b> The rotor position sensor (encoder or resolver) — without the angle, Park is impossible.</li></ul></div>
+      <p class="trans">Transition: That angle must be correct — what happens if it is not?</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 17</span>Rotor angle alignment and offset errors<span class="time">~4 min</span></h3>
+      <p class="say">The encoder&#x27;s zero is wherever it happened to be mounted, but FOC needs electrical angle zero exactly on the magnet&#x27;s d axis. A wrong offset is a crooked camera: we push at the wrong angle. Useful torque falls with the cosine of the error, and the sine part is wasted as heat. Example: two mechanical degrees on a four-pole-pair motor is eight electrical degrees: only one percent less torque, but 14 percent of the current wasted. Beyond ninety degrees the torque reverses and the motor runs away. Drives therefore store a factory offset or run an alignment routine.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>T = k_t |i| cos Δθ_e.</li><li>Misconception: small angle errors &#x27;only&#x27; cost a little torque — they also waste current as heat and can cause runaway if large.</li></ul></div>
+      <p class="trans">Transition: Let us bring FOC into a robot joint.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 18</span>FOC in a robot joint: from joint torque to i_q<span class="time">~5 min</span></h3>
+      <p class="say">The robot controller thinks in joint torque; the drive thinks in i_q. Between them is the gear. Work through the example: the joint needs 120 newton-metres. With a harmonic gear of ratio 100 and 80 percent efficiency the motor must supply 1.5 newton-metres, so the i_q command is 1.5 divided by 0.72, about 2.1 amps. The joint at 3 radians per second means the motor spins at 300 radians per second, nearly 2900 rpm, the same region as our worked example. Gearing turns a small fast motor into a strong slow joint.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>i_q* = T_joint / (N η k_t).</li><li>Misconception: the gear does not create power — it trades speed for torque and loses some to friction.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why does a cobot joint use a harmonic gear? <b>A:</b> High ratio in one compact stage with almost no backlash (W1D2).</li></ul></div>
+      <p class="trans">Transition: Time to check understanding of FOC.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 19</span>Check your understanding — 3.3<span class="time">~4 min</span></h3>
+      <p class="say">Give the students two minutes in pairs, then take answers. Answers for you: Question one: i_alpha equals two thirds of 8 plus 2 plus 2, which is 8 amps, and i_beta equals 8 minus 8 over root three, which is zero. Question two: the camera turns with the rotor at the same speed as the current arrow, so the arrow appears frozen; its two coordinates are constant. Question three: an eight-pole motor has p equals 4, so the electrical frequency is 4 times 1500 over 60, which is 100 hertz.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Answers: (1) i_α = 8 A, i_β = 0; (2) camera and arrow rotate together; (3) 100 Hz.</li><li>Misconception to listen for: using 8 instead of 4 for p (poles vs pole pairs).</li></ul></div>
+      <p class="trans">Transition: Summary of FOC.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 20</span>Summary 3.3 — Field-oriented control<span class="time">~2 min</span></h3>
+      <p class="say">Summarise in five lines: three phase currents are one rotating arrow. Clarke writes it in two fixed axes; Park writes it from the rotor&#x27;s point of view, where it becomes two DC values. Torque equals k_t times i_q, and for surface magnets we keep i_d at zero. Each axis is an R-L circuit with back-EMF on q. FOC repeats measure, transform, two PIs, transform back and PWM every period, and it needs a correct rotor angle. Point at the key terms box and ask students to explain one term to their neighbour.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>FOC turns the PMSM into a &#x27;DC motor&#x27; with torque = k_t i_q.</li><li>Misconception: pole pairs vs poles — check again.</li></ul></div>
+      <p class="trans">Transition: After the break: the loops stacked around this current control.</p>
+    </div>
+  </section>
+
+  <section id="s2">
+    <h2 class="session">Session 3.4 · Cascaded current, velocity and position loops <small>Curriculum code 3.4 · 90 min</small></h2>
+    <div class="slide">
+      <h3><span class="num">Slide 22</span>The nested (cascade) control structure<span class="time">~9 min</span></h3>
+      <p class="say">Here is the full cascade. The trajectory generator produces the position command. The position controller, a simple P, produces a velocity command. The velocity PI produces a current, that is torque, command. The current PI, which is the FOC we just saw, drives the inverter. Use the car analogy: the navigator decides where to be, cruise control decides the speed, engine management delivers the torque. Each loop treats the closed inner loop as its actuator. Inner loops are faster, sampled at 16, 8 and 2 kilohertz here, and they also enforce limits. The dashed arrows are feedforward, which we use in 3.6.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Inner = faster; each outer loop sees the inner loop as its actuator.</li><li>Misconception: the position loop does not command voltage directly — it commands speed.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why not one big controller from position to voltage? <b>A:</b> Cascade lets each limit (current, speed) be enforced where it lives, and each loop can be tuned and tested separately.</li></ul></div>
+      <p class="trans">Transition: Where do these loops sit in a robot?</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 23</span>Cascaded loops in a robot joint<span class="time">~9 min</span></h3>
+      <p class="say">In a robot each joint has its own servo drive, shown dashed. In most industrial arms the drive closes all three loops: the robot controller computes the trajectory and kinematics and sends a position set-point, plus velocity and torque feedforward, every one to four milliseconds over a fieldbus such as EtherCAT. For computed-torque or force control, from session 2.9, the controller sends torque and the drive closes only the current loop. Point out the encoder on the motor: it measures motor angle, and the link angle differs by gear backlash and compliance. Cobots often add a joint-side encoder or torque sensor.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>The robot controller plans; the drive executes fast loops.</li><li>Misconception: a motor encoder does not measure the link angle exactly — the gear is between them.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why is the current loop always in the drive? <b>A:</b> It must run at the PWM rate (tens of kHz), far faster than any fieldbus cycle.</li></ul></div>
+      <p class="trans">Transition: Now we design the innermost loop.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 24</span>Current-loop PI: a step-by-step recipe<span class="time">~12 min</span></h3>
+      <p class="say">The plant for one axis is the R-L winding plus a small delay T_sigma from computation and PWM, about one and a half sample periods. The PI&#x27;s integral time is chosen equal to L over R, so its zero cancels the slow winding pole. Then the gain K_p equals L over two T_sigma, which keeps the delay safe; this is called the technical optimum. Go through the example step by step: sample time 62.5 microseconds, T_sigma about 94 microseconds, T_i 6 milliseconds, K_p 16 volts per amp. The crossover is about 850 hertz and the phase margin about 61 degrees.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>T_i = L/R, K_p = L/(2T_σ).</li><li>Misconception: a higher current-loop gain is always better — the delay sets a hard limit.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> If the sample rate doubles, what happens to K_p? <b>A:</b> T_σ halves, so K_p and the bandwidth roughly double.</li></ul></div>
+      <p class="trans">Transition: Let us check that the recipe works.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 25</span>Current loop: computed frequency and step response<span class="time">~9 min</span></h3>
+      <p class="say">These curves are computed for the reference motor. On the left, the Bode plot of the loop: the dashed curve ignores the delay; the blue one includes it. The magnitude is almost the same, but the phase bends down at high frequency: delay costs phase, not gain. At the crossover near 850 hertz we keep about 61 degrees of margin. On the right, a step from 0 to 10 amps: the current follows in about 0.3 milliseconds with only about 4 percent overshoot. A third of a millisecond to deliver torque: that is why the outer loops can be treated as having a nearly ideal torque source.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Delay costs phase, not magnitude.</li><li>Misconception: the small overshoot is not a tuning error — it is the expected technical-optimum response.</li></ul></div>
+      <p class="trans">Transition: Next ring out: the velocity loop.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 26</span>Velocity-loop PI: a step-by-step recipe<span class="time">~12 min</span></h3>
+      <p class="say">From current to speed, Newton&#x27;s law says J times d omega over dt equals k_t i_q: the plant is an integrator, k_t over J s, plus a small lag T_eq from the closed current loop and the speed filter. Pick a spacing factor a between 2 and 4: the crossover is a times below the lag, and the PI corner a times below the crossover. Example with a equals 2: T_eq is about half a millisecond, the crossover 1000 radians per second, which is 159 hertz, the gain 1.67, and T_i 2 milliseconds. Larger a is slower but calmer.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>K_pω = J ω_c / k_t: gain scales with inertia.</li><li>Misconception: the velocity loop&#x27;s speed limit is not the motor — it is the lag of everything inside it.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> If the load inertia doubles, how should K_pω change? <b>A:</b> Double it to keep the same crossover.</li></ul></div>
+      <p class="trans">Transition: What do these designs look like?</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 27</span>Velocity loop: computed Bode plot and step responses<span class="time">~9 min</span></h3>
+      <p class="say">Compare the two spacing factors. With a equals 2, the crossover is about 164 hertz but the phase margin only 35 degrees, and the step response overshoots 46 percent. With a equals 3, 107 hertz, 53 degrees and 25 percent overshoot. The dashed curves add a reference prefilter, which smooths the command and removes most of the overshoot without changing how the loop rejects disturbances. Main message: more phase margin means less overshoot. Students saw this rule on Thursday; here it is with real numbers.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>More phase margin = less overshoot.</li><li>Misconception: overshoot to a step is not the same as poor disturbance rejection — the prefilter fixes one without changing the other.</li></ul></div>
+      <p class="trans">Transition: Now the outer loop: position.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 28</span>Position loop: a P controller and the following error<span class="time">~10 min</span></h3>
+      <p class="say">With a good velocity loop, speed follows its command, and position is the integral of speed. So a simple P controller already reaches a fixed target with zero error. But when the target moves at constant speed, the P loop lags behind by speed divided by k_v: the following error. Robot example: k_v of 50 per second and a joint speed of 1 radian per second give 0.02 radians, over one degree. At one metre reach the tool is 20 millimetres behind its planned path. And if six joints lag differently, a straight line becomes curved. Feedforward in 3.6 solves this.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>e_ss = ω / k_v.</li><li>Misconception: zero error at standstill does not mean zero error while moving.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why not just raise k_v to 500? <b>A:</b> The position loop must stay several times slower than the velocity loop; too high k_v causes overshoot and oscillation.</li></ul></div>
+      <p class="trans">Transition: Every loop runs into limits — what then?</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 29</span>Torque and speed limits; integrator windup<span class="time">~9 min</span></h3>
+      <p class="say">Every loop output is limited: current to protect the drive and magnets, speed for safety. While a limit is active the loop is effectively open, but the integrator keeps adding up error. When the limit releases, all that stored error comes out as a huge overshoot: windup. The computed plot shows a 300 radians per second step with a 20-amp limit: without protection the speed shoots to 553; with clamping it stops at 303. Analogy: keeping the accelerator floored and still remembering you wanted more. Cure: stop integrating while saturated.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Saturation opens the loop; protect every integrator.</li><li>Misconception: windup is a tuning problem — it is a nonlinearity, and only anti-windup logic fixes it.</li></ul></div>
+      <p class="trans">Transition: Check your understanding of the cascade.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 30</span>Check your understanding — 3.4<span class="time">~7 min</span></h3>
+      <p class="say">Give two minutes. Answers: Question one: K_p equals L over two T_sigma, 6 millihenry over 200 microseconds, which is 30 volts per amp. Question two: the following error is 0.5 divided by 25, which is 0.02 radians, about 1.15 degrees. Question three: each outer loop is designed assuming the inner loop is already closed and fast; if you tune the outer loop first, you tune it against the wrong plant and must redo it after the inner loop changes. Collect one answer per question from different pairs.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Answers: (1) 30 V/A; (2) 0.02 rad ≈ 1.15°; (3) the outer loop&#x27;s plant includes the closed inner loop.</li><li>Misconception to listen for: forgetting to convert radians to degrees.</li></ul></div>
+      <p class="trans">Transition: Summary of 3.4.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 31</span>Summary 3.4 — Cascaded loops<span class="time">~4 min</span></h3>
+      <p class="say">Recap: position P, velocity PI, current PI; the inner loops are faster. The current PI uses T_i equals L over R and K_p equals L over two T_sigma, giving about 850 hertz. The velocity PI uses K_p equals J omega_c over k_t. The P position loop leaves a following error of speed over k_v. Limits need anti-windup. In robots, either the drive closes all loops or the controller closes the outer ones and sends torque. Ask a student to explain the technical optimum in their own words.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Know the two recipes and e_ss = ω/k_v.</li><li>Misconception: &#x27;cascade&#x27; means three separate motors — it is three loops around one motor.</li></ul></div>
+      <p class="trans">Transition: After the break: how to tune these loops on a real machine.</p>
+    </div>
+  </section>
+
+  <section id="s3">
+    <h2 class="session">Session 3.5 · Loop tuning and bandwidth <small>Curriculum code 3.5 · 60 min</small></h2>
+    <div class="slide">
+      <h3><span class="num">Slide 33</span>Refresher: what does bandwidth mean?<span class="time">~6 min</span></h3>
+      <p class="say">Feed the closed loop a sine command and watch the output. Slow sines are followed perfectly. Fast sines come out too small and late. The bandwidth is the frequency where the output has dropped to 70 percent, minus 3 dB. A dancer copying a leader is a good picture: slow moves are easy, fast ones are lost. A useful rule links bandwidth to rise time: about 0.35 divided by the bandwidth. 100 hertz gives 3.5 milliseconds, 400 hertz less than one millisecond. Higher bandwidth means a faster response.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>t_r ≈ 0.35 / f_BW.</li><li>Misconception: bandwidth is not the maximum motor speed — it is how fast the loop can follow changes.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> A loop has 50 Hz bandwidth: rise time? <b>A:</b> About 7 ms.</li></ul></div>
+      <p class="trans">Transition: How do the bandwidths of the three loops relate?</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 34</span>The bandwidth hierarchy of a servo drive<span class="time">~6 min</span></h3>
+      <p class="say">On a logarithmic frequency axis: PWM at 8 to 32 kilohertz, current loop at 0.5 to 3 kilohertz, velocity at 50 to 400 hertz, position at 10 to 80 hertz. Each loop is a few times slower than the one inside it. The current loop is limited by sampling and PWM delay. The velocity loop is usually limited by mechanical resonances, the red line. A robot with elastic gears may only reach a few tens of hertz in velocity bandwidth; stiff direct drives reach several hundred.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Mechanics, not electronics, usually limits velocity bandwidth.</li><li>Misconception: a faster processor alone does not make a robot joint faster — the gear&#x27;s springiness often limits it.</li></ul></div>
+      <p class="trans">Transition: So how do we tune in practice?</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 35</span>Tuning procedure: from the inside out<span class="time">~7 min</span></h3>
+      <p class="say">Walk down the flow chart. First get the motor data and the angle offset. Then tune the current loop with the recipe and check a step. Then measure the inertia: a known current step gives an acceleration, and J equals k_t times delta i over delta acceleration. Example: 5 amps giving 3000 radians per second squared means 1.2 times 10 to the minus 3 kilogram square metres. Then tune velocity with filters, then position, then feedforward. Raise gains until you hit a margin limit, 45 degrees or 6 dB, then back off. Test large steps last.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Inside out; measure inertia, don&#x27;t guess.</li><li>Misconception: tuning outer loops first &#x27;to save time&#x27; — it wastes time because everything must be redone.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why test large steps last? <b>A:</b> Large steps hit current limits; you first want the linear behaviour right, then check anti-windup.</li></ul></div>
+      <p class="trans">Transition: How far apart must the loops be?</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 36</span>Bandwidth separation: rule of thumb 3–10×<span class="time">~6 min</span></h3>
+      <p class="say">These step responses are computed with a velocity PI designed assuming a perfect current loop; then we make the real current loop slower. A slow inner loop adds a lag at the outer crossover of arctan of the ratio. At ratio 1.5 we lose 34 degrees of phase and the response rings, the red curve. At 3 we lose 18 degrees; at 10 only 6. So the practical window is 3 to 10: below 3 the loops fight each other; above 10 we are safe but leave speed on the table.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Δφ = arctan(ω_c/ω_i).</li><li>Misconception: bigger separation is always better — it also makes the outer loop needlessly slow.</li></ul></div>
+      <p class="trans">Transition: Next: what the load inertia does to the tuning.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 37</span>Effect of the load inertia ratio<span class="time">~7 min</span></h3>
+      <p class="say">Same gains, designed for an inertia ratio of 3, applied to different loads. The loop gain is proportional to K_p k_t over J. More inertia lowers the crossover and the loop becomes sluggish; less inertia pushes the crossover up towards the delays, and it oscillates. For a robot this matters a lot: the inertia seen by joint 1 depends on the pose, stretched arm versus folded arm, and the gear divides it by N squared. So tune for the worst pose or schedule the gains with the pose, and aim for a ratio below 3 to 10.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Loop gain ∝ 1/J: inertia changes the crossover.</li><li>Misconception: a heavier load is the only risk — too little load can also cause oscillation.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Which pose gives joint 1 the largest inertia? <b>A:</b> Arm fully stretched, payload far from the axis.</li></ul></div>
+      <p class="trans">Transition: Every loop also suffers from delay — what does it cost?</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 38</span>Delays and their phase cost at crossover<span class="time">~7 min</span></h3>
+      <p class="say">A pure delay does not reduce gain, but it costs phase equal to 360 degrees times crossover frequency times delay. The shower analogy: with a long pipe, you turn the tap and the temperature arrives seconds later, so you overshoot. The table lists the usual delay sources: computation, PWM update, encoder transfer, and the velocity filter, which is often the largest. Example: half a millisecond at 160 hertz costs almost 29 degrees of phase margin. Keep a delay budget for each loop.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Δφ = 360° · f_c · T_d.</li><li>Misconception: delay only matters for slow systems — the cost grows with crossover frequency.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> A 200 µs delay at 250 Hz? <b>A:</b> 360·250·0.0002 = 18°.</li></ul></div>
+      <p class="trans">Transition: To tune well we measure the real frequency response.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 39</span>Measuring frequency responses (FRFs)<span class="time">~6 min</span></h3>
+      <p class="say">To see the real plant, add a small test signal inside the running loop, a sine sweep or chirp, and record input and output of the plant. At each frequency, the ratio of output to input amplitude and their phase difference give one point of a measured Bode plot. The machine stays under control during the test. The signal must be large enough to beat friction and noise but small enough to stay linear. The photo shows a classic signal analyser; today every servo drive has this built into its tuning software.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Inject inside the loop; G = Y/U at each frequency.</li><li>Misconception: you must open the loop to measure the plant — closed-loop measurement is standard and safer.</li></ul></div>
+      <p class="trans">Transition: What does a real measurement show?</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 40</span>A measured-style FRF: resonance and notch filter<span class="time">~6 min</span></h3>
+      <p class="say">Motor and load are joined by a springy shaft or gear: a two-mass system. Compared with the rigid curve, the measured one shows a dip, the anti-resonance at 300 hertz, and a peak, the resonance at 600 hertz. A playground swing pushed at its own frequency swings huge. The peak can lift the loop gain above one where the phase is bad, and the axis buzzes. A notch filter cuts a narrow band around 600 hertz, the orange curve. We study this properly on Monday in session 3.7, because robot gears make it very common.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Resonance peak can destabilise the velocity loop.</li><li>Misconception: a notch is not a general low-pass — it removes a narrow band only.</li></ul></div>
+      <p class="trans">Transition: Check your understanding of tuning.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 41</span>Check your understanding — 3.5<span class="time">~6 min</span></h3>
+      <p class="say">Answers: Question one: rise time is about 0.35 divided by 200, so 1.75 milliseconds. Question two: 360 times 250 times 200 microseconds equals 18 degrees of phase. Question three: the loop gain is proportional to one over J, so doubling the inertia roughly halves the crossover frequency, and the loop becomes slower and the phase margin changes;  in practice you retune K_p by doubling it. If students say &#x27;it becomes unstable&#x27;, ask them to look again at the inertia-ratio plot: the curve for a larger ratio is slower, and only far from the design point does the phase margin really suffer.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Answers: (1) ≈1.75 ms; (2) 18°; (3) crossover roughly halves.</li><li>Misconception to listen for: thinking more inertia makes the loop unstable — mainly it becomes sluggish.</li></ul></div>
+      <p class="trans">Transition: Summary of 3.5.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 42</span>Summary 3.5 — Tuning and bandwidth<span class="time">~3 min</span></h3>
+      <p class="say">Recap: bandwidth says how fast a loop can follow, with rise time about 0.35 over the bandwidth. Tune from the inside out and separate bandwidths by 3 to 10 times. Inertia changes the loop gain, and in robots it changes with pose. Every delay costs 360 times f_c times T_d of phase. Measure frequency responses in closed loop and tame resonances with notch filters. Ask students which of these levers they think limits a cobot most: usually gear compliance. Then announce the break.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Delay budget and inertia ratio are the key tuning levers.</li><li>Misconception: tuning is guesswork — it is a measured, ordered procedure.</li></ul></div>
+      <p class="trans">Transition: After the break: how the move itself is planned, and how we compensate what we know.</p>
+    </div>
+  </section>
+
+  <section id="s4">
+    <h2 class="session">Session 3.6 · Trajectory generation, feedforward and disturbance compensation + wrap-up <small>Curriculum code 3.6 · 60 min</small></h2>
+    <div class="slide">
+      <h3><span class="num">Slide 44</span>Trajectory generation: trapezoidal vs S-curve profiles<span class="time">~5 min</span></h3>
+      <p class="say">The trajectory generator turns &#x27;go there&#x27; into smooth commands for position, speed and acceleration. Two profiles compute here for a 10-revolution move. Trapezoidal: speed ramps up linearly, cruises, ramps down, so acceleration jumps instantly; those jumps jolt the machine and excite resonances. S-curve: acceleration itself ramps, so the jerk is limited. It takes only 6 percent longer but is much smoother. Analogy: a good lift driver — you never feel the start. Peak torque here is 3.6 newton-metres, within the limits.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>S-curve limits jerk: smoother, slightly slower.</li><li>Misconception: the fastest profile is always the trapezoid — in practice smoother moves settle sooner.</li></ul></div>
+      <p class="trans">Transition: Let us plan a trapezoidal joint move by hand.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 45</span>Worked example: planning a trapezoidal joint move<span class="time">~7 min</span></h3>
+      <p class="say">A joint must move 1.5 radians with maximum speed 2 radians per second and maximum acceleration 8. Step one: the ramp time is speed over acceleration, 0.25 seconds. Step two: each ramp covers one half alpha t squared, 0.25 radians, so both ramps cover 0.5. Step three: the remaining 1.0 radian is covered at cruise speed in 0.5 seconds. Step four: total 1.0 second. Check the condition: a cruise phase exists only if the move is longer than omega squared over alpha, here 0.5 radians; shorter moves become triangles. Robot controllers scale all joints to finish together.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>t_a = ω_max/α_max; cruise only if Δθ ≥ ω²/α.</li><li>Misconception: every move reaches maximum speed — short moves never do.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Move 0.3 rad with the same limits? <b>A:</b> 0.3 &lt; 0.5 rad, so triangle: peak speed √(αΔθ) ≈ 1.55 rad/s.</li></ul></div>
+      <p class="trans">Transition: Now use those planned commands to remove following error.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 46</span>Following error and how feedforward removes it<span class="time">~5 min</span></h3>
+      <p class="say">This computed plot uses a logarithmic scale. With only the P position loop the peak following error on the S-curve move is about 3000 milliradians. Adding velocity feedforward, sending the planned speed directly to the velocity loop, reduces it to 2.6. Adding torque feedforward, the current needed to accelerate the known inertia, brings it to 0.19. Each step is a factor of about one thousand or ten. Feedback now only fixes what is left. Because feedforward acts outside the loop, it does not change stability.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Velocity FF then torque FF: orders of magnitude less error.</li><li>Misconception: feedforward makes the loop less stable — it is outside the loop.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> What does torque feedforward need to know? <b>A:</b> The inertia estimate Ĵ and the planned acceleration.</li></ul></div>
+      <p class="trans">Transition: Where exactly are these feedforward signals added?</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 47</span>Feedforward: velocity, acceleration/torque and friction<span class="time">~5 min</span></h3>
+      <p class="say">The block diagram shows three feedforward paths from the trajectory generator. The planned speed goes to the velocity loop input. The planned acceleration times the inertia estimate, divided by k_t, goes to the current command. And a friction estimate at the planned speed goes there too. Example: inertia 1.2 times 10 to the minus 3, acceleration 3000, friction 0.1 newton-metres gives 5.1 amps of predicted current. Feedforward predicts; feedback corrects the leftover. It needs smooth commands and a good inertia estimate.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>i_q,FF = (Ĵ θ̈* + T̂_f)/k_t.</li><li>Misconception: feedforward replaces feedback — without feedback any model error accumulates.</li></ul></div>
+      <p class="trans">Transition: What pushes against the joint that we did not plan?</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 48</span>Disturbances: load torque and friction<span class="time">~4 min</span></h3>
+      <p class="say">Newton&#x27;s law for the joint now includes the load torque and friction. Friction is larger at standstill than while sliding, the Stribeck curve, so the axis sticks and then jumps when reversing: stick-slip. The PI eventually removes a constant load, but first there is a dip. In a robot the biggest load torque is gravity on every link, which  leads to the next slide. Point at the plot: the blue curve is a realistic Stribeck friction curve, the orange dashed line is the simple Coulomb-plus-viscous model that most drives use for friction feedforward. Ask students where along the curve a slowly reversing robot joint spends its time.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Friction jumps at ω = 0: stick-slip.</li><li>Misconception: friction is just a constant — it depends on speed, direction and temperature.</li></ul></div>
+      <p class="trans">Transition: Gravity: the robot&#x27;s biggest disturbance.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 49</span>Gravity compensation for a robot joint<span class="time">~6 min</span></h3>
+      <p class="say">Gravity pulls every link down with a torque m g l cos theta, so it changes with the pose: maximum when the link is horizontal, zero when vertical. A pure PI must discover it through the error, so the arm sags and overshoots after every move. Better: compute it from the model and add it as feedforward, as we saw in 2.9. Example: 8 kilograms at half a metre gives 39 newton-metres; through the gear of 100 the motor needs 0.39 newton-metres, 0.54 amps, just to hold still. For several links the gravity vector comes from the dynamic model in Week 2.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>τ_g = m g l cos θ; add τ_g/(N k_t) to i_q*.</li><li>Misconception: the integrator &#x27;handles gravity&#x27; fine — it does, but only after an error has built up.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Where is gravity torque zero? <b>A:</b> When the link is vertical (θ = ±90°).</li></ul></div>
+      <p class="trans">Transition: What about pushes we cannot model?</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 50</span>Disturbance observer (DOB): estimate the unknown push<span class="time">~5 min</span></h3>
+      <p class="say">The disturbance observer compares what the motor should do, k_t times i_q, with what it actually does, the inertia times the measured acceleration. The difference, low-pass filtered, is the unknown disturbance torque. Adding it to the current command cancels the disturbance. In the computed example, holding position against a 2 newton-metre load step, the speed dip shrinks from 1.85 to 0.70, 2.6 times smaller. Bonus: the estimate jumps when the robot hits something, so cobots use it to detect collisions and stop.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>T̂_L ≈ k_t i_q − Ĵ ω̇ (filtered).</li><li>Misconception: a DOB needs a force sensor — it needs only current and encoder.</li></ul></div>
+      <p class="trans">Transition: One last periodic disturbance: cogging.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 51</span>Cogging and torque ripple compensation<span class="time">~3 min</span></h3>
+      <p class="say">Cogging is the clicking you feel when turning an unpowered motor by hand: the magnets prefer certain slot positions. It repeats with angle, every 360 degrees divided by the least common multiple of slots and poles; for 12 slots and 8 poles that is every 15 degrees. Because it repeats, we can measure it once at slow speed, store it in a look-up table and add it to the current command. It matters most at low speed, for example in smooth robot painting or polishing moves.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Angle-periodic → table compensation.</li><li>Misconception: cogging is caused by the controller — it is magnetic, present even at zero current.</li></ul></div>
+      <p class="trans">Transition: Check your understanding.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 52</span>Check your understanding — 3.6<span class="time">~5 min</span></h3>
+      <p class="say">Answers: Question one: omega max squared over alpha max is 4 over 8, 0.5 radians; 0.3 is less, so the profile is a triangle with a peak speed of about 1.55 radians per second. Question two: gravity compensation, m g l cos theta, added as feedforward; it depends on the pose because the lever arm of the weight changes with the angle. Question three: the observer compares the torque the motor produces with the torque needed for the measured acceleration; a collision creates a sudden difference.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Answers: (1) triangle; (2) gravity FF, lever arm changes with θ; (3) produced vs. needed torque mismatch.</li><li>Misconception to listen for: &#x27;a triangle profile is wrong&#x27; — it is just a short move.</li></ul></div>
+      <p class="trans">Transition: Summary of 3.6.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 53</span>Summary 3.6 — Trajectories, feedforward, disturbances<span class="time">~2 min</span></h3>
+      <p class="say">Recap: the trajectory generator provides position, speed and acceleration commands; S-curves limit jerk. Feedforward sends what we know directly to the inner loops, and the following error almost disappears. Gravity, friction and load torque push against the joint; we model what we can. A disturbance observer estimates the rest. Cogging repeats with angle and is  compensated with a table. Point at the key terms and ask students which compensation they would switch on first on a new robot joint: usually gravity, then velocity and torque feedforward, then friction, and only at the end an observer or cogging table.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Feedforward for known, DOB for unknown, table for periodic.</li><li>Misconception: compensation replaces good tuning — it complements it.</li></ul></div>
+      <p class="trans">Transition: Let us wrap up the day and the week.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 54</span>Day summary<span class="time">~6 min</span></h3>
+      <p class="say">Use the chain at the bottom. FOC makes the motor a clean torque source, torque equals k_t i_q, joint torque N times that. The cascade wraps velocity and position around it with simple recipes. Tuning sets the bandwidths from the inside out, aware of inertia that changes with pose and of delays. Planned trajectories plus feedforward and compensation make the joint follow accurately. That closes Week 1: actuators, control and servo drives. In Week 2 we put six of these joints together into a robot arm.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>The chain: FOC → cascade → tuning → trajectory and compensation.</li><li>Misconception: the servo part is &#x27;done&#x27; — Monday&#x27;s resonance session still belongs to it.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Which single number limits robot joint speed of response most often? <b>A:</b> Velocity-loop bandwidth, set by gear compliance and delays.</li></ul></div>
+      <p class="trans">Transition: Here is what comes on Monday.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 55</span>Preview of Week 2 Day 1<span class="time">~4 min</span></h3>
+      <p class="say">Monday starts with session 3.7, resonance, compliance and notch filters in robot joints: today&#x27;s FRF peak explained. Then we start robot mechanisms: anatomy and classification of robots, spatial descriptions with rotation matrices and homogeneous transforms, and forward kinematics with the DH convention. Ask students to bring the rotation matrix from today&#x27;s Park slide: it is exactly the same matrix that describes  a rotated robot frame. Also mention that the resonance session closes the servo topic: after Monday morning every remaining session is about the robot as a mechanism and as part of a manufacturing system.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>R(θ) from Park reappears in robot kinematics.</li><li>Misconception: kinematics and drives are separate worlds — the joint loops execute what kinematics computes.</li></ul></div>
+      <p class="trans">Transition: Credits and references for completeness.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 56</span>Figure credits<span class="time">~1 min</span></h3>
+      <p class="say">All plots and diagrams without a credit line were drawn and computed for this course. The photographs come from Wikimedia Commons under Creative Commons licences; the table lists file, author and licence. Remind students that reuse requires the  same attribution. Point out that the computed plots are reproducible: the Python script in the course folder regenerates every curve from the reference-motor parameters, so students who want to experiment can change the inertia ratio or the delay and see how the step responses change. This is a good self-study exercise over the weekend.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Respect the licence terms when reusing photographs.</li><li>Misconception: images on the web are free to reuse without credit.</li></ul></div>
+      <p class="trans">Transition: And the reading list.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 57</span>References<span class="time">~2 min</span></h3>
+      <p class="say">For drives and FOC, Krishnan and Leonhard are the standard texts; for practical servo tuning, Ellis&#x27;s Control System Design Guide is the most useful single book. For the robotics side, Spong, Siciliano and Craig cover joint control and trajectories and will also serve all of Week 2. Biagiotti and Melchiorri is the reference for motion profiles. Suggest reading Ellis&#x27;s chapters on cascade loops  before Monday. For students who want the original sources, Park&#x27;s 1929 paper and Blaschke&#x27;s 1972 article introduced the transforms and field orientation, and Kessler&#x27;s symmetric optimum dates from 1958: these ideas are older than most of the hardware.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Ellis for servo tuning; Spong/Siciliano/Craig for robotics.</li><li>Misconception: application notes are less reliable than textbooks — manufacturer notes are often the best practical source.</li></ul></div>
+      <p class="trans">Transition: End of Week 1.</p>
+    </div>
+  </section>
+</main>
+<footer>Figures and references are listed on the final slides of the deck.</footer>
+</body>
+</html>

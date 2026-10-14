@@ -1,0 +1,5 @@
+\beamer@sectionintoc {1}{6.4 Machine vision in robotics}{4}{0}{1}
+\beamer@sectionintoc {2}{6.5 Sampling and digitisation}{16}{0}{2}
+\beamer@sectionintoc {3}{6.6 Signal processing and filters}{26}{0}{3}
+\beamer@sectionintoc {4}{6.7 Communication and integration}{37}{0}{4}
+\beamer@sectionintoc {5}{6.8 System-integration case study and course wrap-up}{49}{0}{5}

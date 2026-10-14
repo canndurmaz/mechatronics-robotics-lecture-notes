@@ -1,0 +1,32 @@
+\frametitle{Discrete PID: a few lines every sample}
+\begin{columns}[T]
+\begin{column}{.45\textwidth}
+\small
+Every $T$ seconds the controller runs:
+\begin{itemize}\setlength\itemsep{.4mm}
+\item \textbf{I}: add up the error, $I_k=I_{k-1}+K_iT\,e_k$
+\item \textbf{D}: difference of the measurement, filtered
+\item \textbf{saturation}: output limited (max.\ current)
+\item \term{anti-windup}: when saturated, stop the integrator growing
+\end{itemize}
+\textbf{Picture:} the integral is a bucket that collects error; the derivative is the slope between two snapshots.
+\end{column}
+\begin{column}{.53\textwidth}
+\begin{notebox}
+\scriptsize
+\begin{semiverbatim}
+// executed every T (interrupt synced to PWM)
+e  = r - y;
+I += Ki*T*e;                    // integrate
+D  = a*D - b*(y - y_old);       // filtered D on y
+y_old = y;              // a=Tf/(Tf+T), b=Kd/(Tf+T)
+u  = Kp*e + I + D;
+if (u > UMAX)      \{ I -= u - UMAX; u = UMAX; \}
+else if (u < -UMAX)\{ I -= u + UMAX; u = -UMAX;\}
+write_pwm(u);       // takes effect next period
+\end{semiverbatim}
+\end{notebox}
+{\scriptsize D acts on $-y$ so a step in $r$ does not cause a ``kick''.}
+\end{column}
+\end{columns}
+\gofurther{discretisation methods (forward/backward Euler, Tustin, ZOH equivalent) and frequency pre-warping [Franklin, Powell \& Workman, 1998, ch.~6].}

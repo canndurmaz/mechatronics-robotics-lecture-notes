@@ -1,0 +1,483 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>W2D4 Speaker Notes</title>
+<style>
+  :root{
+    --navy:#0B1F3A; --blue:#14365E; --mid:#2B5A8C; --sky:#6E9BC9; --pale:#E8EEF6;
+    --orange:#F07F12; --amber:#F9A94B; --cream:#FFF3E4; --gray:#5B6573; --bg:#F6F8FB; --card:#fff; --text:#0B1F3A;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){ --bg:#0A1424; --card:#10213A; --text:#E6ECF4; --pale:#1A3152; --cream:#3a2a14; --gray:#9AA8BA; }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 "Segoe UI",system-ui,-apple-system,Roboto,Helvetica,Arial,sans-serif}
+  header{background:var(--navy);color:#fff;padding:28px 16px 22px;border-bottom:4px solid var(--orange)}
+  header .wrap{max-width:980px;margin:0 auto}
+  header .day{color:var(--orange);font-weight:700;letter-spacing:.08em;font-size:.9rem}
+  header h1{margin:.2em 0 .1em;font-size:1.9rem}
+  header p{margin:0;color:var(--sky)}
+  nav.toc{position:sticky;top:0;z-index:5;background:var(--blue);padding:8px 16px;overflow-x:auto;white-space:nowrap}
+  nav.toc a{color:#fff;text-decoration:none;margin-right:16px;font-size:.88rem}
+  nav.toc a:hover{color:var(--amber)}
+  main{max-width:980px;margin:0 auto;padding:20px 16px 60px}
+  h2.session{margin:42px 0 12px;padding:10px 14px;background:var(--blue);color:#fff;border-left:6px solid var(--orange);border-radius:4px;font-size:1.25rem}
+  h2.session small{display:block;color:var(--amber);font-weight:500;font-size:.85rem}
+  table.plan{width:100%;border-collapse:collapse;background:var(--card);margin:12px 0}
+  table.plan th{background:var(--blue);color:#fff;text-align:left;padding:8px}
+  table.plan td{padding:8px;border-bottom:1px solid var(--pale)}
+  .slide{background:var(--card);border-radius:8px;margin:14px 0;padding:14px 18px;box-shadow:0 1px 3px rgba(11,31,58,.12);border-top:3px solid var(--mid)}
+  .slide h3{margin:0 0 6px;font-size:1.05rem;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+  .slide h3 .num{background:var(--orange);color:#fff;border-radius:4px;padding:1px 8px;font-size:.85rem}
+  .slide h3 .time{margin-left:auto;color:var(--gray);font-weight:400;font-size:.85rem}
+  .say{margin:6px 0}
+  .key{background:var(--cream);border-left:4px solid var(--orange);padding:6px 10px;margin:8px 0;border-radius:3px}
+  .ask{background:var(--pale);border-left:4px solid var(--mid);padding:6px 10px;margin:8px 0;border-radius:3px}
+  .trans{color:var(--gray);font-style:italic;margin-top:6px}
+  .label{font-weight:700;font-size:.8rem;text-transform:uppercase;letter-spacing:.05em;color:var(--orange)}
+  .ask .label{color:var(--mid)}
+  ul{margin:4px 0 4px 1.1em;padding:0}
+  footer{max-width:980px;margin:0 auto;padding:20px 16px;color:var(--gray);font-size:.85rem}
+  @media print{nav.toc{display:none}.slide{break-inside:avoid;box-shadow:none;border:1px solid #ccc}}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <div class="day">WEEK 2 · DAY 4 / 5 · SPEAKER NOTES</div>
+  <h1>Flexible Automation, Safety and Robot Sensors</h1>
+  <p>Mechatronics and Robotics Engineering (50 h) · 5 h net teaching time</p>
+</div></header>
+<nav class="toc"><a href="#plan">Plan</a><a href="#s1">5.6 · Material handling</a><a href="#s2">5.7 · Safety</a><a href="#s3">6.1 · Sensors</a><a href="#s4">6.2 · Position</a><a href="#s5">6.3 · Force, proximity &amp; range</a></nav>
+<main>
+  <section id="plan">
+    <h2 class="session">Day plan &amp; timing</h2>
+    <table class="plan"><tr><th>Block</th><th>Topic</th><th>Slides</th><th>Duration</th></tr>
+      <tr><td>1</td><td>5.6 Material handling and flexible systems <i>(incl. opening)</i></td><td>2–14</td><td>60 min</td></tr>
+      <tr><td>—</td><td><i>Break (extra, not counted)</i></td><td></td><td>10 min</td></tr>
+      <tr><td>2</td><td>5.7 Safety and standards</td><td>16–25</td><td>60 min</td></tr>
+      <tr><td>—</td><td><i>Break (extra, not counted)</i></td><td></td><td>10 min</td></tr>
+      <tr><td>3</td><td>6.1 Sensors and measurement principles</td><td>27–35</td><td>60 min</td></tr>
+      <tr><td>—</td><td><i>Break (extra, not counted)</i></td><td></td><td>10 min</td></tr>
+      <tr><td>4</td><td>6.2 Position and motion sensors</td><td>37–47</td><td>60 min</td></tr>
+      <tr><td>—</td><td><i>Break (extra, not counted)</i></td><td></td><td>10 min</td></tr>
+      <tr><td>5</td><td>6.3 Force/torque, tactile, proximity and range sensors <i>(incl. day close)</i></td><td>49–64</td><td>60 min</td></tr>
+      <tr><td></td><td><b>Total net teaching time</b></td><td></td><td><b>300 min</b></td></tr>
+    </table>
+  </section>
+
+  <section id="s1">
+    <h2 class="session">Session 5.6 · Material handling and flexible systems <small>Curriculum code 5.6 · 60 min · incl. opening</small></h2>
+    <div class="slide">
+      <h3><span class="num">Slide 2</span>Agenda and learning outcomes<span class="time">~3 min</span></h3>
+      <p class="say">Welcome to day four of week two. Today has two halves. In the morning we finish the manufacturing topic: how parts move between cells, and how we keep people safe around robots. After lunch we start the sensor block: what makes a good measurement, how a robot knows the angle of its joints, and how it senses force, presence and distance. Read the outcomes on the right aloud: they are the things you should be able to do tonight. Each session ends with a short check and a list of key terms.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Today links two worlds: the factory floor (flow, safety) and the sensor that makes both possible.</li><li>Misconception: safety is an add-on at the end. It is designed in from the start.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why sensors on the same day as safety? <b>A:</b> Every safety function starts with a sensor: a light curtain, a scanner, a door switch.</li></ul></div>
+      <p class="trans">Transition: Let us first remember where we stopped yesterday.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 3</span>What we learned so far: the robot work-cell (W2D3)<span class="time">~4 min</span></h3>
+      <p class="say">Yesterday we designed one robot cell. We saw typical applications such as welding and palletising, laid out a cell with reach and cycle time in mind, programmed a PLC sequence, and talked about frames on the teach pendant. Three ideas come back today. Cycle time: the slowest station sets the pace. PLC inputs: every sensor we meet this afternoon ends up as a PLC or controller input. Frames: they describe where things are, and sensors are how we find out. Today we connect cells together and add people to the picture.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Cycle time and bottleneck return in the FMS example.</li><li>Misconception: a cell is designed in isolation. In reality the material flow around it often limits output.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> What sets the cycle time of a line? <b>A:</b> The slowest station, the bottleneck.</li></ul></div>
+      <p class="trans">Transition: So let us look at how material moves through a factory.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 5</span>Why material flow matters<span class="time">~5 min</span></h3>
+      <p class="say">Start with the airport analogy: your suitcase spends minutes in the plane and hours on belts and trolleys. A traditional job shop is similar. The bar chart is illustrative, but the message is well known in manufacturing: a part spends most of its time waiting in queues, not being machined. Material handling means moving, storing and buffering parts. If we make the robot twice as fast but parts still wait, output barely changes. Flexible handling also lets one line build many variants, which is the point of flexible automation.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Speeding up the machine does not help if parts wait.</li><li>Misconception: automation is mainly about faster machines; much of the gain is in flow.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Where would you look first to raise output? <b>A:</b> At queues and the bottleneck, not at the fastest machine.</li></ul></div>
+      <p class="trans">Transition: The simplest handling device is the conveyor.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 6</span>Conveyors: the factory&#x27;s moving pavement<span class="time">~6 min</span></h3>
+      <p class="say">A conveyor is like the moving walkway at an airport. A motor drives a drum through a gearbox; the belt moves at the drum&#x27;s surface speed. The equation is just circumference times revolutions per second: v equals pi D times n over i. Walk through the example: 1500 rpm is 25 revolutions per second, the 25 to 1 gear gives one revolution per second at the drum, and a 0.1 metre drum gives about 0.31 metres per second. With parts every half metre, that is roughly 37 parts per minute. Mention accumulating conveyors, which let parts queue without pressure.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Units: convert rpm to rev/s before using the formula.</li><li>Misconception: forgetting to divide by the gear ratio, giving a belt 25 times too fast.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> What happens to throughput if parts are spaced at 0.25 m? <b>A:</b> It doubles, to about 75 parts per minute, if the downstream cell can keep up.</li></ul></div>
+      <p class="trans">Transition: Robots often have to pick parts straight off such a moving belt.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 7</span>Conveyor tracking: picking from a moving belt<span class="time">~6 min</span></h3>
+      <p class="say">Conveyor tracking means the robot works on a moving belt without stopping it. A camera or photo-sensor detects the part and at that instant latches the conveyor encoder count. From then on the robot controller knows where the part is: the start position plus the counts travelled times the distance per count. When the part enters the pick window, the robot moves with the belt, matching speed, and grips it. In the example, 4000 counts per drum revolution and a 314 millimetre circumference give about 0.08 millimetres per count, far finer than needed.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>The encoder on the conveyor is the link between belt and robot: we meet encoders properly in 6.2.</li><li>Misconception: the camera must see the part at the moment of picking. It only needs to see it once.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> What if the belt slips on the drum? <b>A:</b> Then counts no longer equal distance; tracking errors appear. Use a measuring wheel on the belt itself.</li></ul></div>
+      <p class="trans">Transition: Conveyors follow fixed paths. Vehicles give more freedom.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 8</span>AGV and AMR: vehicles that move material<span class="time">~6 min</span></h3>
+      <p class="say">Compare the two vehicle types. An AGV is like a train on invisible rails: it follows a wire in the floor, magnetic tape, or floor codes, and when something blocks its path it stops and waits. An AMR is more like a taxi: it carries a map of the building, usually built with a LiDAR, localises itself, and plans a path around obstacles. Changing an AGV route means relaying tape; changing an AMR route means editing a map. The photo shows a mobile platform next to an industrial robot. The SLAM remark is optional depth.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>AGV: fixed guide, predictable. AMR: free navigation, flexible.</li><li>Misconception: AMRs are always better. For heavy, repetitive routes the simpler AGV is often the right choice.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Which would you choose for a fixed 2-tonne pallet route? <b>A:</b> Usually an AGV: predictable, proven, and the route never changes.</li></ul></div>
+      <p class="trans">Transition: How many of these vehicles do we actually need?</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 9</span>Worked example: how many AMRs do we need?<span class="time">~7 min</span></h3>
+      <p class="say">Go through the steps slowly. Demand is 60 transports per hour. One round trip is 200 metres loaded and 200 metres empty at one metre per second, so 400 seconds of driving, plus 60 seconds to load and 60 to unload, so 520 seconds, about 8.7 minutes. One AMR therefore makes about 6.9 trips per hour, and we need 60 divided by 6.9, about 8.7, so nine vehicles. But vehicles charge, wait in traffic and break down. With 80 percent availability we need 9 divided by 0.8, about 11.3, so twelve AMRs. Always round up.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Round up at each step that represents whole vehicles.</li><li>Misconception: ignoring loading time and availability gives a fleet that is 30 percent too small.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> What if the AMR speed rises to 1.5 m/s? <b>A:</b> Travel 267 s, round trip 387 s, about 9.3 trips/h, so 6.5 → 7 AMRs, 7/0.8 ≈ 8.8 → 9 AMRs.</li></ul></div>
+      <p class="trans">Transition: Now put machines and transport together into one flexible system.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 10</span>Flexible manufacturing system (FMS) cell<span class="time">~6 min</span></h3>
+      <p class="say">A flexible manufacturing system combines several CNC machines, an automated transport system and a cell computer that decides which pallet goes where. Parts are clamped on pallets with fixtures, so any machine can take any pallet, and robots load and unload. Point at the drawing: machines on top, transport in the middle, load station and pallet store below. Then the bottleneck example: stations of 40, 60 and 45 seconds. The line can only go as fast as the 60-second station, so 60 parts per hour, and the other stations wait part of the time.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>The bottleneck sets the output; improve it first.</li><li>Misconception: average station time sets the pace. It is the maximum.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> How could we raise output to 90 parts per hour? <b>A:</b> Duplicate the 60 s station or split its work so no station exceeds 40 s.</li></ul></div>
+      <p class="trans">Transition: Some of these cells now share space with people, which brings us to cobots.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 11</span>Collaborative robots (cobots)<span class="time">~5 min</span></h3>
+      <p class="say">A cobot is designed to share workspace with people without a fence, if the risk assessment allows it. Cobots are light, rounded, avoid pinch points, and sense joint torque or motor current so they can detect a collision and stop. They are also easy to teach by hand. The photo shows a typical six-axis cobot on a workbench. Stress the note at the bottom: a cobot holding a knife is not safe. Safety belongs to the whole application, including the tool, the part, and the speed, not to the robot alone.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Collaborative is a property of the application, not of the robot.</li><li>Misconception: buying a cobot removes the need for a risk assessment.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Is a cobot slower than an industrial robot? <b>A:</b> Usually yes in collaborative mode, because speed and force are limited; it can run faster when no person is near.</li></ul></div>
+      <p class="trans">Transition: The standards describe four ways in which people and robots can collaborate.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 12</span>Human–robot collaboration: four modes<span class="time">~6 min</span></h3>
+      <p class="say">Walk through the four panels from left to right. Safety-rated monitored stop: the robot stops, under safety monitoring, while the person is in the shared space, and resumes when they leave. Hand guiding: the person moves the robot using a handle with an enabling switch. Speed and separation monitoring: the robot slows as the person comes closer and stops before contact. Power and force limiting: contact may happen, but force and pressure stay below limits for each body region, given in ISO/TS 15066. Real cells usually combine modes. The energy formula is optional depth.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Only power and force limiting allows contact during motion.</li><li>Misconception: the four modes are robot types. They are ways of operating.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Which mode suits a heavy payload near people? <b>A:</b> Speed and separation monitoring, since contact with a heavy payload could not stay under force limits.</li></ul></div>
+      <p class="trans">Transition: Let us check what you remember from this session.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 13</span>Check your understanding: material handling<span class="time">~4 min</span></h3>
+      <p class="say">Give students two minutes in pairs, then take answers. Answers: one, v equals pi times 0.2 times 0.5, about 0.31 metres per second. Two, an AGV stops and waits, usually raising an alarm, until someone removes the box, because it can only follow its guide; an AMR plans a path around the box if there is space. Three, no: the cell needs a risk assessment, and a sharp tool makes contact unacceptable, so we need speed and separation monitoring, guarding or a tool cover, not just a cobot.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Listen for the word application in question three.</li><li>Misconception: the cobot alone makes the cell safe.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Q1 <b>A:</b> 0.31 m/s</li><li><b>Q:</b> Q2 <b>A:</b> AGV stops and waits; AMR replans around</li><li><b>Q:</b> Q3 <b>A:</b> No: the application, including the tool, must be assessed</li></ul></div>
+      <p class="trans">Transition: Let us summarise and collect the key terms.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 14</span>Summary and key terms: material handling<span class="time">~2 min</span></h3>
+      <p class="say">Summarise in one breath: parts mostly wait, so flow matters. Conveyor speed is pi D n over i, and tracking uses an encoder on the belt. AGVs follow fixed guides, AMRs navigate with maps, and fleet size comes from demand times round trip divided by availability. An FMS combines machines, transport and a scheduling computer, and its output is set by the bottleneck. Cobots support four collaborative modes, but each application must be assessed. Point to the key terms box; students should be able to define each.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Fleet sizing and bottleneck are the two calculations of this session.</li><li>Misconception: collaborative equals safe.</li></ul></div>
+      <p class="trans">Transition: The word safety has come up several times. Session 5.7 makes it systematic.</p>
+    </div>
+  </section>
+
+  <section id="s2">
+    <h2 class="session">Session 5.7 · Safety and standards <small>Curriculum code 5.7 · 60 min</small></h2>
+    <div class="slide">
+      <h3><span class="num">Slide 16</span>Why robots are dangerous<span class="time">~5 min</span></h3>
+      <p class="say">Start from physics students know: kinetic energy is one half m v squared. A robot arm with an effective moving mass of 20 kilograms at 2 metres per second carries 40 joules, about the same as a 4 kilogram brick falling one metre. The plot shows that energy grows with the square of speed, so halving speed quarters the energy. Hazards are impact, crushing and trapping between robot and fixed objects, thrown parts and the tool itself. Robots also move fast, without warning, and may start when someone thinks they are stopped.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Speed counts twice: energy goes with v squared.</li><li>Misconception: a robot standing still is safe. It may be waiting for a signal.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Which reduces energy more: halving mass or halving speed? <b>A:</b> Halving speed: energy drops to one quarter instead of one half.</li></ul></div>
+      <p class="trans">Transition: So how do we deal with these hazards systematically? With ISO 12100.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 17</span>ISO 12100: the risk assessment loop<span class="time">~7 min</span></h3>
+      <p class="say">ISO 12100 is the basic standard for all machinery. It defines risk as the combination of how severe a harm could be and how likely it is. The process is a loop. First, determine the limits of the machine: what it does, who uses it, where. Second, identify hazards. Third, estimate the risk. Fourth, evaluate: is it acceptable? If not, reduce the risk and go back, because every new safeguard can create new hazards. The first three steps together are called risk analysis. Everything is documented.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>It is a loop, not a checklist done once.</li><li>Misconception: risk equals the probability of an accident. It is severity and probability together.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Example of a safeguard that creates a new hazard? <b>A:</b> A fence creates a trapping zone between fence and robot if someone can be locked inside.</li></ul></div>
+      <p class="trans">Transition: Step five, risk reduction, follows a strict order of preference.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 18</span>Three-step risk reduction and the standards family<span class="time">~6 min</span></h3>
+      <p class="say">The pyramid shows the three-step method. Step one, the most effective: design the hazard away, for example lower speed, lower mass, or no pinch points. Step two: add safeguards such as fences, interlocked doors and light curtains. Step three, the weakest: information for use, meaning warnings, signs, training and protective equipment. On the right is the family of standards. Type A, ISO 12100, applies to everything. Type B covers generic aspects like safety control systems and safety distances. Type C covers one machine type: ISO 10218 for industrial robots, plus ISO/TS 15066 for collaboration.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Design first, guard second, warn last.</li><li>Misconception: a warning sign is an acceptable fix for a high risk.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Where does a light curtain belong in the pyramid? <b>A:</b> Step two, safeguarding.</li></ul></div>
+      <p class="trans">Transition: How strong must a safeguard&#x27;s control system be? The risk graph answers that.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 19</span>How strong must a safety function be? The risk graph<span class="time">~8 min</span></h3>
+      <p class="say">ISO 13849-1 asks three questions. S: how severe is the injury, slight or serious? F: how often and how long is someone exposed, rarely or frequently? P: can the person avoid the hazard, possible or hardly? Follow the tree from start: each path ends in a required performance level from a, the weakest, to e, the strongest. Work through the example: an operator reaches into the cell several times per hour, injury could be serious and the robot is too fast to dodge, so S2, F2, P2, giving PL e. Robot safety functions are typically required at PL d.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>PLr comes from the risk; PL comes from the design. The design must reach PLr.</li><li>Misconception: higher PL means safer machine overall. It only describes one safety function&#x27;s reliability.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> What if the operator enters only once per shift? <b>A:</b> F1: S2-F1-P2 gives PL d.</li></ul></div>
+      <p class="trans">Transition: How do we build a control system that reaches PL d or e?</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 20</span>Performance level and redundant (two-channel) design<span class="time">~7 min</span></h3>
+      <p class="say">The table gives the meaning of each PL as the average probability of a dangerous failure per hour. PL d means at most one in a million per hour: around one dangerous failure in more than a century of continuous operation. No single relay or sensor is that reliable on its own, so we use redundancy. The drawing shows category 3: two sensor channels, two logic units that cross-check each other, and two contactors with feedback so a welded contact is detected. One fault does not remove the safety function, and the fault is detected.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Redundancy plus diagnostics, not just better parts.</li><li>Misconception: two identical channels are enough. Without cross-checking, a hidden fault in one channel stays undetected until the second fails.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why the feedback from the contactors? <b>A:</b> A contactor can weld shut; feedback lets the logic notice and block a restart.</li></ul></div>
+      <p class="trans">Transition: Now a concrete safeguard: the light curtain, and how far away it must be.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 21</span>Light curtains and the safety distance<span class="time">~8 min</span></h3>
+      <p class="say">A light curtain is a row of infrared beams; blocking any beam sends a stop signal. But the robot does not stop instantly, and a hand keeps moving. ISO 13855 gives the minimum distance S equals K times T plus C. K is approach speed, 2000 millimetres per second for a hand. T is the total stopping time of curtain plus robot. C is an allowance for reaching through before detection, 8 times d minus 14 for detection capability d. Example: T is 0.2 seconds, d is 14 millimetres so C is zero, and S is 400 millimetres.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Stopping time must be measured on the real robot, with payload.</li><li>Misconception: the curtain can be placed anywhere because it reacts in milliseconds; the robot&#x27;s stop takes much longer.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> What if the robot needs 0.4 s to stop? <b>A:</b> S = 2000·0.42 = 840 mm; and for distances over 500 mm the standard allows K = 1600 mm/s, worth checking.</li></ul></div>
+      <p class="trans">Transition: Light curtains guard a line. Laser scanners guard an area.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 22</span>Laser scanners and speed &amp; separation monitoring<span class="time">~5 min</span></h3>
+      <p class="say">A safety laser scanner sweeps a light beam in a fan and measures distance by time of flight, which we explain in session 6.3. You configure fields on the floor. If someone enters the outer warning field, the robot slows down. If they enter the inner protective field, it stops. This is the basis of speed and separation monitoring: the allowed speed depends on the separation distance. The analogy is adaptive cruise control in a car: the closer the car ahead, the slower you go, and you must always be able to stop in time.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Warning field slows, protective field stops.</li><li>Misconception: a scanner can be configured however you like. Field sizes come from the same stopping-distance calculation as light curtains.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why not just stop at the outer field? <b>A:</b> Productivity: slowing allows work to continue while the person is still far away.</li></ul></div>
+      <p class="trans">Transition: Finally, what does stopping actually mean, and who decides?</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 23</span>Emergency stop, stop categories and the safety PLC<span class="time">~6 min</span></h3>
+      <p class="say">IEC 60204-1 defines three stop categories. In category 0 the power is cut at once and the axis coasts or is held by a brake. In category 1 the drive brakes the axis under control, then power is cut. In category 2 the axis is braked but power stays on, for example for a monitored standstill. The plot compares them. The emergency stop button is red on yellow, latching and wired with two channels. A safety PLC has redundant processors and self-tests. Safe torque off means the drive removes torque without opening the motor cable.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Category 1 often stops faster and more gently than category 0 for a heavy axis.</li><li>Misconception: an emergency stop is a normal stop button. It is a complementary measure, not the main safeguard.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why can category 0 be dangerous on a vertical axis? <b>A:</b> Without power the axis can fall; it needs a holding brake.</li></ul></div>
+      <p class="trans">Transition: Time for a check on safety.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 24</span>Check your understanding: safety<span class="time">~5 min</span></h3>
+      <p class="say">Let students work individually for two minutes. Answers: one, inherently safe design first, then safeguarding and complementary protective measures, then information for use. Two, S equals 2000 times 0.15 plus 8 times 14 minus 14, which is 300 plus zero, so 300 millimetres. Three, any single component can fail in a dangerous way, for example a welded contact or a stuck input; with two channels that monitor each other, one failure is detected and the other channel still stops the machine. No single part is reliable enough for PL d.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Order of the three steps matters.</li><li>Misconception: a very reliable single channel is equivalent to redundancy.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Q1 <b>A:</b> Safe design → safeguards → information</li><li><b>Q:</b> Q2 <b>A:</b> 300 mm</li><li><b>Q:</b> Q3 <b>A:</b> Single faults must not remove the safety function and must be detected</li></ul></div>
+      <p class="trans">Transition: Let us summarise.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 25</span>Summary and key terms: safety and standards<span class="time">~3 min</span></h3>
+      <p class="say">ISO 12100 gives the loop: limits, hazards, estimate, evaluate, reduce, and repeat. Risk reduction prefers safe design, then safeguards, then information. The risk graph of ISO 13849-1 gives the required performance level, and redundancy with diagnostics reaches it. Safeguards must be placed at a safety distance S equals K T plus C, so the stopping time matters. ISO 10218 and ISO/TS 15066 are the robot-specific standards. Point out that every safety device in this session is a sensor, which leads straight to the afternoon.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Every safety function begins with a sensor.</li><li>Misconception: standards are paperwork. They encode decades of accident experience.</li></ul></div>
+      <p class="trans">Transition: After the break we begin the sensor block with measurement principles.</p>
+    </div>
+  </section>
+
+  <section id="s3">
+    <h2 class="session">Session 6.1 · Sensors and measurement principles <small>Curriculum code 6.1 · 60 min</small></h2>
+    <div class="slide">
+      <h3><span class="num">Slide 27</span>The senses of a robot cell<span class="time">~5 min</span></h3>
+      <p class="say">Ask students to close their eyes and touch their nose. They can, because their body senses joint positions: that is proprioception. Seeing the cup they reach for is exteroception. A robot cell has both. Proprioceptive sensors measure the robot itself: encoders in every joint, motor currents. Exteroceptive sensors measure the world: the force/torque sensor at the wrist, a camera above the conveyor, proximity sensors detecting parts, light curtains guarding people. A real cell easily has dozens of sensors, each an input to a robot controller or a PLC.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Every sensor answers a question the controller cannot answer otherwise.</li><li>Misconception: the robot knows where the part is because it was programmed. It only knows where it expects the part.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Is a motor current sensor proprio- or exteroceptive? <b>A:</b> Proprioceptive, but it can indirectly reveal external contact.</li></ul></div>
+      <p class="trans">Transition: Every one of these sensors follows the same chain from physics to numbers.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 28</span>The measurement chain<span class="time">~7 min</span></h3>
+      <p class="say">Follow the chain from left to right. The measurand is the physical quantity we want, such as a force. The sensor or transducer converts it into something electrical, maybe a tiny resistance change. Signal conditioning amplifies, filters and isolates it into a clean voltage, perhaps zero to ten volts. An ADC or a counter turns it into bits. Processing scales the bits into engineering units like newtons or radians and filters them. Finally the controller uses the value. The red arrows remind us that every stage adds error, noise and delay.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>A chain is only as good as its weakest link.</li><li>Misconception: a high-quality sensor guarantees a good measurement; wiring, grounding and the ADC matter just as much.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Where does a long unshielded cable hurt most? <b>A:</b> Between sensor and conditioning, where the signal is still millivolts.</li></ul></div>
+      <p class="trans">Transition: Let us describe the sensor itself with a few numbers.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 29</span>Static characteristic: sensitivity, offset, range, linearity<span class="time">~9 min</span></h3>
+      <p class="say">Plot output against input for slow, steady inputs: that is the static characteristic. Ideally it is a straight line, y equals y zero plus S x. The slope S is the sensitivity, here 0.2 volts per newton. The value at zero input is the offset, here 0.4 volts. The range is the span of inputs the sensor is rated for, and full scale is the largest value. Real sensors bend away from the line; the largest gap, expressed as a percentage of full-scale output, is the linearity error. In the example, 0.12 volts out of a 2 volt span is 6 percent.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Specs are often in percent of full scale, so small readings have larger relative error.</li><li>Misconception: linearity error is a percentage of the reading. Usually it is of full scale.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> A 1 % FS error on a 100 N sensor, reading 5 N: relative error? <b>A:</b> 1 N out of 5 N, that is 20 %.</li></ul></div>
+      <p class="trans">Transition: Now three words students often mix up.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 30</span>Accuracy, precision and resolution<span class="time">~7 min</span></h3>
+      <p class="say">Use the dartboard. Accuracy is how close the darts land to the bull&#x27;s eye on average. Precision, or repeatability, is how tightly they cluster. The top-right board is precise but not accurate: a steady bias. Resolution is the smallest change the sensor can show, like the finest marks on a ruler. A ruler with 0.1 millimetre marks printed 2 millimetres off is high resolution but inaccurate. Robots show this beautifully: an industrial robot repeats a taught point very precisely, about five hundredths of a millimetre, but reaches a computed point only to a few tenths.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>This is why we teach points by hand rather than typing coordinates.</li><li>Misconception: more digits on the display means more accuracy.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Which matters for a robot replaying taught points? <b>A:</b> Repeatability (precision).</li></ul></div>
+      <p class="trans">Transition: Errors come in two kinds, and each has its own cure.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 31</span>Random and systematic errors<span class="time">~9 min</span></h3>
+      <p class="say">Measure the same 10 kilogram mass many times and draw a histogram: a bell curve. Its centre is the mean; the gap from the true value is the systematic error, or bias. Its width, the standard deviation sigma, is the random error. Bias is fixed by calibration; random error is reduced by averaging. Work the example: five readings sum to 50.5, so the mean is 10.1, a bias of plus 0.1. Deviations are 0.1, minus 0.1, 0, minus 0.2, 0.2; squares sum to 0.10; divide by n minus 1, which is 4, and take the root: about 0.16 kilograms.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Averaging n readings shrinks random error by about the square root of n, but never removes bias.</li><li>Misconception: averaging fixes every error.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why n−1 and not n? <b>A:</b> Because the mean was estimated from the same data; dividing by n−1 corrects the slight underestimate. Not essential today.</li></ul></div>
+      <p class="trans">Transition: So how do we remove the bias? By calibration.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 32</span>Calibration: making the numbers right<span class="time">~8 min</span></h3>
+      <p class="say">Calibration means applying known reference inputs and recording the outputs, then using the fitted line to convert future readings. With a two-point calibration we use two references. Steps: zero kilograms gives 0.40 volts, ten kilograms gives 2.40 volts. Sensitivity is the rise over run: 2 volts over 10 kilograms, 0.2 volts per kilogram. Offset is 0.40 volts. Now invert: a reading of 1.30 volts means 1.30 minus 0.40, divided by 0.20, which is 4.5 kilograms. Mention that in robotics calibration also means finding true link lengths, camera parameters or the tool frame.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Calibrate with references at least a few times more accurate than the sensor.</li><li>Misconception: calibration improves precision. It removes bias; noise remains.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why two points rather than one? <b>A:</b> One point fixes only the offset; two fix offset and sensitivity.</li></ul></div>
+      <p class="trans">Transition: So far the input changed slowly. What if it jumps?</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 33</span>Dynamic behaviour: sensors are not instant<span class="time">~7 min</span></h3>
+      <p class="say">Put a kitchen thermometer into hot soup: the reading climbs and settles. Many sensors behave like the first-order system from W1D2: y of t equals the final value times one minus e to the minus t over tau. After one time constant the reading has reached 63 percent; after three, 95 percent. Example: a sensor with tau of 2 milliseconds needs 6 milliseconds to reach 95 percent, so a 1 kilohertz control loop sees the change only after six cycles. That delay eats phase margin, as we learned in the control block.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Sensor delay is part of the loop delay.</li><li>Misconception: digital sensors are instantaneous. They also filter and need conversion time.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> How long for 99 %? <b>A:</b> About 4.6 τ, roughly 5 τ.</li></ul></div>
+      <p class="trans">Transition: Let us check measurement principles.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 34</span>Check your understanding: measurement principles<span class="time">~5 min</span></h3>
+      <p class="say">Give two minutes. Answers: one, the readings are tightly grouped but about 0.23 kilograms too high, so precise but not accurate; calibration would fix it. Two, sensitivity is 2 volts over 100 newtons, 0.02 volts per newton; 2.2 minus 1.0 is 1.2 volts, divided by 0.02 gives 60 newtons. Three, 95 percent takes three time constants, 3 times 4 seconds, 12 seconds. If students say both accurate and precise for question one, return to the dartboard.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Precise but biased is the most common real-world case.</li><li>Misconception: close to the true value means accurate even if consistently off.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Q1 <b>A:</b> Precise, not accurate</li><li><b>Q:</b> Q2 <b>A:</b> 60 N</li><li><b>Q:</b> Q3 <b>A:</b> 12 s</li></ul></div>
+      <p class="trans">Transition: Summary and key terms.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 35</span>Summary and key terms: measurement principles<span class="time">~3 min</span></h3>
+      <p class="say">Recap the chain: sensor, conditioning, ADC, processing. Static description: sensitivity, offset, range and linearity. Keep accuracy, precision and resolution apart. Fix bias by calibration and reduce noise by averaging. Dynamics: a time constant tau, with 95 percent after three tau. Ask students to define two key terms to a neighbour. These ideas are the vocabulary for every sensor we meet next.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>These terms apply to every sensor in 6.2 and 6.3.</li><li>Misconception: resolution and accuracy are the same.</li></ul></div>
+      <p class="trans">Transition: Now the most important sensor in any robot: the joint position sensor.</p>
+    </div>
+  </section>
+
+  <section id="s4">
+    <h2 class="session">Session 6.2 · Position and motion sensors <small>Curriculum code 6.2 · 60 min</small></h2>
+    <div class="slide">
+      <h3><span class="num">Slide 37</span>Where position sensors sit in a robot joint<span class="time">~5 min</span></h3>
+      <p class="say">Every robot joint has a position sensor on the motor shaft, behind a gearbox. That placement is clever: the gear multiplies resolution. A 17-bit motor encoder has 131,072 counts per revolution; behind a 100 to 1 gear that becomes 13 million counts per joint revolution, about thirty millionths of a degree. But the motor-side sensor cannot see backlash or twist in the gear, which we met in W1D2. High-accuracy robots therefore add a secondary encoder on the load side. Today: encoders, resolvers and inertial sensors.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Motor-side sensing is fine-grained but blind to gear errors.</li><li>Misconception: high counts per revolution means the tool position is equally precise.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why not put only one encoder on the load side? <b>A:</b> It would see the gear&#x27;s elasticity inside the loop, making control harder; it is also more expensive.</li></ul></div>
+      <p class="trans">Transition: Before encoders, a quick refresher on binary numbers.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 38</span>Refresher: binary numbers and Gray code<span class="time">~5 min</span></h3>
+      <p class="say">Each binary digit is a power of two. 101 in binary is four plus zero plus one, five. N bits give 2 to the N values. Now look at going from 3 to 4: 011 becomes 100, all three bits flip. On a real disk the three edges never line up perfectly, so for a moment the reader could see 111 or 000, a wild jump. Gray code changes only one bit per step, so a reader on the boundary sees either the old or the new value, never nonsense. The disk drawing shows three Gray-coded tracks.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Gray code avoids glitches at boundaries.</li><li>Misconception: Gray code gives more resolution. It gives the same resolution, but safer reading.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> How many bits for 0.01° resolution? <b>A:</b> 36,000 positions → 16 bits (65,536).</li></ul></div>
+      <p class="trans">Transition: With that, let us look at the most common sensor: the incremental encoder.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 39</span>Optical incremental encoders<span class="time">~6 min</span></h3>
+      <p class="say">An incremental encoder has a disk with N slits. An LED shines through onto photodiodes, which produce square waves called A and B, shifted by a quarter period, plus one index pulse Z per revolution. The drive counts pulses, so it only knows how far it moved since switch-on: position is relative and a homing run is needed. The photo shows such a disk. Example: 2500 lines at 6000 rpm, 100 revolutions per second, gives 250 kilohertz on channel A, so the counter input must handle at least that frequency.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Incremental means relative: homing after power-up.</li><li>Misconception: the Z pulse gives absolute position. It only marks one point per revolution.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> What happens if the counter misses pulses at high speed? <b>A:</b> Position drifts silently; drives monitor for this with frequency limits and error flags.</li></ul></div>
+      <p class="trans">Transition: Why two channels A and B? Because of direction and resolution.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 40</span>Quadrature signals and ×4 counting<span class="time">~6 min</span></h3>
+      <p class="say">A and B are in quadrature, a quarter period apart. If we count every rising and falling edge of both signals we get four counts per line: 4N counts per revolution. Direction comes from order: if A changes before B, we turn forward; otherwise backward. If both change at once, a count was missed and the decoder raises an error. Example: 2500 lines give 10,000 counts per revolution, so 0.036 degrees per count.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Four times the lines, for free, in the decoder.</li><li>Misconception: a single channel is enough. It gives no direction and only N or 2N counts.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Where have we seen quadrature before? <b>A:</b> Sine and cosine 90° apart in FOC (W1D5) — the same idea.</li></ul></div>
+      <p class="trans">Transition: Incremental encoders forget everything at power-off. Absolute encoders do not.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 41</span>Absolute encoders: no homing after power-up<span class="time">~5 min</span></h3>
+      <p class="say">An absolute encoder has many Gray-coded tracks, so every angle has its own code and the position is known at switch-on. Single-turn encoders give 17 to 23 bits per revolution. Multi-turn encoders also count whole revolutions, with gears or a battery-backed counter. Industrial robots use multi-turn absolute encoders, so after a power cut the arm knows its pose immediately. The position is sent as a digital message over a serial line: SSI is simple; BiSS-C and EnDat add two-way communication and a CRC check.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Absolute equals known position at power-up.</li><li>Misconception: absolute encoders need no reference ever. After a motor change, the zero must still be set once.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why does the robot sometimes need a battery change? <b>A:</b> The battery keeps the multi-turn counter alive while power is off.</li></ul></div>
+      <p class="trans">Transition: A completely different principle survives heat and vibration: the resolver.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 42</span>Resolver: a rotating transformer<span class="time">~6 min</span></h3>
+      <p class="say">A resolver is a rotating transformer with no electronics inside the motor. The rotor coil is fed with a sine carrier, a few kilohertz. Two stator coils at ninety degrees pick up the carrier multiplied by sine theta and by cosine theta. The top trace is the carrier; the next two show the received signals, whose envelopes, dashed, are the sine and cosine of the angle. The electronics recover the angle with atan2 of the two envelopes. Resolvers are robust to heat, shock and vibration, so they are common in harsh environments.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>The angle lives in the envelopes, not in the carrier.</li><li>Misconception: a resolver outputs a digital angle. It outputs analogue signals; a converter computes the angle.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why atan2 rather than arcsin? <b>A:</b> atan2 uses both signals, covers 360° and is insensitive to amplitude changes.</li></ul></div>
+      <p class="trans">Transition: Robots also need speed, and that is harder at low speed than you might think.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 43</span>Speed from an encoder and the low-speed problem<span class="time">~6 min</span></h3>
+      <p class="say">Speed is derived from position. The M-method counts pulses in a fixed window; the T-method times one pulse period. Work the example: 10,000 counts per revolution and a 125 microsecond sample. One count per sample corresponds to 0.8 revolutions per second, 48 rpm. That is the smallest speed step the M-method can see. At 60 rpm the reading jumps between 48 and 96 rpm, which makes the velocity loop noisy. Remedies are more counts per revolution, longer windows, or filtering, which we discuss tomorrow in 6.6.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Low speed is the hard case for M-method speed measurement.</li><li>Misconception: a fine position sensor automatically gives a smooth speed signal.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> At 6000 rpm, how many counts per sample? <b>A:</b> 100 rev/s × 10,000 × 125 µs = 125 counts: plenty.</li></ul></div>
+      <p class="trans">Transition: Encoders measure rotation relative to the base. Inertial sensors measure motion relative to space.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 44</span>Accelerometers: a mass on a spring<span class="time">~7 min</span></h3>
+      <p class="say">An accelerometer is a mass on a spring inside a case. When the case accelerates, the mass lags and the spring deflects by x equals m over k times a. In a MEMS chip like the one in the photo, the mass is a tiny silicon structure and a capacitor measures the gap. At rest the accelerometer measures gravity, so it tells us tilt: the component along x is g times sine theta. Example: 4.9 metres per second squared at rest means sine theta is 0.5, so the sensor is tilted 30 degrees.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>At rest an accelerometer reads gravity, not zero.</li><li>Misconception: an accelerometer reading zero means the object is at rest. In free fall it also reads zero.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Use in robotics? <b>A:</b> Tilt of an AMR or a mobile manipulator, vibration measurement on the arm, collision detection.</li></ul></div>
+      <p class="trans">Transition: Rotation rate needs a different sensor: the gyroscope.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 45</span>Gyroscopes and the IMU: drift and fusion<span class="time">~6 min</span></h3>
+      <p class="say">A gyroscope measures angular rate in degrees per second; MEMS gyros use a vibrating mass and the Coriolis force. To get angle we integrate the rate, and any small bias integrates too. The orange line shows a bias of just 0.01 degrees per second: after ten minutes, 600 seconds, the angle is 6 degrees off. An IMU combines three accelerometers and three gyros. The trick is fusion: trust the gyro for fast changes and the accelerometer for the long-term tilt, which gives the bounded blue curve. We see the filters behind this tomorrow.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Integration turns a tiny bias into a growing error.</li><li>Misconception: a gyro measures angle directly. It measures rate.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why not use only the accelerometer for tilt? <b>A:</b> It is disturbed by the robot&#x27;s own accelerations; it is only reliable on average.</li></ul></div>
+      <p class="trans">Transition: Let us check position and motion sensors.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 46</span>Check your understanding: position and motion sensors<span class="time">~5 min</span></h3>
+      <p class="say">Give two minutes. Answers: one, 1000 lines times four is 4000 counts per revolution, and 360 divided by 4000 is 0.09 degrees per count. Two, the incremental encoder needs homing, because it only counts changes since power-up; the absolute encoder reads a unique code for every angle. Three, the full gravity value on the x axis means sine theta equals one: the sensor is tilted 90 degrees, with its x axis pointing along gravity.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Relative versus absolute is the key distinction.</li><li>Misconception: the Z pulse makes an incremental encoder absolute.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Q1 <b>A:</b> 4000 counts/rev, 0.09°/count</li><li><b>Q:</b> Q2 <b>A:</b> Incremental: it only counts changes</li><li><b>Q:</b> Q3 <b>A:</b> 90° tilt, x axis along gravity</li></ul></div>
+      <p class="trans">Transition: Summary.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 47</span>Summary and key terms: position and motion sensors<span class="time">~3 min</span></h3>
+      <p class="say">Recap: each joint has a motor-side encoder and the gear multiplies its resolution. Incremental encoders give A, B and Z with 4N counts per revolution, and need homing. Absolute encoders use Gray code and multi-turn counters, so the pose is known at power-up. Resolvers are robust analogue sensors read with atan2. IMUs combine accelerometers, which see tilt, with gyros, which see rate but drift. Ask students which sensor they would put in a welding robot&#x27;s joint and why.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Know which sensor answers which question.</li><li>Misconception: one sensor type fits all.</li></ul></div>
+      <p class="trans">Transition: The last session moves from the robot&#x27;s own motion to its contact with the world.</p>
+    </div>
+  </section>
+
+  <section id="s5">
+    <h2 class="session">Session 6.3 · Force/torque, tactile, proximity and range sensors <small>Curriculum code 6.3 · 60 min · incl. day close</small></h2>
+    <div class="slide">
+      <h3><span class="num">Slide 49</span>A map of robot sensors by what they detect<span class="time">~4 min</span></h3>
+      <p class="say">This map orders sensors by the distance at which they work. At contact we have force/torque and tactile sensors. From millimetres to centimetres, inductive and capacitive proximity sensors. Photoelectric sensors cover centimetres up to tens of metres. Ultrasonic sensors work from centimetres to several metres. LiDAR and laser scanners reach many metres. Point out the three families: contact, proximity which gives yes or no, and range which gives a distance. Many of these simply switch a PLC input, which links back to yesterday&#x27;s PLC session.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Proximity answers is something there; range answers how far.</li><li>Misconception: every sensor gives a number; many give only a switching signal.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Which of these could detect a glass bottle? <b>A:</b> Ultrasonic, capacitive, or a retro-reflective photoelectric sensor with a polarising filter.</li></ul></div>
+      <p class="trans">Transition: We start at contact: measuring force with strain gauges.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 50</span>Strain gauges and the Wheatstone bridge<span class="time">~6 min</span></h3>
+      <p class="say">A strain gauge is a zig-zag foil resistor glued onto metal. When the metal stretches, the foil gets longer and thinner and its resistance rises: delta R over R equals gauge factor times strain, with a gauge factor about 2. These changes are tiny, so we use a Wheatstone bridge, which outputs only the difference. Example: strain of one in a thousand, 5 volts excitation, four active gauges: the output is about 2 times 10 to the minus 3 times 5, which is 10 millivolts. A load cell is a metal body with such a bridge, rated in millivolts per volt.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Millivolt signals need careful amplification and shielding.</li><li>Misconception: strain is large. Typical strains are below 0.1 %.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why does the bridge help with temperature? <b>A:</b> All gauges warm up equally, so their changes cancel in the bridge difference.</li></ul></div>
+      <p class="trans">Transition: Put several bridges in one body and you get a six-axis force/torque sensor.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 51</span>Six-axis force/torque sensor at the robot wrist<span class="time">~7 min</span></h3>
+      <p class="say">A six-axis force/torque sensor sits between the robot flange and the tool. Inside, strain gauges on a stiff metal cross measure three forces and three torques. Uses: force-controlled grinding and polishing, inserting a peg into a hole, detecting collisions and hand-guiding the robot. But the sensor also feels the tool&#x27;s own weight. Example: a 2 kilogram gripper weighs about 19.6 newtons; with its centre of mass 0.1 metres to the side it adds a torque of about 1.96 newton metres. The controller subtracts these, using the current wrist orientation: gravity compensation.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>The tool&#x27;s load direction changes with orientation.</li><li>Misconception: the F/T sensor measures only contact forces. It measures everything acting on it.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> What else must be subtracted at high speed? <b>A:</b> Inertial forces of the tool when it accelerates.</li></ul></div>
+      <p class="trans">Transition: Force sensors measure total force. Tactile sensors show where it acts.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 52</span>Tactile sensors: a skin for the gripper<span class="time">~4 min</span></h3>
+      <p class="say">A tactile sensor is like the nerve endings in your fingertip: an array of small pressure cells called taxels. The map shows a ten by ten array with the pressure of a grasped object. Principles: resistive, where pressure lowers resistance; capacitive, where pressure narrows the gap and raises capacitance, as the formula shows; and piezoelectric, which reacts to changes and can sense slip. Tactile sensing tells the gripper where and how hard the object touches, so it can centre a grasp or catch slipping.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Location and distribution of force, not just total force.</li><li>Misconception: tactile sensors replace F/T sensors. They complement them.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Where would you use one? <b>A:</b> Handling fragile or soft objects, e.g. fruit, where grip force must be just enough.</li></ul></div>
+      <p class="trans">Transition: Now sensors that detect objects without touching them.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 53</span>Inductive and capacitive proximity sensors<span class="time">~5 min</span></h3>
+      <p class="say">The photo shows a typical cylindrical inductive proximity switch. Inside, a coil and oscillator produce an alternating magnetic field. A metal target nearby absorbs energy through eddy currents, the oscillation drops, and the output switches. It only sees metal. A capacitive sensor uses an electric field and reacts to almost any material, including plastics and liquids. The rated sensing distance is a few millimetres for steel; for other metals it shrinks, as the table shows: about 0.7 for stainless steel and 0.3 to 0.4 for aluminium and copper.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Inductive: metal only, very robust against dirt and oil.</li><li>Misconception: the rated distance applies to every metal.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why are inductive sensors so popular in fixtures? <b>A:</b> Cheap, sealed, no moving parts, immune to coolant and dust.</li></ul></div>
+      <p class="trans">Transition: For longer distances we use light.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 54</span>Photoelectric sensors: three ways to use a light beam<span class="time">~5 min</span></h3>
+      <p class="say">Three arrangements. Through-beam: emitter and receiver face each other; an object blocks the beam. Longest range, most reliable, but two units to wire and align. Retro-reflective: one unit sends light to a reflector and back; an object breaks the beam. Shiny objects can fool it by reflecting light themselves. Diffuse: the sensor sees light scattered back by the object itself. Easiest to install, but short range, and dark or distant objects return too little light. Light curtains in session 5.7 are many through-beams in a row.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Blocked beam versus returned light.</li><li>Misconception: diffuse sensors work equally well on all colours.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Best choice to count black boxes on a conveyor? <b>A:</b> Through-beam or retro-reflective: they do not rely on the box reflecting light.</li></ul></div>
+      <p class="trans">Transition: To measure a distance rather than presence, we time an echo.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 55</span>Ultrasonic range sensors: listening for an echo<span class="time">~5 min</span></h3>
+      <p class="say">An ultrasonic sensor works like a bat. It sends a short burst of sound and listens for the echo. Distance is speed of sound times echo time divided by two, because the sound travels there and back. Example: an echo after 5.83 milliseconds means 343 times 0.00583 divided by 2, about one metre. But the speed of sound depends on air temperature: at 40 degrees it is about 355 metres per second, so the same echo means 1.035 metres, a 3.5 percent error unless corrected. Ultrasonic sensors work on glass and liquids but have a wide cone.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Divide by two for the round trip.</li><li>Misconception: the speed of sound is constant. It changes about 0.6 m/s per kelvin.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why is ultrasonic good for fill levels? <b>A:</b> It works on liquids and granules regardless of colour or transparency.</li></ul></div>
+      <p class="trans">Transition: Replace sound with light and we get LiDAR.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 56</span>LiDAR and laser scanners: range with light<span class="time">~5 min</span></h3>
+      <p class="say">LiDAR uses the same time-of-flight equation, but with the speed of light, 3 times 10 to the 8 metres per second. The photo shows a rotating 3-D LiDAR. A rotating mirror sweeps the beam, producing a point cloud; the small drawing shows a 2-D scan. Safety laser scanners from session 5.7 work this way, and AMRs use LiDAR for mapping. Example: an object one metre away returns light after 6.7 nanoseconds; resolving one centimetre means timing about 67 picoseconds. That is why LiDAR electronics are demanding, while ultrasound is easy to time.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Same formula, a million times faster signal.</li><li>Misconception: LiDAR sees everything. Glass, black or mirror-like surfaces can return too little light.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why does an AMR need LiDAR instead of ultrasound? <b>A:</b> Narrow beam, high angular resolution and range give an accurate map.</li></ul></div>
+      <p class="trans">Transition: With all these options, how do we choose?</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 57</span>Choosing a sensor for the task<span class="time">~4 min</span></h3>
+      <p class="say">Go through the table as a quick quiz: cover the middle column and ask students to choose before revealing. Steel part in a fixture: inductive. Plastic bottle: photoelectric. Fill level: ultrasonic. Peg insertion with 5 newtons: wrist F/T sensor. Slip: tactile. Person approaching: certified safety scanner or light curtain. AMR navigation: LiDAR. Then the four questions in the box: what material, how far, yes or no or a value, and is it safety-related. Safety functions require certified safety sensors, not ordinary ones.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>The safety question comes first: it changes the whole selection.</li><li>Misconception: a standard photoelectric sensor can be used as a safety device.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Can a normal inductive sensor monitor a safety door? <b>A:</b> Not on its own; use a certified safety switch or a safety-rated sensor with diagnostics.</li></ul></div>
+      <p class="trans">Transition: Check your understanding.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 58</span>Check your understanding: force, proximity and range<span class="time">~4 min</span></h3>
+      <p class="say">Give two minutes. Answers: one, aluminium has a reduction factor of about 0.3 to 0.4, so roughly 2.5 to 3 millimetres. Two, 343 times 0.0029 divided by 2 is about 0.50 metres. Three, the tool&#x27;s weight and its torque appear in the sensor reading and change as the wrist turns; without subtracting them, the controller would mistake the tool&#x27;s own weight for a contact, or miss a real collision hidden in that offset.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Divide by two in time-of-flight problems.</li><li>Misconception: the sensing distance is the same for every metal.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Q1 <b>A:</b> ≈ 2.5–3 mm</li><li><b>Q:</b> Q2 <b>A:</b> ≈ 0.50 m</li><li><b>Q:</b> Q3 <b>A:</b> Gravity compensation separates tool weight from contact force</li></ul></div>
+      <p class="trans">Transition: Summary.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 59</span>Summary and key terms: force, proximity and range<span class="time">~3 min</span></h3>
+      <p class="say">Recap: strain gauges in a Wheatstone bridge become load cells and six-axis F/T sensors. Tactile arrays add a pressure map. Proximity sensors are inductive for metal, capacitive for any material and photoelectric with a light beam. Range sensors use time of flight, d equals c t over two, with sound or light. Choose by material, distance, output type and safety. Ask students to name one sensor for each row of a cell they designed yesterday.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Time of flight unifies ultrasonic, LiDAR and laser scanners.</li><li>Misconception: one sensor type can do everything.</li></ul></div>
+      <p class="trans">Transition: Let us wrap up the day.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 61</span>Day summary<span class="time">~4 min</span></h3>
+      <p class="say">Walk down the five boxes, one sentence each. Session 5.6: conveyors, AGVs, AMRs, FMS cells and cobots move parts and share space. Session 5.7: the ISO 12100 loop, the required performance level, safety distance and stop categories. Session 6.1: the measurement chain and the words accuracy, precision, resolution, calibration and time constant. Session 6.2: encoders, resolvers and IMUs. Session 6.3: force, tactile, proximity and range sensors. Then read the sentence in the orange box and the three equations to remember.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Three equations: conveyor speed, safety distance, time-of-flight range.</li><li>Misconception: safety and sensors are separate topics; safety is built from sensors.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Which session felt hardest? <b>A:</b> Use the answer to decide what to revisit tomorrow morning.</li></ul></div>
+      <p class="trans">Transition: Here is what comes tomorrow.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 62</span>Preview of tomorrow (W2D5): sensing, signals and integration<span class="time">~2 min</span></h3>
+      <p class="say">Tomorrow is the final day. We continue the sensor block with machine vision: how a camera tells the robot where a part is. Then sampling and digitisation, the step from a voltage to a number. Then signal processing and filters, including the sensor fusion we saw with the IMU. Then communication: how fifty sensors and six drives share one network. We finish with a system-integration case study and a course wrap-up. Ask students to think about the three questions on the slide.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Tomorrow completes the measurement chain we drew today.</li><li>Misconception: sensors stand alone; they only become useful once sampled, filtered and communicated.</li></ul></div>
+      <p class="trans">Transition: Last, the credits and references for today&#x27;s material.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 63</span>Figure credits<span class="time">~1 min</span></h3>
+      <p class="say">Point out that all drawings and plots without a credit are original for this course, and that the photographs come from Wikimedia Commons under the licences listed. Students reusing them in reports must keep the attribution.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Attribution is a licence condition, not a courtesy.</li></ul></div>
+      <p class="trans">Transition: And the references for further reading.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 64</span>References<span class="time">~1 min</span></h3>
+      <p class="say">Recommend Groover for automation and material handling, Siciliano and Khatib for robot sensing, and Fraden for sensors. The standards are listed for orientation; students do not need to read them, but should know their names and roles.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Know the standard names: ISO 12100, ISO 13849, ISO 10218, ISO/TS 15066.</li></ul></div>
+      <p class="trans">Transition: End of day four.</p>
+    </div>
+  </section>
+</main>
+<footer>Figures and references are listed on the final slides of the deck.</footer>
+</body>
+</html>

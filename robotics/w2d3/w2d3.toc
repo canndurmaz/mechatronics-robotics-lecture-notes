@@ -1,0 +1,4 @@
+\beamer@sectionintoc {1}{5.2 Industrial Robot Applications}{4}{0}{1}
+\beamer@sectionintoc {2}{5.3 Robotic Work-Cell Design}{16}{0}{2}
+\beamer@sectionintoc {3}{5.4 PLCs and Automation Control}{27}{0}{3}
+\beamer@sectionintoc {4}{5.5 Robot Programming}{45}{0}{4}

@@ -1,0 +1,1810 @@
+% =====================================================================
+%  Mechatronics and Robotics Engineering (50 h) -- Week 1, Day 2
+%  Actuators II + Introduction to Control  (sessions 1.5, 1.6, 1.7, 2.1, 2.2)
+%  Build: cd robotics && ./compile.sh w1d2
+% =====================================================================
+\documentclass[aspectratio=169,10pt]{beamer}
+\usetheme{mekatronik}
+\renewcommand{\coursetitle}{Mechatronics and Robotics Engineering (50 h)}
+\setweek{1}
+\setday{2}{Actuators II and Introduction to Control}
+\title[Actuators II and Introduction to Control]{Actuators II and Introduction to Control}
+\subtitle{Joint gearboxes \textbullet\ Linear actuators \& grippers \textbullet\ Motor sizing \textbullet\ Dynamic models \textbullet\ Laplace \& transfer functions}
+\author{Mechatronics and Robotics Engineering Programme}
+\institute{Week 1 \textperiodcentered{} Day 2}
+\date{2 weeks \textperiodcentered{} 10 days \textperiodcentered{} 50 hours}
+
+% ------------------------------------------------------------- helpers
+\newcommand{\figph}[2]{\includegraphics[#1]{../../figures/#2}}
+\newcommand{\gofurther}[1]{{\scriptsize\color{mkGray}\textbf{Going further:} #1\par}}
+\newcommand{\src}[1]{{\color{mkGray}\fontsize{6}{7}\selectfont [#1]}}
+\tikzset{
+  mkblk/.style={draw=mkBlue,fill=mkPale,rounded corners=1.5pt,minimum height=7mm,minimum width=12mm,font=\scriptsize,align=center,line width=.6pt},
+  mksum/.style={draw=mkBlue,circle,fill=white,minimum size=4.5mm,inner sep=0pt,line width=.6pt},
+  mksig/.style={-{Stealth[length=2mm]},mkNavy,line width=.6pt},
+  mklab/.style={font=\scriptsize,text=mkNavy},
+  spring/.style={decorate,decoration={coil,aspect=0.5,segment length=2mm,amplitude=2mm},mkNavy,line width=.6pt},
+}
+
+\begin{document}
+
+% =====================================================================
+\begin{frame}[plain]\titlepage\end{frame}
+
+% =====================================================================
+\begin{frame}{Agenda and learning outcomes}
+\begin{columns}[T]
+\begin{column}{.52\textwidth}
+\small
+\renewcommand{\arraystretch}{1.12}
+\begin{tabular}{@{}l p{5.0cm} r@{}}
+\toprule
+\textbf{Code} & \textbf{Session} & \textbf{Time}\\
+\midrule
+1.5 & Robot joint actuators: gearboxes, reflected inertia, backlash, stiffness, direct drive, SEA & 1.0\,h\\
+1.6 & Linear actuators and end-effectors & 1.0\,h\\
+1.7 & Motor sizing and selection for a robot joint & 1.0\,h\\
+2.1 & Modelling dynamic systems & 1.0\,h\\
+2.2 & Laplace transform and transfer functions & 1.0\,h\\
+\midrule
+ & \textbf{Net teaching time} & \textbf{5.0\,h}\\
+\bottomrule
+\end{tabular}\\[1mm]
+{\scriptsize\color{mkGray} Breaks ($\approx$10 min) roughly every hour are additional.}
+\end{column}
+\begin{column}{.45\textwidth}
+\begin{defbox}[By the end of today you can \dots]
+\small
+\begin{itemize}\setlength\itemsep{1pt}
+\item \textbf{explain} how planetary, harmonic and cycloidal gears work
+\item \textbf{calculate} reflected inertia, screw speed and gripper force
+\item \textbf{size} a motor for a robot joint (peak, RMS, speed)
+\item \textbf{model} mechanical and electromechanical systems as ODEs
+\item \textbf{find} a transfer function and read its poles
+\end{itemize}
+\end{defbox}
+\end{column}
+\end{columns}
+\end{frame}
+
+% =====================================================================
+\begin{frame}{What we learned yesterday (W1D1)}
+\begin{columns}[T]
+\begin{column}{.50\textwidth}
+\small
+\begin{itemize}\setlength\itemsep{3pt}
+\item Motors turn \hl{current into torque} (force on a wire) and \hl{speed into voltage} (back-EMF).
+\item Robots mostly use electric actuators; pneumatics for simple grippers, hydraulics for very heavy loads.
+\item DC, BLDC and PMSM motors differ in how they \term{commutate} (brushes vs electronics).
+\item Steppers move in steps without feedback; induction motors drive conveyors and spindles.
+\end{itemize}
+\end{column}
+\begin{column}{.47\textwidth}
+\centering
+\begin{tikzpicture}[font=\scriptsize]
+\node[mkblk,minimum width=16mm,minimum height=11mm] (e) {electrical\\ $R,\,L$};
+\node[mkblk,minimum width=16mm,minimum height=11mm,fill=mkCream,draw=mkOrange,right=7mm of e] (k) {motor\\ $k_t=k_e$};
+\node[mkblk,minimum width=16mm,minimum height=11mm,right=7mm of k] (m) {mechanical\\ $J,\,B$};
+\draw[mksig,{Stealth}-{Stealth}] (e) -- node[above]{$i,\,e$} (k);
+\draw[mksig,{Stealth}-{Stealth}] (k) -- node[above]{$T,\,\omega$} (m);
+\end{tikzpicture}
+\begin{eqbox}
+\small
+$V=Ri+L\dfrac{di}{dt}+k_e\omega$\\[1mm]
+$J\dfrac{d\omega}{dt}=k_t i-B\omega-T_L$
+\end{eqbox}
+\small
+Two time constants: electrical $\tau_e=L/R$ (ms) and mechanical $\tau_m=RJ/(k_tk_e)$ (tens of ms).\\[1mm]
+\textbf{Today:} what sits \hl{between} the motor and the robot link -- and how to describe the whole thing with equations.
+\end{column}
+\end{columns}
+\end{frame}
+
+% =====================================================================
+\section{1.5 Robot joint actuators: gearboxes, inertia, backlash, stiffness}
+% =====================================================================
+
+\begin{frame}{Why a robot joint needs a gearbox}
+\begin{columns}[T]
+\begin{column}{.30\textwidth}
+\centering
+\figph{width=\linewidth,height=4.0cm,keepaspectratio}{d4_kuka_robot.jpg}\\
+\credit{Oleg Yunakov, CC BY-SA 4.0, via Wikimedia Commons}
+\end{column}
+\begin{column}{.34\textwidth}
+\centering
+\begin{tikzpicture}[scale=.85]
+\fill[mkBlue] (0,0.4) rectangle (1.2,1.8); \node[white,font=\scriptsize,align=center] at (0.6,1.1) {motor\\fast};
+\draw[mkGray,line width=2pt] (1.2,1.1) -- (1.8,1.1);
+\fill[mkAmber] (1.8,0.3) rectangle (2.7,1.9); \node[font=\scriptsize,rotate=90] at (2.25,1.1) {gear $N$};
+\draw[mkGray,line width=3pt] (2.7,1.1) -- (3.1,1.1);
+\fill[mkNavy] (3.1,1.1) circle (0.25);
+\draw[mkOrange,line width=5pt,rounded corners] (3.1,1.1) -- (3.9,2.9);
+\fill[mkOrange] (3.9,2.9) circle (0.2);
+\node[font=\scriptsize,text=mkOrange] at (4.0,1.6) {link};
+\node[font=\scriptsize,align=center] at (0.6,-0.2) {3000 rpm\\ 1\,N\,m};
+\node[font=\scriptsize,align=center] at (3.2,-0.2) {30 rpm\\ 100\,N\,m};
+\end{tikzpicture}
+\end{column}
+\begin{column}{.34\textwidth}
+\small
+\begin{itemize}\setlength\itemsep{2pt}
+\item Electric motors like \hl{high speed, low torque}.
+\item Robot joints need \hl{low speed, high torque}.
+\item A gearbox of ratio $N$ trades one for the other -- like the low gear on a bicycle.
+\end{itemize}
+\begin{eqbox}
+$N=\dfrac{\omega_m}{\omega_L}$, \qquad $T_L=\eta\,N\,T_m$
+\end{eqbox}
+{\small $\eta$: efficiency (0.6--0.98). Typical joint: $N=50$--160.}
+\end{column}
+\end{columns}
+\end{frame}
+
+% ---------------------------------------------------------------------
+\begin{frame}{Planetary gearbox: sun, planets and ring}
+\begin{columns}[T]
+\begin{column}{.36\textwidth}
+\centering
+\begin{tikzpicture}[scale=.75]
+\fill[mkGray!25] (0,0) circle (2.3); \fill[white] (0,0) circle (2.0);
+\draw[mkGray,line width=1pt] (0,0) circle (2.0);
+\node[font=\scriptsize,text=mkGray] at (0,2.55) {ring (fixed)};
+\fill[mkBlue] (0,0) circle (0.75); \node[white,font=\scriptsize] at (0,0) {sun};
+\foreach \a in {90,210,330} {
+  \fill[mkSky] (\a:1.38) circle (0.6);
+  \fill[mkNavy] (\a:1.38) circle (0.08);}
+\draw[mkOrange,line width=1.4pt] (90:1.38) -- (210:1.38) -- (330:1.38) -- cycle;
+\node[font=\scriptsize,text=mkOrange] at (0,-1.1) {carrier};
+\draw[-{Stealth},mkBlue,line width=.8pt] (40:0.95) arc (40:120:0.95);
+\node[font=\scriptsize,text=mkBlue] at (-3.0,0.8) {input};
+\draw[mkBlue,-{Stealth}] (-2.6,0.7) -- (-0.8,0.25);
+\node[font=\scriptsize,text=mkOrange] at (2.9,-1.6) {output};
+\draw[mkOrange,-{Stealth}] (2.6,-1.4) -- (1.3,-0.75);
+\end{tikzpicture}
+\end{column}
+\begin{column}{.22\textwidth}
+\centering
+\figph{width=\linewidth,height=3.2cm,keepaspectratio}{d1_planetary_diag.png}\\
+\credit{Wapcaplet, CC BY-SA 3.0, via Wikimedia Commons}
+\end{column}
+\begin{column}{.40\textwidth}
+\small
+\begin{itemize}\setlength\itemsep{2pt}
+\item Input on the \term{sun}, ring held still, output on the \term{carrier} that holds the planets.
+\item Load shared by 3--4 planets: compact, stiff, efficient (95--98\,\%).
+\end{itemize}
+\begin{eqbox}
+$N=1+\dfrac{z_\text{ring}}{z_\text{sun}}$ \quad ($z$: number of teeth)
+\end{eqbox}
+\begin{defbox}[Worked example]
+\small
+\begin{enumerate}\setlength\itemsep{0pt}
+\item $z_\text{sun}=20$, $z_\text{ring}=80$: $N=1+4=5$.
+\item Two stages in series: $N=5\cdot5=25$.
+\end{enumerate}
+\end{defbox}
+{\small Some play (backlash): 3--15 arcmin. Common on SCARA and cobot joints.}
+\end{column}
+\end{columns}
+\end{frame}
+
+% ---------------------------------------------------------------------
+\begin{frame}{Harmonic drive (strain-wave gear): huge ratio, almost no play}
+\begin{columns}[T]
+\begin{column}{.34\textwidth}
+\centering
+\begin{tikzpicture}[scale=.8]
+\fill[mkGray!25] (0,0) circle (2.2); \fill[white] (0,0) circle (1.95);
+\node[font=\scriptsize,text=mkGray] at (0,2.45) {circular spline (fixed)};
+\draw[mkOrange,line width=2.5pt] (0,0) ellipse (1.92 and 1.55);
+\node[font=\scriptsize,text=mkOrange] at (0.0,-2.5) {flexspline (output)};
+\fill[mkBlue] (0,0) ellipse (1.6 and 1.2);
+\node[white,font=\scriptsize,align=center] at (0,0) {wave\\generator\\(input)};
+\foreach \s in {-1,1} \fill[mkRed] (\s*1.93,0) circle (0.1);
+\node[font=\scriptsize,text=mkRed,align=left,anchor=west] at (2.3,0.0) {teeth\\mesh};
+\end{tikzpicture}
+\end{column}
+\begin{column}{.26\textwidth}
+\centering
+\figph{width=\linewidth,height=3.4cm,keepaspectratio}{d1_harmonic_drive.jpg}\\
+\credit{Pieceofmetalwork, CC BY-SA 4.0, via Wikimedia Commons}
+\end{column}
+\begin{column}{.38\textwidth}
+\small
+\begin{itemize}\setlength\itemsep{2pt}
+\item An oval \term{wave generator} squeezes a thin toothed cup (\term{flexspline}) into a rigid ring with \hl{2 more teeth}.
+\item Each input turn shifts the flexspline by 2 teeth.
+\end{itemize}
+\begin{eqbox}
+$N=\dfrac{z_\text{flex}}{z_\text{circ}-z_\text{flex}}$
+\end{eqbox}
+{\small \textbf{Example:} $z_\text{flex}=200$, $z_\text{circ}=202$ $\Rightarrow$ $N=200/2=100$ in \hl{one} stage.}\\[1mm]
+{\small Near-zero backlash, light, hollow shaft $\Rightarrow$ standard in arms and cobots. Drawbacks: springy, 70--85\,\% efficient.}
+\end{column}
+\end{columns}
+\end{frame}
+
+% ---------------------------------------------------------------------
+\begin{frame}{Cycloidal drive -- and how the three compare}
+\begin{columns}[T]
+\begin{column}{.32\textwidth}
+\centering
+\begin{tikzpicture}[scale=.55]
+\foreach \a in {0,30,...,330} \fill[mkGray!60] (\a:2.0) circle (0.16);
+\node[font=\scriptsize,text=mkGray] at (0,2.45) {ring pins ($z_p$)};
+\begin{scope}[shift={(0.18,0.0)}]
+\draw[mkOrange,line width=1.2pt,fill=mkCream,domain=0:360,samples=200,smooth,variable=\t]
+  plot ({(1.6+0.18*cos(11*\t))*cos(\t)},{(1.6+0.18*cos(11*\t))*sin(\t)}) -- cycle;
+\fill[mkBlue] (0,0) circle (0.45);
+\node[font=\scriptsize,white] at (0,0) {ecc.};
+\foreach \a in {45,135,225,315} \draw[mkNavy,line width=.8pt] (\a:1.0) circle (0.2);
+\end{scope}
+\node[font=\scriptsize,text=mkOrange] at (0,-2.5) {lobed disc ($z_d=z_p-1$)};
+\end{tikzpicture}\\[1mm]
+\figph{width=.75\linewidth,height=2.3cm,keepaspectratio}{r12_cycloidal_model.jpg}\\
+\credit{1-1111 at German Wikipedia, Public domain, via Wikimedia Commons}
+\end{column}
+\begin{column}{.66\textwidth}
+\small
+An eccentric input makes a lobed disc ``roll'' inside a ring of pins; one lobe fewer than pins.
+\begin{eqbox}
+$N=\dfrac{z_d}{z_p-z_d}$ \qquad \textbf{Example:} $z_p=40,\ z_d=39$ $\Rightarrow$ $N=39$
+\end{eqbox}
+\renewcommand{\arraystretch}{1.08}
+\begin{tabularx}{\linewidth}{@{}l*{4}{>{\centering\arraybackslash}X}@{}}
+\toprule
+ & \textbf{Ratio / stage} & \textbf{Backlash} & \textbf{Stiffness \& shock} & \textbf{Typical joint}\\
+\midrule
+Planetary & 3--10 & small & good & SCARA, wrist, AMR wheel\\
+Harmonic & 50--160 & \textcolor{mkGreen}{$\approx 0$} & \textcolor{mkRed}{lower} & cobot, small arm\\
+Cycloidal & 30--180 & \textcolor{mkGreen}{very small} & \textcolor{mkGreen}{high, shock-proof} & base/shoulder of big arms\\
+\bottomrule
+\end{tabularx}\\[1mm]
+\gofurther{RV reducers combine a planetary first stage with a cycloidal second stage.}
+\end{column}
+\end{columns}
+\end{frame}
+
+% ---------------------------------------------------------------------
+\begin{frame}{Reflected inertia: what the motor ``feels''}
+\begin{columns}[T]
+\begin{column}{.47\textwidth}
+\small
+Kinetic energy is the same on both sides of the gear ($\omega_L=\omega_m/N$):
+\[
+\tfrac12 J_L\omega_L^2=\tfrac12\,\frac{J_L}{N^2}\,\omega_m^2
+\]
+\begin{eqbox}
+$J_\text{tot}=J_m+\dfrac{J_L}{N^2}$, \qquad load torque seen: $\dfrac{T_L}{N}$
+\end{eqbox}
+\begin{defbox}[Worked example: robot link behind N 100]
+\small
+\begin{enumerate}\setlength\itemsep{0pt}
+\item Link + payload: $J_L=\SI{1.6}{\kilo\gram\metre\squared}$.
+\item Reflected: $1.6/100^2=\SI{1.6e-4}{\kilo\gram\metre\squared}$.
+\item Motor $J_m=\SI{0.18e-4}{}$ $\Rightarrow$ \term{inertia ratio} $1.6/0.18\approx9$.
+\end{enumerate}
+\end{defbox}
+\end{column}
+\begin{column}{.51\textwidth}
+\centering
+\begin{tikzpicture}
+\begin{axis}[mkplot,width=7.0cm,height=4.6cm,xmin=0.5,xmax=20,ymin=0,ymax=1.08,xmode=log,
+  xlabel={gear ratio $N$},ylabel={load acceleration (relative)},legend pos=south east,
+  xtick={1,2,4,8,16},xticklabels={1,2,4,8,16}]
+\addplot[mkSky,thick,domain=0.5:20,samples=120]{2*x*2/(x^2+4)}; \addlegendentry{$J_L/J_m=4$}
+\addplot[mkBlue,thick,domain=0.5:20,samples=120]{2*x*4/(x^2+16)}; \addlegendentry{$J_L/J_m=16$}
+\addplot[mkOrange,thick,domain=0.5:20,samples=120]{2*x*8/(x^2+64)}; \addlegendentry{$J_L/J_m=64$}
+\end{axis}
+\end{tikzpicture}\\
+\small
+Fastest acceleration when $J_L/N^2=J_m$, i.e.\ $N_\text{opt}=\sqrt{J_L/J_m}$.\\
+Rule of thumb: keep the inertia ratio below $\approx$\,10 for easy tuning.
+\end{column}
+\end{columns}
+\end{frame}
+
+% ---------------------------------------------------------------------
+\begin{frame}{Backlash and torsional stiffness}
+\begin{columns}[T]
+\begin{column}{.32\textwidth}
+\centering
+\begin{tikzpicture}
+\begin{axis}[mkplot,width=5.0cm,height=4.3cm,xmin=-2,xmax=2,ymin=-1.6,ymax=1.6,axis lines=middle,
+  xlabel={motor angle},ylabel={link angle},xtick=\empty,ytick=\empty,
+  every axis x label/.style={at={(current axis.right of origin)},anchor=north east,font=\scriptsize},
+  every axis y label/.style={at={(current axis.above origin)},anchor=north west,font=\scriptsize}]
+\addplot[mkGray,thin,dashed,domain=-1.2:1.9]{x-0.4};
+\addplot[mkGray,thin,dashed,domain=-1.9:1.2]{x+0.4};
+\addplot[mkOrange,thick,-{Stealth}] coordinates {(-1.0,-1.4) (1.4,1.0)};
+\addplot[mkOrange,thick,-{Stealth}] coordinates {(1.4,1.0) (0.6,1.0)};
+\addplot[mkOrange,thick,-{Stealth}] coordinates {(0.6,1.0) (-1.0,-0.6)};
+\draw[mkNavy,{Stealth[length=1mm]}-{Stealth[length=1mm]}] (axis cs:0.6,1.2) -- (axis cs:1.4,1.2);
+\node[font=\scriptsize,text=mkNavy,anchor=west] at (axis cs:1.42,1.2) {play};
+\end{axis}
+\end{tikzpicture}\\
+{\small \term{Backlash}: on reversal the motor turns but the link does not.}
+\end{column}
+\begin{column}{.30\textwidth}
+\centering
+\begin{tikzpicture}[scale=.8]
+\fill[mkBlue] (0,0) rectangle (1,1.2); \node[white,font=\scriptsize] at (0.5,0.6) {$J_m$};
+\draw[spring] (1,0.6) -- (2.6,0.6);
+\node[font=\scriptsize] at (1.8,1.15) {$k$ [N\,m/rad]};
+\fill[mkOrange] (2.6,0) rectangle (3.6,1.2); \node[white,font=\scriptsize] at (3.1,0.6) {$J_L$};
+\end{tikzpicture}\\[2mm]
+\small Every gearbox \hl{twists} a little under load, like a stiff torsion spring:
+\begin{eqbox}
+$\Delta\theta=\dfrac{T}{k}$
+\end{eqbox}
+\end{column}
+\begin{column}{.35\textwidth}
+\begin{defbox}[Worked example: harmonic drive]
+\small
+\begin{enumerate}\setlength\itemsep{0pt}
+\item $k=\SI{1e4}{\newton\metre\per\radian}$, gravity torque $T=\SI{34}{\newton\metre}$.
+\item Twist: $34/10^4=\SI{3.4}{\milli\radian}$.
+\item At the tool, $r=\SI{0.5}{\metre}$: $0.5\cdot3.4=\SI{1.7}{\milli\metre}$!
+\item Backlash 1 arcmin $=\SI{0.29}{\milli\radian}$ $\Rightarrow$ \SI{0.15}{\milli\metre}.
+\end{enumerate}
+\end{defbox}
+\small Cures: preloaded gears, stiffer reducer, encoder on the link side (Day 9).
+\end{column}
+\end{columns}
+\end{frame}
+
+% ---------------------------------------------------------------------
+\begin{frame}{Direct drive and quasi-direct drive}
+\begin{columns}[T]
+\begin{column}{.46\textwidth}
+\centering
+\begin{tikzpicture}
+\begin{axis}[mkplot,width=6.6cm,height=4.6cm,xmode=log,xmin=1,xmax=200,ymin=0,ymax=1.05,
+  xlabel={gear ratio $N$},ylabel={relative value},legend pos=south west,
+  xtick={1,10,100},xticklabels={1,10,100}]
+\addplot[mkOrange,thick,domain=0:2.301,samples=80] ({10^x},{1/(1+0.05*(10^x-1))});
+\addlegendentry{backdrivability}
+\addplot[mkBlue,thick,domain=0:2.301,samples=80] ({10^x},{1-1/(1+0.1*10^x)});
+\addlegendentry{torque from a small motor}
+\fill[mkSky,opacity=.25] (axis cs:5,0) rectangle (axis cs:10,1.05);
+\node[font=\tiny,text=mkMid,rotate=90] at (axis cs:7,0.75) {quasi-direct};
+\end{axis}
+\end{tikzpicture}\\
+{\scriptsize\color{mkGray} qualitative trend, not data}
+\end{column}
+\begin{column}{.52\textwidth}
+\small
+\begin{itemize}\setlength\itemsep{3pt}
+\item \term{Direct drive} ($N=1$): large torque motor bolted straight to the link -- no backlash, no gear wear, very precise. But heavy and expensive.
+\item \term{Backdrivable}: pushing the link by hand turns the motor. Important for safe contact.
+\item \term{Quasi-direct drive} ($N\approx$\,6--10): a compromise used in legged robots.
+\item High ratio ($N=100$): small motor, but stiff to push and high friction.
+\end{itemize}
+\begin{notebox}
+Example: \SI{34}{\newton\metre} with no gear needs a motor $\approx$100$\times$ stronger than the \SI{0.34}{\newton\metre} motor behind $N=100$.
+\end{notebox}
+\end{column}
+\end{columns}
+\end{frame}
+
+% ---------------------------------------------------------------------
+\begin{frame}{Series-elastic actuator (SEA): a spring on purpose}
+\begin{columns}[T]
+\begin{column}{.52\textwidth}
+\centering
+\begin{tikzpicture}[font=\scriptsize]
+\node[mkblk,minimum width=14mm,minimum height=10mm,fill=mkBlue,text=white] (m) {motor};
+\node[mkblk,minimum width=12mm,minimum height=10mm,fill=mkAmber,right=5mm of m] (g) {gear $N$};
+\coordinate[right=4mm of g] (s0);
+\coordinate[right=22mm of g] (s1);
+\draw[mkNavy,line width=.8pt] (g) -- (s0);
+\draw[spring] (s0) -- (s1);
+\node[above=4mm,text=mkNavy] at ($(s0)!.5!(s1)$) {spring $k_s$};
+\node[mkblk,minimum width=13mm,minimum height=10mm,fill=mkOrange,text=white,right=0mm of s1] (l) {link};
+\draw[mkGray,{Stealth[length=1.5mm]}-{Stealth[length=1.5mm]}] ($(s0)+(0,-0.7)$) -- node[below]{twist $\Delta\theta$ (encoder)} ($(s1)+(0,-0.7)$);
+\end{tikzpicture}
+
+\vspace{4mm}
+\begin{eqbox}
+$T=k_s\,\Delta\theta$
+\end{eqbox}
+\small \textbf{Example:} $k_s=\SI{300}{\newton\metre\per\radian}$, measured twist \SI{0.05}{\radian} $\Rightarrow$ $T=\SI{15}{\newton\metre}$.
+\end{column}
+\begin{column}{.46\textwidth}
+\small
+\textbf{Analogy:} carrying a full cup with a soft wrist -- bumps are absorbed, and you \hl{feel} how hard you push.
+\begin{itemize}\setlength\itemsep{2pt}
+\item Measuring the spring twist = a cheap, robust \term{torque sensor}.
+\item Spring absorbs impacts $\Rightarrow$ safer for humans and gears.
+\item Price: lower \term{bandwidth} -- the joint cannot react as fast.
+\end{itemize}
+\gofurther{variable-stiffness actuators; SEAs in exoskeletons and legged robots [Pratt \& Williamson, 1995].}
+\end{column}
+\end{columns}
+\end{frame}
+
+% ---------------------------------------------------------------------
+\begin{frame}{Session 1.5 -- Check your understanding}
+\begin{columns}[T]
+\begin{column}{.62\textwidth}
+\begin{keybox}[Check your understanding]
+\begin{enumerate}\setlength\itemsep{6pt}
+\item A planetary stage has $z_\text{sun}=15$, $z_\text{ring}=60$. What is its ratio?
+\item A link with $J_L=\SI{2}{\kilo\gram\metre\squared}$ is driven through $N=100$. What inertia does the motor feel?
+\item Why do cobots often use harmonic drives, and why do some legged robots avoid high ratios?
+\end{enumerate}
+\end{keybox}
+\end{column}
+\begin{column}{.34\textwidth}
+\small
+\textbf{Hint:} $N=1+z_\text{ring}/z_\text{sun}$; inertia is divided by $N^2$; think about backlash and backdrivability.
+\end{column}
+\end{columns}
+\end{frame}
+
+% ---------------------------------------------------------------------
+\begin{frame}{Session 1.5 -- Summary and key terms}
+\begin{columns}[T]
+\begin{column}{.55\textwidth}
+\small
+\begin{itemize}
+\item Gearboxes give the joint torque; motors give speed.
+\item Planetary (low ratio), harmonic (high ratio, no play), cycloidal (stiff, shock-proof).
+\item The load is reflected to the motor: inertia $\div N^2$, torque $\div N$.
+\item Backlash and finite stiffness cost accuracy at the tool.
+\item Direct drive and SEAs trade ratio for backdrivability and safety.
+\end{itemize}
+\begin{keybox}[Remember]
+$N=\omega_m/\omega_L$, \quad $J_\text{tot}=J_m+J_L/N^2$, \quad $\Delta\theta=T/k$
+\end{keybox}
+\end{column}
+\begin{column}{.42\textwidth}
+\begin{defbox}[Key terms]
+\small
+\term{Gear ratio $N$}: motor speed / joint speed.\\
+\term{Reflected inertia}: load inertia felt at the motor.\\
+\term{Backlash}: lost motion on reversal.\\
+\term{Torsional stiffness}: torque per radian of twist.\\
+\term{Backdrivable}: link can be pushed by hand.\\
+\term{SEA}: actuator with a deliberate spring.
+\end{defbox}
+\end{column}
+\end{columns}
+\end{frame}
+
+% =====================================================================
+\section{1.6 Linear actuators and end-effectors}
+% =====================================================================
+
+\begin{frame}{From rotation to straight-line motion}
+\centering
+\small
+\renewcommand{\arraystretch}{1.12}
+\begin{tabularx}{\textwidth}{@{}l>{\centering\arraybackslash}X>{\centering\arraybackslash}X>{\centering\arraybackslash}X>{\centering\arraybackslash}X@{}}
+\toprule
+\textbf{Mechanism} & \textbf{Speed} & \textbf{Stiffness} & \textbf{Accuracy} & \textbf{Robot use}\\
+\midrule
+Ball screw & $\le$ 1--2\,m/s & \textcolor{mkGreen}{high} & \textcolor{mkGreen}{\textmu m} & Cartesian axes, SCARA Z\\
+Toothed belt & \textcolor{mkGreen}{$\le$ 5--10\,m/s} & \textcolor{mkRed}{low} & 0.1\,mm & long gantries\\
+Rack \& pinion & 2--5\,m/s & medium & 0.05\,mm & 7th axis (track)\\
+Linear motor & \textcolor{mkGreen}{$\le$ 5\,m/s} & \textcolor{mkGreen}{highest} & \textcolor{mkGreen}{\textmu m} & wafer, PCB machines\\
+Pneumatic cylinder & fast, end-to-end & low & two end points & simple pick \& place\\
+\bottomrule
+\end{tabularx}
+
+\vspace{4mm}
+\begin{columns}[T]
+\begin{column}{.48\textwidth}
+\begin{defbox}[Rule of thumb]
+\small
+Rotary motor + screw/belt: cheap and flexible.\\
+Linear motor: best performance, highest cost.
+\end{defbox}
+\end{column}
+\begin{column}{.48\textwidth}
+\begin{defbox}[Every converter has a ratio]
+\small
+Screw: travel per turn (\term{lead} $p$). Belt and rack: pulley radius $r$.
+\end{defbox}
+\end{column}
+\end{columns}
+\end{frame}
+
+% ---------------------------------------------------------------------
+\begin{frame}{Ball screw: a nut on a bolt, with rolling balls}
+\begin{columns}[T]
+\begin{column}{.54\textwidth}
+\centering
+\begin{tikzpicture}[scale=.8]
+\fill[mkBlue] (0,0.6) rectangle (1.4,2.0); \node[white,font=\scriptsize] at (0.7,1.3) {motor};
+\fill[mkGray!70] (1.4,1.15) rectangle (1.9,1.45); \fill[mkAmber] (1.9,1.0) rectangle (2.3,1.6);
+\fill[mkGray!40] (2.3,1.15) rectangle (8.2,1.45);
+\foreach \x in {2.4,2.6,...,8.0} \draw[mkGray] (\x,1.15) -- (\x+0.12,1.45);
+\fill[mkGray] (8.2,0.9) rectangle (8.5,1.7); \fill[mkGray] (2.3,0.9) rectangle (2.5,1.7);
+\fill[mkOrange] (4.4,0.95) rectangle (5.4,1.65); \node[font=\scriptsize,white] at (4.9,1.3) {nut};
+\fill[mkSky!70] (3.6,1.65) rectangle (6.2,2.3); \node[font=\scriptsize] at (4.9,1.98) {table $m$};
+\draw[mkGray,line width=1pt] (2.2,0.2) -- (8.6,0.2);
+\draw[-{Stealth},line width=1pt,mkNavy] (6.4,2.0) -- (7.3,2.0) node[right,font=\scriptsize]{$x,v$};
+\draw[-{Stealth},line width=.8pt,mkOrange] (1.65,1.8) arc (100:-100:0.25 and 0.5);
+\node[font=\scriptsize,text=mkOrange] at (1.6,2.45) {$\theta,\omega$};
+\node[font=\scriptsize] at (5.6,0.6) {screw, lead $p$};
+\end{tikzpicture}
+
+\vspace{1mm}
+\figph{width=.55\linewidth,height=2.3cm,keepaspectratio}{d1_ballscrew.jpg}\\
+\credit{Glenn McKechnie (Graibeard), CC BY-SA 3.0, via Wikimedia Commons}
+\end{column}
+\begin{column}{.44\textwidth}
+\small
+Turn the bolt once, the nut moves one \term{lead} $p$ [m/rev]. Balls roll instead of slide: $\eta\approx0.9$.
+\begin{eqbox}
+$v=\dfrac{p}{2\pi}\,\omega$, \qquad $F=\dfrac{2\pi\,\eta}{p}\,T$
+\end{eqbox}
+\begin{defbox}[Worked example: lead 10 mm]
+\small
+\begin{enumerate}\setlength\itemsep{0pt}
+\item \SI{3000}{rpm} $=\SI{50}{rev/s}$ $\Rightarrow$ $v=50\cdot0.01=\SI{0.5}{\metre\per\second}$.
+\item $T=\SI{1}{\newton\metre}$: $F=6.28\cdot0.9/0.01\approx\SI{565}{\newton}$.
+\end{enumerate}
+\end{defbox}
+{\small A small motor pushes like a 57\,kg weight!}
+\end{column}
+\end{columns}
+\end{frame}
+
+% ---------------------------------------------------------------------
+\begin{frame}{Belt and rack drives: same idea, different ratio}
+\begin{columns}[T]
+\begin{column}{.44\textwidth}
+\centering
+\begin{tikzpicture}[scale=.8]
+\draw[mkNavy,line width=1.6pt] (0,0.6) -- (6,0.6); \draw[mkNavy,line width=1.6pt] (0,-0.6) -- (6,-0.6);
+\draw[mkNavy,line width=1.6pt] (0,0.6) arc (90:270:0.6); \draw[mkNavy,line width=1.6pt] (6,-0.6) arc (-90:90:0.6);
+\fill[mkBlue] (0,0) circle (0.5); \fill[white] (0,0) circle (0.08);
+\fill[mkGray!50] (6,0) circle (0.5);
+\fill[mkOrange] (2.5,0.6) rectangle (3.7,1.3); \node[white,font=\scriptsize] at (3.1,0.95) {carriage};
+\draw[-{Stealth},mkOrange,line width=1pt] (3.9,1.0) -- (4.8,1.0) node[right,font=\scriptsize]{$v$};
+\draw[mkNavy] (0,0) -- (0,0.5) node[midway,left,font=\scriptsize]{$r$};
+\node[font=\scriptsize,text=mkBlue] at (0,-1.1) {motor pulley};
+\end{tikzpicture}
+
+\vspace{2mm}
+\begin{eqbox}
+$v=r\,\omega$, \qquad $F=\dfrac{T}{r}$, \qquad $J_\text{refl}=m\,r^2$
+\end{eqbox}
+\small Rack \& pinion: same formulas, $r$ = pinion pitch radius.
+\end{column}
+\begin{column}{.54\textwidth}
+\begin{defbox}[Worked example: carry m 5 kg]
+\small
+\begin{enumerate}\setlength\itemsep{1pt}
+\item Belt, pulley $r=\SI{20}{\milli\metre}$: $J_\text{refl}=5\cdot0.02^2=\SI{2e-3}{\kilo\gram\metre\squared}$.
+\item Ball screw, $p=\SI{10}{\milli\metre}$: $J_\text{refl}=m\,(p/2\pi)^2=5\cdot(0.0016)^2\approx\SI{1.3e-5}{\kilo\gram\metre\squared}$.
+\item Ratio of the two: $\approx$\,160!
+\end{enumerate}
+\end{defbox}
+\small
+\begin{itemize}\setlength\itemsep{1pt}
+\item A belt is a ``\hl{low gear ratio}'': fast and long, but the motor feels much more of the load.
+\item That is why belt axes often add a small planetary gearbox.
+\item Belts stretch $\Rightarrow$ low stiffness, wobble at stops.
+\end{itemize}
+\end{column}
+\end{columns}
+\end{frame}
+
+% ---------------------------------------------------------------------
+\begin{frame}{Linear motor and voice coil: no conversion needed}
+\begin{columns}[T]
+\begin{column}{.34\textwidth}
+\centering
+\figph{width=\linewidth,height=3.0cm,keepaspectratio}{d1_linear_motor.jpg}\\
+\credit{Zureks, CC BY-SA 4.0, via Wikimedia Commons}
+\vspace{1mm}
+\small
+\begin{itemize}\setlength\itemsep{1pt}
+\item \term{Linear motor} = a PMSM ``unrolled'' flat: coil carriage + magnet track.
+\item Direct drive for straight lines: stiff, fast, no play.
+\end{itemize}
+\end{column}
+\begin{column}{.30\textwidth}
+\centering
+\begin{tikzpicture}[scale=.75]
+\fill[mkGray!50] (0,0) rectangle (3.2,0.5);
+\fill[mkGray!50] (0,0) rectangle (0.5,3.2);
+\fill[mkGray!50] (1.2,0.5) rectangle (1.7,3.2);
+\fill[mkRed!70] (0.5,0.5) rectangle (1.2,2.0); \node[white,font=\scriptsize\bfseries] at (0.85,1.25) {PM};
+\fill[mkGray!50] (0.5,2.0) rectangle (1.2,3.2);
+\fill[mkGray!50] (2.4,0.5) rectangle (3.2,3.2);
+\fill[mkOrange] (1.85,1.4) rectangle (2.25,3.6);
+\node[font=\scriptsize,text=white,rotate=90] at (2.05,2.5) {coil};
+\foreach \y in {2.4,2.8} \draw[-{Stealth[length=1.3mm]},mkSky] (1.7,\y) -- (2.4,\y);
+\node[font=\scriptsize,text=mkSky] at (2.7,3.75) {$B$};
+\draw[-{Stealth},mkNavy,line width=1pt] (2.05,3.7) -- (2.05,4.4) node[above,font=\scriptsize]{$F=k_f\,i$};
+\node[font=\scriptsize,text=mkGray] at (1.6,-0.45) {voice coil, half-section};
+\end{tikzpicture}
+\end{column}
+\begin{column}{.34\textwidth}
+\small
+\textbf{Voice coil}: like a loudspeaker -- a coil in a magnet gap moves in and out.
+\begin{eqbox}
+$F=k_f\,i$, \quad $m\dfrac{dv}{dt}=k_f\,i-b\,v-F_L$
+\end{eqbox}
+\begin{itemize}\setlength\itemsep{1pt}
+\item $k_f$ [\si{\newton\per\ampere}]: force constant.
+\item Same equations as the DC motor with $T\rightarrow F$, $\omega\rightarrow v$, $J\rightarrow m$.
+\item Example: $k_f=\SI{20}{\newton\per\ampere}$, \SI{3}{\ampere} $\Rightarrow$ \SI{60}{\newton}.
+\end{itemize}
+\end{column}
+\end{columns}
+\end{frame}
+
+% ---------------------------------------------------------------------
+\begin{frame}{Grippers: electric and pneumatic jaws}
+\begin{columns}[T]
+\begin{column}{.36\textwidth}
+\centering
+\figph{width=.8\linewidth,height=1.7cm,keepaspectratio}{r12_rov_gripper.png}\\
+\credit{BPLINFO, CC BY-SA 4.0, via Wikimedia Commons}\\[1mm]
+\begin{tikzpicture}[scale=.68]
+\fill[mkBlue] (-1.6,3.0) rectangle (1.6,3.8); \node[white,font=\scriptsize] at (0,3.4) {gripper body};
+\fill[mkGray!60] (-1.3,1.0) rectangle (-0.9,3.0);
+\fill[mkGray!60] (0.9,1.0) rectangle (1.3,3.0);
+\fill[mkSky!70,draw=mkBlue] (-0.9,1.1) rectangle (0.9,2.3); \node[font=\scriptsize] at (0,1.7) {part $m$};
+\draw[-{Stealth},mkOrange,line width=1pt] (-1.9,1.7) -- (-1.3,1.7); \node[font=\scriptsize,text=mkOrange] at (-2.1,2.05) {$F_\text{g}$};
+\draw[-{Stealth},mkOrange,line width=1pt] (1.9,1.7) -- (1.3,1.7); \node[font=\scriptsize,text=mkOrange] at (2.1,2.05) {$F_\text{g}$};
+\draw[-{Stealth},mkRed,line width=1pt] (0,1.1) -- (0,0.2) node[below,font=\scriptsize]{$m(g+a)$};
+\draw[-{Stealth},mkGreen,line width=.8pt] (-0.75,1.3) -- (-0.75,2.1); \draw[-{Stealth},mkGreen,line width=.8pt] (0.75,1.3) -- (0.75,2.1);
+\node[font=\scriptsize,text=mkGreen] at (0,2.6) {friction $\mu F_g$};
+\end{tikzpicture}
+\end{column}
+\begin{column}{.62\textwidth}
+\small
+Two jaws squeeze; \hl{friction} carries the weight (no form-fit).
+\begin{eqbox}
+$2\,\mu\,F_g\;\ge\;S\cdot m\,(g+a)$
+\end{eqbox}
+{\small $\mu$: friction coefficient; $S$: safety factor (2--4); $a$: vertical acceleration.}
+\begin{defbox}[Worked example]
+\small
+\begin{enumerate}\setlength\itemsep{0pt}
+\item $m=\SI{2}{\kilo\gram}$, $a=\SI{5}{\metre\per\second\squared}$: $m(g+a)=2\cdot14.8=\SI{29.6}{\newton}$.
+\item With $S=2$: \SI{59}{\newton} must be held.
+\item $\mu=0.4$: $F_g\ge 59/(2\cdot0.4)\approx$ \hl{\SI{74}{\newton}} per jaw.
+\end{enumerate}
+\end{defbox}
+\renewcommand{\arraystretch}{1.0}
+{\small \textbf{Pneumatic}: cheap, fast, open/closed only. \textbf{Electric}: programmable force and width, quieter, needs no air.}
+\end{column}
+\end{columns}
+\end{frame}
+
+% ---------------------------------------------------------------------
+\begin{frame}{Vacuum grippers and suction cups}
+\begin{columns}[T]
+\begin{column}{.40\textwidth}
+\centering
+\begin{tikzpicture}[scale=.85]
+\fill[mkGray!50] (-0.15,2.0) rectangle (0.15,3.2); \node[font=\scriptsize,anchor=west] at (0.25,2.9) {to vacuum};
+\fill[mkBlue!80] (-1.2,1.2) -- (1.2,1.2) -- (0.3,2.0) -- (-0.3,2.0) -- cycle;
+\fill[mkSky!40] (-1.1,1.2) rectangle (1.1,1.45);
+\node[font=\scriptsize,text=mkNavy] at (0,1.32) {low $p$};
+\fill[mkOrange!70] (-2.0,0.6) rectangle (2.0,1.2); \node[font=\scriptsize,white] at (0,0.9) {sheet, box, glass};
+\foreach \x in {-0.8,-0.3,0.2,0.7} \draw[-{Stealth},mkNavy] (\x,0.0) -- (\x,0.55);
+\node[font=\scriptsize,text=mkNavy] at (0,-0.3) {atmosphere pushes up};
+\draw[mkGray,{Stealth[length=1.2mm]}-{Stealth[length=1.2mm]}] (-1.2,2.25) -- (1.2,2.25) node[right,font=\scriptsize]{$d$};
+\end{tikzpicture}
+\end{column}
+\begin{column}{.58\textwidth}
+\small
+The cup does not ``suck'': the \hl{air outside pushes} the part against it.
+\begin{eqbox}
+$F=\Delta p\cdot A$, \qquad $A=\pi d^2/4$
+\end{eqbox}
+\begin{defbox}[Worked example: lift a 5 kg box]
+\small
+\begin{enumerate}\setlength\itemsep{0pt}
+\item One cup, $d=\SI{40}{\milli\metre}$: $A=\SI{1.26e-3}{\metre\squared}$.
+\item $\Delta p=\SI{60}{\kilo\pascal}$: $F=60000\cdot0.00126\approx\SI{75}{\newton}$.
+\item Needed: $5\cdot(9.81+10)\cdot2\approx\SI{198}{\newton}$ ($a=10$, $S=2$).
+\item Use \hl{3 cups} (\SI{225}{\newton}).
+\end{enumerate}
+\end{defbox}
+{\small Great for flat, smooth, light parts; porous or dusty surfaces leak.}
+\end{column}
+\end{columns}
+\end{frame}
+
+% ---------------------------------------------------------------------
+\begin{frame}{Solenoids and pneumatic cylinders: simple two-position actuators}
+\begin{columns}[T]
+\begin{column}{.22\textwidth}
+\centering
+\figph{width=\linewidth,height=3.0cm,keepaspectratio}{d2_solenoid.jpg}\\
+\credit{Svjo, CC BY-SA 3.0, via Wikimedia Commons}
+\end{column}
+\begin{column}{.40\textwidth}
+\centering
+\begin{tikzpicture}
+\begin{axis}[mkplot,width=6.0cm,height=4.4cm,xmin=1,xmax=10,ymin=0,ymax=1.05,
+  xlabel={air gap (mm)},ylabel={force (relative)},legend pos=north east]
+\addplot[mkOrange,thick,domain=1:10,samples=60]{1/(x^2)}; \addlegendentry{$F\propto 1/\text{gap}^2$}
+\addplot[mkBlue,thick,dashed,domain=1:10]{0.15}; \addlegendentry{spring/load}
+\end{axis}
+\end{tikzpicture}\\
+\small A \term{solenoid} pulls hardest when almost closed -- it ``snaps'' in.
+\end{column}
+\begin{column}{.36\textwidth}
+\small
+\textbf{Pneumatic cylinder:} compressed air pushes a piston.
+\begin{eqbox}
+$F=p\cdot A$
+\end{eqbox}
+\begin{enumerate}\setlength\itemsep{0pt}
+\item Bore \SI{32}{\milli\metre}: $A=\SI{8.0e-4}{\metre\squared}$.
+\item $p=\SI{6}{bar}=\SI{6e5}{\pascal}$: $F\approx\SI{480}{\newton}$.
+\end{enumerate}
+\vspace{1mm}
+\begin{itemize}\setlength\itemsep{1pt}
+\item Both are \term{bang-bang}: two end positions, no control in between.
+\item Uses: valves, locks, part stops, ejectors.
+\end{itemize}
+\end{column}
+\end{columns}
+\end{frame}
+
+% ---------------------------------------------------------------------
+\begin{frame}{Session 1.6 -- Check your understanding}
+\begin{columns}[T]
+\begin{column}{.62\textwidth}
+\begin{keybox}[Check your understanding]
+\begin{enumerate}\setlength\itemsep{6pt}
+\item A ball screw has lead \SI{5}{\milli\metre}. How fast does the nut move at \SI{1200}{rpm}?
+\item A suction cup of \SI{1e-3}{\metre\squared} works at $\Delta p=\SI{50}{\kilo\pascal}$. What is its theoretical holding force?
+\item Why does a belt axis ``feel'' heavier to the motor than a ball-screw axis with the same carriage?
+\end{enumerate}
+\end{keybox}
+\end{column}
+\begin{column}{.34\textwidth}
+\small
+\textbf{Hint:} $v=p\cdot n$; $F=\Delta p\,A$; compare $m r^2$ with $m(p/2\pi)^2$.
+\end{column}
+\end{columns}
+\end{frame}
+
+% ---------------------------------------------------------------------
+\begin{frame}{Session 1.6 -- Summary and key terms}
+\begin{columns}[T]
+\begin{column}{.55\textwidth}
+\small
+\begin{itemize}
+\item Screws, belts and racks turn rotation into translation, each with its own ratio.
+\item Ball screw: precise and strong; belt: fast and long but soft.
+\item Linear motors and voice coils: direct drive for straight lines.
+\item Grippers hold by friction ($2\mu F_g$) or by air pressure ($\Delta p\,A$).
+\item Solenoids and cylinders: simple two-position motion.
+\end{itemize}
+\begin{keybox}[Remember]
+$v=\dfrac{p}{2\pi}\omega$, \; $J=m\Big(\dfrac{p}{2\pi}\Big)^2$, \; $J=m r^2$, \; $F=\Delta p\,A$
+\end{keybox}
+\end{column}
+\begin{column}{.42\textwidth}
+\begin{defbox}[Key terms]
+\small
+\term{Lead}: travel per screw turn.\\
+\term{End-effector}: tool at the robot flange.\\
+\term{Gripping force}: squeeze force per jaw.\\
+\term{Safety factor}: margin for unknowns.\\
+\term{Solenoid}: coil that pulls an iron plunger.\\
+\term{Bang-bang}: only two positions.
+\end{defbox}
+\end{column}
+\end{columns}
+\end{frame}
+
+% =====================================================================
+\section{1.7 Motor sizing and selection for a robot joint}
+% =====================================================================
+
+\begin{frame}{What loads a robot joint motor?}
+\begin{columns}[T]
+\begin{column}{.40\textwidth}
+\centering
+\begin{tikzpicture}[node distance=2.2mm,
+  st/.style={mkblk,minimum width=42mm,text width=40mm,minimum height=6mm}]
+\node[st] (a) {1. Describe the move and cycle};
+\node[st,below=of a] (b) {2. Link inertia and gravity};
+\node[st,below=of b] (c) {3. Choose gear ratio $N$};
+\node[st,below=of c] (d) {4. Torque in every segment};
+\node[st,below=of d,fill=mkCream,draw=mkOrange] (e) {5. Check peak, RMS, speed};
+\node[st,below=of e] (f) {6. Check drive, gearbox, brake};
+\foreach \x/\y in {a/b,b/c,c/d,d/e,e/f} \draw[mksig] (\x) -- (\y);
+\draw[mksig,mkGray,dashed] (e.east) -- ++(4mm,0) |- (c.east);
+\end{tikzpicture}
+\end{column}
+\begin{column}{.58\textwidth}
+\small
+Motor torque = accelerate the inertia + hold the gravity + overcome friction:
+\begin{eqbox}
+$T_m=\Big(J_m+\dfrac{J_L}{N^2}\Big)\alpha_m+\dfrac{T_g}{\eta N}+T_f$
+\end{eqbox}
+\begin{itemize}\setlength\itemsep{2pt}
+\item $\alpha_m=N\alpha_L$: motor acceleration [rad/s$^2$].
+\item $T_g=m g\,r\cos\theta$: \term{gravity torque}, largest with the arm horizontal.
+\item In a robot, gravity often \hl{dominates} -- and acts even when standing still.
+\item Payload changes $J_L$ and $T_g$ -- size for the worst case.
+\end{itemize}
+\end{column}
+\end{columns}
+\end{frame}
+
+% ---------------------------------------------------------------------
+\begin{frame}{Servo motor torque--speed envelope}
+\begin{columns}[T]
+\begin{column}{.58\textwidth}
+\begin{tikzpicture}
+\begin{axis}[mkplot,width=8cm,height=5.4cm,xmin=0,xmax=5200,ymin=0,ymax=2.2,
+  xlabel={speed $n$ (rpm)},ylabel={torque $T$ (\si{\newton\metre})},scaled x ticks=false,
+  xtick={0,1000,2000,3000,4000,5000}]
+\addplot[fill=mkCream,draw=none] coordinates {(0,0.64)(0,1.91)(3300,1.91)(5000,0.8)(5000,0.48)(3000,0.64)} -- cycle;
+\addplot[fill=mkPale,draw=none] coordinates {(0,0)(0,0.64)(3000,0.64)(5000,0.48)(5000,0)} -- cycle;
+\addplot[mkOrange,thick] coordinates {(0,1.91)(3300,1.91)(5000,0.8)};
+\addplot[mkBlue,thick] coordinates {(0,0.64)(3000,0.64)(5000,0.48)};
+\node[font=\scriptsize,text=mkBlue] at (axis cs:1500,0.35) {continuous zone (forever)};
+\node[font=\scriptsize,text=mkOrange] at (axis cs:1500,1.3) {short-time zone (seconds)};
+\node[font=\scriptsize,text=mkOrange,anchor=south west] at (axis cs:4100,1.35) {voltage limit};
+\node[font=\scriptsize,text=mkNavy,anchor=south] at (axis cs:1200,1.93) {$T_\text{peak}$ (current limit)};
+\node[circle,fill=mkNavy,inner sep=1.2pt] at (axis cs:3000,0.64) {};
+\node[font=\scriptsize,anchor=north] at (axis cs:3000,0.6) {rated point};
+\end{axis}
+\end{tikzpicture}\\
+{\scriptsize\color{mkGray} Typical 200\,W servo: $T_N=\SI{0.64}{\newton\metre}$, $T_\text{peak}=\SI{1.91}{\newton\metre}$, $n_N=\SI{3000}{rpm}$, $J_m=\SI{0.18e-4}{\kilo\gram\metre\squared}$.}
+\end{column}
+\begin{column}{.40\textwidth}
+\small
+\textbf{Analogy:} you can sprint for 10 seconds, but only jog for an hour.
+\begin{itemize}\setlength\itemsep{2pt}
+\item \term{Continuous torque}: possible forever without overheating.
+\item \term{Peak torque}: $\approx3\times$ more, for short bursts (acceleration).
+\item \term{Voltage limit}: at high speed the back-EMF ``eats'' the supply voltage.
+\end{itemize}
+\end{column}
+\end{columns}
+\end{frame}
+
+% ---------------------------------------------------------------------
+\begin{frame}{Duty cycle and RMS torque}
+\begin{columns}[T]
+\begin{column}{.52\textwidth}
+\begin{tikzpicture}
+\begin{groupplot}[group style={group size=1 by 2,vertical sep=4mm,xticklabels at=edge bottom},
+  mkplot,width=7.2cm,height=3.2cm,xmin=0,xmax=2.0]
+\nextgroupplot[ymin=0,ymax=2400,ylabel={$n_m$ (rpm)},scaled y ticks=false,ytick={0,1000,2000}]
+\addplot[mkBlue,thick] coordinates {(0,0)(0.25,2000)(0.75,2000)(1.0,0)(2.0,0)};
+\nextgroupplot[ymin=0,ymax=0.62,ylabel={$T_m$ (\si{\newton\metre})},xlabel={$t$ (s)}]
+\addplot[mkOrange,thick,const plot] coordinates {(0,0.489)(0.25,0.34)(0.75,0.191)(1.0,0.34)(2.0,0.34)};
+\addplot[mkSky,thick,dashed,domain=0:2]{0.348};
+\node[font=\scriptsize,text=mkMid,anchor=south west] at (axis cs:1.2,0.36) {$T_\text{rms}=0.35$};
+\node[font=\scriptsize] at (axis cs:0.12,0.55) {acc.};
+\node[font=\scriptsize] at (axis cs:0.5,0.27) {cruise};
+\node[font=\scriptsize] at (axis cs:0.87,0.12) {dec.};
+\node[font=\scriptsize] at (axis cs:1.5,0.22) {hold (gravity)};
+\end{groupplot}
+\end{tikzpicture}
+\end{column}
+\begin{column}{.46\textwidth}
+\small
+Heat $\propto i^2\propto T^2$, and the motor heats up slowly, so it ``feels'' the \hl{average of $T^2$}:
+\begin{eqbox}
+$T_\text{rms}=\sqrt{\dfrac{1}{t_\text{cyc}}\displaystyle\sum_k T_k^2\,t_k}\;\le\;T_\text{cont}$
+\end{eqbox}
+\begin{itemize}\setlength\itemsep{1pt}
+\item $T_k$: torque in segment $k$, lasting $t_k$ seconds.
+\item Why not the plain average? Negative torque heats just as much.
+\item Robot joint: holding against gravity also heats the motor.
+\item Also check $\max|T_k|\le T_\text{peak}$ and $n_\text{max}$.
+\end{itemize}
+\end{column}
+\end{columns}
+\end{frame}
+
+% ---------------------------------------------------------------------
+\begin{frame}{Thermal limits: the motor warms like an RC circuit charges}
+\begin{columns}[T]
+\begin{column}{.40\textwidth}
+\centering
+\begin{circuitikz}[scale=.8,transform shape,font=\small]
+\draw (0,0) to[I,l=$P_\text{loss}$,color=mkOrange] (0,2.5) -- (2,2.5)
+ to[R,l=$R_\text{th}$,color=mkNavy] (2,0) -- (0,0);
+\draw (2,2.5) -- (4,2.5) to[C,l=$C_\text{th}$,color=mkNavy] (4,0) -- (2,0);
+\node[font=\scriptsize,above] at (3,2.5) {$\Delta\vartheta$};
+\draw (0,0) node[ground]{};
+\end{circuitikz}
+\begin{eqbox}
+$\Delta\vartheta(t)=P_\text{loss}R_\text{th}\big(1-e^{-t/\tau_\text{th}}\big)$
+\end{eqbox}
+\small $\tau_\text{th}=R_\text{th}C_\text{th}$: minutes for a servo motor.
+\end{column}
+\begin{column}{.58\textwidth}
+\begin{tikzpicture}
+\begin{axis}[mkplot,width=7.4cm,height=4.2cm,xmin=0,xmax=3,ymin=0,ymax=1.6,
+  xlabel={$t/\tau_\text{th}$},ylabel={temp.\ rise / allowed},legend pos=south east]
+\addplot[mkBlue,thick,domain=0:3,samples=60]{1-exp(-x)}; \addlegendentry{$T=T_N$}
+\addplot[mkSky,thick,domain=0:0.75,samples=40]{2.25*(1-exp(-x))}; \addlegendentry{$T=1.5\,T_N$}
+\addplot[mkOrange,thick,domain=0:0.5,samples=40]{4*(1-exp(-x))}; \addlegendentry{$T=2\,T_N$}
+\addplot[mkRed,dashed,domain=0:3]{1};
+\end{axis}
+\end{tikzpicture}
+\small
+\begin{itemize}\setlength\itemsep{1pt}
+\item $R_\text{th}$ [K/W]: temperature rise per watt of loss; $C_\text{th}$ [J/K]: heat capacity.
+\item Copper loss $\propto T^2$: twice the torque = \hl{four times} the heat.
+\item Example: $P=\SI{50}{\watt}$, $R_\text{th}=\SI{1.6}{\kelvin\per\watt}$ $\Rightarrow$ final rise \SI{80}{\kelvin}.
+\end{itemize}
+\end{column}
+\end{columns}
+\end{frame}
+
+% ---------------------------------------------------------------------
+\begin{frame}{Worked example (1/2): shoulder-type joint, the load side}
+\begin{columns}[T]
+\begin{column}{.40\textwidth}
+\centering
+\begin{tikzpicture}[scale=.9]
+\fill[mkNavy] (0,0) circle (0.3);
+\fill[pattern=north east lines,pattern color=mkGray] (-0.6,-0.9) rectangle (0.6,-0.6);
+\draw[mkGray,line width=1.5pt] (0,-0.6) -- (0,-0.3);
+\draw[mkOrange,line width=6pt] (0,0) -- (4,0);
+\fill[mkBlue] (4,-0.35) rectangle (4.6,0.35); \node[font=\scriptsize,above] at (4.3,0.35) {5 kg};
+\draw[-{Stealth},mkRed] (4.3,-0.4) -- (4.3,-1.2) node[below,font=\scriptsize]{$m_pg$};
+\draw[-{Stealth},mkRed] (2,-0.1) -- (2,-0.9) node[below,font=\scriptsize]{$m_ag$};
+\draw[mkGray,{Stealth[length=1.2mm]}-{Stealth[length=1.2mm]}] (0,0.7) -- (4.3,0.7) node[midway,above,font=\scriptsize]{$r=\SI{0.5}{\metre}$};
+\node[font=\scriptsize,text=mkOrange] at (2,0.3) {arm 4 kg};
+\end{tikzpicture}
+\begin{defbox}[Given]
+\small
+Payload \SI{5}{\kilo\gram} at \SI{0.5}{\metre}; arm \SI{4}{\kilo\gram}, uniform, \SI{0.5}{\metre}.\\
+Move \SI{90}{\degree}: accel \SI{0.25}{\second}, cruise \SI{0.5}{\second}, decel \SI{0.25}{\second}, hold \SI{1.0}{\second}.\\
+Harmonic drive $N=100$ (assume $\eta\approx1$).
+\end{defbox}
+\end{column}
+\begin{column}{.58\textwidth}
+\small
+\textbf{Step 1 -- link inertia}\\
+$J_L=m_pr^2+\tfrac13 m_aL^2=1.25+0.33\approx\SI{1.6}{\kilo\gram\metre\squared}$\\[1.5mm]
+\textbf{Step 2 -- worst-case gravity torque} (arm horizontal)\\
+$T_g=5\cdot9.81\cdot0.5+4\cdot9.81\cdot0.25\approx\SI{34}{\newton\metre}$\\[1.5mm]
+\textbf{Step 3 -- joint speed and acceleration}\\
+$\omega_L=\dfrac{\pi/2}{0.25+0.5}=\SI{2.09}{\radian\per\second}$, \quad $\alpha_L=\dfrac{2.09}{0.25}=\SI{8.4}{\radian\per\second\squared}$\\[1.5mm]
+\textbf{Step 4 -- at the motor} ($\times N$)\\
+$\omega_m=\SI{209}{\radian\per\second}=$ \hl{\SI{2000}{rpm}}, \quad $\alpha_m=\SI{838}{\radian\per\second\squared}$
+\end{column}
+\end{columns}
+\end{frame}
+
+% ---------------------------------------------------------------------
+\begin{frame}{Worked example (2/2): motor torques and checks}
+\begin{columns}[T]
+\begin{column}{.54\textwidth}
+\small
+\textbf{Step 5 -- candidate:} 200\,W servo, $J_m=\SI{0.18e-4}{\kilo\gram\metre\squared}$.\\
+$J_\text{tot}=(0.18+1.60)\cdot10^{-4}=\SI{1.78e-4}{\kilo\gram\metre\squared}$ (ratio $\approx9$)\\[1.5mm]
+\textbf{Step 6 -- torque pieces at the motor}\\
+inertia: $1.78\text{e-}4\cdot838=\SI{0.15}{\newton\metre}$; gravity: $34/100=\SI{0.34}{\newton\metre}$\\
+acc.\ \SI{0.49}{}; cruise \SI{0.34}{}; dec.\ \SI{0.19}{}; hold \SI{0.34}{\newton\metre}\\[1.5mm]
+\textbf{Step 7 -- RMS over the \SI{2}{\second} cycle}\\
+$T_\text{rms}=\sqrt{\tfrac{0.49^2\cdot0.25+0.34^2\cdot0.5+0.19^2\cdot0.25+0.34^2\cdot1}{2}}=$ \hl{\SI{0.35}{\newton\metre}}\\[1.5mm]
+\textbf{Step 8 -- checks}\\
+peak $0.49<1.91$ \textcolor{mkGreen}{\checkmark}\; RMS $0.35<0.64$ \textcolor{mkGreen}{\checkmark}\; $2000\le3000$\,rpm \textcolor{mkGreen}{\checkmark}
+\end{column}
+\begin{column}{.44\textwidth}
+\begin{tikzpicture}
+\begin{axis}[mkplot,width=6.4cm,height=4.4cm,xmin=0,xmax=5200,ymin=0,ymax=2.2,
+  xlabel={$n$ (rpm)},ylabel={$|T|$ (\si{\newton\metre})},scaled x ticks=false,xtick={0,2000,4000}]
+\addplot[fill=mkCream,draw=none] coordinates {(0,0.64)(0,1.91)(3300,1.91)(5000,0.8)(5000,0.48)(3000,0.64)} -- cycle;
+\addplot[fill=mkPale,draw=none] coordinates {(0,0)(0,0.64)(3000,0.64)(5000,0.48)(5000,0)} -- cycle;
+\addplot[mkOrange,thick] coordinates {(0,1.91)(3300,1.91)(5000,0.8)};
+\addplot[mkBlue,thick] coordinates {(0,0.64)(3000,0.64)(5000,0.48)};
+\addplot[mkRed,thick,mark=*,mark size=1.2pt] coordinates {(0,0.489)(2000,0.489)};
+\addplot[mkMid,thick,mark=*,mark size=1.2pt] coordinates {(2000,0.191)(0,0.191)};
+\addplot[only marks,mark=diamond*,mark size=2.5pt,mkNavy] coordinates {(1000,0.348)};
+\node[font=\scriptsize,text=mkRed,anchor=south] at (axis cs:1000,0.5) {accel.};
+\node[font=\scriptsize,text=mkNavy,anchor=west] at (axis cs:1150,0.33) {$T_\text{rms}$};
+\end{axis}
+\end{tikzpicture}
+\begin{notebox}
+Gravity is 70\,\% of the RMS torque. A holding \hl{brake} in the hold phase cuts $T_\text{rms}$ to \SI{0.25}{\newton\metre}. Also check the gearbox: output peak $\approx\SI{49}{\newton\metre}$.
+\end{notebox}
+\end{column}
+\end{columns}
+\end{frame}
+
+% ---------------------------------------------------------------------
+\begin{frame}{Session 1.7 -- Check your understanding}
+\begin{columns}[T]
+\begin{column}{.62\textwidth}
+\begin{keybox}[Check your understanding]
+\begin{enumerate}\setlength\itemsep{6pt}
+\item In a \SI{1}{\second} cycle the motor gives \SI{1}{\newton\metre} for \SI{0.25}{\second} and zero otherwise. What is $T_\text{rms}$?
+\item In the worked example, the payload doubles to \SI{10}{\kilo\gram}. Which torque piece grows most, and is the 200\,W motor still enough?
+\item Why can a motor deliver $3\times$ its rated torque, but not permanently?
+\end{enumerate}
+\end{keybox}
+\end{column}
+\begin{column}{.34\textwidth}
+\small
+\textbf{Hint:} heat $\propto T^2$; gravity torque $\propto$ mass $\times$ distance.
+\end{column}
+\end{columns}
+\end{frame}
+
+% ---------------------------------------------------------------------
+\begin{frame}{Session 1.7 -- Summary and key terms}
+\begin{columns}[T]
+\begin{column}{.55\textwidth}
+\small
+\begin{itemize}
+\item Joint torque = inertia + gravity + friction, all reflected through $N$.
+\item Peak torque must sit in the short-time zone, RMS torque in the continuous zone.
+\item The motor heats up like an RC circuit: exponentially, over minutes.
+\item In robots, holding against gravity can dominate the heating.
+\item Always check speed, drive current, gearbox rating and brake.
+\end{itemize}
+\begin{keybox}[Remember]
+$T_\text{rms}=\sqrt{\tfrac{1}{t_\text{cyc}}\sum T_k^2t_k}\le T_\text{cont}$, \quad $T_\text{max}\le T_\text{peak}$
+\end{keybox}
+\end{column}
+\begin{column}{.42\textwidth}
+\begin{defbox}[Key terms]
+\small
+\term{Continuous torque}: torque possible forever.\\
+\term{Peak torque}: short-burst torque.\\
+\term{RMS torque}: heating-equivalent torque.\\
+\term{Duty cycle}: the repeating motion pattern.\\
+\term{Gravity torque}: weight $\times$ lever arm.\\
+\term{Thermal resistance}: K of rise per W.
+\end{defbox}
+\end{column}
+\end{columns}
+\end{frame}
+
+% =====================================================================
+\section{2.1 Modelling dynamic systems}
+% =====================================================================
+
+\begin{frame}{Why model? From hardware to equations}
+\begin{columns}[T]
+\begin{column}{.40\textwidth}
+\centering
+\begin{tikzpicture}[node distance=2.2mm,
+  st/.style={mkblk,minimum width=40mm,text width=38mm,minimum height=6mm}]
+\node[st] (a) {1. Define inputs and outputs};
+\node[st,below=of a] (b) {2. Simplify into ideal elements};
+\node[st,below=of b] (c) {3. Free-body diagram / KVL};
+\node[st,below=of c] (d) {4. Element laws ($F=kx$, \dots)};
+\node[st,below=of d,fill=mkCream,draw=mkOrange] (e) {5. Write the ODE};
+\node[st,below=of e] (f) {6. Compare with measurement};
+\foreach \x/\y in {a/b,b/c,c/d,d/e,e/f} \draw[mksig] (\x) -- (\y);
+\draw[mksig,mkGray,dashed] (f.east) -- ++(4mm,0) |- (b.east);
+\end{tikzpicture}
+\end{column}
+\begin{column}{.58\textwidth}
+\small
+A controller can only be designed for something we can \hl{predict}. A \term{model} predicts the output for a given input.\\[1mm]
+\renewcommand{\arraystretch}{1.12}
+\begin{tabular}{@{}llll@{}}
+\toprule
+\textbf{Domain} & \textbf{Motion store} & \textbf{Position store} & \textbf{Loss}\\
+\midrule
+Translation & mass $m$ & spring $k$ & damper $b$\\
+Rotation & inertia $J$ & torsion spring $k_\theta$ & damper $B$\\
+Electrical & inductor $L$ & capacitor $C$ & resistor $R$\\
+\bottomrule
+\end{tabular}\\[1mm]
+\begin{itemize}\setlength\itemsep{1pt}
+\item \term{Lumped}: each property sits in one ideal element.
+\item Each energy store adds one to the \term{order} of the ODE.
+\item Use the \hl{simplest model that answers your question}.
+\end{itemize}
+\end{column}
+\end{columns}
+\end{frame}
+
+% ---------------------------------------------------------------------
+\begin{frame}{Mass--spring--damper: from free-body diagram to ODE}
+\begin{columns}[T]
+\begin{column}{.46\textwidth}
+\centering
+\begin{tikzpicture}[scale=.9]
+\fill[pattern=north east lines,pattern color=mkGray] (-0.3,-0.2) rectangle (0,2.2); \draw[mkGray,line width=1pt] (0,-0.2) -- (0,2.2);
+\draw[decorate,decoration={coil,aspect=0.5,segment length=2.4mm,amplitude=2.2mm},mkNavy,line width=.6pt] (0,1.6) -- (2,1.6);
+\node[font=\scriptsize] at (1,2.05) {$k$};
+\draw[mkNavy,line width=.6pt] (0,0.4) -- (0.9,0.4); \draw[mkNavy,line width=.6pt] (0.9,0.2) -- (0.9,0.6);
+\draw[mkNavy,line width=.6pt] (0.7,0.15) -- (1.3,0.15) -- (1.3,0.65) -- (0.7,0.65); \draw[mkNavy,line width=.6pt] (1.3,0.4) -- (2,0.4);
+\node[font=\scriptsize] at (1,-0.1) {$b$};
+\fill[mkSky!60,draw=mkBlue] (2,-0.1) rectangle (3.2,2.1); \node[font=\small] at (2.6,1) {$m$};
+\draw[-{Stealth},mkOrange,line width=1pt] (3.2,1) -- (4.1,1) node[right,font=\scriptsize]{$F(t)$};
+\draw[-{Stealth},mkNavy] (2,2.4) -- (2.9,2.4) node[right,font=\scriptsize]{$x$};
+\draw[mkNavy] (2,2.25) -- (2,2.55);
+\fill[pattern=north east lines,pattern color=mkGray] (1.8,-0.45) rectangle (3.4,-0.2);
+\begin{scope}[shift={(0.8,-2.2)}]
+\fill[mkSky!60,draw=mkBlue] (1.2,0) rectangle (2.4,1.2); \node[font=\small] at (1.8,0.6) {$m$};
+\draw[-{Stealth},mkRed,line width=.8pt] (1.2,0.85) -- (0.1,0.85) node[left,font=\scriptsize]{$kx$};
+\draw[-{Stealth},mkRed,line width=.8pt] (1.2,0.35) -- (0.1,0.35) node[left,font=\scriptsize]{$b\dot x$};
+\draw[-{Stealth},mkOrange,line width=.8pt] (2.4,0.6) -- (3.4,0.6) node[right,font=\scriptsize]{$F$};
+\node[font=\scriptsize,text=mkGray] at (1.8,-0.3) {free-body diagram};
+\end{scope}
+\end{tikzpicture}
+\end{column}
+\begin{column}{.52\textwidth}
+\small
+\textbf{Analogy:} a car's suspension -- spring carries the car, shock absorber (damper) stops the bouncing.\\[1mm]
+Newton $\sum F=m\ddot x$ with spring force $kx$ and damper force $b\dot x$:
+\begin{eqbox}
+$m\,\ddot x + b\,\dot x + k\,x = F(t)$
+\end{eqbox}
+\begin{defbox}[Two numbers describe it]
+\small
+$\omega_n=\sqrt{k/m}$ \; \term{natural frequency} [rad/s]: how fast it bounces\\
+$\zeta=\dfrac{b}{2\sqrt{km}}$ \; \term{damping ratio} [--]: how fast bouncing dies
+\end{defbox}
+\textbf{Example:} $m=\SI{2}{\kilo\gram}$, $k=\SI{2e5}{\newton\per\metre}$, $b=\SI{120}{\newton\second\per\metre}$:\\
+$\omega_n=\sqrt{10^5}=\SI{316}{\radian\per\second}$ (\SI{50}{\hertz}), \; $\zeta=120/1265=0.095$.
+\end{column}
+\end{columns}
+\end{frame}
+
+% ---------------------------------------------------------------------
+\begin{frame}{Step responses: the role of damping}
+\begin{columns}[T]
+\begin{column}{.60\textwidth}
+\begin{tikzpicture}
+\begin{axis}[mkplot,width=8.4cm,height=5.6cm,xmin=0,xmax=14,ymin=0,ymax=1.85,
+  xlabel={normalised time $\omega_n t$},ylabel={$x(t)/x_\infty$},legend pos=north east,legend columns=2,
+  cycle list={{mkOrange,thick},{mkAmber,thick},{mkBlue,thick},{mkMid,thick,dashed},{mkSky,thick}}]
+\addplot+[mark=none,domain=0:14,samples=300]{1-exp(-0.1*x)/sqrt(1-0.01)*sin(deg(sqrt(1-0.01)*x)+deg(acos(0.1)))}; \addlegendentry{$\zeta=0.1$}
+\addplot+[mark=none,domain=0:14,samples=200]{1-exp(-0.3*x)/sqrt(1-0.09)*sin(deg(sqrt(1-0.09)*x)+deg(acos(0.3)))}; \addlegendentry{$\zeta=0.3$}
+\addplot+[mark=none,domain=0:14,samples=150]{1-exp(-0.7071*x)/sqrt(0.5)*sin(deg(sqrt(0.5)*x)+45)}; \addlegendentry{$\zeta=0.707$}
+\addplot+[mark=none,domain=0:14,samples=100]{1-(1+x)*exp(-x)}; \addlegendentry{$\zeta=1$}
+\addplot+[mark=none,domain=0:14,samples=100]{1+(-3.7321*exp(-0.26795*x)+0.26795*exp(-3.7321*x))/(3.7321-0.26795)}; \addlegendentry{$\zeta=2$}
+\end{axis}
+\end{tikzpicture}
+\end{column}
+\begin{column}{.38\textwidth}
+\small
+Push the mass with a constant force (a \term{step}) and watch $x(t)$:
+\begin{itemize}\setlength\itemsep{2pt}
+\item $\zeta<1$: \hl{overshoots and rings} -- worn shock absorbers.
+\item $\zeta\approx0.7$: fast, tiny overshoot (4\,\%) -- a good target.
+\item $\zeta\ge1$: no overshoot, but sluggish.
+\end{itemize}
+\begin{eqbox}
+overshoot $\approx e^{-\pi\zeta/\sqrt{1-\zeta^2}}$
+\end{eqbox}
+{\small $\zeta=0.1$: 73\,\%, \; $\zeta=0.3$: 37\,\%.}
+\end{column}
+\end{columns}
+\end{frame}
+
+% ---------------------------------------------------------------------
+\begin{frame}{Rotational systems: the flexible robot joint}
+\begin{columns}[T]
+\begin{column}{.44\textwidth}
+\centering
+\begin{tikzpicture}[scale=.85]
+\fill[mkBlue] (0,0) rectangle (1,1.4); \node[white,font=\scriptsize] at (0.5,0.7) {$J_m$};
+\draw[-{Stealth},mkOrange,line width=1pt] (-0.4,1.2) arc (110:250:0.25 and 0.5); \node[font=\scriptsize,text=mkOrange] at (-0.5,1.5) {$T_m$};
+\draw[spring] (1,0.95) -- (2.8,0.95);
+\node[font=\scriptsize] at (1.9,1.4) {$k$ (gearbox)};
+\draw[mkNavy] (1,0.45) -- (1.6,0.45); \draw[mkNavy] (1.6,0.3) -- (1.6,0.6); \draw[mkNavy] (1.5,0.25)--(2.0,0.25)--(2.0,0.65)--(1.5,0.65); \draw[mkNavy] (2.0,0.45) -- (2.8,0.45);
+\node[font=\scriptsize] at (1.8,0.0) {$c$};
+\fill[mkOrange] (2.8,0) rectangle (3.8,1.4); \node[white,font=\scriptsize] at (3.3,0.7) {$J_L$};
+\node[font=\scriptsize] at (0.5,-0.3) {$\theta_m$}; \node[font=\scriptsize] at (3.3,-0.3) {$\theta_L$};
+\end{tikzpicture}
+\begin{eqbox}
+$J\,\ddot\theta + B\,\dot\theta + k_\theta\,\theta = T(t)$
+\end{eqbox}
+\small Same as mass--spring--damper with $m\rightarrow J$, $b\rightarrow B$, $k\rightarrow k_\theta$, $F\rightarrow T$.
+\end{column}
+\begin{column}{.54\textwidth}
+\small
+\begin{itemize}\setlength\itemsep{2pt}
+\item Newton for rotation: $\sum T=J\ddot\theta$.
+\item The gearbox is a torsion spring (Session 1.5) between motor and link.
+\item Holding the motor still, the link swings with $\omega_n=\sqrt{k/J_L}$.
+\end{itemize}
+\begin{defbox}[Worked example: our shoulder joint]
+\small
+\begin{enumerate}\setlength\itemsep{0pt}
+\item $k=\SI{1e4}{\newton\metre\per\radian}$, $J_L=\SI{1.6}{\kilo\gram\metre\squared}$.
+\item $\omega_n=\sqrt{10^4/1.6}=\SI{79}{\radian\per\second}$.
+\item $f_n=79/2\pi\approx$ \hl{\SI{12.6}{\hertz}} -- low! The arm will wobble.
+\end{enumerate}
+\end{defbox}
+\gofurther{two-inertia resonance and notch filters (Session 3.7).}
+\end{column}
+\end{columns}
+\end{frame}
+
+% ---------------------------------------------------------------------
+\begin{frame}{Electromechanical systems: one equation, three domains}
+\begin{columns}[T]
+\begin{column}{.5\textwidth}
+\small
+\renewcommand{\arraystretch}{1.12}
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Translation} & \textbf{Rotation} & \textbf{Electrical}\\
+\midrule
+force $F$ & torque $T$ & voltage $v$\\
+velocity $\dot x$ & speed $\omega$ & current $i$\\
+mass $m$ & inertia $J$ & inductance $L$\\
+damper $b$ & damper $B$ & resistance $R$\\
+spring $k$ & torsion $k_\theta$ & $1/C$\\
+\bottomrule
+\end{tabular}\\[2mm]
+Always: (push) $\times$ (flow) $=$ \hl{power}: $Fv$, $T\omega$, $vi$.
+\end{column}
+\begin{column}{.48\textwidth}
+\centering
+\begin{circuitikz}[scale=.7,transform shape,font=\small]
+\draw (0,0) to[V,v<=$V$,color=mkNavy] (0,2.6)
+ to[R,l=$R$,i>^=$i$,color=mkNavy] (2.4,2.6)
+ to[L,l=$L$,color=mkNavy] (4.4,2.6)
+ to[sV,l={$e=k\omega$},color=mkOrange] (4.4,0) -- (0,0);
+\end{circuitikz}
+\begin{eqbox}
+\small
+$L\dfrac{di}{dt}+Ri=V-k\omega$\\[1mm]
+$J\dfrac{d\omega}{dt}+B\omega=k\,i-T_L$
+\end{eqbox}
+\small
+\begin{itemize}\setlength\itemsep{1pt}
+\item Two coupled first-order ODEs $\Rightarrow$ 2nd-order system (stores $L$ and $J$).
+\item The motor constant $k$ is the bridge between the domains.
+\end{itemize}
+\end{column}
+\end{columns}
+\end{frame}
+
+% ---------------------------------------------------------------------
+\begin{frame}{Linearisation: zoom in until the curve looks straight}
+\begin{columns}[T]
+\begin{column}{.48\textwidth}
+\centering
+\begin{tikzpicture}
+\begin{axis}[mkplot,width=6.6cm,height=5.0cm,xlabel={$x$},ylabel={$f(x)$},xmin=0,xmax=4,ymin=0,ymax=16]
+  \addplot[mkBlue,very thick,domain=0:4,samples=60] {x^2};
+  \addplot[mkOrange,thick,dashed,domain=1.6:4] {9+6*(x-3)};
+  \fill[mkOrange] (axis cs:3,9) circle (2pt);
+  \draw[mkGray,dashed] (axis cs:3,0)--(axis cs:3,9);
+  \node[font=\scriptsize,anchor=north west] at (axis cs:3,0.9) {$x_0$};
+  \node[font=\scriptsize,text=mkOrange,anchor=west] at (axis cs:0.6,13) {tangent, slope $f'(x_0)$};
+  \node[font=\scriptsize,text=mkBlue,anchor=west] at (axis cs:0.3,3) {$f(x)=x^2$};
+\end{axis}
+\end{tikzpicture}
+\end{column}
+\begin{column}{.5\textwidth}
+\small
+Real robots are \term{nonlinear} (gravity $\propto\cos\theta$, friction, magnets). Close to an \term{operating point} $x_0$ every smooth curve looks like its tangent:
+\begin{eqbox}
+$f(x)\approx f(x_0)+f'(x_0)\,(x-x_0)$
+\end{eqbox}
+\textbf{Example} $f=x^2$, $x_0=3$:
+\begin{enumerate}\setlength\itemsep{0pt}
+  \item slope $f'(3)=2\cdot3=6$
+  \item at $x=3.1$: linear $9.6$, exact $9.61$ (0.1\,\% error)
+  \item at $x=4$: linear $15$, exact $16$ (6\,\%) $\Rightarrow$ only \hl{local}
+\end{enumerate}
+\gofurther{many variables: Jacobian matrices $A=\partial\bm f/\partial\bm x$ (state space, Session 2.3).}
+\end{column}
+\end{columns}
+\end{frame}
+
+% ---------------------------------------------------------------------
+\begin{frame}{Example: a robot link under gravity}
+\begin{columns}[T]
+\begin{column}{.24\textwidth}
+\centering
+\begin{tikzpicture}[scale=.85]
+  \fill[pattern=north east lines,pattern color=mkGray] (-1,0) rectangle (1,.2);
+  \draw[thick,mkGray] (-1,0)--(1,0);
+  \draw[dashed,mkGray] (0,0)--(0,-2.6);
+  \draw[very thick,mkBlue] (0,0)--({2.2*sin(30)},{-2.2*cos(30)}) coordinate (m);
+  \fill[mkOrange] (m) circle (.17);
+  \fill[mkNavy] (0,0) circle (.06);
+  \draw[->,mkOrange,thick] (0,-1.1) arc (-90:-60:1.1) node[pos=.6,below]{\scriptsize$\theta$};
+  \draw[-{Latex},thick,mkMid] (m)--++(0,-.8) node[right]{\scriptsize$mg$};
+  \draw[-{Latex},thick,mkNavy] (-.35,.45) arc (150:30:.4) node[right]{\scriptsize$\tau$};
+  \node[font=\scriptsize] at (.4,-1.5) {$l$};
+\end{tikzpicture}
+\end{column}
+\begin{column}{.42\textwidth}
+\small
+$J\ddot\theta=\tau-mgl\sin\theta-b\dot\theta$
+\begin{enumerate}\setlength\itemsep{0pt}
+  \item Only $\sin\theta$ is nonlinear; its slope at $\theta_0$ is $\cos\theta_0$.
+  \item Linear model for small deviations $\delta\theta$:
+\end{enumerate}
+\begin{eqbox}
+$J\,\delta\ddot\theta+b\,\delta\dot\theta+(mgl\cos\theta_0)\,\delta\theta=\delta\tau$
+\end{eqbox}
+\begin{enumerate}\setcounter{enumi}{2}\setlength\itemsep{0pt}
+  \item \textbf{Hanging} ($\cos0=+1$): gravity acts like a spring $\Rightarrow$ \hl{stable}.
+  \item \textbf{Upright} ($\cos\pi=-1$): a ``negative spring'' $\Rightarrow$ \hl{falls over}.
+\end{enumerate}
+\end{column}
+\begin{column}{.32\textwidth}
+\centering
+\begin{tikzpicture}
+\begin{axis}[mkplot,width=5.2cm,height=4.4cm,xlabel={$\theta$ [deg]},ylabel={$\sin\theta$},
+  xmin=-30,xmax=210,ymin=-1.3,ymax=1.3,xtick={0,90,180},legend pos=south west,legend columns=1]
+  \addplot[mkBlue,very thick,domain=-30:210,samples=100] {sin(x)}; \addlegendentry{$\sin\theta$}
+  \addplot[mkOrange,thick,dashed,domain=-30:75] {rad(x)}; \addlegendentry{lin.\ at $0$}
+  \addplot[mkMid,thick,dashed,domain=105:210] {-rad(x-180)}; \addlegendentry{lin.\ at $\pi$}
+  \fill[mkOrange] (axis cs:0,0) circle (1.6pt);\fill[mkMid] (axis cs:180,0) circle (1.6pt);
+\end{axis}
+\end{tikzpicture}\\
+\small $\sin\theta\approx\theta$: 1\,\% error at 14$^\circ$, 5\,\% at 31$^\circ$.
+\end{column}
+\end{columns}
+\end{frame}
+
+% ---------------------------------------------------------------------
+\begin{frame}{Session 2.1 -- Check your understanding}
+\begin{columns}[T]
+\begin{column}{.62\textwidth}
+\begin{keybox}[Check your understanding]
+\begin{enumerate}\setlength\itemsep{6pt}
+\item You fit a gearbox that is $4\times$ stiffer. What happens to the natural frequency of the link?
+\item A step response overshoots by 40\,\%. Should the damping $b$ go up or down?
+\item In the electrical/mechanical analogy, which element plays the role of the mass?
+\end{enumerate}
+\end{keybox}
+\end{column}
+\begin{column}{.34\textwidth}
+\small
+\textbf{Hint:} $\omega_n=\sqrt{k/m}$, $\zeta=b/(2\sqrt{km})$, and the analogy table.
+\end{column}
+\end{columns}
+\end{frame}
+
+% ---------------------------------------------------------------------
+\begin{frame}{Session 2.1 -- Summary and key terms}
+\begin{columns}[T]
+\begin{column}{.55\textwidth}
+\small
+\begin{itemize}
+\item Lumped models: masses, springs, dampers (and $L$, $C$, $R$).
+\item Translation, rotation and circuits share one 2nd-order ODE with $\omega_n$ and $\zeta$.
+\item A gearbox spring plus link inertia gives a low joint natural frequency.
+\item The motor couples the electrical and mechanical worlds.
+\item Nonlinear models are linearised around an operating point.
+\end{itemize}
+\begin{keybox}[Remember]
+$m\ddot x+b\dot x+kx=F$, \quad $\omega_n=\sqrt{k/m}$, \quad $\zeta=\dfrac{b}{2\sqrt{km}}$
+\end{keybox}
+\end{column}
+\begin{column}{.42\textwidth}
+\begin{defbox}[Key terms]
+\small
+\term{Lumped model}: built from ideal elements.\\
+\term{Natural frequency}: speed of free oscillation.\\
+\term{Damping ratio}: how fast oscillation dies.\\
+\term{Step response}: reaction to a sudden input.\\
+\term{Operating point}: where we linearise.
+\end{defbox}
+\end{column}
+\end{columns}
+\end{frame}
+
+% =====================================================================
+\section{2.2 Laplace transform and transfer functions}
+% =====================================================================
+
+\begin{frame}{Refresher: complex numbers and the complex plane}
+\begin{columns}[T]
+\begin{column}{.38\textwidth}
+\centering
+\begin{tikzpicture}[scale=.75]
+  \draw[-{Latex},mkGray] (-1,0)--(4.5,0) node[right]{\scriptsize Re};
+  \draw[-{Latex},mkGray] (0,-1)--(0,4.8) node[above]{\scriptsize Im};
+  \draw[mkBlue,very thick,-{Latex}] (0,0)--(3,4) node[above right,font=\scriptsize]{$z=3+4j$};
+  \draw[mkGray,dashed] (3,0)--(3,4) (0,4)--(3,4);
+  \node[font=\scriptsize,below] at (3,0) {3};
+  \node[font=\scriptsize,left] at (0,4) {4};
+  \node[font=\scriptsize,text=mkBlue,above left] at (1.5,2) {$|z|=5$};
+  \draw[mkOrange,thick] (1,0) arc (0:53:1);
+  \node[font=\scriptsize,text=mkOrange] at (1.4,.45) {$53^\circ$};
+\end{tikzpicture}
+\end{column}
+\begin{column}{.6\textwidth}
+\begin{defbox}[Refresher: complex numbers]
+\small
+$z=a+jb$ (engineers write $j=\sqrt{-1}$). Polar form $z=|z|\,e^{j\varphi}$ with
+$|z|=\sqrt{a^2+b^2}$, $\varphi=\operatorname{atan2}(b,a)$.
+\end{defbox}
+\begin{eqbox}
+$e^{j\varphi}=\cos\varphi+j\sin\varphi$ \qquad (Euler)
+\end{eqbox}
+\small
+\begin{itemize}\setlength\itemsep{1pt}
+  \item Multiply: magnitudes multiply, angles add.
+  \item Example: $\dfrac{1}{1+j}$: $|1+j|=1.414$, $\angle 45^\circ$ $\Rightarrow$ $0.707\angle{-45^\circ}$.
+  \item For $s=\sigma+j\omega$: $e^{st}=e^{\sigma t}(\cos\omega t+j\sin\omega t)$ -- $\sigma$ sets growth/decay, $\omega$ sets oscillation.
+\end{itemize}
+\end{column}
+\end{columns}
+\end{frame}
+
+% ---------------------------------------------------------------------
+\begin{frame}{Refresher: the Laplace transform as a tool}
+\begin{columns}[T]
+\begin{column}{.46\textwidth}
+\begin{defbox}[Refresher: Laplace transform]
+\small
+A ``translation'' $f(t)\rightarrow F(s)$ that turns \hl{differential equations into algebra} -- like logarithms turn multiplication into addition. We only use the table.
+\end{defbox}
+\small
+\centering
+\renewcommand{\arraystretch}{1.05}
+\begin{tabular}{@{}ll@{}}
+\toprule
+Time domain $f(t)$ & Laplace $F(s)$\\
+\midrule
+unit impulse $\delta(t)$ & $1$\\
+unit step $1(t)$ & $1/s$\\
+$e^{-at}$ & $1/(s+a)$\\
+derivative $\dot f$ & $sF(s)-f(0)$\\
+integral $\int_0^tf\,d\tau$ & $F(s)/s$\\
+\bottomrule
+\end{tabular}
+\end{column}
+\begin{column}{.52\textwidth}
+\small
+\textbf{Worked example: RC circuit}, $RC=\SI{1}{\milli\second}$, input $u$, capacitor voltage $v$ (starting at 0\,V):
+\begin{enumerate}\setlength\itemsep{1pt}
+  \item ODE: $RC\,\dot v+v=u$.
+  \item Transform ($\dot v\rightarrow sV$): $RC\,s\,V+V=U$.
+  \item Solve for the ratio:
+\end{enumerate}
+\begin{eqbox}
+$\dfrac{V(s)}{U(s)}=\dfrac{1}{RC\,s+1}=\dfrac{1}{0.001\,s+1}$
+\end{eqbox}
+\begin{enumerate}\setcounter{enumi}{3}
+  \item 1\,V step: $V=\frac{1}{s(0.001s+1)}$ $\Rightarrow$ table: $v(t)=1-e^{-t/1\,\mathrm{ms}}$ -- the familiar RC charging curve.
+\end{enumerate}
+\end{column}
+\end{columns}
+\end{frame}
+
+% ---------------------------------------------------------------------
+\begin{frame}{Transfer function, poles and zeros}
+\begin{columns}[T]
+\begin{column}{.52\textwidth}
+\small
+The \term{transfer function} is the ``recipe'' of a system: output over input, starting from rest.
+\begin{eqbox}
+$G(s)=\dfrac{Y(s)}{U(s)}=\dfrac{\text{numerator}(s)}{\text{denominator}(s)}$
+\end{eqbox}
+\begin{itemize}\setlength\itemsep{1pt}
+  \item \term{Poles}: roots of the denominator $\Rightarrow$ \hl{stability and speed}.
+  \item \term{Zeros}: roots of the numerator $\Rightarrow$ shape the response.
+  \item \term{Order} = number of poles = number of energy stores.
+  \item \term{DC gain} $G(0)$: output/input after everything settles.
+\end{itemize}
+\textbf{Example:} $G(s)=\dfrac{s+2}{(s+1)(s+3)}$: zero $-2$; poles $-1,-3$; $G(0)=2/3$.
+\end{column}
+\begin{column}{.45\textwidth}
+\centering
+\begin{tikzpicture}[scale=.85]
+  \fill[mkCream] (0,-2.2) rectangle (2.2,2.2);
+  \node[font=\scriptsize,text=mkOrange,anchor=north east] at (2.2,2.2) {unstable};
+  \fill[mkPale] (-4,-2.2) rectangle (0,2.2);
+  \node[font=\scriptsize,text=mkBlue,anchor=north west] at (-4,2.2) {stable (LHP)};
+  \draw[-{Latex},mkGray] (-4,0)--(2.4,0) node[right]{\scriptsize Re};
+  \draw[-{Latex},mkGray] (0,-2.3)--(0,2.4) node[above]{\scriptsize Im};
+  \foreach \p in {(-1,0),(-3,0)}{\draw[mkBlue,very thick] \p++(-.12,-.12)--++(.24,.24) \p++(-.12,.12)--++(.24,-.24);}
+  \draw[mkOrange,very thick] (-2,0) circle (.12);
+  \node[font=\scriptsize,above] at (-1,0.15) {$-1$};
+  \node[font=\scriptsize,above] at (-3,0.15) {$-3$};
+  \node[font=\scriptsize,below] at (-2,-0.15) {zero $-2$};
+  \node[font=\scriptsize,text=mkBlue] at (-2,-1.2) {$\times$ pole \quad $\circ$ zero};
+\end{tikzpicture}\\
+\small Left half-plane (LHP) = the stable side.
+\end{column}
+\end{columns}
+\end{frame}
+
+% ---------------------------------------------------------------------
+\begin{frame}{First-order system: one energy store}
+\begin{columns}[T]
+\begin{column}{.55\textwidth}
+\centering
+\begin{tikzpicture}
+\begin{axis}[mkplot,width=7.6cm,height=5.0cm,xlabel={$t/\tau$},ylabel={$y(t)/(K u_0)$},
+  xmin=0,xmax=5,ymin=0,ymax=1.1,xtick={0,1,2,3,4,5},ytick={0,0.632,0.95,1},
+  yticklabel style={/pgf/number format/fixed}]
+  \addplot[mkBlue,very thick,domain=0:5,samples=100] {1-exp(-x)};
+  \addplot[mkOrange,thick,dashed,domain=0:1.05] {x};
+  \draw[mkGray,dashed] (axis cs:1,0)--(axis cs:1,0.632)--(axis cs:0,0.632);
+  \draw[mkGray,dashed] (axis cs:3,0)--(axis cs:3,0.95);
+  \node[font=\scriptsize,anchor=west,text=mkOrange] at (axis cs:1.05,0.98) {initial slope $1/\tau$};
+  \node[font=\scriptsize,anchor=west] at (axis cs:1.05,0.55) {63\,\% at $t=\tau$};
+  \node[font=\scriptsize,anchor=west] at (axis cs:3.05,0.86) {95\,\% at $3\tau$};
+\end{axis}
+\end{tikzpicture}
+\end{column}
+\begin{column}{.43\textwidth}
+\small
+Like a cup of coffee cooling or an RC circuit charging.
+\begin{eqbox}
+$G(s)=\dfrac{K}{\tau s+1}$, \quad $y(t)=Ku_0\big(1-e^{-t/\tau}\big)$
+\end{eqbox}
+\begin{itemize}\setlength\itemsep{1pt}
+  \item $K$: gain; $\tau$: \term{time constant} [s]; pole at $s=-1/\tau$.
+  \item 63\,\% after $\tau$, 98\,\% after $4\tau$; never overshoots.
+  \item Motor winding: $I/V=1/(Ls+R)$, $\tau_e=L/R$ (2\,mH/1\,$\Omega$ = 2\,ms).
+  \item Flywheel with friction: $\Omega/T=1/(Js+B)$, $\tau=J/B$.
+\end{itemize}
+\end{column}
+\end{columns}
+\end{frame}
+
+% ---------------------------------------------------------------------
+\begin{frame}{Second-order system: the car suspension again}
+\begin{columns}[T]
+\begin{column}{.56\textwidth}
+\centering
+\begin{tikzpicture}
+\begin{axis}[mkplot,width=7.8cm,height=5.4cm,xlabel={time (s)},ylabel={$y(t)/K$},
+  xmin=0,xmax=1.5,ymin=0,ymax=1.5,legend pos=south east]
+  \addplot[mkOrange,thick,domain=0:1.5,samples=200] {1-exp(-0.2*12.6*x)/sqrt(1-0.04)*sin(deg(12.6*sqrt(1-0.04)*x)+deg(acos(0.2)))}; \addlegendentry{$\zeta=0.2$}
+  \addplot[mkBlue,thick,domain=0:1.5,samples=200] {1-exp(-0.7*12.6*x)/sqrt(1-0.49)*sin(deg(12.6*sqrt(1-0.49)*x)+deg(acos(0.7)))}; \addlegendentry{$\zeta=0.7$}
+  \addplot[mkMid,thick,dashed,domain=0:1.5,samples=200] {1-(1+12.6*x)*exp(-12.6*x)}; \addlegendentry{$\zeta=1$}
+\end{axis}
+\end{tikzpicture}\\
+{\scriptsize\color{mkGray} $\omega_n=\SI{12.6}{\radian\per\second}$ (2\,Hz) -- computed responses.}
+\end{column}
+\begin{column}{.42\textwidth}
+\small
+Mass $m$, spring $k$, damper $b$: $m\ddot x+b\dot x+kx=F$. Laplace: $(ms^2+bs+k)X=F$.
+\begin{eqbox}
+$G(s)=\dfrac{K\,\omega_n^2}{s^2+2\zeta\omega_n s+\omega_n^2}$
+\end{eqbox}
+\begin{itemize}\setlength\itemsep{1pt}
+  \item Two poles: $s=-\zeta\omega_n\pm j\omega_n\sqrt{1-\zeta^2}$.
+  \item $\zeta<1$: complex poles $\Rightarrow$ oscillation.
+  \item $\zeta\ge1$: two real poles $\Rightarrow$ no overshoot.
+\end{itemize}
+\textbf{Quarter car}: $m=\SI{250}{\kilo\gram}$, $k=\SI{16}{\kilo\newton\per\metre}$, $b=\SI{2000}{\newton\second\per\metre}$ $\Rightarrow$ $\omega_n=8$, $\zeta=0.5$.
+\end{column}
+\end{columns}
+\end{frame}
+
+% ---------------------------------------------------------------------
+\begin{frame}{Where the poles are tells you how the system moves}
+\begin{columns}[T]
+\begin{column}{.58\textwidth}
+\centering
+\begin{tikzpicture}[scale=1]
+  \fill[mkPale] (-4.2,-2.4) rectangle (0,2.4);
+  \fill[mkCream] (0,-2.4) rectangle (2.4,2.4);
+  \draw[-{Latex},mkGray] (-4.2,0)--(2.5,0) node[right]{\scriptsize Re};
+  \draw[-{Latex},mkGray] (0,-2.4)--(0,2.5) node[above]{\scriptsize Im};
+  \foreach \px/\py/\sg/\om [count=\k] in {-3/0/-1.6/0, -1/0/-0.6/0, 1.2/0/0.45/0, -2.8/1.6/-1.2/10, -0.8/1.6/-0.35/10, 0/1.6/0/10, 1.2/1.6/0.25/10}{
+    \draw[mkBlue,very thick] (\px,\py)++(-.1,-.1)--++(.2,.2) (\px,\py)++(-.1,.1)--++(.2,-.2);
+    \begin{scope}[shift={(\px-.45,\py-.65)}]
+      \draw[mkGray!60,thin] (0,0)--(0.95,0);
+      \ifnum\om=0
+        \draw[mkOrange,thick,domain=0:0.9,samples=30] plot (\x,{0.3*exp(\sg*3*\x)});
+      \else
+        \draw[mkOrange,thick,domain=0:0.9,samples=60] plot (\x,{0.28*exp(\sg*3*\x)*cos(\om*\x*80)});
+      \fi
+    \end{scope}
+  }
+  \node[font=\scriptsize,text=mkBlue,anchor=north west] at (-4.2,2.4) {LHP: decaying};
+  \node[font=\scriptsize,text=mkOrange,anchor=north east] at (2.4,2.4) {RHP: growing};
+  \node[font=\scriptsize,text=mkNavy,anchor=south] at (0,-2.4) {$j\omega$-axis: sustained};
+\end{tikzpicture}
+\end{column}
+\begin{column}{.40\textwidth}
+\small
+A pole $p=-\sigma\pm j\omega_d$ gives a motion $e^{-\sigma t}\cos(\omega_d t)$:
+\begin{itemize}\setlength\itemsep{1pt}
+  \item \hl{Real part} $-\sigma$: how fast it dies out; settles in $\approx4/\sigma$.
+  \item \hl{Imaginary part} $\omega_d$: how fast it wiggles [rad/s].
+  \item Right half-plane: grows $\Rightarrow$ \hl{unstable}.
+  \item Slowest poles (nearest the $j\omega$-axis) \term{dominate}.
+\end{itemize}
+\textbf{Example:} poles $-2$ and $-20$: the pole at $-2$ dominates; settling $\approx4/2=\SI{2}{\second}$.
+\end{column}
+\end{columns}
+\end{frame}
+
+% ---------------------------------------------------------------------
+\begin{frame}{Worked example: transfer function of a robot joint motor}
+\begin{columns}[T]
+\begin{column}{.50\textwidth}
+\small
+Neglect $L$ (fast) and $B$ in the DC-motor equations, then Laplace-transform:
+\begin{eqbox}
+$\dfrac{\Omega(s)}{V(s)}=\dfrac{1/k}{\tau_m s+1}$, \qquad $\tau_m=\dfrac{RJ}{k^2}$
+\end{eqbox}
+\begin{defbox}[Worked example]
+\small
+\begin{enumerate}\setlength\itemsep{0pt}
+\item $R=\SI{1}{\ohm}$, $k=\SI{0.1}{\newton\metre\per\ampere}$, $J=\SI{1e-4}{\kilo\gram\metre\squared}$.
+\item $\tau_m=1\cdot10^{-4}/0.01=\SI{10}{\milli\second}$; DC gain $1/k=\SI{10}{rad/s/V}$.
+\item \SI{24}{\volt} step: final speed \SI{240}{\radian\per\second}, 63\,\% after \SI{10}{\milli\second}.
+\item Position $\Theta=\Omega/s$ adds a pole at $s=0$ (integrator).
+\end{enumerate}
+\end{defbox}
+\end{column}
+\begin{column}{.48\textwidth}
+\centering
+\begin{tikzpicture}
+\begin{axis}[mkplot,width=6.8cm,height=4.4cm,xmin=0,xmax=50,ymin=0,ymax=270,
+  xlabel={time (ms)},ylabel={speed $\omega$ (rad/s)}]
+\addplot[mkBlue,very thick,domain=0:50,samples=80]{240*(1-exp(-x/10))};
+\addplot[mkGray,dashed] coordinates {(10,0)(10,151.7)(0,151.7)};
+\addplot[mkOrange,dashed,domain=0:50]{240};
+\node[font=\scriptsize,anchor=west] at (axis cs:11,140) {63\,\% at $\tau_m$};
+\node[font=\scriptsize,text=mkOrange,anchor=south] at (axis cs:35,240) {$24/k=240$};
+\end{axis}
+\end{tikzpicture}\\
+\begin{tikzpicture}[font=\scriptsize]
+\node (u) {$V$};
+\node[mkblk,right=5mm of u] (g) {$\dfrac{10}{0.01s+1}$};
+\node[mkblk,right=6mm of g] (i) {$\dfrac{1}{s}$};
+\node[right=5mm of i] (y) {$\theta$};
+\draw[mksig] (u) -- (g); \draw[mksig] (g) -- node[above]{$\omega$} (i); \draw[mksig] (i) -- (y);
+\end{tikzpicture}
+\end{column}
+\end{columns}
+\end{frame}
+
+% ---------------------------------------------------------------------
+\begin{frame}{Session 2.2 -- Check your understanding}
+\begin{columns}[T]
+\begin{column}{.62\textwidth}
+\begin{keybox}[Check your understanding]
+\begin{enumerate}\setlength\itemsep{6pt}
+\item Find the transfer function $Y/U$ of $0.5\,\dot y+y=2u$. What are its gain, time constant and pole?
+\item A system has poles at $-1\pm 5j$. Does it oscillate? Is it stable? Roughly how long until it settles?
+\item Why does the joint \emph{position} (not speed) keep growing after a constant voltage step?
+\end{enumerate}
+\end{keybox}
+\end{column}
+\begin{column}{.34\textwidth}
+\small
+\textbf{Hint:} $\dot y\rightarrow sY$; settling $\approx4/\sigma$; integrating a constant gives a ramp.
+\end{column}
+\end{columns}
+\end{frame}
+
+% ---------------------------------------------------------------------
+\begin{frame}{Session 2.2 -- Summary and key terms}
+\begin{columns}[T]
+\begin{column}{.55\textwidth}
+\small
+\begin{itemize}
+\item Laplace turns linear ODEs into algebra: $d/dt\rightarrow s$.
+\item Transfer function $G(s)=Y(s)/U(s)$; poles decide stability and speed.
+\item First order: $K/(\tau s+1)$, 63\,\% at $\tau$, no overshoot.
+\item Second order: $\omega_n$ and $\zeta$; complex poles oscillate.
+\item Motor speed is first order; joint position adds an integrator.
+\end{itemize}
+\begin{keybox}[Remember]
+$\dfrac{K}{\tau s+1}$, \quad $\dfrac{K\omega_n^2}{s^2+2\zeta\omega_ns+\omega_n^2}$, \quad LHP poles $\Rightarrow$ stable
+\end{keybox}
+\end{column}
+\begin{column}{.42\textwidth}
+\begin{defbox}[Key terms]
+\small
+\term{Laplace transform}: ODE $\rightarrow$ algebra.\\
+\term{Transfer function}: output/input in $s$.\\
+\term{Pole / zero}: root of denominator / numerator.\\
+\term{Time constant}: time to reach 63\,\%.\\
+\term{DC gain}: steady-state output/input.\\
+\term{Integrator}: pole at $s=0$.
+\end{defbox}
+\end{column}
+\end{columns}
+\end{frame}
+
+% =====================================================================
+\section*{Wrap-up}
+\begin{frame}{Day summary}
+\begin{columns}[T]
+\begin{column}{.5\textwidth}
+\small
+\begin{enumerate}\setlength\itemsep{3pt}
+\item[1.5] Gearboxes (planetary, harmonic, cycloidal) give joint torque; inertia is reflected by $1/N^2$; backlash and stiffness limit accuracy.
+\item[1.6] Screws, belts and linear motors make straight lines; grippers hold by friction or vacuum.
+\item[1.7] Size a joint motor with peak torque, RMS torque and speed -- gravity matters.
+\end{enumerate}
+\end{column}
+\begin{column}{.48\textwidth}
+\small
+\begin{enumerate}\setlength\itemsep{3pt}
+\item[2.1] Mechanical, rotational and electrical systems share the same ODEs ($\omega_n$, $\zeta$).
+\item[2.2] Laplace and transfer functions: poles tell us speed, oscillation and stability.
+\end{enumerate}
+\begin{keybox}[The thread of the day]
+Motor + gear + link $\rightarrow$ equations $\rightarrow$ transfer function. Tomorrow we \hl{close the loop} around it.
+\end{keybox}
+\end{column}
+\end{columns}
+\end{frame}
+
+% ---------------------------------------------------------------------
+\begin{frame}{Preview of W1D3: Control in robotic and mechatronic systems}
+\begin{columns}[T]
+\begin{column}{.48\textwidth}
+\centering
+\begin{tikzpicture}[font=\scriptsize]
+\node (r) {$r$};
+\node[mksum,right=5mm of r] (s) {};
+\node[mkblk,right=6mm of s,fill=mkCream,draw=mkOrange] (c) {PID\\$C(s)$};
+\node[mkblk,right=6mm of c] (g) {joint\\$G(s)$};
+\node[right=6mm of g] (y) {$y$};
+\draw[mksig] (r) -- (s); \draw[mksig] (s) -- node[above]{$e$} (c); \draw[mksig] (c) -- node[above]{$u$} (g); \draw[mksig] (g) -- (y);
+\draw[mksig] ($(g.east)+(3mm,0)$) -- ++(0,-10mm) -| node[pos=.9,left]{$-$} (s);
+\end{tikzpicture}
+\end{column}
+\begin{column}{.5\textwidth}
+\small
+\begin{itemize}\setlength\itemsep{3pt}
+\item 2.3 Block diagrams, feedback and state space
+\item 2.4 Frequency response and Bode plots
+\item 2.5 PID control: P, I, D, tuning, anti-windup, feedforward
+\item 2.6 Stability and performance: margins, bandwidth, steady-state error
+\end{itemize}
+{\small \textbf{Prepare:} revise today's poles and $\omega_n$, $\zeta$.}
+\end{column}
+\end{columns}
+\end{frame}
+
+% ---------------------------------------------------------------------
+\begin{frame}{Figure credits}
+\scriptsize
+\renewcommand{\arraystretch}{1.1}
+\begin{tabularx}{\textwidth}{@{}l l X l@{}}
+\toprule
+\textbf{Slide} & \textbf{File (Wikimedia Commons)} & \textbf{Author} & \textbf{License}\\
+\midrule
+Why a joint needs a gearbox & KUKA industrial robotic arm \dots{} 02.jpg & Oleg Yunakov & CC BY-SA 4.0\\
+Planetary gearbox & Epicyclic gear ratios.png & Wapcaplet & CC BY-SA 3.0\\
+Harmonic drive & Harmonic Drive AG strain wave gear set.jpg & Pieceofmetalwork & CC BY-SA 4.0\\
+Cycloidal drive & Zyklo-Getriebe-Modell.jpg & 1-1111 at German Wikipedia & Public domain\\
+Ball screw & BallScrewNut-showing-balls-recirculating-tubes.jpg & Glenn McKechnie (Graibeard) & CC BY-SA 3.0\\
+Linear motor & Linear motor by Zureks.jpg & Zureks & CC BY-SA 4.0\\
+Grippers & Robotic Claw ROV Gripper.png & BPLINFO & CC BY-SA 4.0\\
+Solenoids & Solenoid-with-core.JPG & Svjo & CC BY-SA 3.0\\
+\bottomrule
+\end{tabularx}
+{\tiny Source pages: \texttt{https://commons.wikimedia.org/wiki/File:<file name>} (see \texttt{figures/CREDITS.tsv}).}
+\vspace{2mm}
+
+All other drawings, plots and diagrams: own work for this course (TikZ / pgfplots / circuitikz).
+\end{frame}
+
+% ---------------------------------------------------------------------
+\begin{frame}{References}
+\scriptsize
+\begin{itemize}\setlength\itemsep{1pt}
+\item M.\,W. Spong, S. Hutchinson, M. Vidyasagar, \textit{Robot Modeling and Control}, 2nd ed., Wiley, 2020.
+\item J.\,J. Craig, \textit{Introduction to Robotics: Mechanics and Control}, 4th ed., Pearson, 2018.
+\item B. Siciliano, O. Khatib (eds.), \textit{Springer Handbook of Robotics}, 2nd ed., Springer, 2016.
+\item G. Ellis, \textit{Control System Design Guide}, 4th ed., Butterworth-Heinemann, 2012.
+\item A. Hughes, B. Drury, \textit{Electric Motors and Drives}, 4th ed., Newnes, 2013.
+\item K. Ogata, \textit{Modern Control Engineering}, 5th ed., Prentice Hall, 2010.
+\item G.\,F. Franklin, J.\,D. Powell, A. Emami-Naeini, \textit{Feedback Control of Dynamic Systems}, 7th ed., Pearson, 2015.
+\item D.\,C. Karnopp, D.\,L. Margolis, R.\,C. Rosenberg, \textit{System Dynamics: Modeling, Simulation, and Control of Mechatronic Systems}, 5th ed., Wiley, 2012.
+\item G.\,A. Pratt, M.\,M. Williamson, ``Series elastic actuators'', \textit{Proc. IEEE/RSJ IROS}, 1995.
+\item G.\,J. Monkman, S. Hesse, R. Steinmann, H. Schunk, \textit{Robot Grippers}, Wiley-VCH, 2007.
+\end{itemize}
+\end{frame}
+\end{document}

@@ -1,0 +1,455 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>W2D3 Speaker Notes</title>
+<style>
+  :root{
+    --navy:#0B1F3A; --blue:#14365E; --mid:#2B5A8C; --sky:#6E9BC9; --pale:#E8EEF6;
+    --orange:#F07F12; --amber:#F9A94B; --cream:#FFF3E4; --gray:#5B6573; --bg:#F6F8FB; --card:#fff; --text:#0B1F3A;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){ --bg:#0A1424; --card:#10213A; --text:#E6ECF4; --pale:#1A3152; --cream:#3a2a14; --gray:#9AA8BA; }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 "Segoe UI",system-ui,-apple-system,Roboto,Helvetica,Arial,sans-serif}
+  header{background:var(--navy);color:#fff;padding:28px 16px 22px;border-bottom:4px solid var(--orange)}
+  header .wrap{max-width:980px;margin:0 auto}
+  header .day{color:var(--orange);font-weight:700;letter-spacing:.08em;font-size:.9rem}
+  header h1{margin:.2em 0 .1em;font-size:1.9rem}
+  header p{margin:0;color:var(--sky)}
+  nav.toc{position:sticky;top:0;z-index:5;background:var(--blue);padding:8px 16px;overflow-x:auto;white-space:nowrap}
+  nav.toc a{color:#fff;text-decoration:none;margin-right:16px;font-size:.88rem}
+  nav.toc a:hover{color:var(--amber)}
+  main{max-width:980px;margin:0 auto;padding:20px 16px 60px}
+  h2.session{margin:42px 0 12px;padding:10px 14px;background:var(--blue);color:#fff;border-left:6px solid var(--orange);border-radius:4px;font-size:1.25rem}
+  h2.session small{display:block;color:var(--amber);font-weight:500;font-size:.85rem}
+  table.plan{width:100%;border-collapse:collapse;background:var(--card);margin:12px 0}
+  table.plan th{background:var(--blue);color:#fff;text-align:left;padding:8px}
+  table.plan td{padding:8px;border-bottom:1px solid var(--pale)}
+  .slide{background:var(--card);border-radius:8px;margin:14px 0;padding:14px 18px;box-shadow:0 1px 3px rgba(11,31,58,.12);border-top:3px solid var(--mid)}
+  .slide h3{margin:0 0 6px;font-size:1.05rem;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+  .slide h3 .num{background:var(--orange);color:#fff;border-radius:4px;padding:1px 8px;font-size:.85rem}
+  .slide h3 .time{margin-left:auto;color:var(--gray);font-weight:400;font-size:.85rem}
+  .say{margin:6px 0}
+  .key{background:var(--cream);border-left:4px solid var(--orange);padding:6px 10px;margin:8px 0;border-radius:3px}
+  .ask{background:var(--pale);border-left:4px solid var(--mid);padding:6px 10px;margin:8px 0;border-radius:3px}
+  .trans{color:var(--gray);font-style:italic;margin-top:6px}
+  .label{font-weight:700;font-size:.8rem;text-transform:uppercase;letter-spacing:.05em;color:var(--orange)}
+  .ask .label{color:var(--mid)}
+  ul{margin:4px 0 4px 1.1em;padding:0}
+  footer{max-width:980px;margin:0 auto;padding:20px 16px;color:var(--gray);font-size:.85rem}
+  @media print{nav.toc{display:none}.slide{break-inside:avoid;box-shadow:none;border:1px solid #ccc}}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <div class="day">WEEK 2 · DAY 3 / 5 · SPEAKER NOTES</div>
+  <h1>Robotic Manufacturing and Flexible Automation</h1>
+  <p>Mechatronics and Robotics Engineering (50 h) · 5 h net teaching time · robot applications, work-cells, PLCs, robot programming</p>
+</div></header>
+<nav class="toc"><a href="#plan">Plan</a><a href="#s1">5.2 · Industrial robot applications</a><a href="#s2">5.3 · Robotic work-cell design</a><a href="#s3">5.4 · PLCs and automation control</a><a href="#s4">5.5 · Robot programming</a></nav>
+<main>
+  <section id="plan">
+    <h2 class="session">Day plan &amp; timing</h2>
+    <table class="plan"><tr><th>Block</th><th>Topic</th><th>Slides</th><th>Duration</th></tr>
+      <tr><td>1</td><td>5.2 · Industrial robot applications (incl. agenda &amp; recap)</td><td>2–15</td><td>60 min</td></tr>
+      <tr><td></td><td><i>Break</i></td><td></td><td>10 min (extra)</td></tr>
+      <tr><td>2</td><td>5.3 · Robotic work-cell design</td><td>17–26</td><td>60 min</td></tr>
+      <tr><td></td><td><i>Break</i></td><td></td><td>10 min (extra)</td></tr>
+      <tr><td>3</td><td>5.4 · PLCs and automation control</td><td>28–44</td><td>90 min</td></tr>
+      <tr><td></td><td><i>Break</i></td><td></td><td>10 min (extra)</td></tr>
+      <tr><td>4</td><td>5.5 · Robot programming (incl. day summary, preview)</td><td>46–62</td><td>90 min</td></tr>
+      <tr><td></td><td><b>Total net teaching time</b></td><td></td><td><b>300 min</b></td></tr>
+    </table>
+  </section>
+
+  <section id="s1">
+    <h2 class="session">Session 1 · Industrial robot applications <small>Curriculum code 5.2 · 60 min</small></h2>
+    <div class="slide">
+      <h3><span class="num">Slide 2</span>Agenda and learning outcomes<span class="time">~3 min</span></h3>
+      <p class="say">Welcome to day three of week two. Yesterday we finished the robot arm itself: inverse kinematics, the Jacobian, dynamics and trajectories, and we started robotic manufacturing. Today we zoom out from the single arm to the whole production cell. We ask four questions in order: what jobs do robots actually do, how do we arrange a cell around a robot, who coordinates the cell (the PLC), and how do we tell the robot what to do. One running example connects everything: a robot that unloads a CNC lathe, checks the part and stacks it on a pallet, coordinated by a PLC.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Today is mostly new material; no heavy maths, but several small calculations.</li><li>Misconception: &#x27;robotics is only the arm&#x27;. In industry most of the engineering effort is in the cell around it.</li></ul></div>
+      <p class="trans">Transition: Before we start, a quick look back at yesterday.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 3</span>What we learned so far<span class="time">~2 min</span></h3>
+      <p class="say">Two boxes summarise yesterday. On the left, the arm: inverse kinematics turns a desired gripper pose into joint angles, often with two solutions; the Jacobian links joint speeds to tool speed and fails at singularities; dynamics tells us torque grows with payload and acceleration; and we distinguished joint-space PTP moves from straight Cartesian moves. On the right, the automation ladder: fixed, programmable and flexible automation. Today we move along the arrow at the bottom: from the arm to the work-cell and towards the factory line.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Singularities and PTP/linear moves come back in session 5.5 when we write move instructions.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> What is the difference between programmable and flexible automation? <b>A:</b> Programmable: reprogram between batches (downtime). Flexible: switch between products with almost no change-over time.</li></ul></div>
+      <p class="trans">Transition: Let us start with the jobs robots do.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 5</span>Where do industrial robots work?<span class="time">~5 min</span></h3>
+      <p class="say">This bar chart shows roughly how new industrial robots are used. The numbers are rounded and vary from year to year, so read them as orders of magnitude. The striking fact is that almost half the robots simply move things: picking, placing, loading machines and stacking. Welding is second, a legacy of the car industry, which was the first big robot customer. Assembly follows, and painting, dispensing and machining are smaller. A useful rule: robots take tasks that are dull, dirty or dangerous, or that need a precision and repeatability a person cannot keep up for an eight-hour shift.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Values are approximate; the IFR World Robotics report gives yearly numbers.</li><li>Misconception: robots mostly do &#x27;clever&#x27; tasks. Most do simple handling, very reliably.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why did the car industry adopt robots first? <b>A:</b> Huge volumes of identical bodies, heavy and hot spot-welding work, and enough capital to invest.</li></ul></div>
+      <p class="trans">Transition: So how do we pick the right robot for a job?</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 6</span>What decides which robot fits a task?<span class="time">~5 min</span></h3>
+      <p class="say">The table matches applications to robot types and to the property that matters most. Spot welding needs payload because the gun is heavy. Arc welding and painting need smooth paths at constant speed. Palletising needs payload, reach and speed, often with a 4-axis arm because the box always stays horizontal. Machine tending needs reach into the machine and reliability. Assembly needs repeatability and some compliance, and pick-and-place needs pure speed, which is why delta and SCARA robots dominate there. The three data-sheet words, payload, reach and repeatability, will come back all day.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Payload includes the gripper! A 10 kg robot with a 4 kg gripper can lift only 6 kg of part.</li><li>Typical numbers are indicative ranges, not limits.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why is a 4-axis robot enough for palletising? <b>A:</b> Boxes only need x, y, z and rotation about the vertical axis; the wrist never needs to tilt.</li></ul></div>
+      <p class="trans">Transition: One of those properties, repeatability, is often confused with accuracy.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 7</span>Accuracy vs. repeatability<span class="time">~5 min</span></h3>
+      <p class="say">Use the darts analogy. On the left, the player hits the same spot every time, but not the bull&#x27;s-eye: very repeatable, not accurate. On the right, both. Industrial robots are typically like the left picture. They return to a taught point within a few hundredths of a millimetre, but if you calculate a point from CAD and send the robot there, the error can be half a millimetre or more, because real link lengths and joint offsets differ slightly from the model. This matters a lot: teaching points by hand only needs repeatability, while offline programming in session 5.5 needs accuracy.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Misconception: a data sheet &#x27;repeatability 0.02 mm&#x27; means the robot is accurate to 0.02 mm. It does not.</li><li>ISO 9283 defines how both are measured.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Which property matters when you teach a point with the pendant? <b>A:</b> Repeatability, because the robot only has to return to where it already was.</li></ul></div>
+      <p class="trans">Transition: Now the applications one by one, starting with spot welding.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 8</span>Spot welding<span class="time">~6 min</span></h3>
+      <p class="say">A car body has thousands of spot welds. Two copper electrodes squeeze the sheets together and a very large current, around ten kiloamps, flows for a fraction of a second. The contact resistance between the sheets heats a small region until it melts and forms a nugget. The equation Q equals I squared R t shows why the current must be so large: the resistance is tiny. Work through the example: ten to the four squared is ten to the eight, times ten to the minus four ohms is ten thousand watts, times 0.2 seconds gives two kilojoules in a six-millimetre spot. The gun is heavy, so spot-welding robots are large.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Heat goes with current squared: doubling I gives four times the heat.</li><li>The robot size is set by the tool, not by the car.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why copper electrodes? <b>A:</b> Copper has low resistance, so the heat is generated between the sheets, not in the electrodes.</li></ul></div>
+      <p class="trans">Transition: Arc welding is a very different job for the robot.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 9</span>Arc welding<span class="time">~6 min</span></h3>
+      <p class="say">In arc welding the robot carries a torch and lays a continuous seam. Now the path matters more than force: the torch must keep the same angle, distance and speed along the whole seam. Too slow and you burn through, too fast and the seam is weak. Often the torch weaves sideways, as in the drawing, to fill a wider joint. Robots do this with linear and circular moves from yesterday&#x27;s session. The example is simple: a 1.2 metre seam at 8 millimetres per second needs 150 seconds of arc time, plus air moves and torch cleaning. Notice that speed here is a process parameter, not something to maximise.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Arc welding is a path application; spot welding is a point application.</li><li>Misconception: faster robot means more parts. Here the process sets the speed.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> What happens if the real part is 2 mm away from the CAD position? <b>A:</b> The seam is missed; seam tracking sensors correct the path.</li></ul></div>
+      <p class="trans">Transition: Painting is another path application, with an extra hazard.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 10</span>Painting and coating<span class="time">~5 min</span></h3>
+      <p class="say">Painting robots move the spray gun in overlapping passes, like mowing a lawn in stripes. Even thickness needs constant gun speed, constant distance and the right overlap, here fifty percent. Paint mist is explosive, so painting robots are explosion-protected, for example with pressurised motor housings, and use hollow wrists so hoses run inside the arm. The worked example: a 300 mm fan with 50 percent overlap gives a 150 mm pitch, so a 1.5 m tall panel needs ten passes; each two-metre pass at half a metre per second takes four seconds, forty seconds in total plus turnarounds. The photo is a historic 1982 painting robot.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Overlap avoids stripes; too much overlap wastes paint and time.</li><li>Safety and environment can dominate robot choice (explosion protection).</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why not simply drive the gun faster? <b>A:</b> Coating thickness drops; you would need more passes or more paint flow.</li></ul></div>
+      <p class="trans">Transition: From paths back to handling: palletising.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 11</span>Palletising<span class="time">~5 min</span></h3>
+      <p class="say">Palletising means stacking boxes on a pallet. The drawing shows two layer patterns: layer B is a mirrored version of layer A, so joints do not line up and the stack interlocks, just like bricks in a wall. For the robot this is a pattern problem: one pick position and a list of place positions that we will calculate with loops in session 5.5. The photo shows robots palletising bread crates. A rate check: twelve boxes per minute means one complete pick-and-place every five seconds, including the return trip.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Interlocking layers make the stack stable for transport.</li><li>A pallet program is one taught frame plus arithmetic, not 60 taught points.</li></ul></div>
+      <p class="trans">Transition: Another handling job with a big economic effect: machine tending.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 12</span>Machine tending<span class="time">~5 min</span></h3>
+      <p class="say">Machine tending means loading and unloading another machine, here a CNC. The CNC is expensive, so the goal is to keep it busy. The timeline compares manual loading, 60 seconds each time, with robot loading, 15 seconds. The utilisation formula is machining time divided by machining plus loading time. Manual: 90 over 150, sixty percent. Robot: 90 over 105, eighty-six percent. The same machine makes 43 percent more parts, and the robot also works nights and weekends. This is often the clearest business case for a first robot.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Utilisation of the expensive machine, not robot speed, is the key metric here.</li><li>Misconception: the robot must be fast. Here a slow, reliable robot is fine.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Where does the 43 % come from? <b>A:</b> Cycle drops from 150 s to 105 s: 150/105 = 1.43.</li></ul></div>
+      <p class="trans">Transition: Finally, assembly and fast pick-and-place.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 13</span>Assembly and pick-and-place<span class="time">~5 min</span></h3>
+      <p class="say">Assembly is hard for robots because parts fit with tiny clearances, a few hundredths of a millimetre, which is about the robot&#x27;s repeatability. A perfectly stiff robot slightly misaligned will jam. The solution is compliance, a controlled give: chamfers guide the peg in, compliant wrists let it tilt, or force control from week one adjusts the motion. Pick-and-place is the opposite: light parts, simple motion, very high speed. Delta robots, like the ones in the photo picking from a conveyor, reach over a hundred picks per minute, half a second per complete pick.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Assembly needs gentleness, pick-and-place needs speed.</li><li>Compliance is deliberate softness, not a defect.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why not just make the robot more accurate? <b>A:</b> Clearances are so small that some error always remains; compliance tolerates it.</li></ul></div>
+      <p class="trans">Transition: Time to check understanding.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 14</span>Check your understanding -- 5.2<span class="time">~5 min</span></h3>
+      <p class="say">Give students two minutes in pairs, then collect answers. Question one tests the idea that the tool sets robot size. Question two separates repeatability from accuracy. Question three repeats the utilisation calculation with new numbers; ask one student to write it on the board with units. Walk around while pairs discuss and listen for the repeatability versus accuracy confusion; it is the most common mistake. When collecting answers, ask for reasons, not just results: why does the tool decide the robot size, and why can a robot be excellent at one property and poor at the other? For the calculation, insist that students write the formula first, then the numbers, then the unit or percentage. If time allows, ask what the extra utilisation is worth if the machine costs a lot per hour.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Answers: (1) The spot-welding gun weighs 50–150 kg and must squeeze with kilonewtons; an arc torch weighs a few kg. (2) Repeatability (±0.03 mm) is good; accuracy (0.8 mm) is poor. (3) Manual 60/(60+40) = 60 %; robot 60/(60+10) = 86 %.</li></ul></div>
+      <p class="trans">Transition: Let us summarise session 5.2.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 15</span>Summary 5.2<span class="time">~3 min</span></h3>
+      <p class="say">Read the take-aways quickly. Half the robots do handling. The process decides the robot. Spot welding is about payload, arc welding and painting about smooth paths, palletising and pick-and-place about patterns and speed, and assembly about compliance. And remember the darts player: robots are more repeatable than accurate. The key-terms box is the vocabulary for the rest of the day. Ask one student to name an application and the property that matters most for it, then another student to name the matching robot type. This quick round links the table back to the photos.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Payload, reach, repeatability: the three data-sheet words.</li></ul></div>
+      <p class="trans">Transition: Next: how we arrange a cell around the robot.</p>
+    </div>
+  </section>
+
+  <section id="s2">
+    <h2 class="session">Session 2 · Robotic work-cell design <small>Curriculum code 5.3 · 60 min</small></h2>
+    <div class="slide">
+      <h3><span class="num">Slide 17</span>What is a robotic work-cell?<span class="time">~5 min</span></h3>
+      <p class="say">A work-cell is the robot plus everything it needs to do one job on its own. The top view shows our running example: the robot in the middle, the CNC lathe on the left, an incoming conveyor, a check station, a pallet, and around everything a safety fence with an interlocked door. Outside the fence sit the robot controller, the PLC and the operator panel or HMI. Use the kitchen analogy: a cook is only fast if pots, knives and fridge are all within arm&#x27;s reach and in the same place every day. Designing the cell is arranging that kitchen.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>The robot is often less than half of the cell cost.</li><li>Guarding details come tomorrow in session 5.7.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> What is an HMI? <b>A:</b> Human–machine interface: the operator screen and buttons.</li></ul></div>
+      <p class="trans">Transition: There are a few standard ways to arrange cells.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 18</span>Cell layouts<span class="time">~5 min</span></h3>
+      <p class="say">Three patterns cover most cases. Robot-centred: stations arranged around one robot, compact and cheap, but the robot is the bottleneck. In-line: robots along a conveyor, each doing a small piece of work, as in a car body line with dozens of robots. Robot on a track: one robot travels along a linear axis to serve several machines; the track becomes an extra seventh axis, and today the same role is sometimes played by a mobile robot. The choice depends on volume, part size and floor space.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Layout follows volume: one robot for small volume, many in line for high volume.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> When would you put the robot on a track? <b>A:</b> When several machines need occasional loading and one robot has time to serve them all.</li></ul></div>
+      <p class="trans">Transition: Whatever the layout, every station must be reachable.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 19</span>Reach check<span class="time">~7 min</span></h3>
+      <p class="say">The light outer ring is the robot&#x27;s maximum reach, 1.4 m. But near full reach the arm is stretched out, close to the boundary singularity we met with the Jacobian: it is slow, less stiff and less precise. Too close to the base, the arm folds onto itself. So we use a comfort zone, roughly 30 to 85 percent of reach. Walk through the example: point P at 1.0, 0.6 is 1.17 m from the base, 83 percent, acceptable but at the limit. Point Q is 1.42 m away, beyond reach, so the station must move. In practice we also check orientation in simulation.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>30–85 % is a rule of thumb, not a standard.</li><li>Misconception: if the wrist centre reaches, the tool works there. The tool also needs the right angle.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why is the arm less stiff when stretched? <b>A:</b> Long lever arms amplify joint compliance; small joint deflections give large tip errors.</li></ul></div>
+      <p class="trans">Transition: Next, the most important number of a cell: cycle time.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 20</span>Cycle time<span class="time">~6 min</span></h3>
+      <p class="say">Cycle time is the time between two finished parts leaving the cell. The stacked bars split twelve seconds into robot moves, gripping, process and waiting. The improved bar shows where time can be saved: shorter blended moves save 1.4 s, moving the gripper valve closer to the tool saves 0.8 s, and having the next part ready in a buffer removes almost all waiting. Note the biggest win came from removing waiting, not from a faster robot. Also point out parallel work: while the CNC machines one part, the robot handles the previous one.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Remove waiting first, then shorten moves.</li><li>Misconception: buy a faster robot to fix cycle time.</li></ul></div>
+      <p class="trans">Transition: How fast must the cell actually be? That is takt time.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 21</span>Takt time and throughput<span class="time">~7 min</span></h3>
+      <p class="say">Takt comes from the German word for beat: it is the rhythm the customer demands. Takt time is available time divided by demand. In the example a 7.5 hour shift has 27,000 seconds, and the customer wants 2,700 parts, so takt is 10 seconds, or 360 parts per hour. Our cell takes 12 seconds, giving 3600 over 12, which is 300 parts per hour. That is too slow. The plot shows the hyperbola parts per hour equals 3600 over cycle time, with the demand line. Fixes: shorten the cycle as on the previous slide, or add a second robot.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Rule: cycle time must be ≤ takt time, with some margin for stops.</li><li>Parts per hour = 3600 / cycle time in seconds.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> If two robots work in parallel with 12 s cycles, what is the throughput? <b>A:</b> 600 parts per hour — enough.</li></ul></div>
+      <p class="trans">Transition: To estimate cycle time before building, we need move times.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 22</span>Estimating a robot move time<span class="time">~6 min</span></h3>
+      <p class="say">Recall the trapezoidal velocity profile from yesterday: accelerate, cruise, brake. If the move is long enough to reach full speed, the time is distance over maximum speed plus speed over acceleration. In the example, v max is 2 m/s, acceleration 10 m/s squared, and the distance 1 m. First check: v squared over a is 0.4 m, less than 1 m, so the profile is a trapezoid. Then t equals one half plus two tenths, 0.7 s. The plot shows that short moves never reach full speed, so halving a short distance does not halve the time.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Short moves are acceleration-limited.</li><li>Real controllers add settling time at &#x27;fine&#x27; points.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Time for a 0.1 m move? <b>A:</b> Triangular: t = 2·sqrt(0.1/10) = 0.2 s.</li></ul></div>
+      <p class="trans">Transition: The robot needs a hand: end-of-arm tooling.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 23</span>End-of-arm tooling (EOAT) and grip force<span class="time">~7 min</span></h3>
+      <p class="say">End-of-arm tooling is the robot&#x27;s hand: fingers, vacuum cups, magnets or process tools like the welding gun. It is usually custom-made for the part. A friction gripper holds the part only through friction, so the finger force must be large enough to carry the weight and the acceleration, with a safety factor. Walk through the example: two kilograms, five m/s² upward acceleration, two surfaces, friction coefficient 0.3, safety factor 2. Required friction force is 2 times 14.8 times 2, about 59 N; dividing by 0.6 gives about 100 N per finger. Shaped fingers that cradle the part are much safer.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Grip force grows with acceleration, not only with mass.</li><li>Misconception: a gripper rated for 2 kg can move a 2 kg part at any speed.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> What if the robot also brakes hard sideways? <b>A:</b> Add the horizontal acceleration; friction must carry the vector sum.</li></ul></div>
+      <p class="trans">Transition: The part must also be in the right place when the robot comes for it.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 24</span>Fixtures and part presentation<span class="time">~6 min</span></h3>
+      <p class="say">A robot repeats blindly, so the part must be in the same place every time. A fixture does this with the 3-2-1 rule: three points under the part fix its height and two tilts, two points on a side fix one horizontal direction and a rotation, and one point at the end fixes the last direction. Six points for the six degrees of freedom from session 4.1. A clamp then pushes the part against them. Feeders such as bowl feeders and trays present small parts; if parts arrive in random positions, a vision system must find them, which we cover on day five.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Good fixtures make simple robot programs; bad fixtures cause most stoppages.</li><li>3 + 2 + 1 = 6 degrees of freedom.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why not use more than six locating points? <b>A:</b> The part would be over-constrained; it would rock or depend on tiny dimensional variations.</li></ul></div>
+      <p class="trans">Transition: Let us check understanding of the cell design ideas.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 25</span>Check your understanding -- 5.3<span class="time">~7 min</span></h3>
+      <p class="say">Two minutes in pairs. Question one is a reach calculation with Pythagoras. Question two is takt time with new numbers. Question three checks understanding of the move-time curve. Encourage students to sketch the reach circle for question one rather than only calculating. For question two, ask what margin they would want in reality, since cells stop for faults, pallet changes and maintenance. For question three, refer back to the move-time plot and the square-root shape of the triangular profile. Collect one answer per question and correct units on the board.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Answers: (1) r = sqrt(1.2² + 0.9²) = 1.5 m; 1.5/1.6 = 94 % — reachable but outside the comfort zone, move the station closer. (2) 27,000 s / 1800 = 15 s takt; 14 s is enough, with only about 7 % margin. (3) Short moves are dominated by acceleration and braking; time grows with the square root of distance, so halving d reduces t only by about 30 %.</li></ul></div>
+      <p class="trans">Transition: Summary of session 5.3.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 26</span>Summary 5.3<span class="time">~4 min</span></h3>
+      <p class="say">A cell is the robot plus EOAT, fixtures, feeders, controls and guarding. Place stations in the comfort zone. Cycle time must not exceed takt time, and the cheapest seconds are usually waiting time. Move time is roughly distance over speed plus speed over acceleration. Grip force follows from friction, and fixtures use the 3-2-1 rule. After the break we meet the brain of the cell, the PLC. Remind students that every number today, reach, cycle time, grip force, is a quick first check that is later confirmed in simulation.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Cycle ≤ takt is the single most important design check.</li></ul></div>
+      <p class="trans">Transition: Short break, then PLCs.</p>
+    </div>
+  </section>
+
+  <section id="s3">
+    <h2 class="session">Session 3 · PLCs and automation control <small>Curriculum code 5.4 · 90 min</small></h2>
+    <div class="slide">
+      <h3><span class="num">Slide 28</span>Why PLCs?<span class="time">~4 min</span></h3>
+      <p class="say">Before about 1970, machine logic was built from hundreds of relays wired in cabinets. Changing the sequence meant rewiring. In 1968 General Motors asked for a programmable replacement, and the programmable logic controller was born. A PLC is an industrial computer that reads sensors, runs a user program and switches actuators, reliably and in real time, for many years in a hot, dusty, electrically noisy environment. The photo shows a modern modular PLC. In a robot cell, the PLC is the conductor of the orchestra and the robot is one of the musicians.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>The PLC coordinates; the robot controller moves the arm.</li><li>Misconception: a PLC is just a slow PC. It is built for deterministic, reliable I/O.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why not use a normal PC? <b>A:</b> PCs are not designed for 20 years of uptime, deterministic timing, 24 V I/O and harsh environments.</li></ul></div>
+      <p class="trans">Transition: What is inside a PLC?</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 29</span>PLC hardware<span class="time">~5 min</span></h3>
+      <p class="say">A modular PLC is a rack of modules. The power supply provides 24 V DC. The CPU runs the program and holds memory. Digital input modules read switches and sensors; digital output modules switch lamps, valves and contactors; analog modules read and write continuous signals such as 4–20 mA. A communication module connects robot, drives and HMI over an industrial network such as PROFINET, EtherNet/IP or EtherCAT, which we cover on day five. Signals are typically 24 V DC: zero volts means false, 24 V means true.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>I/O modules are the PLC&#x27;s senses and muscles.</li><li>24 V DC is the standard industrial signal level.</li></ul></div>
+      <p class="trans">Transition: Let us see how one input and one output are wired.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 30</span>Digital inputs and outputs<span class="time">~7 min</span></h3>
+      <p class="say">On the left a start button connects plus 24 V to an input terminal. When the button is pressed, 24 V appears and the corresponding bit in the PLC memory, here written percent I zero point zero, becomes one. The address format depends on the vendor. On the output side, when the program sets output bit percent Q zero point zero, the module switches 24 V to a valve coil. Sourcing and sinking describe whether a device supplies or receives the current; the sensor and the input card must match, a common commissioning mistake. A digital signal is just one bit.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Every I/O point has an address.</li><li>Misconception: the PLC output can drive a motor directly. It drives a coil or contactor, which switches the power.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> What happens if a PNP (sourcing) sensor is wired to a sinking card that expects the opposite? <b>A:</b> The input never turns on; the polarities do not match.</li></ul></div>
+      <p class="trans">Transition: Not all signals are on/off; analog signals carry values.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 31</span>Analog signals<span class="time">~6 min</span></h3>
+      <p class="say">Many sensors, such as pressure or temperature transmitters, send a current between 4 and 20 milliamps, proportional to the measured value. Current is used because it is not changed by long wire resistance. Four milliamps, not zero, means zero percent: this live zero lets the PLC detect a broken wire, because then the current falls to zero. The scaling formula maps current to engineering units. Example: a 0 to 10 bar transmitter sending 12 mA is at 8 out of 16, half range, so 5 bar.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Live zero: 0 mA means fault, not zero.</li><li>Scaling: value = (I − 4)/16 × range.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> What does 20 mA mean for this sensor? <b>A:</b> 10 bar, full scale.</li></ul></div>
+      <p class="trans">Transition: Now the heart of the PLC: how it runs the program.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 32</span>The scan cycle<span class="time">~6 min</span></h3>
+      <p class="say">A PLC runs in an endless loop called the scan cycle. Step one, copy all inputs into memory, the process image. Step two, run the program from top to bottom using that frozen snapshot. Step three, copy the results to the outputs. Step four, communicate and self-check, then start again, every one to twenty milliseconds. Use the security guard analogy: the guard looks at all cameras, decides, then acts, and repeats. Something that happens between two looks is seen only on the next round.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Inputs are frozen during one scan: the program sees a consistent snapshot.</li><li>A watchdog stops the PLC if a scan takes far too long.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why freeze the inputs? <b>A:</b> So that the same input does not change value halfway through the program, which would cause inconsistent logic.</li></ul></div>
+      <p class="trans">Transition: This loop has consequences for timing.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 33</span>Scan time and response time<span class="time">~6 min</span></h3>
+      <p class="say">In the worst case an input changes just after the input read. The PLC sees it only at the next scan, and the output is written at the end of that scan, so the response can take about two scans plus input filter and output delays. Example: 3 ms filter, 10 ms scan, 1 ms output gives about 24 ms. A box on a conveyor at half a metre per second moves 12 mm in that time, which may matter for a stop gate. Worse, a pulse shorter than a scan can be missed completely. Fast events use interrupt inputs or high-speed counters.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Worst-case response ≈ input delay + 2 scans + output delay.</li><li>Misconception: the PLC reacts instantly.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> A 2 ms encoder pulse with a 10 ms scan? <b>A:</b> Will be missed regularly; use a high-speed counter input.</li></ul></div>
+      <p class="trans">Transition: Before we write logic, a quick Boolean refresher.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 34</span>Refresher: Boolean logic<span class="time">~4 min</span></h3>
+      <p class="say">PLC logic is Boolean logic. AND is true only if all inputs are true: door closed AND start pressed. OR is true if at least one input is true. NOT inverts. The truth table lists all combinations. The example combines all three: run the press when Start AND DoorClosed AND NOT Fault. With Start one, DoorClosed one and Fault zero, the result is one, so the press runs. Most students have seen this in a digital-logic course; keep it brisk but make sure everyone can read the table.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>AND = all, OR = at least one, NOT = invert.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> If Fault becomes 1, what happens? <b>A:</b> NOT Fault = 0, so the product is 0: the press stops.</li></ul></div>
+      <p class="trans">Transition: Ladder logic draws exactly these operations.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 35</span>Ladder logic<span class="time">~6 min</span></h3>
+      <p class="say">Ladder logic looks like the relay circuit drawings electricians already knew, which is why it is still the most used PLC language. Two vertical rails represent power, and horizontal rungs carry logic. A normally open contact, two vertical bars, is closed when its bit is one. A normally closed contact, with the diagonal, is closed when its bit is zero. A coil at the right end sets a bit. Power flows from left to right if there is a path of closed contacts. Rung one: Lamp equals Sensor. Rung two: Alarm equals NOT Sensor. Rungs execute top to bottom every scan.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>NO contact tests &#x27;is the bit 1?&#x27;; NC tests &#x27;is the bit 0?&#x27;.</li><li>Misconception: real current flows in the ladder. It is a drawing of logic, executed by the CPU.</li></ul></div>
+      <p class="trans">Transition: Now the three basic operations in ladder form.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 36</span>AND, OR and NOT in ladder<span class="time">~5 min</span></h3>
+      <p class="say">Series contacts are AND: Run needs DoorClosed and Start. Parallel branches are OR: the horn sounds if either button is pressed. A normally closed contact is NOT: the green lamp is on when Ready and not Fault. With these three patterns you can draw any Boolean expression. Ask a student to read each rung aloud as a sentence; this is a good habit for reading real programs. Point out that the drawing order of contacts in series does not matter logically.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Series = AND, parallel = OR, NC = NOT.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> How would you draw &#x27;A AND (B OR C)&#x27;? <b>A:</b> Contact A in series with a parallel pair B, C, then the coil.</li></ul></div>
+      <p class="trans">Transition: A very important rung gives the PLC memory.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 37</span>The start/stop latch<span class="time">~7 min</span></h3>
+      <p class="say">This is the most famous rung in automation. Press Start: the Start contact closes, so the Motor coil turns on. Now the Motor contact, placed in parallel with Start, also closes. Release Start: power still flows through the Motor contact, so the motor stays on. This is the seal-in. Press Stop: the normally closed Stop contact opens, the coil drops, and the seal is broken. The timing diagram shows that Motor stays on after Start is released. This is a one-bit memory, the same idea as set/reset coils or a flip-flop. Note the going-further remark about real stop buttons.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Seal-in = memory in one rung.</li><li>Misconception: an emergency stop can be just a PLC rung. Safety stops use certified safety circuits (W2D4).</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> What if Start and Stop are pressed together? <b>A:</b> Stop wins, because the NC Stop contact is in series with everything.</li></ul></div>
+      <p class="trans">Transition: Machines also need time and counting.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 38</span>Timers and counters<span class="time">~5 min</span></h3>
+      <p class="say">The on-delay timer, TON, turns its output Q on after its input has been true for the preset time PT. The elapsed time ET ramps up while IN is true. If IN drops early, as in the second pulse, ET resets and Q never turns on. Typical uses: keep a valve open two seconds, or raise a fault if a part is not seen within five seconds. The up-counter CTU counts rising edges. Example: count boxes placed; at 60, a full pallet of four by three by five, stop the robot, request a new pallet, reset the counter.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>TON needs the input to stay true for the whole preset.</li><li>Counters count edges, not how long a signal is on.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why use a timeout timer in every step? <b>A:</b> To detect jams or broken sensors instead of waiting forever.</li></ul></div>
+      <p class="trans">Transition: PLC languages are standardised.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 39</span>IEC 61131-3<span class="time">~4 min</span></h3>
+      <p class="say">IEC 61131-3 defines five PLC languages. Ladder for simple interlocks, Function Block Diagram for signal flow and analog processing, Structured Text, a Pascal-like text language, for calculations and state machines, Sequential Function Chart for step sequences, and Instruction List, an assembler-like language now deprecated. The bottom row shows the same AND function in three notations; the PLC does exactly the same thing. In practice, you mix languages: ladder for interlocks, structured text for calculations. Mention that students will most likely meet ladder and structured text first in industry.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Choose the language that makes the logic easiest to read.</li><li>IL is deprecated since the 2013 edition.</li></ul></div>
+      <p class="trans">Transition: Most machines run in sequences of steps.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 40</span>Sequential control<span class="time">~5 min</span></h3>
+      <p class="say">Most machines work in steps: wait for a part, extend a cylinder, close the gripper, retract. A sequential function chart shows steps as boxes with their actions, and transitions as bars with the condition to move on: part present, extended sensor, timer done, retracted. In this simple chain only one step is active at a time. Use the recipe analogy: boil water; when it boils, add pasta; after ten minutes, drain. This picture is both an SFC program and a state machine with four states.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Step = what we do; transition = when we move on.</li><li>Misconception: write the sequence as one big Boolean expression. Steps make it readable and debuggable.</li></ul></div>
+      <p class="trans">Transition: Here is the same sequence as text.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 41</span>Worked example: the same sequence in Structured Text<span class="time">~6 min</span></h3>
+      <p class="say">A variable called step remembers the current state. Each scan, the CASE statement runs only the code for the active step. The IF lines are the transitions: when the condition is true, step changes. Outputs such as Extend and Grip are set in the steps that need them. Trace it with the class: a part arrives, step goes to 1, the cylinder extends in about 0.4 seconds, step 2 closes the gripper and waits 0.3 seconds with the timer, step 3 retracts, and we return to 0. Real programs add a fault timeout in every step.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>One variable &#x27;step&#x27; = the state of the machine.</li><li>Each scan runs only the active step.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> What happens if the IsExtended sensor breaks? <b>A:</b> The sequence stays in step 1 forever — hence the timeout fault.</li></ul></div>
+      <p class="trans">Transition: Finally, how the PLC talks to the robot.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 42</span>PLC ↔ robot: the handshake<span class="time">~5 min</span></h3>
+      <p class="say">PLC and robot exchange signals in a handshake. Read the numbered events. One: the robot is Ready, the PLC selects program 3 and sets Start. Two: the robot answers Busy. Three: the PLC drops Start, because it has been seen. Four: the robot finishes; Busy goes off and Done goes on. Five: the PLC reads Done and moves to its next step. The rule is that every command is acknowledged; never assume the other side saw a signal. This handshake fits naturally into the step sequence we just wrote.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Every command is acknowledged.</li><li>Misconception: a short Start pulse is enough. With different scan times, it may be missed.</li></ul></div>
+      <p class="trans">Transition: Let us check understanding of PLCs.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 43</span>Check your understanding -- 5.4<span class="time">~6 min</span></h3>
+      <p class="say">Three minutes in pairs. Ask one pair to draw the rung for question two on the board. Question one connects the scan cycle with timing; ask what a pulse-stretching sensor setting or a high-speed input does. Question two practises drawing: the OR must be a parallel branch, the NOT must be a normally closed contact, and everything feeds one Pump coil. Question three repeats the 4–20 mA scaling: first subtract the live zero, then divide by the 16 mA span, then multiply by the range. Ask a student to explain why 0 mA would indicate a fault rather than zero degrees.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Answers: (1) The 5 ms pulse can fall between two input reads and be missed; use a high-speed/interrupt input, a pulse-stretching sensor setting or a faster task. (2) Level_Low NO and Manual NO in parallel, in series with Overload as an NC contact, then the Pump coil. (3) (16 − 4)/16 × 100 = 75 °C.</li></ul></div>
+      <p class="trans">Transition: Summary of session 5.4.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 44</span>Summary 5.4<span class="time">~3 min</span></h3>
+      <p class="say">The PLC reads inputs, runs logic and writes outputs in a repeating scan. Worst-case response is about two scans plus I/O delays. In ladder, series is AND, parallel is OR, normally closed is NOT, and the seal-in rung gives memory. IEC 61131-3 defines the languages. Sequences are steps and transitions, and PLC and robot talk by handshake. Ask the class to say which ladder pattern gives memory, and why the PLC and robot must acknowledge every signal.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Read rungs aloud as sentences.</li></ul></div>
+      <p class="trans">Transition: Break, then robot programming.</p>
+    </div>
+  </section>
+
+  <section id="s4">
+    <h2 class="session">Session 4 · Robot programming <small>Curriculum code 5.5 · 90 min</small></h2>
+    <div class="slide">
+      <h3><span class="num">Slide 46</span>How do we tell a robot what to do?<span class="time">~6 min</span></h3>
+      <p class="say">There are two families of robot programming. Online programming happens at the real robot: with the teach pendant, by lead-through where you guide the arm by hand, or by editing text on the controller. It is simple and uses the real cell, but the cell stops while you program. Offline programming happens on a computer with a model of the cell, either with simulation, by generating paths from CAD, or in research with task-level and AI methods. Each vendor has its own language, for example RAPID for ABB, KRL for KUKA, TP and KAREL for FANUC and URScript for Universal Robots.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Most installed robots are still taught online.</li><li>Offline programming needs accuracy, not only repeatability.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why not always program offline? <b>A:</b> The model must match reality; for small, simple cells, teaching is faster.</li></ul></div>
+      <p class="trans">Transition: The main tool for online programming is the teach pendant.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 47</span>The teach pendant<span class="time">~7 min</span></h3>
+      <p class="say">The teach pendant is a hand-held terminal, visible in front of the cobot in the photo. With it you jog the robot, store points, edit programs and run them. Jogging can be joint by joint or moving the tool along x, y, z of a chosen frame. Safety is built in: the three-position enabling switch lets the robot move only while held in the middle; releasing it or squeezing it in panic both stop the robot. In manual mode T1 the tool speed is limited to 250 mm/s. The teach workflow is: jog, check the angle, store, insert the move, test slowly step by step.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Three-position enabling switch: middle = move, released or squeezed = stop.</li><li>T1 speed limit 250 mm/s (ISO 10218-1).</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why a three-position switch, not two? <b>A:</b> In a panic people either let go or squeeze hard; both must stop the robot.</li></ul></div>
+      <p class="trans">Transition: Every stored point is expressed in a frame.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 48</span>Coordinate frames<span class="time">~8 min</span></h3>
+      <p class="say">Recall homogeneous transforms from session 4.2. A robot uses several frames. The world frame is the fixed cell reference, useful with several robots. The base frame sits at the robot foot, where the kinematics are defined. The tool frame sits at the tool centre point, the working point of the gripper or torch. The user frame, or work object, sits on the fixture or pallet. A taught point is really the pose of the tool frame relative to a user frame, and the controller chains the transforms: base to user times user to tool.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Points are relative to frames; choose frames wisely.</li><li>Misconception: robot points are absolute positions in the room.</li></ul></div>
+      <p class="trans">Transition: First, the tool frame.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 49</span>The tool frame (TCP)<span class="time">~8 min</span></h3>
+      <p class="say">The TCP is the point that follows the programmed path and about which the tool rotates. If the controller thinks the TCP is 5 mm away from the real tip, the tool wobbles whenever it re-orients. To find the TCP, the 4-point method is used: touch the same fixed tip from four different wrist orientations; the controller solves for the offset that makes all four consistent. Example: with a 5 mm TCP error and a 30 degree re-orientation, the real tip moves along an arc with chord 2 times 5 times sine 15 degrees, about 2.6 mm, enough to miss a weld seam.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Check the TCP after every tool crash or tool change.</li><li>Chord = 2 e sin(θ/2).</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> How do you check a TCP quickly? <b>A:</b> Re-orient the tool about a sharp fixed tip; the tool tip should stay on it.</li></ul></div>
+      <p class="trans">Transition: The user frame makes programs portable.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 50</span>User frames<span class="time">~8 min</span></h3>
+      <p class="say">A user frame is taught with three points: the origin, a point on the x axis, and a point in the xy plane. Program points are then stored relative to the fixture. If the fixture is moved, you re-teach only its three frame points and all fifty program points follow. The example: the user frame origin is at 800, 200 in the base frame, rotated 90 degrees. A point at 100, 50 in the user frame is rotated to minus 50, 100, then shifted by the origin, giving 750, 300 in the base frame. This is exactly the homogeneous transform from session 4.2.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Teach 3 frame points, not 50 program points.</li><li>Rotate first, then add the origin.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> What if the fixture is also rotated by 5°? <b>A:</b> Re-teaching the frame captures the rotation too; points follow.</li></ul></div>
+      <p class="trans">Transition: Now the instructions that move the robot.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 51</span>Motion instructions<span class="time">~8 min</span></h3>
+      <p class="say">Three motion types. MoveJ, or PTP, interpolates the joints: fastest, but the tool path is curved and hard to predict, so use it in free air. MoveL moves the TCP in a straight line: for approach, insertion and welding. MoveC moves along an arc through an auxiliary point. Zones, or blending, let the robot pass near a via-point without stopping, which shortens the cycle, as in our cycle-time slide. Watch out: MoveL can drive the arm through a singularity, where joint speeds explode, while MoveJ cannot but may swing wide.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>MoveJ in air, MoveL near parts.</li><li>Zone &#x27;fine&#x27; means stop exactly; zones blend corners.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why not use MoveL everywhere? <b>A:</b> Risk of singularities and joint limits, and it is usually slower.</li></ul></div>
+      <p class="trans">Transition: Let us put this into a complete program.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 52</span>A complete pick-and-place program<span class="time">~8 min</span></h3>
+      <p class="say">This generic pseudo-code looks like most vendor languages. Start at Home. In a loop, wait for the PLC input PartReady. Move in joint mode to a point 100 mm above the pick point, then linearly down at 200 mm/s and stop exactly. Close the gripper and wait 0.2 s. Move straight up, swing over to above the place point, go down straight, open, go up, and pulse Done for the PLC. Only two points need teaching, Pick and Place; the approach points are calculated with offsets. The pattern is: fast in joint mode, slow and straight near the part, act, retreat straight.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Teach few points, compute the rest.</li><li>WaitDI/SetDO are the link to the PLC handshake.</li></ul></div>
+      <div class="ask"><span class="label">Ask the audience / likely questions</span><ul><li><b>Q:</b> Why &#x27;fine&#x27; at Pick but a zone at the approach point? <b>A:</b> At Pick the gripper must be exactly in position; the approach point is only a via-point.</li></ul></div>
+      <p class="trans">Transition: Variables and loops extend this to a whole pallet.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 53</span>Variables and loops<span class="time">~6 min</span></h3>
+      <p class="say">For a pallet we teach one position and compute the rest. Position P i j k equals P zero plus i times d x, j times d y, k times d z, with i the column, j the row and k the layer, counting from zero. Example: P zero is 200, 150, 200; for column 2, row 1, layer 2, the offset is 800, 300, 400, so the position is 1000, 450, 600 in the pallet frame. Three nested FOR loops place all sixty boxes, and the CTU counter in the PLC from session 5.4 can track how many are done.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>One taught frame + arithmetic = whole pallet.</li><li>Count from zero to avoid off-by-one errors.</li></ul></div>
+      <p class="trans">Transition: Now offline programming.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 54</span>Offline programming (OLP)<span class="time">~6 min</span></h3>
+      <p class="say">Offline programming follows a workflow: CAD model of the cell and part, generate paths, simulate for reach, collisions and cycle time, fix problems, post-process into the robot&#x27;s language, and finally calibrate and touch up on the real cell. Advantages: no production stop, testing layouts before buying, complex paths straight from CAD. Challenges: the model must be accurate, robot accuracy now matters, and cables and part variation are not in CAD. Calibration of the real link lengths reduces absolute error significantly.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>OLP moves programming time out of the production cell.</li><li>Misconception: OLP programs run perfectly the first time. A touch-up step is normal.</li></ul></div>
+      <p class="trans">Transition: Simulation is the core of OLP.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 55</span>Simulation<span class="time">~5 min</span></h3>
+      <p class="say">Simulation checks four things: can the tool reach every point at the right angle, are joint limits and singularities avoided, are there collisions with fence, machine or the robot itself, and what is the realistic cycle time. The plot shows a simulated joint 5 angle exceeding its limit: the fix is a different path or a different part orientation. The analogy is a flight simulator: crash the robot on the computer, not in the cell.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Simulation finds problems before installation.</li><li>Cycle time accuracy depends on the controller model.</li></ul></div>
+      <p class="trans">Transition: Simulation becomes even more powerful when it stays connected.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 56</span>From simulation to digital twin<span class="time">~5 min</span></h3>
+      <p class="say">A simulation is a one-way model used before installation. In virtual commissioning, the real PLC program is tested against a simulated cell, so debugging moves from the shop floor to the office. A digital twin goes further: the model is continuously synchronised with the real cell through live data, for example over OPC UA. Uses include predicting cycle time, spotting wear and trying changes safely. This connects back to Industry 4.0 from yesterday. Keep it conceptual; communication protocols come on day five.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Simulation: one-way. Digital twin: continuously synchronised.</li><li>Misconception: every 3D model is a digital twin.</li></ul></div>
+      <p class="trans">Transition: Let us check understanding.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 57</span>Check your understanding -- 5.5<span class="time">~6 min</span></h3>
+      <p class="say">Three minutes in pairs. Question one tests the idea of frames: points are relative, so moving the reference moves all points. Question two tests motion types and the singularity warning. Question three links back to the accuracy versus repeatability slide in session 5.2. Ask pairs to give one reason each; collect a list on the board and group the reasons into model errors, robot errors and part variation. This list is exactly why a touch-up step remains in every offline-programming workflow.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Answers: (1) Program points are stored relative to the user frame; re-teaching its 3 points updates the transform, so all points follow. (2) MoveL for insertion (straight, controlled approach along the hole axis); MoveJ back to Home (fast, avoids singularities, path in free air). (3) Robot absolute accuracy, CAD/cell model differences, TCP or user-frame errors, part variation, cables and hoses.</li></ul></div>
+      <p class="trans">Transition: Summary of session 5.5.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 58</span>Summary 5.5<span class="time">~3 min</span></h3>
+      <p class="say">Online versus offline programming; world, base, tool and user frames; correct TCP and user frames make programs robust; MoveJ in free air, MoveL and MoveC for process paths, zones save time; simulation and digital twins test before touching the real cell. Ask students which frame they would define first when setting up our running example cell, and why: usually the tool frame, then a user frame on the CNC chuck and one on the pallet.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Frames are the key idea of robot programming.</li></ul></div>
+      <p class="trans">Transition: Let us wrap up the day.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 59</span>Day summary<span class="time">~3 min</span></h3>
+      <p class="say">Today we followed one chain: what robots do, where they do it, who coordinates, and how they are told. Repeat the five things to remember and ask students which one they found hardest. Then connect the sessions: takt time from session 5.3 sets the target cycle time; the PLC handshake from session 5.4 starts each robot program; and the program from session 5.5 is built from a few taught points in well-chosen frames. If time remains, let students sketch the running example cell from memory and label the PLC signals.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Connect: takt time (5.3) → cycle time → handshake (5.4) → program structure (5.5).</li></ul></div>
+      <p class="trans">Transition: Tomorrow we continue with material handling, safety and sensors.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 60</span>Preview of Week 2 Day 4<span class="time">~1 min</span></h3>
+      <p class="say">Tomorrow: conveyors, AGVs and AMRs, cobots and human–robot collaboration, then the safety standards, then sensors. Leave the think-about-it question with the class: what changes if a person works next to the robot without a fence? Also mention that sensors from tomorrow afternoon are what made today&#x27;s part-present inputs, extended sensors and vision-based part finding possible.</p>
+      <div class="key"><span class="label">Emphasise</span><ul><li>Answer hint for tomorrow: speed and force limits, safety-rated monitoring, risk assessment.</li></ul></div>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 61</span>Figure credits<span class="time">~1 min</span></h3>
+      <p class="say">Mention that all drawings are original and the six photos come from Wikimedia Commons under free licences. The diagrams and plots were drawn for this course, so they can be reused in exercises. Note the licences if students want to reuse the photographs in their own reports.</p>
+    </div>
+    <div class="slide">
+      <h3><span class="num">Slide 62</span>References<span class="time">~1 min</span></h3>
+      <p class="say">Point students to Groover for automation and cells, Bolton or Petruzella for PLCs, and Craig for frames and programming. For the standards, mention IEC 61131-3 for PLC languages, ISO 9283 for robot performance and ISO 9787 for coordinate systems; students do not need to read them, but should know they exist.</p>
+    </div>
+  </section>
+</main>
+<footer>Figures and references are listed on the final slides of the deck.</footer>
+</body>
+</html>
